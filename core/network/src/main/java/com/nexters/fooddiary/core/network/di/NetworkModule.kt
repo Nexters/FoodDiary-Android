@@ -1,15 +1,25 @@
 package com.nexters.fooddiary.core.network.di
 
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.dsl.module
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.concurrent.TimeUnit
 
 val networkModule = module {
-    // OkHttpClient
+    // Json
     single {
+        Json {
+            ignoreUnknownKeys = true
+            coerceInputValues = true
+        }
+    }
+
+    // OkHttpClient
+    single<OkHttpClient> {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
@@ -26,8 +36,8 @@ val networkModule = module {
     single {
         Retrofit.Builder()
             .baseUrl("https://api.fooddiary.com/") //FIXME API URL
-            .client(get())
-            .addConverterFactory(GsonConverterFactory.create())
+            .client(get<OkHttpClient>())
+            .addConverterFactory(get<Json>().asConverterFactory("application/json".toMediaType()))
             .build()
     }
 
