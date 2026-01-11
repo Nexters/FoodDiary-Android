@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -54,6 +55,10 @@ dependencies {
     // Koin
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
+
+    // Mavericks
+    implementation(libs.mavericks.compose)
+    testImplementation(libs.mavericks.testing)
 
     // Testing
     testImplementation(libs.junit)
