@@ -20,5 +20,17 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "FoodDiary"
+
+// App
 include(":app")
+
+// Core modules
+include(":core:common")
+include(":core:network")
+include(":core:ui")
+
+// Layer modules
+include(":domain")
+include(":data")
+include(":presentation")
  
