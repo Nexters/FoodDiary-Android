@@ -24,9 +24,9 @@ android {
 
 dependencies {
     // Modules
-    implementation(project(":core:common"))
-    implementation(project(":core:network"))
-    implementation(project(":domain"))
+    implementation(projects.core.common)
+    implementation(projects.core.network)
+    implementation(projects.domain)
 
     // Kotlin
     implementation(libs.androidx.core.ktx)

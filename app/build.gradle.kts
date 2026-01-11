@@ -41,12 +41,12 @@ android {
 
 dependencies {
     // Modules
-    implementation(project(":core:common"))
-    implementation(project(":core:network"))
-    implementation(project(":core:ui"))
-    implementation(project(":domain"))
-    implementation(project(":data"))
-    implementation(project(":presentation"))
+    implementation(projects.core.common)
+    implementation(projects.core.network)
+    implementation(projects.core.ui)
+    implementation(projects.domain)
+    implementation(projects.data)
+    implementation(projects.presentation)
 
     // Android
     implementation(libs.androidx.core.ktx)
