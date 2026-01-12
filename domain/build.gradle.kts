@@ -27,9 +27,6 @@ dependencies {
     implementation(projects.core.common)
     implementation(projects.data)
 
-    // Kotlin
-    implementation(libs.androidx.core.ktx)
-
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
 
