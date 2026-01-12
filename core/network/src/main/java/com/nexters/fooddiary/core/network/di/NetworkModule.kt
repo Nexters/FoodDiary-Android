@@ -1,5 +1,6 @@
 package com.nexters.fooddiary.core.network.di
 
+import com.nexters.fooddiary.core.network.BuildConfig
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -20,12 +21,8 @@ val networkModule = module {
 
     // OkHttpClient
     single<OkHttpClient> {
-        val loggingInterceptor = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        }
-
         OkHttpClient.Builder()
-            .addInterceptor(loggingInterceptor)
+            .addDebugInterceptors()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
@@ -43,4 +40,13 @@ val networkModule = module {
 
     // Add API service instances here when needed
     // single { get<Retrofit>().create(FoodDiaryApi::class.java) }
+}
+
+fun OkHttpClient.Builder.addDebugInterceptors(): OkHttpClient.Builder {
+    if (BuildConfig.DEBUG) {
+        addInterceptor(HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        })
+    }
+    return this
 }
