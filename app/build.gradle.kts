@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -37,6 +38,13 @@ android {
     buildFeatures {
         compose = true
     }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/versions/9/OSGI-INF/MANIFEST.MF"
+        }
+    }
 }
 
 dependencies {
@@ -46,7 +54,11 @@ dependencies {
     implementation(projects.core.ui)
     implementation(projects.domain)
     implementation(projects.data)
-    implementation(projects.presentation)
+    
+    // Presentation modules
+    implementation(projects.presentation.home)
+    implementation(projects.presentation.widget)
+    implementation(projects.presentation.camera)
 
     // Android
     implementation(libs.androidx.core.ktx)
@@ -57,6 +69,9 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+
+    // Navigation Compose
+    implementation(libs.androidx.navigation.compose)
 
     // Koin
     implementation(libs.koin.android)
