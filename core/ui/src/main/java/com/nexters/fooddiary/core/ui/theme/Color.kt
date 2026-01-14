@@ -1,4 +1,4 @@
-package com.nexters.fooddiary.ui.theme
+package com.nexters.fooddiary.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
