@@ -5,7 +5,6 @@ import com.nexters.fooddiary.core.common.di.commonModule
 import com.nexters.fooddiary.core.network.di.networkModule
 import com.nexters.fooddiary.data.di.dataModule
 import com.nexters.fooddiary.domain.di.domainModule
-import com.nexters.fooddiary.presentation.di.presentationModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -27,7 +26,6 @@ class FoodDiaryApplication : Application() {
                 // Layer modules
                 dataModule,
                 domainModule,
-                presentationModule
             )
         }
     }
