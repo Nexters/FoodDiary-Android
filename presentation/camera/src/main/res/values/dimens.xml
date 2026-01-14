@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="camera_button_padding_small">16dp</dimen>
+    <dimen name="camera_button_padding_large">32dp</dimen>
+    <dimen name="camera_capture_button_size">72dp</dimen>
+    <dimen name="camera_capture_button_inner_size">64dp</dimen>
+</resources>
+
