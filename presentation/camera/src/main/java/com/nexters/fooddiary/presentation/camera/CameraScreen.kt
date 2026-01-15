@@ -1,8 +1,10 @@
 package com.nexters.fooddiary.presentation.camera
 
 import android.content.Context
+import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -22,15 +24,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
-fun CameraScreen(onClose: () -> Unit) {
+internal fun CameraScreen(onClose: () -> Unit) {
+    val context = LocalContext.current
     val imageCapture = remember { ImageCapture.Builder().build() }
 
     Box(
@@ -44,8 +51,17 @@ fun CameraScreen(onClose: () -> Unit) {
         )
         
         CameraControls(
+            context = context,
             onClose = onClose,
-            onCapture = { /* TODO: 사진 촬영 로직 구현 */ }
+            onCapture = { 
+                takePhoto(context, imageCapture) { photoPath ->
+                    Toast.makeText(
+                        context,
+                        "사진 저장: $photoPath",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
         )
     }
 }
@@ -69,6 +85,7 @@ private fun CameraPreview(
 
 @Composable
 private fun CameraControls(
+    context: Context,
     onClose: () -> Unit,
     onCapture: () -> Unit
 ) {
@@ -78,6 +95,7 @@ private fun CameraControls(
             .safeDrawingPadding()
     ) {
         CloseButton(
+            context = context,
             onClick = onClose,
             modifier = Modifier
                 .align(Alignment.TopStart)
@@ -95,11 +113,10 @@ private fun CameraControls(
 
 @Composable
 private fun CloseButton(
+    context: Context,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    
     IconButton(
         onClick = onClick,
         modifier = modifier
@@ -121,7 +138,7 @@ private fun CaptureButton(
         onClick = onClick,
         modifier = modifier.size(dimensionResource(R.dimen.camera_capture_button_size)),
         shape = CircleShape,
-        containerColor = Color.White.copy(alpha = 0.9f)
+        containerColor = Color.White.copy(alpha = CameraConstants.CAPTURE_BUTTON_ALPHA)
     ) {
         Box(
             modifier = Modifier
@@ -157,4 +174,42 @@ private fun startCamera(
             )
         }.onFailure { it.printStackTrace() }
     }, ContextCompat.getMainExecutor(context))
+}
+
+private fun takePhoto(
+    context: Context,
+    imageCapture: ImageCapture,
+    onPhotoSaved: (String) -> Unit
+) {
+    val photoFile = createImageFile(context)
+    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+    
+    imageCapture.takePicture(
+        outputOptions,
+        ContextCompat.getMainExecutor(context),
+        object : ImageCapture.OnImageSavedCallback {
+            override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                onPhotoSaved(photoFile.absolutePath)
+            }
+            
+            override fun onError(exception: ImageCaptureException) {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.camera_capture_failed),
+                    Toast.LENGTH_SHORT
+                ).show()
+                exception.printStackTrace()
+            }
+        }
+    )
+}
+
+private fun createImageFile(context: Context): File {
+    val timestamp = SimpleDateFormat(
+        CameraConstants.DATE_FORMAT_PATTERN,
+        Locale.getDefault()
+    ).format(System.currentTimeMillis())
+    val storageDir = context.getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES)
+    val fileName = "${CameraConstants.FILE_NAME_PREFIX}$timestamp${CameraConstants.FILE_EXTENSION}"
+    return File(storageDir, fileName)
 }

@@ -18,7 +18,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 
 @Composable
-fun FoodDiaryWidgetContent() {
+internal fun FoodDiaryWidgetContent() {
     val context = LocalContext.current
     
     GlanceTheme {
