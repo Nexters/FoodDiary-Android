@@ -13,7 +13,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             FoodDiaryTheme {
-                FoodDiaryNavHost(initialDeepLink = intent?.data)
+                FoodDiaryNavHost(
+                    initialDeepLink = intent?.data,
+                    onFinish = { finish() }
+                )
             }
         }
     }

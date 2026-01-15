@@ -13,6 +13,7 @@ import com.nexters.fooddiary.presentation.home.navigation.homeScreen
 @Composable
 fun FoodDiaryNavHost(
     initialDeepLink: Uri? = null,
+    onFinish: () -> Unit,
     navController: NavHostController = rememberNavController()
 ) {
     val startDestination = if (initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_CAMERA) {
@@ -29,7 +30,11 @@ fun FoodDiaryNavHost(
             onNavigateToCamera = { navController.navigate(CameraRoute) }
         )
         cameraScreen(
-            onClose = { navController.popBackStack() }
+            onClose = {
+                if (!navController.popBackStack()) {
+                    onFinish()
+                }
+            }
         )
     }
 }
