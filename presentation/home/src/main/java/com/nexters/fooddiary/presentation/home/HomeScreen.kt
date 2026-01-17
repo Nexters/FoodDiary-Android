@@ -8,10 +8,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun HomeScreen() {
+internal fun HomeScreen(onNavigateToCamera: () -> Unit) {
+    val context = LocalContext.current
+    
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         Box(
             modifier = Modifier
@@ -20,8 +24,8 @@ fun HomeScreen() {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Food Diary - Home",
-                fontSize = 24.sp
+                text = context.getString(R.string.home_title),
+                fontSize = context.resources.getDimension(R.dimen.home_title_text_size).sp
             )
         }
     }

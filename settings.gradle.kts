@@ -34,5 +34,9 @@ include(":core:ui")
 // Layer modules
 include(":domain")
 include(":data")
-include(":presentation")
+
+// Presentation modules
+include(":presentation:home")
+include(":presentation:widget")
+include(":presentation:camera")
  

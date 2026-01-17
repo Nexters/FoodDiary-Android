@@ -2,11 +2,11 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
-    namespace = "com.nexters.fooddiary.presentation"
+    namespace = "com.nexters.fooddiary.presentation.camera"
     compileSdk = 36
 
     defaultConfig {
@@ -29,40 +29,25 @@ android {
 }
 
 dependencies {
-    // Modules
-    implementation(projects.core.common)
-    implementation(projects.core.ui)
-    implementation(projects.domain)
-
     // Kotlin
     implementation(libs.androidx.core.ktx)
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.activity.compose)
 
     // Lifecycle
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
-    // Navigation 3
-    implementation(libs.androidx.navigation3.runtime)
-    implementation(libs.androidx.navigation3.ui)
-    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+    // CameraX
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+
+    // Navigation
+    implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.core)
-    implementation(libs.androidx.material3.adaptive.navigation3)
-
-    // Koin
-    implementation(libs.koin.android)
-    implementation(libs.koin.androidx.compose)
-
-    // Mavericks
-    implementation(libs.mavericks.compose)
-    testImplementation(libs.mavericks.testing)
-
-    // Testing
-    testImplementation(libs.junit)
 }
