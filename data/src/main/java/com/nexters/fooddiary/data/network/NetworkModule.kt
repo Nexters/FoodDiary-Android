@@ -1,4 +1,4 @@
-package com.nexters.fooddiary.data.di
+package com.nexters.fooddiary.data.network
 
 import com.nexters.fooddiary.data.BuildConfig
 import dagger.Module
