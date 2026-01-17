@@ -1,6 +1,6 @@
-package com.nexters.fooddiary.core.network.di
+package com.nexters.fooddiary.data.di
 
-import com.nexters.fooddiary.core.network.BuildConfig
+import com.nexters.fooddiary.data.BuildConfig
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient

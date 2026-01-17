@@ -25,7 +25,6 @@ android {
 dependencies {
     // Modules
     implementation(projects.core.common)
-    implementation(projects.data)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
