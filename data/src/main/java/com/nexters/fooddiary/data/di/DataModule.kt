@@ -1,12 +1,14 @@
 package com.nexters.fooddiary.data.di
 
-import org.koin.dsl.module
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 
-val dataModule = module {
-    // Add repositories here
-    // single<FoodRepository> { FoodRepositoryImpl(get(), get()) }
-
-    // Add data sources here
-    // single { FoodRemoteDataSource(get()) }
-    // single { FoodLocalDataSource(get()) }
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class DataModule {
+    // Add repository bindings here
+    // @Binds
+    // @Singleton
+    // abstract fun bindFoodRepository(impl: FoodRepositoryImpl): FoodRepository
 }

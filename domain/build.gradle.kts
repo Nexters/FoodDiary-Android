@@ -29,8 +29,8 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
 
-    // Koin
-    implementation(libs.koin.core)
+    // Javax Inject (for @Inject annotation without Hilt dependency)
+    implementation(libs.javax.inject)
 
     // Testing
     testImplementation(libs.junit)
