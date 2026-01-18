@@ -1,6 +1,5 @@
 package com.nexters.fooddiary.data.network
 
-import com.nexters.fooddiary.data.BuildConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,6 +11,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.concurrent.TimeUnit
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -27,8 +27,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient = OkHttpClient.Builder()
-        .addDebugInterceptors()
+    fun provideOkHttpClient(
+        @Named("isDebug") isDebug: Boolean
+    ): OkHttpClient = OkHttpClient.Builder()
+        .addDebugInterceptors(isDebug)
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
@@ -52,8 +54,8 @@ object NetworkModule {
     //     retrofit.create(FoodDiaryApi::class.java)
 }
 
-private fun OkHttpClient.Builder.addDebugInterceptors(): OkHttpClient.Builder {
-    if (BuildConfig.DEBUG) {
+private fun OkHttpClient.Builder.addDebugInterceptors(isDebug: Boolean): OkHttpClient.Builder {
+    if (isDebug) {
         addInterceptor(HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         })
