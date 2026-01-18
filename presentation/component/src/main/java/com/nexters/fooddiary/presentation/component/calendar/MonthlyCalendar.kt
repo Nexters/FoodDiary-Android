@@ -37,6 +37,7 @@ import java.util.Locale
  * @param modifier Modifier
  * @param selectedDate 선택된 날짜
  * @param onDateSelected 날짜 선택 콜백
+ * @param onMonthChanged 월 변경 콜백 (YearMonth)
  * @param adjacentMonths 현재 월 기준 앞뒤로 스크롤 가능한 개월 수
  */
 @Composable
@@ -44,6 +45,7 @@ fun MonthlyCalendar(
     modifier: Modifier = Modifier,
     selectedDate: LocalDate = LocalDate.now(),
     onDateSelected: (LocalDate) -> Unit = {},
+    onMonthChanged: (YearMonth) -> Unit = {},
     adjacentMonths: Long = 500,
 ) {
     val currentMonth = remember { YearMonth.now() }
@@ -59,6 +61,11 @@ fun MonthlyCalendar(
     
     val coroutineScope = rememberCoroutineScope()
     val visibleMonth = remember { derivedStateOf { state.firstVisibleMonth.yearMonth } }
+    
+    // 월 변경 감지 및 콜백 호출
+    LaunchedEffect(visibleMonth.value) {
+        onMonthChanged(visibleMonth.value)
+    }
 
     Column(modifier = modifier) {
         // 월/년도 헤더 화살표
