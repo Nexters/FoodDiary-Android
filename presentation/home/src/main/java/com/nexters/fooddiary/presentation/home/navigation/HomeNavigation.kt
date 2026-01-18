@@ -9,11 +9,11 @@ import kotlinx.serialization.Serializable
 object HomeRoute
 
 fun NavGraphBuilder.homeScreen(
-    onNavigateToCamera: () -> Unit
+    onNavigateToImage: () -> Unit
 ) {
     composable<HomeRoute> {
         HomeScreen(
-            onNavigateToCamera = onNavigateToCamera
+            onNavigateToImage = onNavigateToImage
         )
     }
 }
