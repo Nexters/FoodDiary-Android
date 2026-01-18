@@ -1,5 +1,6 @@
 package com.nexters.fooddiary.data.network
 
+import com.nexters.fooddiary.data.BuildConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -42,7 +43,7 @@ object NetworkModule {
         okHttpClient: OkHttpClient,
         json: Json
     ): Retrofit = Retrofit.Builder()
-        .baseUrl("https://api.fooddiary.com/") //FIXME API URL
+        .baseUrl(BuildConfig.API_BASE_URL)
         .client(okHttpClient)
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
