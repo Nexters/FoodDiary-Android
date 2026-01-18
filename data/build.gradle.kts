@@ -30,15 +30,6 @@ android {
         )
     }
 
-    buildTypes {
-        debug {
-            buildConfigField("Boolean", "DEBUG", "true")
-        }
-        release {
-            buildConfigField("Boolean", "DEBUG", "false")
-        }
-    }
-
     buildFeatures {
         buildConfig = true
     }
