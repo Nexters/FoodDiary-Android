@@ -3,7 +3,7 @@ package com.nexters.fooddiary.presentation.component.calendar
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kizitonwose.calendar.compose.ContentHeightMode
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.CalendarDay
@@ -85,6 +86,7 @@ fun MonthlyCalendar(
         // 월간 캘린더
         HorizontalCalendar(
             state = state,
+            contentHeightMode = ContentHeightMode.Fill,
             dayContent = { day ->
                 MonthDayCell(
                     day = day,
@@ -181,34 +183,28 @@ private fun MonthDayCell(
 ) {
     val isCurrentMonth = day.position == DayPosition.MonthDate
     
-    Column(
+    Box(
         modifier = modifier
-            .aspectRatio(1f)
+            .fillMaxSize()
+            .clickable(onClick = onClick)
             .padding(4.dp)
-            .clickable(onClick = onClick),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .then(
-                    if (isSelected) {
-                        Modifier.border(2.dp, Color(0xFFE91E63), CircleShape)
-                    } else {
-                        Modifier
-                    }
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = day.date.dayOfMonth.toString(),
-                fontSize = 16.sp,
-                color = when {
-                    !isCurrentMonth -> Color.White.copy(alpha = 0.3f)
-                    else -> Color.White
+            .then(
+                if (isSelected) {
+                    Modifier.border(2.dp, Color(0xFFE91E63), RoundedCornerShape(8.dp))
+                } else {
+                    Modifier
                 }
-            )
-        }
+            ),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        Text(
+            text = day.date.dayOfMonth.toString(),
+            fontSize = 16.sp,
+            color = when {
+                !isCurrentMonth -> Color.White.copy(alpha = 0.3f)
+                else -> Color.White
+            },
+            modifier = Modifier.padding(top = 8.dp)
+        )
     }
 }
