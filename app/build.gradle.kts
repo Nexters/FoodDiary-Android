@@ -64,6 +64,7 @@ dependencies {
     implementation(projects.presentation.home)
     implementation(projects.presentation.widget)
     implementation(projects.presentation.camera)
+    implementation(projects.presentation.component)
 
     // Android
     implementation(libs.androidx.core.ktx)
@@ -77,9 +78,6 @@ dependencies {
 
     // Navigation Compose
     implementation(libs.androidx.navigation.compose)
-
-    // Calendar
-    implementation(libs.calendar.compose)
 
     // Hilt
     implementation(libs.hilt.android)

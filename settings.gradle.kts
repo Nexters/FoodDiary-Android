@@ -38,4 +38,5 @@ include(":data")
 include(":presentation:home")
 include(":presentation:widget")
 include(":presentation:camera")
+include(":presentation:component")
  
