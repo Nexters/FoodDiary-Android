@@ -92,12 +92,15 @@ fun MonthlyCalendar(
                     day = day,
                     isSelected = day.date == selectedDate,
                     onClick = {
-                        onDateSelected(day.date)
-                        // 다른 월의 날짜를 클릭한 경우 해당 월로 이동
+                        // 다른 월의 날짜를 클릭한 경우 애니메이션 후 선택
                         if (day.position != DayPosition.MonthDate) {
                             coroutineScope.launch {
                                 state.animateScrollToMonth(YearMonth.from(day.date))
+                                onDateSelected(day.date)
                             }
+                        } else {
+                            // 현재 월의 날짜는 즉시 선택
+                            onDateSelected(day.date)
                         }
                     }
                 )
