@@ -37,7 +37,11 @@ class CalendarViewModel @Inject constructor(
 
     fun loadPhotosForMonth(yearMonth: YearMonth) {
         viewModelScope.launch {
+            val startTime = System.currentTimeMillis()
             val photoCount = getPhotosByMonthUseCase(yearMonth)
+            val endTime = System.currentTimeMillis()
+            Log.d("CalendarViewModel", "Month scan for $yearMonth completed in ${endTime - startTime}ms")
+            
             _photoCountByDate.value += photoCount
         }
     }

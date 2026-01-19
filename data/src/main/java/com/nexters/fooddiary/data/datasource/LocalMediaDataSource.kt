@@ -170,8 +170,6 @@ class LocalMediaDataSource @Inject constructor(
                             )
                         )
                         totalPhotos++
-                        
-                        Log.d(TAG, "Photo: $name, Date: $photoDate, URI: $contentUri")
                     }
                     
                     val elapsedTime = System.currentTimeMillis() - startTime
