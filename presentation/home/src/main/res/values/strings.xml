@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="home_title">Food Diary - Home</string>
+    <string name="permission_required_message">사진 접근 권한이 필요합니다</string>
+    <string name="permission_request_button">권한 요청</string>
 </resources>
 
