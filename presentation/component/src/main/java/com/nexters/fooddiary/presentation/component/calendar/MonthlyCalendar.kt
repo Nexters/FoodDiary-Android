@@ -2,7 +2,15 @@ package com.nexters.fooddiary.presentation.component.calendar
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
@@ -10,7 +18,11 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,6 +36,7 @@ import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.daysOfWeek
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -38,6 +51,7 @@ import java.util.Locale
  * @param selectedDate 선택된 날짜
  * @param onDateSelected 날짜 선택 콜백
  * @param onMonthChanged 월 변경 콜백 (YearMonth)
+ * @param photoCountByDate 날짜별 사진 개수 (LocalDate -> 개수)
  * @param adjacentMonths 현재 월 기준 앞뒤로 스크롤 가능한 개월 수
  */
 @Composable
@@ -46,6 +60,7 @@ fun MonthlyCalendar(
     selectedDate: LocalDate = LocalDate.now(),
     onDateSelected: (LocalDate) -> Unit = {},
     onMonthChanged: (YearMonth) -> Unit = {},
+    photoCountByDate: Map<LocalDate, Int> = emptyMap(),
     adjacentMonths: Long = 500,
 ) {
     val currentMonth = remember { YearMonth.now() }
@@ -60,17 +75,20 @@ fun MonthlyCalendar(
     )
     
     val coroutineScope = rememberCoroutineScope()
-    val visibleMonth = remember { derivedStateOf { state.firstVisibleMonth.yearMonth } }
-    
+
     // 월 변경 감지 및 콜백 호출
-    LaunchedEffect(visibleMonth.value) {
-        onMonthChanged(visibleMonth.value)
+    LaunchedEffect(state) {
+        snapshotFlow { state.firstVisibleMonth.yearMonth }
+            .distinctUntilChanged()
+            .collect { yearMonth ->
+                onMonthChanged(yearMonth)
+            }
     }
 
     Column(modifier = modifier) {
         // 월/년도 헤더 화살표
         MonthCalendarHeader(
-            yearMonth = visibleMonth.value,
+            yearMonth = state.firstVisibleMonth.yearMonth,
             onPreviousClick = {
                 coroutineScope.launch {
                     state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.minusMonths(1))
@@ -95,9 +113,11 @@ fun MonthlyCalendar(
             state = state,
             contentHeightMode = ContentHeightMode.Fill,
             dayContent = { day ->
+                val photoCount = photoCountByDate[day.date] ?: 0
                 MonthDayCell(
                     day = day,
                     isSelected = day.date == selectedDate,
+                    photoCount = photoCount,
                     onClick = {
                         // 다른 월의 날짜를 클릭한 경우 애니메이션 후 선택
                         if (day.position != DayPosition.MonthDate) {
@@ -188,6 +208,7 @@ private fun MonthWeekDaysHeader(
 private fun MonthDayCell(
     day: CalendarDay,
     isSelected: Boolean,
+    photoCount: Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -207,14 +228,29 @@ private fun MonthDayCell(
             ),
         contentAlignment = Alignment.TopCenter
     ) {
-        Text(
-            text = day.date.dayOfMonth.toString(),
-            fontSize = 16.sp,
-            color = when {
-                !isCurrentMonth -> Color.White.copy(alpha = 0.3f)
-                else -> Color.White
-            },
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(top = 8.dp)
-        )
+        ) {
+            Text(
+                text = day.date.dayOfMonth.toString(),
+                fontSize = 16.sp,
+                color = when {
+                    !isCurrentMonth -> Color.White.copy(alpha = 0.3f)
+                    else -> Color.White
+                }
+            )
+            
+            // 사진 개수 표시
+            if (photoCount > 0 && isCurrentMonth) {
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = photoCount.toString(),
+                    fontSize = 10.sp,
+                    color = Color(0xFF4CAF50),
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
     }
 }

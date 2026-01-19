@@ -1,5 +1,6 @@
 package com.nexters.fooddiary.presentation.component.calendar
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -9,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
+import java.time.YearMonth
 
 /**
  * 캘린더 사용 예제
@@ -17,10 +19,24 @@ import java.time.LocalDate
  */
 @Composable
 fun CalendarExample(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    photoCountByDate: Map<LocalDate, Int> = emptyMap(),
+    onMonthChanged: (YearMonth) -> Unit = {}
 ) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var selectedTabIndex by remember { mutableIntStateOf(0) }
+    
+    // Mock 데이터 (실제로는 외부에서 전달받음)
+    val mockPhotoCount = remember {
+        mapOf(
+            LocalDate.now() to 3,
+            LocalDate.now().minusDays(1) to 5,
+            LocalDate.now().minusDays(3) to 2,
+            LocalDate.now().plusDays(2) to 1
+        )
+    }
+    
+    val actualPhotoCount = photoCountByDate.ifEmpty { mockPhotoCount }
     
     Box(
         modifier = modifier
@@ -62,6 +78,11 @@ fun CalendarExample(
                 1 -> MonthlyCalendar(
                     selectedDate = selectedDate,
                     onDateSelected = { selectedDate = it },
+                    photoCountByDate = actualPhotoCount,
+                    onMonthChanged = { yearMonth ->
+                        Log.d("CalendarExample", "Month changed to: $yearMonth")
+                        onMonthChanged(yearMonth)
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
