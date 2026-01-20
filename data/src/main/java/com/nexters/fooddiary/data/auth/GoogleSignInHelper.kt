@@ -15,6 +15,7 @@ import com.nexters.fooddiary.core.common.auth.SignInError
 import com.nexters.fooddiary.core.common.auth.SignInException
 import com.nexters.fooddiary.core.common.resource.ResourceProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -65,6 +66,10 @@ class GoogleSignInHelper @Inject constructor(
             )
             Result.failure(SignInException(error, e))
         }
+    }
+
+    override suspend fun signOut(context: Context, webClientId: String) {
+        getGoogleSignInClient(context, webClientId).signOut().await()
     }
 
     private fun mapToSignInError(exception: ApiException): SignInError {
