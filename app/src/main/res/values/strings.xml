@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">FoodDiary</string>
+    <string name="error_web_client_id_not_set">Web Client ID가 설정되지 않았습니다. strings.xml을 확인하세요.</string>
+    <string name="error_sign_in_failed">로그인 실패</string>
+    <string name="error_unknown">알 수 없는 오류가 발생했습니다.</string>
+    <string name="error_delete_account_failed">계정 삭제에 실패했습니다.</string>
+    <string name="sign_out">로그아웃</string>
 </resources>
