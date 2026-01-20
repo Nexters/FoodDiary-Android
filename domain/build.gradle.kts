@@ -1,13 +1,16 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.ksp)
 }
 
 dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
 
-    // Javax Inject (for @Inject annotation without Hilt dependency)
     implementation(libs.javax.inject)
+
+    implementation(libs.dagger)
+    ksp(libs.dagger.compiler)
 
     // Testing
     testImplementation(libs.junit)
