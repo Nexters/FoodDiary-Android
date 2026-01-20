@@ -9,12 +9,14 @@ import kotlinx.serialization.Serializable
 object HomeRoute
 
 fun NavGraphBuilder.homeScreen(
-    onNavigateToCamera: () -> Unit
+    onNavigateToCamera: () -> Unit,
+    onSignOut: () -> Unit,
+    onDeleteAccount: () -> Unit
 ) {
     composable<HomeRoute> {
         HomeScreen(
-            onNavigateToCamera = onNavigateToCamera
+            onSignOut = onSignOut,
+            onDeleteAccount = onDeleteAccount
         )
     }
 }
-
