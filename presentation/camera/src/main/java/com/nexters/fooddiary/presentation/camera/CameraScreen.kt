@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -27,10 +26,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.nexters.fooddiary.presentation.camera.R
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -95,8 +96,7 @@ private fun CameraControls(
             .safeDrawingPadding()
     ) {
         CloseButton(
-            context = context,
-            onClick = onClose,
+            onClose = onClose,
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(dimensionResource(R.dimen.camera_button_padding_small))
@@ -113,17 +113,16 @@ private fun CameraControls(
 
 @Composable
 private fun CloseButton(
-    context: Context,
-    onClick: () -> Unit,
+    onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     IconButton(
-        onClick = onClick,
+        onClick = onClose,
         modifier = modifier
     ) {
         Icon(
             painter = painterResource(android.R.drawable.ic_menu_close_clear_cancel),
-            contentDescription = context.getString(R.string.camera_close),
+            contentDescription = stringResource(R.string.camera_close),
             tint = Color.White
         )
     }
