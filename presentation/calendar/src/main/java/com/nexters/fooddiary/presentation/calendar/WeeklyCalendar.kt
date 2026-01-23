@@ -26,6 +26,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
+import java.time.temporal.WeekFields
 import java.util.Locale
 
 /**
@@ -35,6 +36,8 @@ import java.util.Locale
  * @param selectedDate 선택된 날짜
  * @param onDateSelected 날짜 선택 콜백
  * @param adjacentMonths 현재 월 기준 앞뒤로 스크롤 가능한 개월 수 (기본값: 500개월 = 약 41년)
+ * @param locale 로케일 설정
+ * @param firstDayOfWeek 주의 시작 요일
  */
 @Composable
 fun WeeklyCalendar(
@@ -42,6 +45,8 @@ fun WeeklyCalendar(
     selectedDate: LocalDate = LocalDate.now(),
     onDateSelected: (LocalDate) -> Unit = {},
     adjacentMonths: Long = 500,
+    locale: Locale = Locale.getDefault(),
+    firstDayOfWeek: DayOfWeek = WeekFields.of(locale).firstDayOfWeek,
 ) {
     val currentMonth = remember { YearMonth.now() }
     val startMonth = remember { currentMonth.minusMonths(adjacentMonths) }
@@ -51,7 +56,7 @@ fun WeeklyCalendar(
         startDate = startMonth.atDay(1),
         endDate = endMonth.atEndOfMonth(),
         firstVisibleWeekDate = selectedDate,
-        firstDayOfWeek = DayOfWeek.SUNDAY
+        firstDayOfWeek = firstDayOfWeek
     )
 
     val coroutineScope = rememberCoroutineScope()
@@ -63,6 +68,7 @@ fun WeeklyCalendar(
         // 월/년도 헤더 with 화살표
         CalendarHeader(
             yearMonth = visibleMonth.value,
+            locale = locale,
             onPreviousClick = {
                 coroutineScope.launch {
                     val targetDate = state.firstVisibleWeek.days.first().date.minusWeeks(1)
@@ -80,7 +86,10 @@ fun WeeklyCalendar(
         Spacer(modifier = Modifier.height(16.dp))
 
         // 요일 헤더
-        WeekDaysHeader()
+        WeekDaysHeader(
+            locale = locale,
+            firstDayOfWeek = firstDayOfWeek
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -104,6 +113,7 @@ fun WeeklyCalendar(
 @Composable
 private fun CalendarHeader(
     yearMonth: YearMonth,
+    locale: Locale,
     onPreviousClick: () -> Unit,
     onNextClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -114,7 +124,7 @@ private fun CalendarHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "${yearMonth.month.getDisplayName(TextStyle.FULL, Locale.ENGLISH).uppercase()} ${yearMonth.year}",
+            text = "${yearMonth.month.getDisplayName(TextStyle.FULL, locale).uppercase()} ${yearMonth.year}",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White
@@ -144,15 +154,18 @@ private fun CalendarHeader(
  */
 @Composable
 private fun WeekDaysHeader(
-    modifier: Modifier = Modifier,
-    daysOfWeek: List<DayOfWeek> = daysOfWeek(firstDayOfWeek = DayOfWeek.SUNDAY)
+    locale: Locale,
+    firstDayOfWeek: DayOfWeek,
+    modifier: Modifier = Modifier
 ) {
+    val daysOfWeek = remember(firstDayOfWeek) { daysOfWeek(firstDayOfWeek = firstDayOfWeek) }
+
     Row(
         modifier = modifier.fillMaxWidth()
     ) {
         daysOfWeek.forEach { dayOfWeek ->
             Text(
-                text = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.ENGLISH).uppercase(),
+                text = dayOfWeek.getDisplayName(TextStyle.SHORT, locale).uppercase(),
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
                 fontSize = 12.sp,
