@@ -22,6 +22,12 @@ fun CalendarExample(
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var selectedTabIndex by remember { mutableIntStateOf(0) }
 
+    // 월간 캘린더 상태
+    val monthCalendarState = rememberMonthCalendarState(selectedDate = selectedDate)
+
+    // 주간 캘린더 상태
+    val weekCalendarState = rememberWeeklyCalendarState(selectedDate = selectedDate)
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -55,11 +61,13 @@ fun CalendarExample(
             // 캘린더 표시
             when (selectedTabIndex) {
                 0 -> WeeklyCalendar(
+                    calendarState = weekCalendarState,
                     selectedDate = selectedDate,
                     onDateSelected = { selectedDate = it },
                     modifier = Modifier.fillMaxWidth()
                 )
                 1 -> MonthlyCalendar(
+                    calendarState = monthCalendarState,
                     selectedDate = selectedDate,
                     onDateSelected = { selectedDate = it },
                     modifier = Modifier.fillMaxWidth()

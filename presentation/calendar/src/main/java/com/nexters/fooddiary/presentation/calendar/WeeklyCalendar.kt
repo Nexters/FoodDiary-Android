@@ -2,7 +2,16 @@ package com.nexters.fooddiary.presentation.calendar
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
@@ -10,7 +19,10 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,14 +31,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kizitonwose.calendar.compose.WeekCalendar
-import com.kizitonwose.calendar.compose.weekcalendar.rememberWeekCalendarState
+import com.kizitonwose.calendar.compose.weekcalendar.WeekCalendarState
 import com.kizitonwose.calendar.core.daysOfWeek
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
-import java.time.temporal.WeekFields
 import java.util.Locale
 
 /**
@@ -42,26 +53,15 @@ import java.util.Locale
 @Composable
 fun WeeklyCalendar(
     modifier: Modifier = Modifier,
-    selectedDate: LocalDate = LocalDate.now(),
-    onDateSelected: (LocalDate) -> Unit = {},
-    adjacentMonths: Long = 500,
+    calendarState: WeekCalendarState,
+    selectedDate: LocalDate,
+    onDateSelected: (LocalDate) -> Unit,
     locale: Locale = Locale.getDefault(),
-    firstDayOfWeek: DayOfWeek = WeekFields.of(locale).firstDayOfWeek,
 ) {
-    val currentMonth = remember { YearMonth.now() }
-    val startMonth = remember { currentMonth.minusMonths(adjacentMonths) }
-    val endMonth = remember { currentMonth.plusMonths(adjacentMonths) }
-
-    val state = rememberWeekCalendarState(
-        startDate = startMonth.atDay(1),
-        endDate = endMonth.atEndOfMonth(),
-        firstVisibleWeekDate = selectedDate,
-        firstDayOfWeek = firstDayOfWeek
-    )
 
     val coroutineScope = rememberCoroutineScope()
     val visibleMonth = remember { derivedStateOf {
-        YearMonth.from(state.firstVisibleWeek.days.first().date)
+        YearMonth.from(calendarState.firstVisibleWeek.days.first().date)
     } }
 
     Column(modifier = modifier) {
@@ -71,14 +71,14 @@ fun WeeklyCalendar(
             locale = locale,
             onPreviousClick = {
                 coroutineScope.launch {
-                    val targetDate = state.firstVisibleWeek.days.first().date.minusWeeks(1)
-                    state.animateScrollToWeek(targetDate)
+                    val targetDate = calendarState.firstVisibleWeek.days.first().date.minusWeeks(1)
+                    calendarState.animateScrollToWeek(targetDate)
                 }
             },
             onNextClick = {
                 coroutineScope.launch {
-                    val targetDate = state.firstVisibleWeek.days.first().date.plusWeeks(1)
-                    state.animateScrollToWeek(targetDate)
+                    val targetDate = calendarState.firstVisibleWeek.days.first().date.plusWeeks(1)
+                    calendarState.animateScrollToWeek(targetDate)
                 }
             }
         )
@@ -88,14 +88,14 @@ fun WeeklyCalendar(
         // 요일 헤더
         WeekDaysHeader(
             locale = locale,
-            firstDayOfWeek = firstDayOfWeek
+            firstDayOfWeek = calendarState.firstDayOfWeek
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         // 주간 캘린더
         WeekCalendar(
-            state = state,
+            state = calendarState,
             dayContent = { day ->
                 DayCell(
                     date = day.date,

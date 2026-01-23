@@ -2,7 +2,15 @@ package com.nexters.fooddiary.presentation.calendar
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
@@ -10,7 +18,11 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,9 +30,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kizitonwose.calendar.compose.CalendarState
 import com.kizitonwose.calendar.compose.ContentHeightMode
 import com.kizitonwose.calendar.compose.HorizontalCalendar
-import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.daysOfWeek
@@ -29,7 +41,6 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
-import java.time.temporal.WeekFields
 import java.util.Locale
 
 /**
@@ -46,26 +57,14 @@ import java.util.Locale
 @Composable
 fun MonthlyCalendar(
     modifier: Modifier = Modifier,
-    selectedDate: LocalDate = LocalDate.now(),
-    onDateSelected: (LocalDate) -> Unit = {},
-    onMonthChanged: (YearMonth) -> Unit = {},
-    adjacentMonths: Long = 500,
+    calendarState: CalendarState,
+    selectedDate: LocalDate,
+    onDateSelected: (LocalDate) -> Unit,
     locale: Locale = Locale.getDefault(),
-    firstDayOfWeek: DayOfWeek = WeekFields.of(locale).firstDayOfWeek,
+    onMonthChanged: (YearMonth) -> Unit = {},
 ) {
-    val currentMonth = remember { YearMonth.now() }
-    val startMonth = remember { currentMonth.minusMonths(adjacentMonths) }
-    val endMonth = remember { currentMonth.plusMonths(adjacentMonths) }
-
-    val state = rememberCalendarState(
-        startMonth = startMonth,
-        endMonth = endMonth,
-        firstVisibleMonth = YearMonth.from(selectedDate),
-        firstDayOfWeek = firstDayOfWeek
-    )
-
     val coroutineScope = rememberCoroutineScope()
-    val visibleMonth = remember { derivedStateOf { state.firstVisibleMonth.yearMonth } }
+    val visibleMonth = remember { derivedStateOf { calendarState.firstVisibleMonth.yearMonth } }
 
     // 월 변경 감지 및 콜백 호출
     LaunchedEffect(visibleMonth.value) {
@@ -79,12 +78,12 @@ fun MonthlyCalendar(
             locale = locale,
             onPreviousClick = {
                 coroutineScope.launch {
-                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.minusMonths(1))
+                    calendarState.animateScrollToMonth(calendarState.firstVisibleMonth.yearMonth.minusMonths(1))
                 }
             },
             onNextClick = {
                 coroutineScope.launch {
-                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.plusMonths(1))
+                    calendarState.animateScrollToMonth(calendarState.firstVisibleMonth.yearMonth.plusMonths(1))
                 }
             }
         )
@@ -94,14 +93,14 @@ fun MonthlyCalendar(
         // 요일 헤더
         MonthWeekDaysHeader(
             locale = locale,
-            firstDayOfWeek = firstDayOfWeek
+            firstDayOfWeek = calendarState.firstDayOfWeek
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         // 월간 캘린더
         HorizontalCalendar(
-            state = state,
+            state = calendarState,
             contentHeightMode = ContentHeightMode.Fill,
             dayContent = { day ->
                 MonthDayCell(
@@ -111,7 +110,7 @@ fun MonthlyCalendar(
                         // 다른 월의 날짜를 클릭한 경우 애니메이션 후 선택
                         if (day.position != DayPosition.MonthDate) {
                             coroutineScope.launch {
-                                state.animateScrollToMonth(YearMonth.from(day.date))
+                                calendarState.animateScrollToMonth(YearMonth.from(day.date))
                                 onDateSelected(day.date)
                             }
                         } else {
