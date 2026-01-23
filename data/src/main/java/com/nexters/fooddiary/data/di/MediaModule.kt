@@ -29,7 +29,7 @@ abstract class MediaRepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindMediaRepository(
+    internal abstract fun bindMediaRepository(
         mediaRepositoryImpl: MediaRepositoryImpl
     ): MediaRepository
 }

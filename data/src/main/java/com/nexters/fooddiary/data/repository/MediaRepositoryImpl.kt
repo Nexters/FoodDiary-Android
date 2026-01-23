@@ -10,7 +10,7 @@ import javax.inject.Inject
 /**
  * MediaRepository 구현체
  */
-class MediaRepositoryImpl @Inject constructor(
+internal class MediaRepositoryImpl @Inject constructor(
     private val localMediaDataSource: LocalMediaDataSource
 ) : MediaRepository {
 
