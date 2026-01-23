@@ -4,7 +4,6 @@ import android.content.ContentResolver
 import android.content.ContentUris
 import android.net.Uri
 import android.provider.MediaStore.Images.Media
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Instant
@@ -19,19 +18,12 @@ import javax.inject.Inject
 class LocalMediaDataSource @Inject constructor(
     private val contentResolver: ContentResolver
 ) {
-    companion object {
-        private const val TAG = "LocalMediaDataSource"
-    }
-
     /**
      * 전체 앨범의 모든 사진을 날짜별로 그룹화하여 반환
      * 성능 비교를 위한 전체 스캔 함수
      */
     suspend fun getAllPhotos(): Map<LocalDate, List<PhotoData>> =
         withContext(Dispatchers.IO) {
-            Log.d(TAG, "Starting full album scan...")
-            val startTime = System.currentTimeMillis()
-            
             val photosByDate = mutableMapOf<LocalDate, MutableList<PhotoData>>()
             
             // 쿼리할 컬럼
@@ -55,9 +47,7 @@ class LocalMediaDataSource @Inject constructor(
                     val idColumn = cursor.getColumnIndexOrThrow(Media._ID)
                     val nameColumn = cursor.getColumnIndexOrThrow(Media.DISPLAY_NAME)
                     val dateTakenColumn = cursor.getColumnIndexOrThrow(Media.DATE_TAKEN)
-                    
-                    var totalPhotos = 0
-                    
+
                     while (cursor.moveToNext()) {
                         val id = cursor.getLong(idColumn)
                         val name = cursor.getString(nameColumn)
@@ -80,23 +70,10 @@ class LocalMediaDataSource @Inject constructor(
                                 dateTaken = dateTaken
                             )
                         )
-                        totalPhotos++
                     }
-                    
-                    val elapsedTime = System.currentTimeMillis() - startTime
-                    val minDate = photosByDate.keys.minOrNull()
-                    val maxDate = photosByDate.keys.maxOrNull()
-                    Log.d(TAG, "Full scan completed: $totalPhotos photos in ${elapsedTime}ms")
-                    Log.d(TAG, "Date range: $minDate ~ $maxDate")
-                    Log.d(TAG, "Photos by date count: ${photosByDate.size} days")
-                    
-                    // 디버깅용: 각 연도별 사진 개수 출력
-                    val photosByYear = photosByDate.entries.groupBy { it.key.year }
-                        .mapValues { it.value.sumOf { entry -> entry.value.size } }
-                    Log.d(TAG, "Photos by year: $photosByYear")
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error in full album scan", e)
+                //TODO 에러 핸들링
             }
             
             photosByDate
@@ -109,10 +86,7 @@ class LocalMediaDataSource @Inject constructor(
         withContext(Dispatchers.IO) {
             val startDate = yearMonth.atDay(1)
             val endDate = yearMonth.atEndOfMonth()
-            
-            Log.d(TAG, "Querying photos for $yearMonth ($startDate ~ $endDate)")
-            val startTime = System.currentTimeMillis()
-            
+
             val photosByDate = mutableMapOf<LocalDate, MutableList<PhotoData>>()
             
             // LocalDate를 Unix timestamp (밀리초)로 변환
@@ -144,9 +118,7 @@ class LocalMediaDataSource @Inject constructor(
                     val idColumn = cursor.getColumnIndexOrThrow(Media._ID)
                     val nameColumn = cursor.getColumnIndexOrThrow(Media.DISPLAY_NAME)
                     val dateTakenColumn = cursor.getColumnIndexOrThrow(Media.DATE_TAKEN)
-                    
-                    var totalPhotos = 0
-                    
+
                     while (cursor.moveToNext()) {
                         val id = cursor.getLong(idColumn)
                         val name = cursor.getString(nameColumn)
@@ -169,15 +141,10 @@ class LocalMediaDataSource @Inject constructor(
                                 dateTaken = dateTaken
                             )
                         )
-                        totalPhotos++
                     }
-                    
-                    val elapsedTime = System.currentTimeMillis() - startTime
-                    Log.d(TAG, "Month scan completed: $totalPhotos photos in ${elapsedTime}ms for $yearMonth")
-                    Log.d(TAG, "Photos by date: ${photosByDate.mapValues { it.value.size }}")
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error querying photos for month", e)
+                //TODO 에러 핸들링
             }
             
             photosByDate

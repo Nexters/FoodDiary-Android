@@ -1,6 +1,5 @@
 package com.nexters.fooddiary.presentation.home.calendar
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nexters.fooddiary.domain.usecase.GetAllPhotosUseCase
@@ -25,23 +24,14 @@ class CalendarViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            Log.d("CalendarViewModel", "Starting full scan...")
-            val startTime = System.currentTimeMillis()
             val allPhotos = getAllPhotosUseCase()
-            val endTime = System.currentTimeMillis()
-            Log.d("CalendarViewModel", "Full scan completed in ${endTime - startTime}ms")
-            
             _photoCountByDate.value = allPhotos
         }
     }
 
     fun loadPhotosForMonth(yearMonth: YearMonth) {
         viewModelScope.launch {
-            val startTime = System.currentTimeMillis()
             val photoCount = getPhotosByMonthUseCase(yearMonth)
-            val endTime = System.currentTimeMillis()
-            Log.d("CalendarViewModel", "Month scan for $yearMonth completed in ${endTime - startTime}ms")
-            
             _photoCountByDate.value += photoCount
         }
     }
