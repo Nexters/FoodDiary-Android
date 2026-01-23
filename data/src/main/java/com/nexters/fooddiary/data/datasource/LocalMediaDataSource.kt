@@ -55,11 +55,7 @@ class LocalMediaDataSource @Inject constructor(
                             dateTaken = dateModified
                         )
 
-                        // 초를 LocalDate로 변환
-                        val photoDate = Instant.ofEpochSecond(photo.dateTaken)
-                            .atZone(ZoneId.systemDefault())
-                            .toLocalDate()
-
+                        val photoDate = photo.dateTaken.toLocalDate()
                         photosByDate.getOrPut(photoDate) { mutableListOf() }.add(photo)
                     }
                 }
@@ -119,11 +115,7 @@ class LocalMediaDataSource @Inject constructor(
                             dateTaken = dateModified
                         )
 
-                        // 초를 LocalDate로 변환
-                        val photoDate = Instant.ofEpochSecond(photo.dateTaken)
-                            .atZone(ZoneId.systemDefault())
-                            .toLocalDate()
-
+                        val photoDate = photo.dateTaken.toLocalDate()
                         photosByDate.getOrPut(photoDate) { mutableListOf() }.add(photo)
                     }
                 }
@@ -137,4 +129,10 @@ class LocalMediaDataSource @Inject constructor(
         val uri: Uri,
         val dateTaken: Long  // DATE_MODIFIED단위가 초 단위 (epoch time)
     )
+}
+
+private fun Long.toLocalDate(): LocalDate {
+    return Instant.ofEpochSecond(this)
+        .atZone(ZoneId.systemDefault())
+        .toLocalDate()
 }
