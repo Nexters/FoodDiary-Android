@@ -25,17 +25,16 @@ class LocalMediaDataSource @Inject constructor(
     suspend fun getAllPhotos(): Map<LocalDate, List<PhotoData>> =
         withContext(Dispatchers.IO) {
             val photosByDate = mutableMapOf<LocalDate, MutableList<PhotoData>>()
-            
+
             // 쿼리할 컬럼
             val projection = arrayOf(
                 Media._ID,
-                Media.DISPLAY_NAME,
-                Media.DATE_TAKEN
+                Media.DATE_MODIFIED
             )
-            
+
             // 최신순 정렬
-            val sortOrder = "${Media.DATE_TAKEN} DESC"
-            
+            val sortOrder = "${Media.DATE_MODIFIED} DESC"
+
             try {
                 contentResolver.query(
                     Media.EXTERNAL_CONTENT_URI,
@@ -45,37 +44,28 @@ class LocalMediaDataSource @Inject constructor(
                     sortOrder
                 )?.use { cursor ->
                     val idColumn = cursor.getColumnIndexOrThrow(Media._ID)
-                    val nameColumn = cursor.getColumnIndexOrThrow(Media.DISPLAY_NAME)
-                    val dateTakenColumn = cursor.getColumnIndexOrThrow(Media.DATE_TAKEN)
+                    val dateModifiedColumn = cursor.getColumnIndexOrThrow(Media.DATE_MODIFIED)
 
                     while (cursor.moveToNext()) {
                         val id = cursor.getLong(idColumn)
-                        val name = cursor.getString(nameColumn)
-                        val dateTaken = cursor.getLong(dateTakenColumn)
-                        
-                        val contentUri = ContentUris.withAppendedId(
-                            Media.EXTERNAL_CONTENT_URI,
-                            id
+                        val dateModified = cursor.getLong(dateModifiedColumn)
+
+                        val photo = PhotoData(
+                            uri = ContentUris.withAppendedId(Media.EXTERNAL_CONTENT_URI, id),
+                            dateTaken = dateModified
                         )
-                        
-                        // 밀리초를 LocalDate로 변환
-                        val photoDate = Instant.ofEpochMilli(dateTaken)
+
+                        // 초를 LocalDate로 변환
+                        val photoDate = Instant.ofEpochSecond(photo.dateTaken)
                             .atZone(ZoneId.systemDefault())
                             .toLocalDate()
-                        
-                        photosByDate.getOrPut(photoDate) { mutableListOf() }.add(
-                            PhotoData(
-                                uri = contentUri,
-                                displayName = name,
-                                dateTaken = dateTaken
-                            )
-                        )
+
+                        photosByDate.getOrPut(photoDate) { mutableListOf() }.add(photo)
                     }
                 }
             } catch (e: Exception) {
                 //TODO 에러 핸들링
             }
-            
             photosByDate
         }
 
@@ -88,25 +78,27 @@ class LocalMediaDataSource @Inject constructor(
             val endDate = yearMonth.atEndOfMonth()
 
             val photosByDate = mutableMapOf<LocalDate, MutableList<PhotoData>>()
-            
-            // LocalDate를 Unix timestamp (밀리초)로 변환
-            val startTimestamp = startDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-            val endTimestamp = endDate.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-            
+
+            // LocalDate를 Unix timestamp (초)로 변환
+            val startTimestamp = startDate.atStartOfDay(ZoneId.systemDefault()).toEpochSecond()
+            val endTimestamp = endDate.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toEpochSecond()
+
             // 쿼리할 컬럼
             val projection = arrayOf(
                 Media._ID,
-                Media.DISPLAY_NAME,
-                Media.DATE_TAKEN
+                Media.DATE_MODIFIED
             )
-            
+
             // 날짜 범위 조건
-            val selection = "${Media.DATE_TAKEN} >= ? AND ${Media.DATE_TAKEN} < ?"
-            val selectionArgs = arrayOf(startTimestamp.toString(), endTimestamp.toString())
-            
+            val selection = "${Media.DATE_MODIFIED} >= ? AND ${Media.DATE_MODIFIED} < ?"
+            val selectionArgs = arrayOf(
+                startTimestamp.toString(),
+                endTimestamp.toString()
+            )
+
             // 최신순 정렬
-            val sortOrder = "${Media.DATE_TAKEN} DESC"
-            
+            val sortOrder = "${Media.DATE_MODIFIED} DESC"
+
             try {
                 contentResolver.query(
                     Media.EXTERNAL_CONTENT_URI,
@@ -116,43 +108,33 @@ class LocalMediaDataSource @Inject constructor(
                     sortOrder
                 )?.use { cursor ->
                     val idColumn = cursor.getColumnIndexOrThrow(Media._ID)
-                    val nameColumn = cursor.getColumnIndexOrThrow(Media.DISPLAY_NAME)
-                    val dateTakenColumn = cursor.getColumnIndexOrThrow(Media.DATE_TAKEN)
+                    val dateModifiedColumn = cursor.getColumnIndexOrThrow(Media.DATE_MODIFIED)
 
                     while (cursor.moveToNext()) {
                         val id = cursor.getLong(idColumn)
-                        val name = cursor.getString(nameColumn)
-                        val dateTaken = cursor.getLong(dateTakenColumn)
-                        
-                        val contentUri = ContentUris.withAppendedId(
-                            Media.EXTERNAL_CONTENT_URI,
-                            id
+                        val dateModified = cursor.getLong(dateModifiedColumn)
+
+                        val photo = PhotoData(
+                            uri = ContentUris.withAppendedId(Media.EXTERNAL_CONTENT_URI, id),
+                            dateTaken = dateModified
                         )
-                        
-                        // 밀리초를 LocalDate로 변환
-                        val photoDate = Instant.ofEpochMilli(dateTaken)
+
+                        // 초를 LocalDate로 변환
+                        val photoDate = Instant.ofEpochSecond(photo.dateTaken)
                             .atZone(ZoneId.systemDefault())
                             .toLocalDate()
-                        
-                        photosByDate.getOrPut(photoDate) { mutableListOf() }.add(
-                            PhotoData(
-                                uri = contentUri,
-                                displayName = name,
-                                dateTaken = dateTaken
-                            )
-                        )
+
+                        photosByDate.getOrPut(photoDate) { mutableListOf() }.add(photo)
                     }
                 }
             } catch (e: Exception) {
                 //TODO 에러 핸들링
             }
-            
             photosByDate
         }
 
     data class PhotoData(
         val uri: Uri,
-        val displayName: String,
-        val dateTaken: Long
+        val dateTaken: Long  // DATE_MODIFIED단위가 초 단위 (epoch time)
     )
 }

@@ -5,6 +5,5 @@ package com.nexters.fooddiary.domain.model
  */
 data class MediaItem(
     val uri: String,
-    val displayName: String,
-    val dateTaken: Long
+    val dateTaken: Long  //초 단위 (epoch time)
 )

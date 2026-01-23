@@ -16,12 +16,11 @@ class MediaRepositoryImpl @Inject constructor(
 
     override suspend fun getPhotosByMonth(yearMonth: YearMonth): Map<LocalDate, List<MediaItem>> {
         val photosByDate = localMediaDataSource.getPhotosByMonth(yearMonth)
-        
+
         return photosByDate.mapValues { (_, photos) ->
             photos.map { photo ->
                 MediaItem(
                     uri = photo.uri.toString(),
-                    displayName = photo.displayName,
                     dateTaken = photo.dateTaken
                 )
             }
@@ -38,12 +37,11 @@ class MediaRepositoryImpl @Inject constructor(
 
     override suspend fun getAllPhotos(): Map<LocalDate, List<MediaItem>> {
         val photosByDate = localMediaDataSource.getAllPhotos()
-        
+
         return photosByDate.mapValues { (_, photos) ->
             photos.map { photo ->
                 MediaItem(
                     uri = photo.uri.toString(),
-                    displayName = photo.displayName,
                     dateTaken = photo.dateTaken
                 )
             }
