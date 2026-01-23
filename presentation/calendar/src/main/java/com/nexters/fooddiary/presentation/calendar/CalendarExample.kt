@@ -1,4 +1,4 @@
-package com.nexters.fooddiary.presentation.component.calendar
+package com.nexters.fooddiary.presentation.calendar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,7 +12,7 @@ import java.time.LocalDate
 
 /**
  * 캘린더 사용 예제
- * 
+ *
  * 주단위와 월단위 캘린더를 탭으로 전환할 수 있는 예제입니다.
  */
 @Composable
@@ -21,7 +21,7 @@ fun CalendarExample(
 ) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var selectedTabIndex by remember { mutableIntStateOf(0) }
-    
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -49,9 +49,9 @@ fun CalendarExample(
                     text = { Text("월간") }
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             // 캘린더 표시
             when (selectedTabIndex) {
                 0 -> WeeklyCalendar(

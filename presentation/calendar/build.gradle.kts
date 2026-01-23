@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.nexters.fooddiary.presentation.component"
+    namespace = "com.nexters.fooddiary.presentation.calendar"
     compileSdk = 36
 
     defaultConfig {
@@ -28,6 +28,9 @@ android {
 }
 
 dependencies {
+    // Modules
+    implementation(projects.presentation.component)
+
     // Kotlin
     implementation(libs.androidx.core.ktx)
 
@@ -39,6 +42,9 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)
+
+    // Calendar
+    implementation(libs.calendar.compose)
 
     // Testing
     testImplementation(libs.junit)

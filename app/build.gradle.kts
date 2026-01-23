@@ -65,6 +65,7 @@ dependencies {
     implementation(projects.presentation.widget)
     implementation(projects.presentation.camera)
     implementation(projects.presentation.component)
+    implementation(projects.presentation.calendar)
 
     // Android
     implementation(libs.androidx.core.ktx)

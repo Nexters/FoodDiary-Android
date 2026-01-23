@@ -1,9 +1,9 @@
-package com.nexters.fooddiary.presentation.component.calendar
+package com.nexters.fooddiary.presentation.calendar
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
@@ -18,11 +18,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kizitonwose.calendar.compose.ContentHeightMode
-import com.kizitonwose.calendar.compose.HorizontalCalendar
-import com.kizitonwose.calendar.compose.rememberCalendarState
-import com.kizitonwose.calendar.core.CalendarDay
-import com.kizitonwose.calendar.core.DayPosition
+import com.kizitonwose.calendar.compose.WeekCalendar
+import com.kizitonwose.calendar.compose.weekcalendar.rememberWeekCalendarState
 import com.kizitonwose.calendar.core.daysOfWeek
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
@@ -32,84 +29,69 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 /**
- * 월단위 캘린더 컴포넌트
- * 
+ * 주단위 캘린더 컴포넌트
+ *
  * @param modifier Modifier
  * @param selectedDate 선택된 날짜
  * @param onDateSelected 날짜 선택 콜백
- * @param onMonthChanged 월 변경 콜백 (YearMonth)
- * @param adjacentMonths 현재 월 기준 앞뒤로 스크롤 가능한 개월 수
+ * @param adjacentMonths 현재 월 기준 앞뒤로 스크롤 가능한 개월 수 (기본값: 500개월 = 약 41년)
  */
 @Composable
-fun MonthlyCalendar(
+fun WeeklyCalendar(
     modifier: Modifier = Modifier,
     selectedDate: LocalDate = LocalDate.now(),
     onDateSelected: (LocalDate) -> Unit = {},
-    onMonthChanged: (YearMonth) -> Unit = {},
     adjacentMonths: Long = 500,
 ) {
     val currentMonth = remember { YearMonth.now() }
     val startMonth = remember { currentMonth.minusMonths(adjacentMonths) }
     val endMonth = remember { currentMonth.plusMonths(adjacentMonths) }
-    
-    val state = rememberCalendarState(
-        startMonth = startMonth,
-        endMonth = endMonth,
-        firstVisibleMonth = YearMonth.from(selectedDate),
+
+    val state = rememberWeekCalendarState(
+        startDate = startMonth.atDay(1),
+        endDate = endMonth.atEndOfMonth(),
+        firstVisibleWeekDate = selectedDate,
         firstDayOfWeek = DayOfWeek.SUNDAY
     )
-    
+
     val coroutineScope = rememberCoroutineScope()
-    val visibleMonth = remember { derivedStateOf { state.firstVisibleMonth.yearMonth } }
-    
-    // 월 변경 감지 및 콜백 호출
-    LaunchedEffect(visibleMonth.value) {
-        onMonthChanged(visibleMonth.value)
-    }
+    val visibleMonth = remember { derivedStateOf {
+        YearMonth.from(state.firstVisibleWeek.days.first().date)
+    } }
 
     Column(modifier = modifier) {
-        // 월/년도 헤더 화살표
-        MonthCalendarHeader(
+        // 월/년도 헤더 with 화살표
+        CalendarHeader(
             yearMonth = visibleMonth.value,
             onPreviousClick = {
                 coroutineScope.launch {
-                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.minusMonths(1))
+                    val targetDate = state.firstVisibleWeek.days.first().date.minusWeeks(1)
+                    state.animateScrollToWeek(targetDate)
                 }
             },
             onNextClick = {
                 coroutineScope.launch {
-                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.plusMonths(1))
+                    val targetDate = state.firstVisibleWeek.days.first().date.plusWeeks(1)
+                    state.animateScrollToWeek(targetDate)
                 }
             }
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         // 요일 헤더
-        MonthWeekDaysHeader()
-        
+        WeekDaysHeader()
+
         Spacer(modifier = Modifier.height(8.dp))
-        
-        // 월간 캘린더
-        HorizontalCalendar(
+
+        // 주간 캘린더
+        WeekCalendar(
             state = state,
-            contentHeightMode = ContentHeightMode.Fill,
             dayContent = { day ->
-                MonthDayCell(
-                    day = day,
+                DayCell(
+                    date = day.date,
                     isSelected = day.date == selectedDate,
-                    onClick = {
-                        // 다른 월의 날짜를 클릭한 경우 애니메이션 후 선택
-                        if (day.position != DayPosition.MonthDate) {
-                            coroutineScope.launch {
-                                state.animateScrollToMonth(YearMonth.from(day.date))
-                                onDateSelected(day.date)
-                            }
-                        } else {
-                            // 현재 월의 날짜는 즉시 선택
-                            onDateSelected(day.date)
-                        }
-                    }
+                    onClick = { onDateSelected(day.date) }
                 )
             }
         )
@@ -117,10 +99,10 @@ fun MonthlyCalendar(
 }
 
 /**
- * 월 캘린더 헤더 (월/년도 + 화살표)
+ * 캘린더 헤더 (월/년도 + 화살표)
  */
 @Composable
-private fun MonthCalendarHeader(
+private fun CalendarHeader(
     yearMonth: YearMonth,
     onPreviousClick: () -> Unit,
     onNextClick: () -> Unit,
@@ -137,7 +119,7 @@ private fun MonthCalendarHeader(
             fontWeight = FontWeight.Bold,
             color = Color.White
         )
-        
+
         Row {
             IconButton(onClick = onPreviousClick) {
                 Icon(
@@ -161,7 +143,7 @@ private fun MonthCalendarHeader(
  * 요일 헤더
  */
 @Composable
-private fun MonthWeekDaysHeader(
+private fun WeekDaysHeader(
     modifier: Modifier = Modifier,
     daysOfWeek: List<DayOfWeek> = daysOfWeek(firstDayOfWeek = DayOfWeek.SUNDAY)
 ) {
@@ -182,39 +164,40 @@ private fun MonthWeekDaysHeader(
 }
 
 /**
- * 월 캘린더 날짜 셀
+ * 날짜 셀
  */
 @Composable
-private fun MonthDayCell(
-    day: CalendarDay,
+private fun DayCell(
+    date: LocalDate,
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isCurrentMonth = day.position == DayPosition.MonthDate
-    
-    Box(
+    Column(
         modifier = modifier
-            .fillMaxSize()
-            .clickable(onClick = onClick)
+            .aspectRatio(1f)
             .padding(4.dp)
-            .then(
-                if (isSelected) {
-                    Modifier.border(2.dp, Color(0xFFE91E63), RoundedCornerShape(8.dp))
-                } else {
-                    Modifier
-                }
-            ),
-        contentAlignment = Alignment.TopCenter
+            .clickable(onClick = onClick),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = day.date.dayOfMonth.toString(),
-            fontSize = 16.sp,
-            color = when {
-                !isCurrentMonth -> Color.White.copy(alpha = 0.3f)
-                else -> Color.White
-            },
-            modifier = Modifier.padding(top = 8.dp)
-        )
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .then(
+                    if (isSelected) {
+                        Modifier.border(2.dp, Color(0xFFE91E63), CircleShape)
+                    } else {
+                        Modifier
+                    }
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = date.dayOfMonth.toString(),
+                fontSize = 16.sp,
+                color = Color.White
+            )
+        }
     }
 }
