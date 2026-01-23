@@ -30,6 +30,7 @@ android {
 dependencies {
     // Modules
     implementation(projects.presentation.component)
+    implementation(projects.core.ui)
 
     // Kotlin
     implementation(libs.androidx.core.ktx)

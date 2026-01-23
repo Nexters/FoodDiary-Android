@@ -10,11 +10,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 
-/**
- * 캘린더 사용 예제
- *
- * 주단위와 월단위 캘린더를 탭으로 전환할 수 있는 예제입니다.
- */
 @Composable
 fun CalendarExample(
     modifier: Modifier = Modifier

@@ -1,16 +1,17 @@
 package com.nexters.fooddiary.presentation.calendar
 
-import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
@@ -31,11 +32,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kizitonwose.calendar.compose.CalendarState
-import com.kizitonwose.calendar.compose.ContentHeightMode
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.daysOfWeek
+import com.nexters.fooddiary.presentation.calendar.theme.CalendarColors
+import com.nexters.fooddiary.presentation.calendar.theme.calendarColors
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -43,17 +45,6 @@ import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
 
-/**
- * 월단위 캘린더 컴포넌트
- *
- * @param modifier Modifier
- * @param selectedDate 선택된 날짜
- * @param onDateSelected 날짜 선택 콜백
- * @param onMonthChanged 월 변경 콜백 (YearMonth)
- * @param adjacentMonths 현재 월 기준 앞뒤로 스크롤 가능한 개월 수
- * @param locale 로케일 설정
- * @param firstDayOfWeek 주의 시작 요일
- */
 @Composable
 fun MonthlyCalendar(
     modifier: Modifier = Modifier,
@@ -61,6 +52,7 @@ fun MonthlyCalendar(
     selectedDate: LocalDate,
     onDateSelected: (LocalDate) -> Unit,
     locale: Locale = Locale.getDefault(),
+    colors: CalendarColors = calendarColors(),
     onMonthChanged: (YearMonth) -> Unit = {},
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -76,6 +68,7 @@ fun MonthlyCalendar(
         MonthCalendarHeader(
             yearMonth = visibleMonth.value,
             locale = locale,
+            colors = colors,
             onPreviousClick = {
                 coroutineScope.launch {
                     calendarState.animateScrollToMonth(calendarState.firstVisibleMonth.yearMonth.minusMonths(1))
@@ -93,7 +86,8 @@ fun MonthlyCalendar(
         // 요일 헤더
         MonthWeekDaysHeader(
             locale = locale,
-            firstDayOfWeek = calendarState.firstDayOfWeek
+            firstDayOfWeek = calendarState.firstDayOfWeek,
+            colors = colors
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -101,11 +95,11 @@ fun MonthlyCalendar(
         // 월간 캘린더
         HorizontalCalendar(
             state = calendarState,
-            contentHeightMode = ContentHeightMode.Fill,
             dayContent = { day ->
                 MonthDayCell(
                     day = day,
                     isSelected = day.date == selectedDate,
+                    colors = colors,
                     onClick = {
                         // 다른 월의 날짜를 클릭한 경우 애니메이션 후 선택
                         if (day.position != DayPosition.MonthDate) {
@@ -124,13 +118,11 @@ fun MonthlyCalendar(
     }
 }
 
-/**
- * 월 캘린더 헤더 (월/년도 + 화살표)
- */
 @Composable
 private fun MonthCalendarHeader(
     yearMonth: YearMonth,
     locale: Locale,
+    colors: CalendarColors,
     onPreviousClick: () -> Unit,
     onNextClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -144,7 +136,7 @@ private fun MonthCalendarHeader(
             text = "${yearMonth.month.getDisplayName(TextStyle.FULL, locale).uppercase()} ${yearMonth.year}",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.White
+            color = colors.headerText
         )
 
         Row {
@@ -152,27 +144,25 @@ private fun MonthCalendarHeader(
                 Icon(
                     imageVector = Icons.Default.ChevronLeft,
                     contentDescription = "Previous",
-                    tint = Color.White
+                    tint = colors.iconTint
                 )
             }
             IconButton(onClick = onNextClick) {
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
                     contentDescription = "Next",
-                    tint = Color.White
+                    tint = colors.iconTint
                 )
             }
         }
     }
 }
 
-/**
- * 요일 헤더
- */
 @Composable
 private fun MonthWeekDaysHeader(
     locale: Locale,
     firstDayOfWeek: DayOfWeek,
+    colors: CalendarColors,
     modifier: Modifier = Modifier
 ) {
     val daysOfWeek = remember(firstDayOfWeek) { daysOfWeek(firstDayOfWeek = firstDayOfWeek) }
@@ -186,47 +176,77 @@ private fun MonthWeekDaysHeader(
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
                 fontSize = 12.sp,
-                color = Color.White.copy(alpha = 0.6f),
+                color = colors.weekdayText,
                 fontWeight = FontWeight.Medium
             )
         }
     }
 }
 
-/**
- * 월 캘린더 날짜 셀
- */
 @Composable
 private fun MonthDayCell(
     day: CalendarDay,
     isSelected: Boolean,
+    colors: CalendarColors,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isCurrentMonth = day.position == DayPosition.MonthDate
 
     Box(
         modifier = modifier
-            .fillMaxSize()
+            .wrapContentSize()
             .clickable(onClick = onClick)
             .padding(4.dp)
-            .then(
-                if (isSelected) {
-                    Modifier.border(2.dp, Color(0xFFE91E63), RoundedCornerShape(8.dp))
-                } else {
-                    Modifier
-                }
+            .background(
+                color = if (isSelected) colors.selectedBackground else Color.Transparent,
+                shape = RoundedCornerShape(8.dp)
             ),
         contentAlignment = Alignment.TopCenter
     ) {
-        Text(
-            text = day.date.dayOfMonth.toString(),
-            fontSize = 16.sp,
-            color = when {
-                !isCurrentMonth -> Color.White.copy(alpha = 0.3f)
-                else -> Color.White
-            },
-            modifier = Modifier.padding(top = 8.dp)
-        )
+        if (isSelected) {
+            Column(
+                modifier = Modifier.wrapContentSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = day.date.dayOfMonth.toString(),
+                    fontSize = 16.sp,
+                    color = colors.dayTextSelected,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+                Box(
+                    modifier = Modifier
+                        .height(50.dp)
+                        .width(50.dp)
+                        .padding(horizontal = 4.dp, vertical = 6.dp)
+                        .background(
+                            color = colors.selectedInnerBox,
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                )
+            }
+        } else {
+            Column(
+                modifier = Modifier.wrapContentSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = day.date.dayOfMonth.toString(),
+                    fontSize = 16.sp,
+                    color = colors.dayTextSelected,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+                Box(
+                    modifier = Modifier
+                        .height(50.dp)
+                        .width(50.dp)
+                        .padding(horizontal = 4.dp, vertical = 6.dp)
+                        .background(
+                            color = colors.unselectedInnerBox,
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                )
+            }
+        }
     }
 }
