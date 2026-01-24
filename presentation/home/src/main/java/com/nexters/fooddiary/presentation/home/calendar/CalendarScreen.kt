@@ -66,9 +66,7 @@ fun CalendarScreen(
     // 권한 체크
     LaunchedEffect(Unit) {
         hasPermission = checkPermission()
-        if (hasPermission) {
-            viewModel.loadPhotosForMonth(YearMonth.from(initialDate))
-        } else {
+        if (!hasPermission) {
             permissionLauncher.launch(requiredPermission)
         }
     }
