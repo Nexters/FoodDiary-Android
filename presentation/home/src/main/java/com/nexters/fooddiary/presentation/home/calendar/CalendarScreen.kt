@@ -1,8 +1,5 @@
 package com.nexters.fooddiary.presentation.home.calendar
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.compose.foundation.background
@@ -29,8 +26,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.nexters.fooddiary.core.common.permission.PermissionUtil
 import com.nexters.fooddiary.presentation.component.calendar.MonthlyCalendar
 import com.nexters.fooddiary.presentation.home.R
 import java.time.LocalDate
@@ -44,9 +41,17 @@ fun CalendarScreen(
     val context = LocalContext.current
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var hasPermission by remember { mutableStateOf(false) }
-    
+
     val photoCountByDate by viewModel.photoCountByDate.collectAsState()
-    
+
+    // 필요 권한
+    val requiredPermission = PermissionUtil.getRequiredMediaPermission()
+
+    // 권한 체크 함수
+    val checkPermission: () -> Boolean = {
+        PermissionUtil.hasMediaPermission(context)
+    }
+
     // 권한 요청 런처
     val permissionLauncher = rememberLauncherForActivityResult(
         RequestPermission()
@@ -56,24 +61,14 @@ fun CalendarScreen(
             viewModel.loadPhotosForMonth(YearMonth.from(selectedDate))
         }
     }
-    
+
     // 권한 체크
     LaunchedEffect(Unit) {
-        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            Manifest.permission.READ_MEDIA_IMAGES
-        } else {
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        }
-        
-        hasPermission = ContextCompat.checkSelfPermission(
-            context,
-            permission
-        ) == PackageManager.PERMISSION_GRANTED
-        
+        hasPermission = checkPermission()
         if (hasPermission) {
             viewModel.loadPhotosForMonth(YearMonth.now())
         } else {
-            permissionLauncher.launch(permission)
+            permissionLauncher.launch(requiredPermission)
         }
     }
     
@@ -107,12 +102,7 @@ fun CalendarScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = {
-                        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            Manifest.permission.READ_MEDIA_IMAGES
-                        } else {
-                            Manifest.permission.READ_EXTERNAL_STORAGE
-                        }
-                        permissionLauncher.launch(permission)
+                        permissionLauncher.launch(requiredPermission)
                     }
                 ) {
                     Text(stringResource(id = R.string.permission_request_button))
