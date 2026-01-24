@@ -39,7 +39,8 @@ fun CalendarScreen(
     viewModel: CalendarViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    val initialDate = remember { LocalDate.now() }
+    var selectedDate by remember { mutableStateOf(initialDate) }
     var hasPermission by remember { mutableStateOf(false) }
 
     val photoCountByDate by viewModel.photoCountByDate.collectAsState()
@@ -58,7 +59,7 @@ fun CalendarScreen(
     ) { isGranted ->
         hasPermission = isGranted
         if (isGranted) {
-            viewModel.loadPhotosForMonth(YearMonth.from(selectedDate))
+            viewModel.loadPhotosForMonth(YearMonth.from(initialDate))
         }
     }
 
@@ -66,7 +67,7 @@ fun CalendarScreen(
     LaunchedEffect(Unit) {
         hasPermission = checkPermission()
         if (hasPermission) {
-            viewModel.loadPhotosForMonth(YearMonth.now())
+            viewModel.loadPhotosForMonth(YearMonth.from(initialDate))
         } else {
             permissionLauncher.launch(requiredPermission)
         }
