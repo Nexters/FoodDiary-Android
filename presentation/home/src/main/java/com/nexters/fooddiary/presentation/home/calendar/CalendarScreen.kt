@@ -60,6 +60,7 @@ fun CalendarScreen(
         hasPermission = isGranted
         if (isGranted) {
             viewModel.loadPhotosForMonth(YearMonth.from(initialDate))
+            viewModel.loadAllPhotos()
         }
     }
 
