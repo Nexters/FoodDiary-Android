@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.nexters.fooddiary.core.common.permission.PermissionUtil
@@ -41,12 +42,29 @@ fun CalendarScreen(
     modifier: Modifier = Modifier,
     viewModel: CalendarViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
     val initialDate = remember { LocalDate.now() }
+    val photoCountByDate by viewModel.photoCountByDate.collectAsState()
+
+    CalendarScreen(
+        modifier = modifier,
+        photoCountByDate = photoCountByDate,
+        initialDate = initialDate,
+        onLoadPhotosForMonth = viewModel::loadPhotosForMonth,
+        onLoadAllPhotos = viewModel::loadAllPhotos
+    )
+}
+
+@Composable
+fun CalendarScreen(
+    modifier: Modifier = Modifier,
+    photoCountByDate: Map<LocalDate, Int>,
+    initialDate: LocalDate = LocalDate.now(),
+    onLoadPhotosForMonth: (YearMonth) -> Unit,
+    onLoadAllPhotos: () -> Unit
+) {
+    val context = LocalContext.current
     var selectedDate by remember { mutableStateOf(initialDate) }
     var hasPermission by remember { mutableStateOf(false) }
-
-    val photoCountByDate by viewModel.photoCountByDate.collectAsState()
 
     // 필요 권한
     val requiredPermission = PermissionUtil.getRequiredMediaPermission()
@@ -62,8 +80,8 @@ fun CalendarScreen(
     ) { isGranted ->
         hasPermission = isGranted
         if (isGranted) {
-            viewModel.loadPhotosForMonth(YearMonth.from(initialDate))
-            viewModel.loadAllPhotos()
+            onLoadPhotosForMonth(YearMonth.from(initialDate))
+            onLoadAllPhotos()
         }
     }
 
@@ -93,7 +111,7 @@ fun CalendarScreen(
                 onDateSelected = { selectedDate = it },
                 photoCountByDate = photoCountByDate,
                 onMonthChanged = { yearMonth ->
-                    viewModel.loadPhotosForMonth(yearMonth)
+                    onLoadPhotosForMonth(yearMonth)
                 },
                 colors = calendarColors(),
                 modifier = Modifier.fillMaxWidth()
@@ -120,4 +138,17 @@ fun CalendarScreen(
             }
         }
     }
+}
+
+@Preview
+@Composable
+private fun CalendarScreenPreview() {
+    CalendarScreen(
+        photoCountByDate = mapOf(
+            LocalDate.now() to 5,
+            LocalDate.now().minusDays(2) to 3
+        ),
+        onLoadPhotosForMonth = {},
+        onLoadAllPhotos = {}
+    )
 }

@@ -32,8 +32,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 import com.kizitonwose.calendar.compose.CalendarState
 import com.kizitonwose.calendar.compose.HorizontalCalendar
+
+// ... (existing code omitted for brevity in prompt, but I need to be careful with range)
+// Actually I shouldn't replace the whole middle part if it's large.
+// I will target the imports block and the preview block separately. 
+// But replace_file_content can only handle one block at a time unless I use multi_replace.
+// I will use multi_replace.
+
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.daysOfWeek
@@ -266,4 +274,23 @@ private fun MonthDayCell(
             }
         }
     }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF222222)
+@Composable
+private fun MonthlyCalendarPreview() {
+    val state = rememberMonthCalendarState(
+        selectedDate = LocalDate.now(),
+        firstDayOfWeek = DayOfWeek.SUNDAY
+    )
+    
+    MonthlyCalendar(
+        calendarState = state,
+        selectedDate = LocalDate.now(),
+        onDateSelected = {},
+        photoCountByDate = mapOf(
+            LocalDate.now() to 3,
+            LocalDate.now().minusDays(2) to 1
+        )
+    )
 }
