@@ -55,18 +55,6 @@ import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
 
-/**
- * 월단위 캘린더 컴포넌트
- *
- * @param modifier Modifier
- * @param calendarState 캘린더 상태
- * @param selectedDate 선택된 날짜
- * @param onDateSelected 날짜 선택 콜백
- * @param locale 로케일
- * @param colors 캘린더 색상 테마
- * @param onMonthChanged 월 변경 콜백 (YearMonth)
- * @param photoCountByDate 날짜별 사진 개수 (LocalDate -> 개수)
- */
 @Composable
 fun MonthlyCalendar(
     modifier: Modifier = Modifier,
