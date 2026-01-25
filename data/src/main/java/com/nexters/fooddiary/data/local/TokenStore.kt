@@ -11,7 +11,9 @@ import com.nexters.fooddiary.data.security.EncryptionKeyManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -35,28 +37,23 @@ class TokenStore @Inject constructor(
         }
     }
 
-    suspend fun getToken(): String? {
-        return try {
-            val preferences: Preferences = dataStore.data.first()
-            preferences[TOKEN_KEY]?.let { encryptedToken ->
-                val encryptionKey = encryptionKeyManager.getOrCreateKey()
-                AesEncryption.decrypt(encryptedToken, encryptionKey)
-            }
-        } catch (e: Exception) {
-            null
+    suspend fun getToken(): String? = runCatching {
+        dataStore.data.first()[TOKEN_KEY]?.let { encryptedToken ->
+            val encryptionKey = encryptionKeyManager.getOrCreateKey()
+            AesEncryption.decrypt(encryptedToken, encryptionKey)
         }
-    }
+    }.getOrNull()
 
-    fun getTokenFlow(): Flow<String?> {
-        return dataStore.data.map { preferences: Preferences ->
-            preferences[TOKEN_KEY]?.let { encryptedToken ->
-                try {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getTokenFlow(): Flow<String?> = dataStore.data.flatMapLatest { preferences ->
+        flow {
+            val token = preferences[TOKEN_KEY]?.let { encryptedToken ->
+                runCatching {
                     val encryptionKey = encryptionKeyManager.getOrCreateKey()
                     AesEncryption.decrypt(encryptedToken, encryptionKey)
-                } catch (e: Exception) {
-                    null
-                }
+                }.getOrNull()
             }
+            emit(token)
         }
     }
 
@@ -66,8 +63,6 @@ class TokenStore @Inject constructor(
         }
     }
 
-    suspend fun hasToken(): Boolean {
-        val preferences: Preferences = dataStore.data.first()
-        return preferences[TOKEN_KEY] != null
-    }
+    suspend fun hasToken(): Boolean = 
+        dataStore.data.first()[TOKEN_KEY] != null
 }
