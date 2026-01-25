@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.nexters.fooddiary.presentation.image.test">
+    
+    <uses-sdk android:minSdkVersion="26" />
+    
+    <application
+        android:name="com.nexters.fooddiary.presentation.image.TestApplicationEntryPoint_Application" />
+    
+    <instrumentation
+        android:name="androidx.test.runner.AndroidJUnitRunner"
+        android:targetPackage="com.nexters.fooddiary.presentation.image" />
+</manifest>
+

@@ -9,12 +9,12 @@ plugins {
 
 android {
     namespace = "com.nexters.fooddiary"
-    compileSdk = 36
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "com.nexters.fooddiary"
-        minSdk = 26
-        targetSdk = 36
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
 
@@ -57,13 +57,14 @@ dependencies {
     // Modules
     implementation(projects.core.common)
     implementation(projects.core.ui)
+    implementation(projects.core.classification)
     implementation(projects.domain)
     implementation(projects.data)
     
     // Presentation modules
     implementation(projects.presentation.home)
     implementation(projects.presentation.widget)
-    implementation(projects.presentation.camera)
+    implementation(projects.presentation.image)
     implementation(projects.presentation.component)
     implementation(projects.presentation.calendar)
 
@@ -84,6 +85,9 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
+
+    // Mavericks
+    implementation(libs.mavericks.compose)
 
     // Testing
     testImplementation(libs.junit)
