@@ -39,4 +39,5 @@ include(":data")
 include(":presentation:home")
 include(":presentation:widget")
 include(":presentation:image")
- 
+include(":presentation:component")
+include(":presentation:calendar")
