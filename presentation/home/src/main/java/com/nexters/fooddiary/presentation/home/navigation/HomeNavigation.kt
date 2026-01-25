@@ -12,11 +12,14 @@ fun NavGraphBuilder.homeScreen(
     onNavigateToCamera: () -> Unit,
     onSignOut: () -> Unit,
     onDeleteAccount: () -> Unit
+    onNavigateToImage: () -> Unit
 ) {
     composable<HomeRoute> {
         HomeScreen(
             onSignOut = onSignOut,
-            onDeleteAccount = onDeleteAccount
+            onDeleteAccount = onDeleteAccount,
+            onNavigateToImage = onNavigateToImage
         )
     }
 }
+

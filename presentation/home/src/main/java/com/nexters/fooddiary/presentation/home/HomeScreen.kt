@@ -4,8 +4,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -18,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -25,6 +27,7 @@ import androidx.compose.ui.unit.sp
 internal fun HomeScreen(
     onSignOut: () -> Unit,
     onDeleteAccount: () -> Unit,
+    onNavigateToImage: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showSignOutDialog by remember { mutableStateOf(false) }
@@ -45,7 +48,7 @@ internal fun HomeScreen(
                     text = stringResource(R.string.home_title),
                     fontSize = dimensionResource(R.dimen.home_title_text_size).value.sp
                 )
-                
+
                 Button(
                     onClick = { showSignOutDialog = true },
                     modifier = Modifier
@@ -53,7 +56,7 @@ internal fun HomeScreen(
                 ) {
                     Text(stringResource(R.string.sign_out))
                 }
-                
+
                 Button(
                     onClick = { showDeleteAccountDialog = true },
                     modifier = Modifier
@@ -113,5 +116,27 @@ internal fun HomeScreen(
                 }
             }
         )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(24.dp)
+            ) {
+                Text(
+                    text = context.getString(R.string.home_title),
+                    fontSize = context.resources.getDimension(R.dimen.home_title_text_size).sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 32.dp)
+                )
+
+                Button(
+                    onClick = onNavigateToImage,
+                    modifier = Modifier.padding(16.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = "음식 분류하기",
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+            }
     }
 }

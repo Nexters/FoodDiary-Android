@@ -29,7 +29,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
 
     // Coroutines
-    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.core)
 
     // Testing
     implementation(libs.hilt.android)
