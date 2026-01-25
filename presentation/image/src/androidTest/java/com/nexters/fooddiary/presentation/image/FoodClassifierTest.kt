@@ -5,6 +5,8 @@ import android.graphics.Bitmap
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.nexters.fooddiary.core.classification.FoodClassifier
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
@@ -13,17 +15,22 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.Assert.*
+import org.junit.Rule
+import javax.inject.Inject
 import kotlin.system.measureTimeMillis
 
 @RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 internal class FoodClassifierTest {
-    private lateinit var context: Context
-    private lateinit var classifier: FoodClassifier
+    @get:Rule
+    val hiltRule = HiltAndroidRule(this)
+
+    @Inject
+    lateinit var classifier: FoodClassifier
 
     @Before
     fun setup() {
-        context = InstrumentationRegistry.getInstrumentation().targetContext
-        classifier = FoodClassifier.create(context)
+        hiltRule.inject()
     }
 
     @Test

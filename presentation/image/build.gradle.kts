@@ -69,5 +69,6 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.hilt.testing)
 }
 
