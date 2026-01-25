@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="image_max_dimension">2048</integer>
+    <integer name="image_display_height_dp">300</integer>
+    <integer name="image_sample_size_multiplier">2</integer>
+    <integer name="image_rotation_90">90</integer>
+    <integer name="image_rotation_180">180</integer>
+    <integer name="image_rotation_270">270</integer>
+    <fraction name="image_flip_scale_negative">-1</fraction>
+    <fraction name="image_flip_scale_positive">1</fraction>
+</resources>
+

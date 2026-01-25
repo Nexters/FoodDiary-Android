@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 문서
+    url: https://github.com/YOUR_ORG/FoodDiary-Android/wiki
+    about: 프로젝트 문서를 확인하세요
+  - name: 질문
+    url: https://github.com/YOUR_ORG/FoodDiary-Android/discussions
+    about: 질문이나 토론이 필요하신가요?
+
