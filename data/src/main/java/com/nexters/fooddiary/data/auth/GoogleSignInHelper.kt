@@ -24,7 +24,7 @@ class GoogleSignInHelper @Inject constructor(
     @ApplicationContext private val context: Context,
     private val resourceProvider: ResourceProvider
 ) : GoogleSignInIntentProvider {
-    private fun getGoogleSignInClient(context: Context, webClientId: String): GoogleSignInClient {
+    private fun getGoogleSignInClient(webClientId: String): GoogleSignInClient {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(webClientId)
             .requestEmail()
@@ -34,7 +34,7 @@ class GoogleSignInHelper @Inject constructor(
     }
 
     override fun getSignInIntent(context: Context, webClientId: String): android.content.Intent {
-        return getGoogleSignInClient(context, webClientId).signInIntent
+        return getGoogleSignInClient(webClientId).signInIntent
     }
 
     override fun getSignInResultFromIntent(context: Context, data: android.content.Intent?): Result<GoogleSignInAccount> {
@@ -69,7 +69,7 @@ class GoogleSignInHelper @Inject constructor(
     }
 
     override suspend fun signOut(context: Context, webClientId: String) {
-        getGoogleSignInClient(context, webClientId).signOut().await()
+        getGoogleSignInClient(webClientId).signOut().await()
     }
 
     private fun mapToSignInError(exception: ApiException): SignInError {
