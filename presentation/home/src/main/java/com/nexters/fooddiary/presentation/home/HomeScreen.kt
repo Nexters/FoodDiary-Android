@@ -17,7 +17,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-internal fun HomeScreen(onNavigateToImage: () -> Unit) {
+internal fun HomeScreen(
+    onNavigateToImage: () -> Unit,
+    onNavigateToCalendar: () -> Unit,
+) {
     val context = LocalContext.current
     
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -45,6 +48,17 @@ internal fun HomeScreen(onNavigateToImage: () -> Unit) {
                 ) {
                     Text(
                         text = "음식 분류하기",
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+
+                Button(
+                    onClick = onNavigateToCalendar,
+                    modifier = Modifier.padding(16.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = "캘린더",
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     )
                 }
