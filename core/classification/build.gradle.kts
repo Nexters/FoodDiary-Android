@@ -30,8 +30,8 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
 
-    // TensorFlow Lite
-    implementation(libs.tensorflow.lite)
+    // Lite RT
+    implementation(libs.liteRt)
 
     // ExifInterface for image rotation
     implementation(libs.androidx.exifinterface)

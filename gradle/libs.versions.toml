@@ -25,7 +25,7 @@ navigationCompose = "2.8.5"
 glance = "1.1.1"
 camerax = "1.3.4"
 navigationCommonAndroid = "2.9.6"
-tensorflowLite = "2.15.0"
+litert = "2.1.0"
 exifinterface = "1.3.7"
 minSdk = "26"
 compileSdk = "36"
@@ -96,8 +96,8 @@ androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycl
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
 androidx-navigation-common-android = { group = "androidx.navigation", name = "navigation-common-android", version.ref = "navigationCommonAndroid" }
 
-# TensorFlow Lite
-tensorflow-lite = { group = "org.tensorflow", name = "tensorflow-lite", version.ref = "tensorflowLite" }
+# LiteRT
+liteRt = { group = "com.google.ai.edge.litert", name = "litert", version.ref = "litert" }
 
 # ExifInterface
 androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
