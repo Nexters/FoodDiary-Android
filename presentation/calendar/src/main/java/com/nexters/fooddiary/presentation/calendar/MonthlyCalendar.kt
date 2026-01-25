@@ -1,16 +1,17 @@
-package com.nexters.fooddiary.presentation.component.calendar
+package com.nexters.fooddiary.presentation.calendar
 
-import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
@@ -20,6 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
@@ -30,12 +32,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kizitonwose.calendar.compose.ContentHeightMode
+import com.kizitonwose.calendar.compose.CalendarState
 import com.kizitonwose.calendar.compose.HorizontalCalendar
-import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.daysOfWeek
+import com.nexters.fooddiary.presentation.calendar.theme.CalendarColors
+import com.nexters.fooddiary.presentation.calendar.theme.calendarColors
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
@@ -46,39 +49,33 @@ import java.util.Locale
 
 /**
  * 월단위 캘린더 컴포넌트
- * 
+ *
  * @param modifier Modifier
+ * @param calendarState 캘린더 상태
  * @param selectedDate 선택된 날짜
  * @param onDateSelected 날짜 선택 콜백
+ * @param locale 로케일
+ * @param colors 캘린더 색상 테마
  * @param onMonthChanged 월 변경 콜백 (YearMonth)
  * @param photoCountByDate 날짜별 사진 개수 (LocalDate -> 개수)
- * @param adjacentMonths 현재 월 기준 앞뒤로 스크롤 가능한 개월 수
  */
 @Composable
 fun MonthlyCalendar(
     modifier: Modifier = Modifier,
-    selectedDate: LocalDate = LocalDate.now(),
-    onDateSelected: (LocalDate) -> Unit = {},
+    calendarState: CalendarState,
+    selectedDate: LocalDate,
+    onDateSelected: (LocalDate) -> Unit,
+    locale: Locale = Locale.getDefault(),
+    colors: CalendarColors = calendarColors(),
     onMonthChanged: (YearMonth) -> Unit = {},
     photoCountByDate: Map<LocalDate, Int> = emptyMap(),
-    adjacentMonths: Long = 500,
 ) {
-    val currentMonth = remember { YearMonth.now() }
-    val startMonth = remember { currentMonth.minusMonths(adjacentMonths) }
-    val endMonth = remember { currentMonth.plusMonths(adjacentMonths) }
-    
-    val state = rememberCalendarState(
-        startMonth = startMonth,
-        endMonth = endMonth,
-        firstVisibleMonth = YearMonth.from(selectedDate),
-        firstDayOfWeek = DayOfWeek.SUNDAY
-    )
-    
     val coroutineScope = rememberCoroutineScope()
+    val visibleMonth = remember { derivedStateOf { calendarState.firstVisibleMonth.yearMonth } }
 
     // 월 변경 감지 및 콜백 호출
-    LaunchedEffect(state) {
-        snapshotFlow { state.firstVisibleMonth.yearMonth }
+    LaunchedEffect(calendarState) {
+        snapshotFlow { calendarState.firstVisibleMonth.yearMonth }
             .distinctUntilChanged()
             .collect { yearMonth ->
                 onMonthChanged(yearMonth)
@@ -88,41 +85,47 @@ fun MonthlyCalendar(
     Column(modifier = modifier) {
         // 월/년도 헤더 화살표
         MonthCalendarHeader(
-            yearMonth = state.firstVisibleMonth.yearMonth,
+            yearMonth = visibleMonth.value,
+            locale = locale,
+            colors = colors,
             onPreviousClick = {
                 coroutineScope.launch {
-                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.minusMonths(1))
+                    calendarState.animateScrollToMonth(calendarState.firstVisibleMonth.yearMonth.minusMonths(1))
                 }
             },
             onNextClick = {
                 coroutineScope.launch {
-                    state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.plusMonths(1))
+                    calendarState.animateScrollToMonth(calendarState.firstVisibleMonth.yearMonth.plusMonths(1))
                 }
             }
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         // 요일 헤더
-        MonthWeekDaysHeader()
-        
+        MonthWeekDaysHeader(
+            locale = locale,
+            firstDayOfWeek = calendarState.firstDayOfWeek,
+            colors = colors
+        )
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         // 월간 캘린더
         HorizontalCalendar(
-            state = state,
-            contentHeightMode = ContentHeightMode.Fill,
+            state = calendarState,
             dayContent = { day ->
                 val photoCount = photoCountByDate[day.date] ?: 0
                 MonthDayCell(
                     day = day,
                     isSelected = day.date == selectedDate,
                     photoCount = photoCount,
+                    colors = colors,
                     onClick = {
                         // 다른 월의 날짜를 클릭한 경우 애니메이션 후 선택
                         if (day.position != DayPosition.MonthDate) {
                             coroutineScope.launch {
-                                state.animateScrollToMonth(YearMonth.from(day.date))
+                                calendarState.animateScrollToMonth(YearMonth.from(day.date))
                                 onDateSelected(day.date)
                             }
                         } else {
@@ -136,12 +139,11 @@ fun MonthlyCalendar(
     }
 }
 
-/**
- * 월 캘린더 헤더 (월/년도 + 화살표)
- */
 @Composable
 private fun MonthCalendarHeader(
     yearMonth: YearMonth,
+    locale: Locale,
+    colors: CalendarColors,
     onPreviousClick: () -> Unit,
     onNextClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -152,104 +154,115 @@ private fun MonthCalendarHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "${yearMonth.month.getDisplayName(TextStyle.FULL, Locale.ENGLISH).uppercase()} ${yearMonth.year}",
+            text = "${yearMonth.month.getDisplayName(TextStyle.FULL, locale).uppercase()} ${yearMonth.year}",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.White
+            color = colors.headerText
         )
-        
+
         Row {
             IconButton(onClick = onPreviousClick) {
                 Icon(
                     imageVector = Icons.Default.ChevronLeft,
                     contentDescription = "Previous",
-                    tint = Color.White
+                    tint = colors.iconTint
                 )
             }
             IconButton(onClick = onNextClick) {
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
                     contentDescription = "Next",
-                    tint = Color.White
+                    tint = colors.iconTint
                 )
             }
         }
     }
 }
 
-/**
- * 요일 헤더
- */
 @Composable
 private fun MonthWeekDaysHeader(
-    modifier: Modifier = Modifier,
-    daysOfWeek: List<DayOfWeek> = daysOfWeek(firstDayOfWeek = DayOfWeek.SUNDAY)
+    locale: Locale,
+    firstDayOfWeek: DayOfWeek,
+    colors: CalendarColors,
+    modifier: Modifier = Modifier
 ) {
+    val daysOfWeek = remember(firstDayOfWeek) { daysOfWeek(firstDayOfWeek = firstDayOfWeek) }
+
     Row(
         modifier = modifier.fillMaxWidth()
     ) {
         daysOfWeek.forEach { dayOfWeek ->
             Text(
-                text = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.ENGLISH).uppercase(),
+                text = dayOfWeek.getDisplayName(TextStyle.SHORT, locale).uppercase(),
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
                 fontSize = 12.sp,
-                color = Color.White.copy(alpha = 0.6f),
+                color = colors.weekdayText,
                 fontWeight = FontWeight.Medium
             )
         }
     }
 }
 
-/**
- * 월 캘린더 날짜 셀
- */
 @Composable
 private fun MonthDayCell(
     day: CalendarDay,
     isSelected: Boolean,
     photoCount: Int,
+    colors: CalendarColors,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val isCurrentMonth = day.position == DayPosition.MonthDate
-    
+
     Box(
         modifier = modifier
-            .fillMaxSize()
+            .wrapContentSize()
             .clickable(onClick = onClick)
             .padding(4.dp)
-            .then(
-                if (isSelected) {
-                    Modifier.border(2.dp, Color(0xFFE91E63), RoundedCornerShape(8.dp))
-                } else {
-                    Modifier
-                }
+            .background(
+                color = if (isSelected) colors.selectedBackground else Color.Transparent,
+                shape = RoundedCornerShape(8.dp)
             ),
         contentAlignment = Alignment.TopCenter
     ) {
         Column(
+            modifier = Modifier.wrapContentSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(top = 8.dp)
         ) {
+            // Date number
             Text(
                 text = day.date.dayOfMonth.toString(),
                 fontSize = 16.sp,
                 color = when {
-                    !isCurrentMonth -> Color.White.copy(alpha = 0.3f)
-                    else -> Color.White
-                }
+                    !isCurrentMonth -> colors.dayTextDisabled
+                    isSelected -> colors.dayTextSelected
+                    else -> colors.dayText
+                },
+                modifier = Modifier.padding(top = 8.dp)
             )
-            
-            // 사진 개수 표시
-            if (photoCount > 0 && isCurrentMonth) {
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = photoCount.toString(),
-                    fontSize = 10.sp,
-                    color = Color(0xFF4CAF50),
-                    fontWeight = FontWeight.Bold
-                )
+
+            // Inner box (from FD-19) with photo count overlay (from FD-29)
+            Box(
+                modifier = Modifier
+                    .height(50.dp)
+                    .width(50.dp)
+                    .padding(horizontal = 4.dp, vertical = 6.dp)
+                    .background(
+                        color = if (isSelected) colors.selectedInnerBox else colors.unselectedInnerBox,
+                        shape = RoundedCornerShape(4.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                // Photo count badge (from FD-29)
+                if (photoCount > 0 && isCurrentMonth) {
+                    Text(
+                        text = photoCount.toString(),
+                        fontSize = 12.sp,
+                        color = Color(0xFF4CAF50),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }

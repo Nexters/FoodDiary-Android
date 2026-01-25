@@ -28,8 +28,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.nexters.fooddiary.core.common.permission.PermissionUtil
-import com.nexters.fooddiary.presentation.component.calendar.MonthlyCalendar
+import com.nexters.fooddiary.presentation.calendar.MonthlyCalendar
+import com.nexters.fooddiary.presentation.calendar.rememberMonthCalendarState
+import com.nexters.fooddiary.presentation.calendar.theme.calendarColors
 import com.nexters.fooddiary.presentation.home.R
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -79,13 +82,20 @@ fun CalendarScreen(
             .padding(16.dp)
     ) {
         if (hasPermission) {
+            val calendarState = rememberMonthCalendarState(
+                selectedDate = selectedDate,
+                firstDayOfWeek = DayOfWeek.SUNDAY
+            )
+
             MonthlyCalendar(
+                calendarState = calendarState,
                 selectedDate = selectedDate,
                 onDateSelected = { selectedDate = it },
                 photoCountByDate = photoCountByDate,
                 onMonthChanged = { yearMonth ->
                     viewModel.loadPhotosForMonth(yearMonth)
                 },
+                colors = calendarColors(),
                 modifier = Modifier.fillMaxWidth()
             )
         } else {

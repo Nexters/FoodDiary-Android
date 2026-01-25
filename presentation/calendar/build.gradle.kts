@@ -2,12 +2,10 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.ksp)
 }
 
 android {
-    namespace = "com.nexters.fooddiary.presentation.home"
+    namespace = "com.nexters.fooddiary.presentation.calendar"
     compileSdk = 36
 
     defaultConfig {
@@ -31,11 +29,8 @@ android {
 
 dependencies {
     // Modules
-    implementation(projects.core.common)
-    implementation(projects.core.ui)
-    implementation(projects.domain)
-    implementation(projects.presentation.calendar)
     implementation(projects.presentation.component)
+    implementation(projects.core.ui)
 
     // Kotlin
     implementation(libs.androidx.core.ktx)
@@ -44,18 +39,13 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
-    // Navigation
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.kotlinx.serialization.core)
-
-    // Hilt
-    implementation(libs.hilt.android)
-    implementation(libs.hilt.navigation.compose)
-    ksp(libs.hilt.compiler)
+    // Calendar
+    api(libs.calendar.compose)
 
     // Testing
     testImplementation(libs.junit)
