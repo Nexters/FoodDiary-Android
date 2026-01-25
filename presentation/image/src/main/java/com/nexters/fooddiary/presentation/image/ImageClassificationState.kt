@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import com.airbnb.mvrx.MavericksState
 import com.nexters.fooddiary.core.classification.FoodClassificationResult
 
-internal data class ImageClassificationState(
+data class ImageClassificationState(
     val selectedImage: Bitmap? = null,
     val classificationResult: ClassificationResult? = null,
     val isLoading: Boolean = false,
@@ -17,7 +17,7 @@ internal data class ImageClassificationState(
         get() = isLoading && selectedImage != null
 }
 
-internal sealed class ClassificationResult {
+sealed class ClassificationResult {
     data class Complete(val result: FoodClassificationResult) : ClassificationResult()
 }
 

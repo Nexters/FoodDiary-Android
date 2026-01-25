@@ -59,9 +59,7 @@ internal fun ImageClassificationScreen(
     LaunchedEffect(state.classificationResult, state.errorMessage) {
         state.classificationResult?.let { result ->
             when (result) {
-                is ClassificationResult.Complete -> {
-                    showClassificationResultToast(context, result.result)
-                }
+                is ClassificationResult.Complete -> showClassificationResultToast(context, result.result)
             }
         }
         

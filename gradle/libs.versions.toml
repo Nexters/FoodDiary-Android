@@ -83,6 +83,7 @@ androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.
 
 # Mavericks
 mavericks-compose = { group = "com.airbnb.android", name = "mavericks-compose", version.ref = "mavericks" }
+mavericks-hilt = { group = "com.airbnb.android", name = "mavericks-hilt", version.ref = "mavericks" }
 mavericks-testing = { group = "com.airbnb.android", name = "mavericks-testing", version.ref = "mavericks" }
 
 # Glance (Widget)

@@ -6,6 +6,8 @@ import android.net.Uri
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
+import com.airbnb.mvrx.hilt.AssistedViewModelFactory
+import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import com.nexters.fooddiary.core.classification.FoodClassifier
 import com.nexters.fooddiary.core.classification.ImageUtils
 import dagger.assisted.Assisted
@@ -22,7 +24,7 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 import javax.inject.Inject
 
-internal class ImageClassificationViewModel @AssistedInject constructor(
+class ImageClassificationViewModel @AssistedInject constructor(
     @Assisted initialState: ImageClassificationState,
     @ApplicationContext private val context: Context
 ) : MavericksViewModel<ImageClassificationState>(initialState) {
@@ -150,26 +152,9 @@ internal class ImageClassificationViewModel @AssistedInject constructor(
     }
 
     @AssistedFactory
-    interface Factory {
-        fun create(state: ImageClassificationState): ImageClassificationViewModel
+    interface Factory : AssistedViewModelFactory<ImageClassificationViewModel, ImageClassificationState> {
+        override fun create(state: ImageClassificationState): ImageClassificationViewModel
     }
 
-    @EntryPoint
-    @InstallIn(SingletonComponent::class)
-    interface ViewModelFactoryEntryPoint {
-        fun factory(): Factory
-    }
-
-    companion object : MavericksViewModelFactory<ImageClassificationViewModel, ImageClassificationState> {
-        override fun create(
-            viewModelContext: ViewModelContext,
-            state: ImageClassificationState
-        ): ImageClassificationViewModel {
-            val entryPoint = EntryPointAccessors.fromApplication(
-                viewModelContext.app(),
-                ViewModelFactoryEntryPoint::class.java
-            )
-            return entryPoint.factory().create(state)
-        }
-    }
+    companion object : MavericksViewModelFactory<ImageClassificationViewModel, ImageClassificationState> by hiltMavericksViewModelFactory()
 }

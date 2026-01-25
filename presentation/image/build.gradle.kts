@@ -62,6 +62,7 @@ dependencies {
 
     // Mavericks
     implementation(libs.mavericks.compose)
+    implementation(libs.mavericks.hilt)
 
     // Testing
     testImplementation(libs.junit)
