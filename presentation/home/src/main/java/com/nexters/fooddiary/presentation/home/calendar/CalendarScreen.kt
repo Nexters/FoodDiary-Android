@@ -78,7 +78,7 @@ fun CalendarScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF2C2C2E))
+            .background(calendarColors().background)
             .padding(16.dp)
     ) {
         if (hasPermission) {
