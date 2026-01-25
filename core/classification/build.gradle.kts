@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -34,6 +35,10 @@ dependencies {
 
     // ExifInterface for image rotation
     implementation(libs.androidx.exifinterface)
+
+    // Hilt for dependency injection
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
 
     // Testing
     testImplementation(libs.junit)

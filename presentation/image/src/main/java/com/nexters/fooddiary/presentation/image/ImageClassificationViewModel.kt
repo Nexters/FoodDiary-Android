@@ -20,35 +20,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import javax.inject.Inject
 
 internal class ImageClassificationViewModel @AssistedInject constructor(
     @Assisted initialState: ImageClassificationState,
     @ApplicationContext private val context: Context
 ) : MavericksViewModel<ImageClassificationState>(initialState) {
-
-    private var classifier: FoodClassifier? = null
-
-    init {
-        initializeClassifier()
-    }
-
-    private fun initializeClassifier() {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                classifier = FoodClassifier.create(context)
-            } catch (e: IOException) {
-                handleClassifierInitializationError()
-            }
-        }
-    }
-
-    private fun handleClassifierInitializationError() {
-        setState {
-            copy(
-                errorMessage = context.getString(R.string.image_model_load_failed)
-            )
-        }
-    }
+    @Inject lateinit var classifier: FoodClassifier
 
     fun loadImageFromUri(uri: Uri) {
         viewModelScope.launch(Dispatchers.IO) {

@@ -16,12 +16,12 @@ object ImageRotationHelper {
         return when (orientation) {
             ExifInterface.ORIENTATION_NORMAL -> bitmap
             ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> bitmap.flipHorizontally()
-            ExifInterface.ORIENTATION_ROTATE_180 -> bitmap.rotate(context, 180f)
+            ExifInterface.ORIENTATION_ROTATE_180 -> bitmap.rotate(180f)
             ExifInterface.ORIENTATION_FLIP_VERTICAL -> bitmap.flipVertically()
-            ExifInterface.ORIENTATION_TRANSPOSE -> bitmap.rotate(context, 90f).flipHorizontally()
-            ExifInterface.ORIENTATION_ROTATE_90 -> bitmap.rotate(context, 90f)
-            ExifInterface.ORIENTATION_TRANSVERSE -> bitmap.rotate(context, 270f).flipHorizontally()
-            ExifInterface.ORIENTATION_ROTATE_270 -> bitmap.rotate(context, 270f)
+            ExifInterface.ORIENTATION_TRANSPOSE -> bitmap.rotate(90f).flipHorizontally()
+            ExifInterface.ORIENTATION_ROTATE_90 -> bitmap.rotate(90f)
+            ExifInterface.ORIENTATION_TRANSVERSE -> bitmap.rotate(270f).flipHorizontally()
+            ExifInterface.ORIENTATION_ROTATE_270 -> bitmap.rotate(270f)
             else -> bitmap
         }
     }
@@ -38,7 +38,7 @@ object ImageRotationHelper {
             ExifInterface.ORIENTATION_NORMAL
         }
     
-    private fun Bitmap.rotate(context: Context, degrees: Float): Bitmap {
+    private fun Bitmap.rotate(degrees: Float): Bitmap {
         if (degrees == NO_ROTATION) return this
         
         val matrix = Matrix().apply {

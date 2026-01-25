@@ -2,7 +2,8 @@ package com.nexters.fooddiary.core.classification
 
 import android.content.Context
 import android.graphics.Bitmap
-import com.nexters.fooddiary.core.classification.R
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.internal.DoubleCheck.lazy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -12,24 +13,22 @@ import java.io.FileInputStream
 import java.io.IOException
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class FoodClassifier private constructor(
-    private val interpreter: Interpreter
+@Singleton
+class FoodClassifier @Inject constructor(
+    @ApplicationContext context: Context
 ) {
-    companion object {
-        private const val OUTPUT_SIZE = 2
-        private const val OUTPUT_BATCH_SIZE = 1
-
-        @Throws(IOException::class)
-        fun create(context: Context): FoodClassifier {
-            val modelBuffer = loadModelFile(context)
-            val options = Interpreter.Options().apply {
-                setNumThreads(1)
-                setUseXNNPACK(false)
-            }
-            val interpreter = Interpreter(modelBuffer, options)
-            return FoodClassifier(interpreter)
+    private val OUTPUT_SIZE = 2
+    private val OUTPUT_BATCH_SIZE = 1
+    private val interpreter: Interpreter = Interpreter(
+        loadModelFile(context),
+        Interpreter.Options().apply {
+            setNumThreads(1)
+            setUseXNNPACK(false)
         }
+    )
 
         private fun loadModelFile(context: Context): MappedByteBuffer {
             val modelFileName = context.getString(R.string.model_file_name)
@@ -41,7 +40,6 @@ class FoodClassifier private constructor(
                     fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
                 }
             }
-        }
     }
 
     private val mutex = Mutex()
