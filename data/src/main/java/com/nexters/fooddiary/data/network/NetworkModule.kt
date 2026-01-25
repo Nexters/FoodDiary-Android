@@ -1,6 +1,9 @@
 package com.nexters.fooddiary.data.network
 
 import com.nexters.fooddiary.data.BuildConfig
+import com.nexters.fooddiary.data.remote.auth.AuthApi
+import com.nexters.fooddiary.data.remote.diary.DiaryApi
+import com.nexters.fooddiary.data.remote.photo.PhotoApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -48,11 +51,20 @@ object NetworkModule {
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
 
-    // Add API service instances here when needed
-    // @Provides
-    // @Singleton
-    // fun provideFoodDiaryApi(retrofit: Retrofit): FoodDiaryApi =
-    //     retrofit.create(FoodDiaryApi::class.java)
+    @Provides
+    @Singleton
+    fun provideAuthApi(retrofit: Retrofit): AuthApi =
+        retrofit.create(AuthApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideDiaryApi(retrofit: Retrofit): DiaryApi =
+        retrofit.create(DiaryApi::class.java)
+
+    @Provides
+    @Singleton
+    fun providePhotoApi(retrofit: Retrofit): PhotoApi =
+        retrofit.create(PhotoApi::class.java)
 }
 
 private fun OkHttpClient.Builder.addDebugInterceptors(isDebug: Boolean): OkHttpClient.Builder {
