@@ -38,6 +38,7 @@ include(":data")
 // Presentation modules
 include(":presentation:home")
 include(":presentation:widget")
+include(":presentation:auth")
 include(":presentation:image")
 include(":presentation:component")
 include(":presentation:calendar")
