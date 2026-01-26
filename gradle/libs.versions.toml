@@ -24,6 +24,7 @@ navigationCompose = "2.8.5"
 glance = "1.1.1"
 camerax = "1.3.4"
 navigationCommonAndroid = "2.9.6"
+mockk = "1.14.7"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -76,6 +77,9 @@ androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.
 # Mavericks
 mavericks-compose = { group = "com.airbnb.android", name = "mavericks-compose", version.ref = "mavericks" }
 mavericks-testing = { group = "com.airbnb.android", name = "mavericks-testing", version.ref = "mavericks" }
+
+# MockK
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 
 # Glance (Widget)
 androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
