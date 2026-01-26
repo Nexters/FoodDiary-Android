@@ -1,12 +1,32 @@
 package com.nexters.fooddiary.data.repository
 
+import android.content.Context
+import android.net.Uri
+import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.AuthCredential
+import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GetTokenResult
+import com.google.firebase.auth.GoogleAuthProvider
+import com.nexters.fooddiary.core.common.auth.GoogleSignInIntentProvider
 import com.nexters.fooddiary.data.datasource.remote.AuthRemoteDataSource
+import com.nexters.fooddiary.data.local.TokenStore
+import com.nexters.fooddiary.data.mapper.UserMapper
 import com.nexters.fooddiary.data.remote.auth.model.request.LoginRequest
 import com.nexters.fooddiary.data.remote.auth.model.response.LoginResponse
+import com.nexters.fooddiary.data.security.EncryptionKeyManager
+import com.nexters.fooddiary.domain.model.User
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import io.mockk.verify
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -16,56 +36,91 @@ class AuthRepositoryTest {
 
     private lateinit var authRepository: AuthRepositoryImpl
     private val authRemoteDataSource: AuthRemoteDataSource = mockk()
+    private val firebaseAuth: FirebaseAuth = mockk(relaxed = true)
+    private val tokenStore: TokenStore = mockk(relaxed = true)
+    private val userMapper: UserMapper = mockk()
+    private val encryptionKeyManager: EncryptionKeyManager = mockk(relaxed = true)
+    private val googleSignInIntentProvider: GoogleSignInIntentProvider = mockk(relaxed = true)
+    private val context: Context = mockk(relaxed = true)
 
     @Before
     fun setUp() {
-        authRepository = AuthRepositoryImpl(authRemoteDataSource)
+        mockkStatic(GoogleAuthProvider::class)
+        mockkStatic("kotlinx.coroutines.tasks.TasksKt")
+
+        authRepository = AuthRepositoryImpl(
+            authRemoteDataSource,
+            firebaseAuth,
+            tokenStore,
+            userMapper,
+            encryptionKeyManager,
+            googleSignInIntentProvider,
+            context
+        )
+    }
+
+    @After
+    fun tearDown() {
+        unmockkStatic(GoogleAuthProvider::class)
+        unmockkStatic("kotlinx.coroutines.tasks.TasksKt")
     }
 
     @Test
-    fun `로그인_성공_시_AuthInfo를_반환한다`() = runTest {
+    fun `signInWithGoogle_성공_시_User를_반환하고_토큰을_저장한다`() = runTest {
         // Given
-        val provider = "google"
-        val idToken = "token_123"
-        val expectedResponse = LoginResponse(
-            userId = "user_1",
-            accessToken = "access_token_1",
-            isFirst = true
-        )
+        val idToken = "test_id_token"
+        val firebaseAccessToken = "firebase_access_token"
+        val mockCredential = mockk<AuthCredential>()
+        val mockAuthResult = mockk<AuthResult>()
+        val mockFirebaseUser = mockk<FirebaseUser>()
+        val mockGetTokenResult = mockk<GetTokenResult>()
+        val mockAuthTask = mockk<Task<AuthResult>>()
+        val mockTokenTask = mockk<Task<GetTokenResult>>()
+        val loginResponse = LoginResponse("test_uid", "access_token", true)
+        val expectedUser = User("test_uid", "test@example.com", "Test User", "http://photo.url", true)
 
-        coEvery { authRemoteDataSource.login(any()) } returns expectedResponse
+        every { GoogleAuthProvider.getCredential(idToken, null) } returns mockCredential
+        every { firebaseAuth.signInWithCredential(mockCredential) } returns mockAuthTask
+        coEvery { mockAuthTask.await() } returns mockAuthResult
+        every { mockAuthResult.user } returns mockFirebaseUser
+        every { mockFirebaseUser.getIdToken(true) } returns mockTokenTask
+        coEvery { mockTokenTask.await() } returns mockGetTokenResult
+        every { mockGetTokenResult.token } returns firebaseAccessToken
+        coEvery { tokenStore.saveToken(firebaseAccessToken) } returns Unit
+        coEvery { authRemoteDataSource.login(any()) } returns loginResponse
+        every { userMapper.toDomainUser(mockFirebaseUser, true) } returns expectedUser
 
         // When
-        val result = authRepository.login(provider, idToken)
+        val result = authRepository.signInWithGoogle(idToken)
 
         // Then
         assertTrue(result.isSuccess)
-        val authInfo = result.getOrNull()
-        assertEquals("user_1", authInfo?.userId)
-        assertEquals("access_token_1", authInfo?.accessToken)
-        assertEquals(true, authInfo?.isFirst)
+        val user = result.getOrNull()
+        assertEquals(expectedUser, user)
 
-        coVerify {
-            authRemoteDataSource.login(
-                LoginRequest(
-                    provider = provider,
-                    idToken = idToken
-                )
-            )
+        coVerify { tokenStore.saveToken(firebaseAccessToken) }
+        coVerify { 
+            authRemoteDataSource.login(match { 
+                it.provider == "google" && it.idToken == firebaseAccessToken 
+            }) 
         }
+        verify { userMapper.toDomainUser(mockFirebaseUser, true) }
     }
 
     @Test
-    fun `로그인_실패_시_Failure를_반환한다`() = runTest {
+    fun `signInWithGoogle_실패_시_Failure를_반환한다`() = runTest {
         // Given
-        val provider = "google"
-        val idToken = "token_123"
-        val exception = RuntimeException("Network Error")
+        val idToken = "test_id_token"
+        val mockCredential = mockk<AuthCredential>()
+        val mockAuthTask = mockk<Task<AuthResult>>()
+        val exception = RuntimeException("SignIn failed")
 
-        coEvery { authRemoteDataSource.login(any()) } throws exception
+        every { GoogleAuthProvider.getCredential(idToken, null) } returns mockCredential
+        every { firebaseAuth.signInWithCredential(mockCredential) } returns mockAuthTask
+        coEvery { mockAuthTask.await() } throws exception
 
         // When
-        val result = authRepository.login(provider, idToken)
+        val result = authRepository.signInWithGoogle(idToken)
 
         // Then
         assertTrue(result.isFailure)
