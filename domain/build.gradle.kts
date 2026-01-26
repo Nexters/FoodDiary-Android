@@ -9,9 +9,6 @@ dependencies {
 
     implementation(libs.javax.inject)
 
-    implementation(libs.dagger)
-    ksp(libs.dagger.compiler)
-
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
