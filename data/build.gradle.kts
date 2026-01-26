@@ -17,10 +17,10 @@ val localProperties = Properties().apply {
 
 android {
     namespace = "com.nexters.fooddiary.data"
-    compileSdk = 36
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk = 24
+        minSdk = libs.versions.minSdk.get().toInt()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField(
@@ -49,11 +49,8 @@ dependencies {
     implementation(projects.core.common)
     implementation(projects.domain)
 
-    // Kotlin
-    implementation(libs.androidx.core.ktx)
-
     // Coroutines
-    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.core)
 
     // Retrofit
     implementation(libs.retrofit)
@@ -69,6 +66,16 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+
+    // Firebase Auth
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+
+    // Google Sign-In
+    implementation(libs.play.services.auth)
+
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
 
     // Testing
     testImplementation(libs.junit)

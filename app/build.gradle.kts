@@ -1,24 +1,44 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.google.gms.services)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
 }
 
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
+}
+
 android {
     namespace = "com.nexters.fooddiary"
-    compileSdk = 36
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "com.nexters.fooddiary"
-        minSdk = 24
-        targetSdk = 36
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val webClientId = localProperties.getProperty("web.client.id", "")
+            .takeIf { it.isNotEmpty() && it != "YOUR_WEB_CLIENT_ID_HERE" }
+            ?: ""
+
+        if (webClientId.isNotEmpty()) {
+            resValue("string", "custom_web_client_id", webClientId)
+            println("Web Client ID set from local.properties: ${webClientId.take(30)}...")
+        } else {
+            println("Warning: web.client.id not found in local.properties")
+        }
     }
 
     buildFeatures {
@@ -32,6 +52,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
         }
     }
     compileOptions {
@@ -57,15 +81,15 @@ dependencies {
     // Modules
     implementation(projects.core.common)
     implementation(projects.core.ui)
+    implementation(projects.core.classification)
     implementation(projects.domain)
     implementation(projects.data)
-    
-    // Presentation modules
+
     implementation(projects.presentation.home)
     implementation(projects.presentation.widget)
-    implementation(projects.presentation.camera)
+    implementation(projects.presentation.image)
+    implementation(projects.presentation.auth)
 
-    // Android
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -77,10 +101,15 @@ dependencies {
 
     // Navigation Compose
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.kotlinx.serialization.core)
 
     // Hilt
     implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
+
+    // Mavericks
+    implementation(libs.mavericks.compose)
 
     // Testing
     testImplementation(libs.junit)

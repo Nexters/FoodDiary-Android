@@ -29,6 +29,7 @@ include(":app")
 // Core modules
 include(":core:common")
 include(":core:ui")
+include(":core:classification")
 
 // Layer modules
 include(":domain")
@@ -37,5 +38,7 @@ include(":data")
 // Presentation modules
 include(":presentation:home")
 include(":presentation:widget")
-include(":presentation:camera")
- 
+include(":presentation:auth")
+include(":presentation:image")
+include(":presentation:component")
+include(":presentation:calendar")

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Google Sign-In Error Messages -->
+    <string name="sign_in_error_cancelled">사용자가 로그인을 취소했습니다.</string>
+    <string name="sign_in_error_network">네트워크 연결을 확인하세요.</string>
+    <string name="sign_in_error_internal">내부 오류가 발생했습니다.</string>
+    <string name="sign_in_error_developer">SHA-1 인증서 지문이 Firebase에 등록되지 않았거나 Web Client ID가 잘못되었습니다.</string>
+    <string name="sign_in_error_developer_details">해결 방법:\n1. Firebase Console &gt; 프로젝트 설정 &gt; 일반 탭에서 SHA-1 지문 확인\n2. Google Cloud Console &gt; API 및 서비스 &gt; 사용자 인증 정보에서 Web Client ID 확인\n3. Web Client ID가 올바른 패키지명과 연결되어 있는지 확인</string>
+    <string name="sign_in_error_unknown">알 수 없는 오류가 발생했습니다.</string>
+    <string name="sign_in_error_code">에러 코드 %1$d: %2$s</string>
+    <string name="sign_in_error_unexpected">예상치 못한 오류: %1$s</string>
+    <string name="sign_in_error_intent_null">Intent is null</string>
+    <string name="sign_in_error_id_token_null">idToken is null</string>
+</resources>
+
