@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.nexters.fooddiary.presentation.home"
-    compileSdk = libs.versions.compileSdk.get().toInt()
+    namespace = "com.nexters.fooddiary.presentation.auth"
+    compileSdk = 36
 
     defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
+        minSdk = 24
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -35,8 +35,6 @@ dependencies {
     implementation(projects.core.common)
     implementation(projects.core.ui)
     implementation(projects.domain)
-    implementation(projects.presentation.calendar)
-    implementation(projects.presentation.component)
 
     // Kotlin
     implementation(libs.androidx.core.ktx)
@@ -57,6 +55,9 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
+
+    // Mavericks
+    implementation(libs.mavericks.compose)
 
     // Testing
     testImplementation(libs.junit)

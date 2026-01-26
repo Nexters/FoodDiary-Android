@@ -67,6 +67,16 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
+    // Firebase Auth
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+
+    // Google Sign-In
+    implementation(libs.play.services.auth)
+
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
+
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
