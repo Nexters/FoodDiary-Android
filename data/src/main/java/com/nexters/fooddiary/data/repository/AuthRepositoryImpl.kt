@@ -5,9 +5,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.nexters.fooddiary.core.common.auth.GoogleSignInIntentProvider
 import com.nexters.fooddiary.core.common.auth.getWebClientId
-import com.nexters.fooddiary.data.datasource.remote.AuthRemoteDataSource
 import com.nexters.fooddiary.data.local.TokenStore
 import com.nexters.fooddiary.data.mapper.UserMapper
+import com.nexters.fooddiary.data.remote.auth.AuthApi
 import com.nexters.fooddiary.data.remote.auth.model.request.LoginRequest
 import com.nexters.fooddiary.data.security.EncryptionKeyManager
 import com.nexters.fooddiary.domain.model.User
@@ -17,7 +17,7 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
-    private val authRemoteDataSource: AuthRemoteDataSource,
+    private val authApi: AuthApi,
     private val firebaseAuth: FirebaseAuth,
     private val tokenStore: TokenStore,
     private val userMapper: UserMapper,
@@ -36,7 +36,7 @@ class AuthRepositoryImpl @Inject constructor(
                 ?: throw Exception("Failed to get Firebase ID Token")
 
             tokenStore.saveToken(firebaseAuthToken)
-            val loginResponse = authRemoteDataSource.login(LoginRequest("google", firebaseAuthToken))
+            val loginResponse = authApi.login(LoginRequest("google", firebaseAuthToken))
 
             userMapper.toDomainUser(firebaseUser, loginResponse.isFirst)
         }

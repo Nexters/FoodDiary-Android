@@ -1,7 +1,6 @@
 package com.nexters.fooddiary.data.repository
 
 import android.content.Context
-import android.net.Uri
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.AuthResult
@@ -10,10 +9,9 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GetTokenResult
 import com.google.firebase.auth.GoogleAuthProvider
 import com.nexters.fooddiary.core.common.auth.GoogleSignInIntentProvider
-import com.nexters.fooddiary.data.datasource.remote.AuthRemoteDataSource
 import com.nexters.fooddiary.data.local.TokenStore
 import com.nexters.fooddiary.data.mapper.UserMapper
-import com.nexters.fooddiary.data.remote.auth.model.request.LoginRequest
+import com.nexters.fooddiary.data.remote.auth.AuthApi
 import com.nexters.fooddiary.data.remote.auth.model.response.LoginResponse
 import com.nexters.fooddiary.data.security.EncryptionKeyManager
 import com.nexters.fooddiary.domain.model.User
@@ -35,7 +33,7 @@ import org.junit.Test
 class AuthRepositoryTest {
 
     private lateinit var authRepository: AuthRepositoryImpl
-    private val authRemoteDataSource: AuthRemoteDataSource = mockk()
+    private val authApi: AuthApi = mockk()
     private val firebaseAuth: FirebaseAuth = mockk(relaxed = true)
     private val tokenStore: TokenStore = mockk(relaxed = true)
     private val userMapper: UserMapper = mockk()
@@ -49,7 +47,7 @@ class AuthRepositoryTest {
         mockkStatic("kotlinx.coroutines.tasks.TasksKt")
 
         authRepository = AuthRepositoryImpl(
-            authRemoteDataSource,
+            authApi,
             firebaseAuth,
             tokenStore,
             userMapper,
@@ -87,7 +85,7 @@ class AuthRepositoryTest {
         coEvery { mockTokenTask.await() } returns mockGetTokenResult
         every { mockGetTokenResult.token } returns firebaseAccessToken
         coEvery { tokenStore.saveToken(firebaseAccessToken) } returns Unit
-        coEvery { authRemoteDataSource.login(any()) } returns loginResponse
+        coEvery { authApi.login(any()) } returns loginResponse
         every { userMapper.toDomainUser(mockFirebaseUser, true) } returns expectedUser
 
         // When
@@ -100,7 +98,7 @@ class AuthRepositoryTest {
 
         coVerify { tokenStore.saveToken(firebaseAccessToken) }
         coVerify { 
-            authRemoteDataSource.login(match { 
+            authApi.login(match {
                 it.provider == "google" && it.idToken == firebaseAccessToken 
             }) 
         }
