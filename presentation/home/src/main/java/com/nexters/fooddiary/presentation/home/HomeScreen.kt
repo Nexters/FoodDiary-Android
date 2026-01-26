@@ -19,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -64,6 +63,22 @@ internal fun HomeScreen(
                         .padding(top = 8.dp)
                 ) {
                     Text(stringResource(R.string.delete_account))
+                }
+
+                Button(
+                    onClick = onNavigateToImage,
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                ) {
+                    Text(text = stringResource(R.string.image_title))
+                }
+
+                Button(
+                    onClick = onNavigateToCalendar,
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                ) {
+                    Text(text = stringResource(R.string.calendar))
                 }
             }
         }
@@ -117,38 +132,5 @@ internal fun HomeScreen(
                 }
             }
         )
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(24.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.home_title),
-                fontSize = dimensionResource(R.dimen.home_title_text_size).value.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 32.dp)
-            )
-
-            Button(
-                onClick = onNavigateToImage,
-                modifier = Modifier.padding(16.dp),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(
-                    text = "음식 분류하기",
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                )
-            }
-
-            Button(
-                onClick = onNavigateToCalendar,
-                modifier = Modifier.padding(16.dp),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(
-                    text = "캘린더",
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                )
-            }
-        }
     }
 }
