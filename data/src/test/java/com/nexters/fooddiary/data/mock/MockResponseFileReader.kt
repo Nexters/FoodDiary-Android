@@ -1,3 +1,5 @@
+package com.nexters.fooddiary.data.mock
+
 import java.io.InputStreamReader
 
 object MockResponseFileReader {
