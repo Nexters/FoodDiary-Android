@@ -121,8 +121,8 @@ internal fun HomeScreen(
                 modifier = Modifier.padding(24.dp)
             ) {
                 Text(
-                    text = context.getString(R.string.home_title),
-                    fontSize = context.resources.getDimension(R.dimen.home_title_text_size).sp,
+                    text = stringResource(R.string.home_title),
+                    fontSize = dimensionResource(R.dimen.home_title_text_size).value.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(bottom = 32.dp)
                 )

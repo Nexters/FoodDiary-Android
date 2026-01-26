@@ -10,6 +10,9 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import com.nexters.fooddiary.presentation.auth.AuthUiState
+import com.nexters.fooddiary.presentation.auth.navigation.LoginRoute
+import com.nexters.fooddiary.presentation.auth.navigation.loginScreen
 import com.nexters.fooddiary.presentation.image.navigation.ImageRoute
 import com.nexters.fooddiary.presentation.image.navigation.imageScreen
 import com.nexters.fooddiary.presentation.home.navigation.HomeRoute
@@ -29,6 +32,7 @@ fun FoodDiaryNavHost(
         ImageRoute
     } else {
         HomeRoute
+    }
 
     LaunchedEffect(authUiState?.isAuthenticated) {
         authUiState?.isAuthenticated?.let { isAuthenticated ->
@@ -50,11 +54,6 @@ fun FoodDiaryNavHost(
         }
     }
 
-    val startDestination = when {
-        initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_CAMERA -> CameraRoute
-        else -> LoginRoute
-    }
-
     NavHost(
         navController = navController,
         startDestination = startDestination
@@ -68,8 +67,7 @@ fun FoodDiaryNavHost(
         )
 
         homeScreen(
-            onNavigateToImage = { navController.navigate(ImageRoute) }
-            onNavigateToCamera = { navController.navigate(CameraRoute) },
+            onNavigateToImage = { navController.navigate(ImageRoute) },
             onSignOut = {
                 signOutRequestId++
                 navController.navigate(LoginRoute) {

@@ -54,13 +54,15 @@ class AuthRepositoryImpl @Inject constructor(
             val user = firebaseAuth.currentUser
             if (user != null) {
                 user.delete().await()
-                firebaseAuth.signOut()
+                
                 kotlin.runCatching { tokenStore.deleteToken() }
                 kotlin.runCatching { encryptionKeyManager.deleteKey() }
+                
                 val webClientId = context.getWebClientId()
                 if (webClientId.isNotEmpty()) {
-                    kotlin.runCatching { googleSignInIntentProvider.signOut(context, webClientId) }
+                    kotlin.runCatching { googleSignInIntentProvider.revokeAccess(context, webClientId) }
                 }
+                
                 Result.success(Unit)
             } else {
                 Result.failure(Exception("No user signed in"))

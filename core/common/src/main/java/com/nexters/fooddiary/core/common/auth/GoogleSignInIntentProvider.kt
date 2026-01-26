@@ -7,6 +7,7 @@ interface GoogleSignInIntentProvider {
     fun getSignInIntent(context: Context, webClientId: String): Intent
     fun getSignInResultFromIntent(context: Context, data: Intent?): Result<GoogleSignInAccount>
     suspend fun signOut(context: Context, webClientId: String)
+    suspend fun revokeAccess(context: Context, webClientId: String)
 }
 
 data class GoogleSignInAccount(

@@ -72,6 +72,10 @@ class GoogleSignInHelper @Inject constructor(
         getGoogleSignInClient(webClientId).signOut().await()
     }
 
+    override suspend fun revokeAccess(context: Context, webClientId: String) {
+        getGoogleSignInClient(webClientId).revokeAccess().await()
+    }
+
     private fun mapToSignInError(exception: ApiException): SignInError {
         return when (exception.statusCode) {
             10 -> SignInError.DeveloperError(
