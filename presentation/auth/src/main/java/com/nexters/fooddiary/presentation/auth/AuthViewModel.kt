@@ -2,9 +2,11 @@ package com.nexters.fooddiary.presentation.auth
 
 import android.content.Context
 import android.content.Intent
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.airbnb.mvrx.MavericksState
+import com.airbnb.mvrx.MavericksViewModel
+import com.airbnb.mvrx.MavericksViewModelFactory
+import com.airbnb.mvrx.hilt.AssistedViewModelFactory
+import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import com.nexters.fooddiary.core.common.auth.GoogleSignInAccount
 import com.nexters.fooddiary.core.common.auth.GoogleSignInIntentProvider
 import com.nexters.fooddiary.core.common.auth.getSignInErrorMessage
@@ -15,13 +17,10 @@ import com.nexters.fooddiary.domain.usecase.GetCurrentUserUseCase
 import com.nexters.fooddiary.domain.usecase.SignInWithGoogleUseCase
 import com.nexters.fooddiary.domain.usecase.SignOutUseCase
 import com.nexters.fooddiary.presentation.auth.R as AuthR
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 data class AuthUiState(
     val isAuthenticated: Boolean? = null,
@@ -30,28 +29,20 @@ data class AuthUiState(
     val signInIntent: Intent? = null
 ) : MavericksState
 
-@HiltViewModel
-class AuthViewModel @Inject constructor(
+class AuthViewModel @AssistedInject constructor(
+    @Assisted initialState: AuthUiState,
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val signInWithGoogleUseCase: SignInWithGoogleUseCase,
     private val signOutUseCase: SignOutUseCase,
     private val deleteAccountUseCase: DeleteAccountUseCase,
     private val googleSignInIntentProvider: GoogleSignInIntentProvider,
-    @ApplicationContext private val context: Context,
     private val resourceProvider: ResourceProvider
-) : ViewModel() {
-
-    private val _state = MutableStateFlow(AuthUiState())
-    val state: StateFlow<AuthUiState> = _state.asStateFlow()
+) : MavericksViewModel<AuthUiState>(initialState) {
 
     init {
         viewModelScope.launch {
             checkAuthenticationStatus()
         }
-    }
-
-    private fun setState(update: AuthUiState.() -> AuthUiState) {
-        _state.value = _state.value.update()
     }
 
     private suspend fun checkAuthenticationStatus() {
@@ -150,4 +141,11 @@ class AuthViewModel @Inject constructor(
     fun consumeSignInError() {
         setState { copy(signInError = null) }
     }
+
+    @AssistedFactory
+    interface Factory : AssistedViewModelFactory<AuthViewModel, AuthUiState> {
+        override fun create(state: AuthUiState): AuthViewModel
+    }
+
+    companion object : MavericksViewModelFactory<AuthViewModel, AuthUiState> by hiltMavericksViewModelFactory()
 }

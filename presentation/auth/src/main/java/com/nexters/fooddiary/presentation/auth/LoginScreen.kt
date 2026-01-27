@@ -15,24 +15,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import com.airbnb.mvrx.compose.collectAsStateWithLifecycle
+import com.airbnb.mvrx.compose.mavericksViewModel
 
 @Composable
 internal fun LoginScreen(
-    authViewModel: AuthViewModel = hiltViewModel(),
+    modifier: Modifier = Modifier,
+    authViewModel: AuthViewModel = mavericksViewModel(),
     onAuthStateChange: (AuthUiState) -> Unit = {},
     signOutRequestId: Int = 0,
     deleteAccountRequestId: Int = 0,
-    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val authUiState by authViewModel.state.collectAsState()
+    val authUiState by authViewModel.collectAsStateWithLifecycle()
 
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
