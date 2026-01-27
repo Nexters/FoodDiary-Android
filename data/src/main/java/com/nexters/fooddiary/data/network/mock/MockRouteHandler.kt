@@ -1,0 +1,60 @@
+package com.nexters.fooddiary.data.network.mock
+
+/**
+ * 공유 라우팅 로직 (path → JSON 파일 매핑)
+ * 테스트와 런타임에서 동일한 라우팅 로직을 사용
+ */
+object MockRouteHandler {
+
+    // Paths
+    private const val PATH_LOGIN = "/auth/login"
+    private const val PATH_DIARIES = "/diaries"
+    private const val PATH_PHOTOS = "/photos"
+
+    // Regex Patterns
+    private val REGEX_DIARY_DATE = Regex("/diaries/\\d{4}-\\d{2}-\\d{2}")
+    private val REGEX_PHOTO_ANALYZE = Regex("/photos/\\d+/analyze")
+    private val REGEX_PHOTO_ANALYSIS = Regex("/photos/\\d+/analysis")
+    private val REGEX_PHOTO_CONFIRM = Regex("/photos/\\d+/confirm")
+    private val REGEX_PHOTO_FINAL = Regex("/photos/\\d+/final")
+
+    // Mock Files
+    private const val MOCK_LOGIN_SUCCESS = "login_success.json"
+    private const val MOCK_CREATE_DIARY_SUCCESS = "create_diary_success.json"
+    private const val MOCK_GET_DIARY_20260117 = "get_diary_20260117.json"
+    private const val MOCK_UPLOAD_URL_SUCCESS = "get_upload_url_success.json"
+    private const val MOCK_ANALYZE_PHOTO_SUCCESS = "analyze_photo_success.json"
+    private const val MOCK_GET_ANALYSIS_RESULT = "get_analysis_result.json"
+    private const val MOCK_CONFIRM_PHOTO_SUCCESS = "confirm_photo_success.json"
+    private const val MOCK_GET_FINAL_RECORD = "get_final_record.json"
+
+    /**
+     * path와 method를 기반으로 mock JSON 파일명을 반환
+     * @return mock JSON 파일명, 매칭되는 라우트가 없으면 null
+     */
+    fun getMockFileName(path: String, method: String): String? {
+        return when {
+            // Auth
+            path == PATH_LOGIN && method == "POST" -> MOCK_LOGIN_SUCCESS
+
+            // Diary
+            path == PATH_DIARIES && method == "POST" -> MOCK_CREATE_DIARY_SUCCESS
+            path.matches(REGEX_DIARY_DATE) && method == "GET" -> {
+                if (path.contains("2026-01-17")) {
+                    MOCK_GET_DIARY_20260117
+                } else {
+                    null
+                }
+            }
+
+            // Photo
+            path == PATH_PHOTOS && method == "POST" -> MOCK_UPLOAD_URL_SUCCESS
+            path.matches(REGEX_PHOTO_ANALYZE) && method == "POST" -> MOCK_ANALYZE_PHOTO_SUCCESS
+            path.matches(REGEX_PHOTO_ANALYSIS) && method == "GET" -> MOCK_GET_ANALYSIS_RESULT
+            path.matches(REGEX_PHOTO_CONFIRM) && method == "POST" -> MOCK_CONFIRM_PHOTO_SUCCESS
+            path.matches(REGEX_PHOTO_FINAL) && method == "GET" -> MOCK_GET_FINAL_RECORD
+
+            else -> null
+        }
+    }
+}
