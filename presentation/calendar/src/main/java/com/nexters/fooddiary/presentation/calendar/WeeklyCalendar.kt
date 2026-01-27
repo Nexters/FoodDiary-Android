@@ -31,7 +31,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kizitonwose.calendar.compose.WeekCalendar
 import com.kizitonwose.calendar.compose.weekcalendar.WeekCalendarState
+import com.kizitonwose.calendar.compose.weekcalendar.rememberWeekCalendarState
 import com.kizitonwose.calendar.core.daysOfWeek
+import androidx.compose.ui.tooling.preview.Preview
 import com.nexters.fooddiary.presentation.calendar.theme.CalendarColors
 import com.nexters.fooddiary.presentation.calendar.theme.calendarColors
 import kotlinx.coroutines.launch
@@ -193,4 +195,26 @@ private fun DayCell(
             color = if (isSelected) colors.selectedInnerBox else colors.dayText
         )
     }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF222222)
+@Composable
+private fun WeeklyCalendarPreview() {
+    val currentDate = LocalDate.now()
+    val startDate = currentDate.minusDays(500)
+    val endDate = currentDate.plusDays(500)
+    val firstDayOfWeek = DayOfWeek.SUNDAY
+    
+    val state = rememberWeekCalendarState(
+        startDate = startDate,
+        endDate = endDate,
+        firstVisibleWeekDate = currentDate,
+        firstDayOfWeek = firstDayOfWeek
+    )
+    
+    WeeklyCalendar(
+        calendarState = state,
+        selectedDate = currentDate,
+        onDateSelected = {}
+    )
 }

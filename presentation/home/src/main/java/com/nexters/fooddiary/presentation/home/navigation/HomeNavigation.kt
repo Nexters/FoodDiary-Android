@@ -11,13 +11,15 @@ object HomeRoute
 fun NavGraphBuilder.homeScreen(
     onSignOut: () -> Unit,
     onDeleteAccount: () -> Unit,
-    onNavigateToImage: () -> Unit
+    onNavigateToImage: () -> Unit,
+    onNavigateToCalendar: () -> Unit,
 ) {
     composable<HomeRoute> {
         HomeScreen(
+            onNavigateToCalendar = onNavigateToCalendar,
             onSignOut = onSignOut,
             onDeleteAccount = onDeleteAccount,
-            onNavigateToImage = onNavigateToImage
+            onNavigateToImage = onNavigateToImage,
         )
     }
 }
