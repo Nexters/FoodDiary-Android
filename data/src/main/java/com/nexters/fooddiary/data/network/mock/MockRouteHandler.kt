@@ -3,7 +3,6 @@ package com.nexters.fooddiary.data.network.mock
 object MockRouteHandler {
 
     // Paths
-    private const val PATH_LOGIN = "/auth/login"
     private const val PATH_DIARIES = "/diaries"
     private const val PATH_PHOTOS = "/photos"
 
@@ -15,7 +14,6 @@ object MockRouteHandler {
     private val REGEX_PHOTO_FINAL = Regex("/photos/\\d+/final")
 
     // Mock Files
-    private const val MOCK_LOGIN_SUCCESS = "login_success.json"
     private const val MOCK_CREATE_DIARY_SUCCESS = "create_diary_success.json"
     private const val MOCK_GET_DIARY_20260117 = "get_diary_20260117.json"
     private const val MOCK_UPLOAD_URL_SUCCESS = "get_upload_url_success.json"
@@ -30,9 +28,6 @@ object MockRouteHandler {
      */
     fun getMockFileName(path: String, method: String): String? {
         return when {
-            // Auth
-            path == PATH_LOGIN && method == "POST" -> MOCK_LOGIN_SUCCESS
-
             // Diary
             path == PATH_DIARIES && method == "POST" -> MOCK_CREATE_DIARY_SUCCESS
             path.matches(REGEX_DIARY_DATE) && method == "GET" -> {
