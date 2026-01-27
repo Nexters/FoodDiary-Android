@@ -8,10 +8,6 @@ import okhttp3.Protocol
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 
-/**
- * Runtime Mock API Interceptor
- * assets에서 mock JSON을 읽어 응답으로 반환
- */
 class MockApiInterceptor(
     private val context: Context
 ) : Interceptor {

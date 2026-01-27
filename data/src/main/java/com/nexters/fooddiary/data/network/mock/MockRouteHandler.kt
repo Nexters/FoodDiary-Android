@@ -1,9 +1,5 @@
 package com.nexters.fooddiary.data.network.mock
 
-/**
- * 공유 라우팅 로직 (path → JSON 파일 매핑)
- * 테스트와 런타임에서 동일한 라우팅 로직을 사용
- */
 object MockRouteHandler {
 
     // Paths
