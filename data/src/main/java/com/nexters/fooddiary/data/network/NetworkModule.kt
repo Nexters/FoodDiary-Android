@@ -1,12 +1,15 @@
 package com.nexters.fooddiary.data.network
 
+import android.content.Context
 import com.nexters.fooddiary.data.BuildConfig
+import com.nexters.fooddiary.data.network.mock.MockApiInterceptor
 import com.nexters.fooddiary.data.remote.auth.AuthApi
 import com.nexters.fooddiary.data.remote.diary.DiaryApi
 import com.nexters.fooddiary.data.remote.photo.PhotoApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -32,8 +35,11 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(
-        @Named("isDebug") isDebug: Boolean
+        @Named("isDebug") isDebug: Boolean,
+        @Named("useMockApi") useMockApi: Boolean,
+        @ApplicationContext context: Context
     ): OkHttpClient = OkHttpClient.Builder()
+        .addMockInterceptor(useMockApi, context)
         .addDebugInterceptors(isDebug)
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
@@ -65,6 +71,16 @@ object NetworkModule {
     @Singleton
     fun providePhotoApi(retrofit: Retrofit): PhotoApi =
         retrofit.create(PhotoApi::class.java)
+}
+
+private fun OkHttpClient.Builder.addMockInterceptor(
+    useMockApi: Boolean,
+    context: Context
+): OkHttpClient.Builder {
+    if (useMockApi) {
+        addInterceptor(MockApiInterceptor(context))
+    }
+    return this
 }
 
 private fun OkHttpClient.Builder.addDebugInterceptors(isDebug: Boolean): OkHttpClient.Builder {
