@@ -36,7 +36,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.airbnb.mvrx.compose.collectAsState
+import com.airbnb.mvrx.compose.collectAsStateWithLifecycle
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.classification.FoodClassificationResult
 
@@ -46,7 +46,7 @@ internal fun ImageClassificationScreen(
     viewModel: ImageClassificationViewModel = mavericksViewModel()
 ) {
     val context = LocalContext.current
-    val state by viewModel.collectAsState()
+    val state by viewModel.collectAsStateWithLifecycle()
     
     val mimeType = remember { context.getString(R.string.image_mime_type) }
     
