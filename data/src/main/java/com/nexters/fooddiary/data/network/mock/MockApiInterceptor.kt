@@ -13,6 +13,7 @@ class MockApiInterceptor(
 ) : Interceptor {
 
     companion object {
+        private const val TAG = "MockApiInterceptor"
         private const val ASSETS_PATH = "api-response"
     }
 
@@ -24,8 +25,10 @@ class MockApiInterceptor(
         val mockFileName = MockRouteHandler.getMockFileName(path, method)
 
         return if (mockFileName != null) {
+            Log.i(TAG, "Mock Response: $method $path -> $mockFileName")
             createMockResponse(chain, mockFileName)
         } else {
+            Log.i(TAG, "Pass-through: $method $path (no mock)")
             chain.proceed(request)
         }
     }
