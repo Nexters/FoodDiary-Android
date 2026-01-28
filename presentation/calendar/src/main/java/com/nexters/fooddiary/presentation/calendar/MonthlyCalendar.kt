@@ -24,6 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,13 +32,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 import com.kizitonwose.calendar.compose.CalendarState
 import com.kizitonwose.calendar.compose.HorizontalCalendar
+
+// ... (existing code omitted for brevity in prompt, but I need to be careful with range)
+// Actually I shouldn't replace the whole middle part if it's large.
+// I will target the imports block and the preview block separately. 
+// But replace_file_content can only handle one block at a time unless I use multi_replace.
+// I will use multi_replace.
+
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.daysOfWeek
 import com.nexters.fooddiary.presentation.calendar.theme.CalendarColors
 import com.nexters.fooddiary.presentation.calendar.theme.calendarColors
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -54,13 +64,18 @@ fun MonthlyCalendar(
     locale: Locale = Locale.getDefault(),
     colors: CalendarColors = calendarColors(),
     onMonthChanged: (YearMonth) -> Unit = {},
+    photoCountByDate: Map<LocalDate, Int> = emptyMap(),
 ) {
     val coroutineScope = rememberCoroutineScope()
     val visibleMonth = remember { derivedStateOf { calendarState.firstVisibleMonth.yearMonth } }
 
     // 월 변경 감지 및 콜백 호출
-    LaunchedEffect(visibleMonth.value) {
-        onMonthChanged(visibleMonth.value)
+    LaunchedEffect(calendarState) {
+        snapshotFlow { calendarState.firstVisibleMonth.yearMonth }
+            .distinctUntilChanged()
+            .collect { yearMonth ->
+                onMonthChanged(yearMonth)
+            }
     }
 
     Column(modifier = modifier) {
@@ -96,9 +111,11 @@ fun MonthlyCalendar(
         HorizontalCalendar(
             state = calendarState,
             dayContent = { day ->
+                val photoCount = photoCountByDate[day.date] ?: 0
                 MonthDayCell(
                     day = day,
                     isSelected = day.date == selectedDate,
+                    photoCount = photoCount,
                     colors = colors,
                     onClick = {
                         // 다른 월의 날짜를 클릭한 경우 애니메이션 후 선택
@@ -187,10 +204,12 @@ private fun MonthWeekDaysHeader(
 private fun MonthDayCell(
     day: CalendarDay,
     isSelected: Boolean,
+    photoCount: Int,
     colors: CalendarColors,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isCurrentMonth = day.position == DayPosition.MonthDate
 
     Box(
         modifier = modifier
@@ -203,50 +222,63 @@ private fun MonthDayCell(
             ),
         contentAlignment = Alignment.TopCenter
     ) {
-        if (isSelected) {
-            Column(
-                modifier = Modifier.wrapContentSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
+        Column(
+            modifier = Modifier.wrapContentSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            // Date number
+            Text(
+                text = day.date.dayOfMonth.toString(),
+                fontSize = 16.sp,
+                color = when {
+                    !isCurrentMonth -> colors.dayTextDisabled
+                    isSelected -> colors.dayTextSelected
+                    else -> colors.dayText
+                },
+                modifier = Modifier.padding(top = 8.dp)
+            )
+
+            // Inner box (from FD-19) with photo count overlay (from FD-29)
+            Box(
+                modifier = Modifier
+                    .height(50.dp)
+                    .width(50.dp)
+                    .padding(horizontal = 4.dp, vertical = 6.dp)
+                    .background(
+                        color = if (isSelected) colors.selectedInnerBox else colors.unselectedInnerBox,
+                        shape = RoundedCornerShape(4.dp)
+                    ),
+                contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = day.date.dayOfMonth.toString(),
-                    fontSize = 16.sp,
-                    color = colors.dayTextSelected,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-                Box(
-                    modifier = Modifier
-                        .height(50.dp)
-                        .width(50.dp)
-                        .padding(horizontal = 4.dp, vertical = 6.dp)
-                        .background(
-                            color = colors.selectedInnerBox,
-                            shape = RoundedCornerShape(4.dp)
-                        )
-                )
-            }
-        } else {
-            Column(
-                modifier = Modifier.wrapContentSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = day.date.dayOfMonth.toString(),
-                    fontSize = 16.sp,
-                    color = colors.dayTextSelected,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-                Box(
-                    modifier = Modifier
-                        .height(50.dp)
-                        .width(50.dp)
-                        .padding(horizontal = 4.dp, vertical = 6.dp)
-                        .background(
-                            color = colors.unselectedInnerBox,
-                            shape = RoundedCornerShape(4.dp)
-                        )
-                )
+                // Photo count badge (from FD-29)
+                if (photoCount > 0 && isCurrentMonth) {
+                    Text(
+                        text = photoCount.toString(),
+                        fontSize = 12.sp,
+                        color = Color(0xFF4CAF50),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF222222)
+@Composable
+private fun MonthlyCalendarPreview() {
+    val state = rememberMonthCalendarState(
+        selectedDate = LocalDate.now(),
+        firstDayOfWeek = DayOfWeek.SUNDAY
+    )
+    
+    MonthlyCalendar(
+        calendarState = state,
+        selectedDate = LocalDate.now(),
+        onDateSelected = {},
+        photoCountByDate = mapOf(
+            LocalDate.now() to 3,
+            LocalDate.now().minusDays(2) to 1
+        )
+    )
 }

@@ -17,6 +17,8 @@ import com.nexters.fooddiary.presentation.image.navigation.ImageRoute
 import com.nexters.fooddiary.presentation.image.navigation.imageScreen
 import com.nexters.fooddiary.presentation.home.navigation.HomeRoute
 import com.nexters.fooddiary.presentation.home.navigation.homeScreen
+import com.nexters.fooddiary.presentation.home.calendar.navigation.CalendarRoute
+import com.nexters.fooddiary.presentation.home.calendar.navigation.calendarScreen
 
 @Composable
 fun FoodDiaryNavHost(
@@ -79,8 +81,10 @@ fun FoodDiaryNavHost(
                 navController.navigate(LoginRoute) {
                     popUpTo(HomeRoute) { inclusive = false }
                 }
-            }
+            },
+            onNavigateToCalendar = { navController.navigate(CalendarRoute) }
         )
+        calendarScreen()
         imageScreen(
             onClose = {
                 if (!navController.popBackStack()) {
