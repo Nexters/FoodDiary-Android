@@ -40,8 +40,6 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.activity.compose)
-    implementation(project(":domain"))
-    implementation(project(":core:common"))
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     // Lifecycle
@@ -76,5 +74,9 @@ dependencies {
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.hilt.testing)
+
+    // module
+    implementation(projects.domain)
+    implementation(projects.core.common)
 }
 
