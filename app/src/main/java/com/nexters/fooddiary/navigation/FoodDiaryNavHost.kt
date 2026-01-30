@@ -32,6 +32,7 @@ fun FoodDiaryNavHost(
     var authUiState by remember { mutableStateOf<AuthUiState?>(null) }
     var signOutRequestId by remember { mutableStateOf(0) }
     var deleteAccountRequestId by remember { mutableStateOf(0) }
+    var hasNavigatedFromSplash by remember { mutableStateOf(false) }
     val startDestination = if (initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_IMAGE) {
         ImageRoute
     } else {
@@ -44,17 +45,45 @@ fun FoodDiaryNavHost(
         }
     }
 
+    // Splash 이후 인증 상태 변경 감지 (Login 후 Home 이동, Logout 후 Login 이동)
+    LaunchedEffect(authUiState?.isAuthenticated) {
+        if (!hasNavigatedFromSplash) return@LaunchedEffect
+
+        // 로그아웃 완료 시 signOutRequestId 리셋
+        if (signOutRequestId > 0 && authUiState?.isAuthenticated == false) {
+            signOutRequestId = 0
+        }
+
+        authUiState?.isAuthenticated?.let { isAuthenticated ->
+            if (!isAuthenticated) {
+                // 로그아웃 → LoginRoute로 이동
+                navController.navigate(LoginRoute) {
+                    popUpTo(0) { inclusive = false }
+                    launchSingleTop = true
+                }
+            } else if (signOutRequestId == 0) {
+                // 로그인 → HomeRoute로 이동 (단, 로그아웃 중이 아닐 때만)
+                navController.navigate(HomeRoute) {
+                    popUpTo(0) { inclusive = false }
+                    launchSingleTop = true
+                }
+            }
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = startDestination
     ) {
         splashScreen(
             onNavigateToHome = {
+                hasNavigatedFromSplash = true
                 navController.navigate(HomeRoute) {
                     popUpTo(SplashRoute) { inclusive = true }
                 }
             },
             onNavigateToLogin = {
+                hasNavigatedFromSplash = true
                 navController.navigate(LoginRoute) {
                     popUpTo(SplashRoute) { inclusive = true }
                 }
@@ -74,13 +103,15 @@ fun FoodDiaryNavHost(
             onSignOut = {
                 signOutRequestId++
                 navController.navigate(LoginRoute) {
-                    popUpTo(HomeRoute) { inclusive = false }
+                    popUpTo(0) { inclusive = false }
+                    launchSingleTop = true
                 }
             },
             onDeleteAccount = {
                 deleteAccountRequestId++
                 navController.navigate(LoginRoute) {
-                    popUpTo(HomeRoute) { inclusive = false }
+                    popUpTo(0) { inclusive = false }
+                    launchSingleTop = true
                 }
             },
             onNavigateToCalendar = { navController.navigate(CalendarRoute) }
