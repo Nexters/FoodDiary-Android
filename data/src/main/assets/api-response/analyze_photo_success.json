@@ -1,0 +1,29 @@
+{
+    "photo_id": 42,
+    "food_category": "한식",
+    "restaurant_name_candidates": [
+        {
+            "name": "명동교자",
+            "confidence": 0.9
+        },
+        {
+            "name": "을지면옥",
+            "confidence": 0.6
+        }
+    ],
+    "menu_candidates": [
+        {
+            "name": "칼국수",
+            "price": 10000
+        },
+        {
+            "name": "만두",
+            "price": 5000
+        }
+    ],
+    "keywords": [
+        "육즙",
+        "직화",
+        "면발"
+    ]
+}
