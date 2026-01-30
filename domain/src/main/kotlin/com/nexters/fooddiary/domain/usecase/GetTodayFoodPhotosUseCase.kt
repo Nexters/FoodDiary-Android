@@ -13,32 +13,33 @@ class GetTodayFoodPhotosUseCase @Inject constructor(
     suspend operator fun invoke(): List<String> {
         val today = LocalDate.now()
         val currentMonth = YearMonth.now()
-        
+
         val photosByMonth = mediaRepository.getPhotosByMonth(currentMonth)
         val todayPhotos = photosByMonth[today] ?: emptyList()
-        
+
         if (todayPhotos.isEmpty()) {
             return emptyList()
         }
-        
-        val classifiedPhotos = todayPhotos.mapNotNull { mediaItem ->
+
+        val withResult = todayPhotos.map { mediaItem ->
             val uriString = mediaItem.uri
             val result = classificationRepository.classifyImage(uriString)
-            
-            if (result != null && result.isFood) {
-                ClassifiedPhoto(uriString, result)
-            } else {
-                null
-            }
+            PhotoWithClassification(uriString, result)
         }
-        
-        return classifiedPhotos
-            .sortedByDescending { it.result.foodConfidence }
+
+        val foodFirst = withResult
+            .filter { (_, result) -> result != null && result.isFood }
+            .sortedByDescending { (_, result) -> result?.foodConfidence ?: 0f }
             .map { it.uriString }
+        val rest = withResult
+            .filter { (_, result) -> result == null || !result.isFood }
+            .map { it.uriString }
+
+        return foodFirst + rest
     }
-    
-    private data class ClassifiedPhoto(
+
+    private data class PhotoWithClassification(
         val uriString: String,
-        val result: com.nexters.fooddiary.domain.model.ClassificationResult
+        val result: com.nexters.fooddiary.domain.model.ClassificationResult?
     )
 }
