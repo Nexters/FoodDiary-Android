@@ -40,6 +40,9 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.activity.compose)
+    implementation(project(":domain"))
+    implementation(project(":core:common"))
+    debugImplementation(libs.androidx.compose.ui.tooling)
 
     // Lifecycle
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -55,6 +58,9 @@ dependencies {
 
     // ExifInterface for image rotation
     implementation(libs.androidx.exifinterface)
+
+    // Coil for image loading
+    implementation(libs.coil.compose)
 
     // Hilt
     implementation(libs.hilt.android)
