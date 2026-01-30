@@ -23,5 +23,5 @@
     <string name="image_picker_gallery_image">갤러리 이미지</string>
     <string name="image_picker_selected">선택됨</string>
     <string name="image_picker_unselected">선택 안됨</string>
-    <string name="image_picker_done">추가하기 (%d)</string>
+    <string name="image_picker_done">추가하기</string>
 </resources>

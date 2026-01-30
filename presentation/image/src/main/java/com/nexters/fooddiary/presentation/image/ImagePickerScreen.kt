@@ -139,10 +139,7 @@ fun ImagePickerContent(
             )
         }
 
-        ImagePickerDoneButton(
-            selectedCount = selectedUris.size,
-            onClick = onDone
-        )
+        ImagePickerDoneButton(onClick = onDone)
     }
 }
 
@@ -304,10 +301,7 @@ private fun ImageGridItem(
 }
 
 @Composable
-private fun ImagePickerDoneButton(
-    selectedCount: Int,
-    onClick: () -> Unit
-) {
+private fun ImagePickerDoneButton(onClick: () -> Unit) {
     Button(
         onClick = onClick,
         modifier = Modifier
@@ -315,7 +309,7 @@ private fun ImagePickerDoneButton(
             .padding(top = ImagePickerDimens.doneButtonTopPadding)
             .navigationBarsPadding()
     ) {
-        Text(stringResource(R.string.image_picker_done, selectedCount))
+        Text(stringResource(R.string.image_picker_done))
     }
 }
 
