@@ -19,6 +19,8 @@ import com.nexters.fooddiary.presentation.home.navigation.HomeRoute
 import com.nexters.fooddiary.presentation.home.navigation.homeScreen
 import com.nexters.fooddiary.presentation.home.calendar.navigation.CalendarRoute
 import com.nexters.fooddiary.presentation.home.calendar.navigation.calendarScreen
+import com.nexters.fooddiary.presentation.splash.navigation.SplashRoute
+import com.nexters.fooddiary.presentation.splash.navigation.splashScreen
 
 @Composable
 fun FoodDiaryNavHost(
@@ -33,21 +35,7 @@ fun FoodDiaryNavHost(
     val startDestination = if (initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_IMAGE) {
         ImageRoute
     } else {
-        HomeRoute
-    }
-
-    LaunchedEffect(authUiState?.isAuthenticated) {
-        authUiState?.isAuthenticated?.let { isAuthenticated ->
-            if (isAuthenticated) {
-                navController.navigate(HomeRoute) {
-                    popUpTo(LoginRoute) { inclusive = true }
-                }
-            } else {
-                navController.navigate(LoginRoute) {
-                    popUpTo(HomeRoute) { inclusive = true }
-                }
-            }
-        }
+        SplashRoute
     }
 
     LaunchedEffect(authUiState?.signInError) {
@@ -60,6 +48,19 @@ fun FoodDiaryNavHost(
         navController = navController,
         startDestination = startDestination
     ) {
+        splashScreen(
+            onNavigateToHome = {
+                navController.navigate(HomeRoute) {
+                    popUpTo(SplashRoute) { inclusive = true }
+                }
+            },
+            onNavigateToLogin = {
+                navController.navigate(LoginRoute) {
+                    popUpTo(SplashRoute) { inclusive = true }
+                }
+            }
+        )
+
         loginScreen(
             onAuthStateChange = { state ->
                 authUiState = state
