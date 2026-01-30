@@ -47,6 +47,7 @@ android {
 dependencies {
     // Modules
     implementation(projects.core.common)
+    implementation(projects.core.classification)
     implementation(projects.domain)
 
     // Coroutines
@@ -65,6 +66,7 @@ dependencies {
 
     // Hilt
     implementation(libs.hilt.android)
+    implementation(project(":core:classification"))
     ksp(libs.hilt.compiler)
 
     // Firebase Auth
