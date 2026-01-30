@@ -139,12 +139,10 @@ fun ImagePickerContent(
             )
         }
 
-        if (selectedUris.isNotEmpty()) {
-            ImagePickerDoneButton(
-                selectedCount = selectedUris.size,
-                onClick = onDone
-            )
-        }
+        ImagePickerDoneButton(
+            selectedCount = selectedUris.size,
+            onClick = onDone
+        )
     }
 }
 

@@ -7,7 +7,6 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import com.nexters.fooddiary.core.classification.ImageUtils
-import com.nexters.fooddiary.domain.model.ClassificationResult
 import com.nexters.fooddiary.domain.usecase.ClassifyImageUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -16,6 +15,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Collections.emptyList
 
 class ImageClassificationViewModel @AssistedInject constructor(
     @Assisted initialState: ImageClassificationState,
@@ -52,7 +52,7 @@ class ImageClassificationViewModel @AssistedInject constructor(
                 withContext(Dispatchers.Main) {
                     setState {
                         copy(
-                            selectedItems = selectedItems.mapIndexed { i, item ->
+                            selectedItems = this.selectedItems.mapIndexed { i, item ->
                                 if (i == idx) item.copy(classificationResult = result)
                                 else item
                             },

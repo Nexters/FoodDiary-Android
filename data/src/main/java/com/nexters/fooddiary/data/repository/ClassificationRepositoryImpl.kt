@@ -13,7 +13,6 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
 @Singleton
 class ClassificationRepositoryImpl @Inject constructor(
     private val foodClassifier: FoodClassifier,
@@ -21,25 +20,33 @@ class ClassificationRepositoryImpl @Inject constructor(
 ) : ClassificationRepository {
 
     private val classificationCache = mutableMapOf<String, FoodClassificationResult>()
-    
+
     override suspend fun classifyImage(uriString: String): ClassificationResult? {
         return withContext(Dispatchers.IO) {
-            val cachedResult = classificationCache[uriString]
+            val cacheKey = normalizeCacheKey(uriString)
+            val cachedResult = classificationCache[cacheKey]
 
-            cachedResult?.let {
-                return@let cachedResult.toDomainModel()
+            if (cachedResult != null) {
+                return@withContext cachedResult.toDomainModel()
             }
-            
             val uri = Uri.parse(uriString)
             val bitmap = ImageUtils.uriToBitmap(context, uri) ?: return@withContext null
-            
+
             try {
                 val result = foodClassifier.classifyAsync(bitmap)
-                classificationCache[uriString] = result
+                classificationCache[cacheKey] = result
                 result.toDomainModel()
             } catch (e: Exception) {
-                null // 에러 notify 정책 논의 필요
+                null
             }
+        }
+    }
+
+    private fun normalizeCacheKey(uriString: String): String {
+        return try {
+            Uri.parse(uriString).toString()
+        } catch (e: Exception) {
+            uriString
         }
     }
 
