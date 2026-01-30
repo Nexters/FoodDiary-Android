@@ -66,7 +66,6 @@ dependencies {
 
     // Hilt
     implementation(libs.hilt.android)
-    implementation(project(":core:classification"))
     ksp(libs.hilt.compiler)
 
     // Firebase Auth
