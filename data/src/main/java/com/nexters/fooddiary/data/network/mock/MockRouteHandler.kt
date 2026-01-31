@@ -31,7 +31,7 @@ object MockRouteHandler {
     fun getMockFileName(path: String, method: String): String? {
         return when {
             // Auth
-            path == PATH_LOGIN && method == "POST" -> MOCK_LOGIN_SUCCESS
+//            path == PATH_LOGIN && method == "POST" -> MOCK_LOGIN_SUCCESS
 
             // Diary
             path == PATH_DIARIES && method == "POST" -> MOCK_CREATE_DIARY_SUCCESS
