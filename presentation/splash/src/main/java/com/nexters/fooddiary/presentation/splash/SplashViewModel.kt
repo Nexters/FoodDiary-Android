@@ -32,6 +32,7 @@ class SplashViewModel @AssistedInject constructor(
             delay(1000)
 
             // 인증 상태 확인
+            // TODO: /auth/verify API로 저장된 토큰의 유효성 검사 필요
             val user = getCurrentUserUseCase()
             val destination = if (user != null) {
                 NavigationDestination.Home
