@@ -1,4 +1,4 @@
-package com.nexters.fooddiary.presentation.calendar
+package com.nexters.fooddiary.core.ui.calendar
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -37,11 +37,11 @@ import androidx.compose.ui.unit.sp
 import com.kizitonwose.calendar.compose.WeekCalendar
 import com.kizitonwose.calendar.compose.weekcalendar.WeekCalendarState
 import com.kizitonwose.calendar.compose.weekcalendar.rememberWeekCalendarState
+import com.nexters.fooddiary.core.ui.calendar.theme.CalendarColors
+import com.nexters.fooddiary.core.ui.calendar.theme.calendarColors
 import com.nexters.fooddiary.core.ui.theme.Gray600
 import com.nexters.fooddiary.core.ui.theme.PrimBase
 import com.nexters.fooddiary.core.ui.theme.White
-import com.nexters.fooddiary.presentation.calendar.theme.CalendarColors
-import com.nexters.fooddiary.presentation.calendar.theme.calendarColors
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate

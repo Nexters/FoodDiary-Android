@@ -1,4 +1,4 @@
-package com.nexters.fooddiary.presentation.calendar
+package com.nexters.fooddiary.core.ui.calendar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -52,18 +52,19 @@ import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.daysOfWeek
+import com.nexters.fooddiary.core.ui.calendar.theme.CalendarColors
+import com.nexters.fooddiary.core.ui.calendar.theme.calendarColors
 import com.nexters.fooddiary.core.ui.theme.AppTypography.p12
 import com.nexters.fooddiary.core.ui.theme.Gray600
 import com.nexters.fooddiary.core.ui.theme.Gray900
 import com.nexters.fooddiary.core.ui.theme.White
-import com.nexters.fooddiary.presentation.calendar.theme.CalendarColors
-import com.nexters.fooddiary.presentation.calendar.theme.calendarColors
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
+import java.util.Collections.emptyMap
 import java.util.Locale
 
 private val CalendarContainerShape = RoundedCornerShape(16.dp)

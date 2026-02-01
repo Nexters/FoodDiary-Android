@@ -35,8 +35,6 @@ dependencies {
     implementation(projects.core.common)
     implementation(projects.core.ui)
     implementation(projects.domain)
-    implementation(projects.presentation.calendar)
-    implementation(projects.presentation.component)
 
     // Kotlin
     implementation(libs.androidx.core.ktx)
