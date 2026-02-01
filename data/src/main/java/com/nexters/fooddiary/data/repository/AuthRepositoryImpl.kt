@@ -35,8 +35,8 @@ class AuthRepositoryImpl @Inject constructor(
             val firebaseAuthToken = firebaseUser.getIdToken(true).await()?.token
                 ?: throw Exception("Failed to get Firebase ID Token")
 
-            tokenStore.saveToken(firebaseAuthToken)
             val loginResponse = authApi.login(LoginRequest("google", firebaseAuthToken))
+            tokenStore.saveToken(loginResponse.accessToken)
 
             userMapper.toDomainUser(firebaseUser, loginResponse.isFirst)
         }
@@ -44,6 +44,10 @@ class AuthRepositoryImpl @Inject constructor(
 
     override fun getCurrentUser(): User? {
         return firebaseAuth.currentUser?.let { userMapper.toDomainUser(it) }
+    }
+
+    override suspend fun verifyToken(): Result<Unit> {
+        return runCatching { authApi.verifyToken() }
     }
 
     override suspend fun signOut() {
