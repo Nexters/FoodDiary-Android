@@ -34,7 +34,7 @@ object MockRouteHandler {
         return when {
             // Auth
 //            path == PATH_LOGIN && method == "POST" -> MOCK_LOGIN_SUCCESS
-//            path == PATH_VERIFY && method == "POST" -> MOCK_VERIFY_TOKEN_SUCCESS
+//            path == PATH_VERIFY && method == "GET" -> MOCK_VERIFY_TOKEN_SUCCESS
 
             // Diary
             path == PATH_DIARIES && method == "POST" -> MOCK_CREATE_DIARY_SUCCESS
