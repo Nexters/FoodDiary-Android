@@ -9,20 +9,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
 import androidx.compose.ui.draw.alpha
+import com.nexters.fooddiary.core.ui.theme.neonShadow
 
 @Composable
 fun NeonStyleDay(
@@ -89,39 +84,6 @@ fun NeonStyleDay(
         }
     }
 }
-
-/**
- * 네온 효과를 위한 Custom Shadow Modifier
- */
-fun Modifier.neonShadow(
-    color: Color,
-    borderRadius: Dp = 8.dp,
-    blurRadius: Dp = 16.dp,
-) = this.drawBehind {
-    drawIntoCanvas { canvas ->
-        val paint = Paint()
-        val frameworkPaint = paint.asFrameworkPaint()
-
-        // Shadow 설정
-        frameworkPaint.setShadowLayer(
-            blurRadius.toPx(),
-            0f,
-            0f,
-            color.toArgb()
-        )
-
-        canvas.drawRoundRect(
-            0f,
-            0f,
-            size.width,
-            size.height,
-            borderRadius.toPx(),
-            borderRadius.toPx(),
-            paint
-        )
-    }
-}
-
 
 @Preview(showBackground = true, backgroundColor = 0xFF191821)
 @Composable
