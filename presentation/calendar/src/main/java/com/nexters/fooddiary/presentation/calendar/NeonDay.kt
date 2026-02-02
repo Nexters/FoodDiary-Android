@@ -21,9 +21,9 @@ import com.nexters.fooddiary.core.ui.theme.neonShadow
 
 @Composable
 fun NeonStyleDay(
-    topText: String = "DD",
-    bottomText: String = "00",
-    showDot: Boolean = true,
+    topText: String,
+    bottomText: String,
+    showDot: Boolean,
     modifier: Modifier = Modifier
 ) {
     val backgroundBrush = Brush.verticalGradient(
