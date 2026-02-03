@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_page_1_description">첫 번째 페이지 설명</string>
+    <string name="onboarding_page_2_description">두 번째 페이지 설명</string>
+    <string name="onboarding_page_3_description">세 번째 페이지 설명</string>
+    <string name="onboarding_page_4_description">네 번째 페이지 설명</string>
+    <string name="onboarding_page_5_description">다섯 번째 페이지 설명</string>
+    <string name="onboarding_page_6_description">여섯 번째 페이지 설명</string>
+    <string name="onboarding_button_next">다음</string>
+    <string name="onboarding_button_start">시작하기</string>
+</resources>
