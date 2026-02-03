@@ -225,7 +225,6 @@ private fun OnboardingScreenPreview() {
 private fun OnboardingPagePreview() {
     Box(
         modifier = Modifier
-            .fillMaxSize()
             .background(OnboardingBackgroundColor)
     ) {
         OnboardingPage(pageNumber = 0)
