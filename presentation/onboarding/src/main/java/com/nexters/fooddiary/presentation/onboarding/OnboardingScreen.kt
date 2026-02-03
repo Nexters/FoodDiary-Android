@@ -1,5 +1,6 @@
 package com.nexters.fooddiary.presentation.onboarding
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +27,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -143,27 +146,13 @@ private fun OnboardingPage(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // 이미지 영역 Placeholder (사용자가 나중에 실제 이미지로 교체)
-        Box(
-            modifier = Modifier
-                .size(200.dp)
-                .background(
-                    color = Color.White.copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(12.dp)
-                )
-                .border(
-                    width = 1.dp,
-                    color = Color.White.copy(alpha = 0.3f),
-                    shape = RoundedCornerShape(12.dp)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "이미지 영역 ${pageNumber + 1}",
-                color = Color.White.copy(alpha = 0.5f),
-                fontSize = 14.sp
-            )
-        }
+        // 온보딩 이미지
+        Image(
+            painter = painterResource(id = getImageForPage(pageNumber)),
+            contentDescription = null,
+            modifier = Modifier.size(220.dp),
+            contentScale = ContentScale.Fit
+        )
 
         Spacer(modifier = Modifier.height(48.dp))
 
@@ -211,6 +200,16 @@ private fun getDescriptionForPage(page: Int): Int {
         4 -> OnboardingR.string.onboarding_page_5_description
         5 -> OnboardingR.string.onboarding_page_6_description
         else -> OnboardingR.string.onboarding_page_1_description
+    }
+}
+
+private fun getImageForPage(page: Int): Int {
+    return when (page) {
+        0, 1, 2 -> OnboardingR.drawable.img_onboarding_key_visual_1
+        3 -> OnboardingR.drawable.img_onboarding_key_visual_2
+        4 -> OnboardingR.drawable.img_onboarding_key_visual_3
+        5 -> OnboardingR.drawable.img_onboarding_key_visual_4
+        else -> OnboardingR.drawable.img_onboarding_key_visual_1
     }
 }
 
