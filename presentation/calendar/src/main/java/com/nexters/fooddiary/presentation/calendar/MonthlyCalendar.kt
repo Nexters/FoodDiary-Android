@@ -1,50 +1,61 @@
 package com.nexters.fooddiary.presentation.calendar
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.graphics.Color.Companion.Transparent
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.tooling.preview.Preview
 import com.kizitonwose.calendar.compose.CalendarState
 import com.kizitonwose.calendar.compose.HorizontalCalendar
-
-// ... (existing code omitted for brevity in prompt, but I need to be careful with range)
-// Actually I shouldn't replace the whole middle part if it's large.
-// I will target the imports block and the preview block separately. 
-// But replace_file_content can only handle one block at a time unless I use multi_replace.
-// I will use multi_replace.
-
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.daysOfWeek
+import com.nexters.fooddiary.core.ui.theme.AppTypography.p12
+import com.nexters.fooddiary.core.ui.theme.Gray600
+import com.nexters.fooddiary.core.ui.theme.Gray900
+import com.nexters.fooddiary.core.ui.theme.White
 import com.nexters.fooddiary.presentation.calendar.theme.CalendarColors
 import com.nexters.fooddiary.presentation.calendar.theme.calendarColors
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -54,6 +65,9 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
+
+private val CalendarContainerShape = RoundedCornerShape(16.dp)
+private val MonthDayInnerShape = RoundedCornerShape(4.dp)
 
 @Composable
 fun MonthlyCalendar(
@@ -68,8 +82,8 @@ fun MonthlyCalendar(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val visibleMonth = remember { derivedStateOf { calendarState.firstVisibleMonth.yearMonth } }
+    var monthDropdownExpanded by remember { mutableStateOf(false) }
 
-    // 월 변경 감지 및 콜백 호출
     LaunchedEffect(calendarState) {
         snapshotFlow { calendarState.firstVisibleMonth.yearMonth }
             .distinctUntilChanged()
@@ -79,59 +93,68 @@ fun MonthlyCalendar(
     }
 
     Column(modifier = modifier) {
-        // 월/년도 헤더 화살표
-        MonthCalendarHeader(
-            yearMonth = visibleMonth.value,
-            locale = locale,
-            colors = colors,
-            onPreviousClick = {
-                coroutineScope.launch {
-                    calendarState.animateScrollToMonth(calendarState.firstVisibleMonth.yearMonth.minusMonths(1))
-                }
-            },
-            onNextClick = {
-                coroutineScope.launch {
-                    calendarState.animateScrollToMonth(calendarState.firstVisibleMonth.yearMonth.plusMonths(1))
-                }
-            }
-        )
+        Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
+            MonthCalendarHeader(
+                yearMonth = visibleMonth.value,
+                locale = locale,
+                colors = colors,
+                onClick = { monthDropdownExpanded = true },
+            )
+            MonthSelectDropdown(
+                expanded = monthDropdownExpanded,
+                onDismissRequest = { monthDropdownExpanded = false },
+                currentYearMonth = visibleMonth.value,
+                locale = locale,
+                colors = colors,
+                onMonthSelected = { targetYearMonth ->
+                    coroutineScope.launch {
+                        calendarState.animateScrollToMonth(targetYearMonth)
+                    }
+                    monthDropdownExpanded = false
+                },
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 요일 헤더
-        MonthWeekDaysHeader(
-            locale = locale,
-            firstDayOfWeek = calendarState.firstDayOfWeek,
-            colors = colors
-        )
+        Column(
+            modifier = Modifier
+                .shadow(4.dp, CalendarContainerShape, spotColor = Gray600.copy(alpha = 0.25f))
+                .clip(CalendarContainerShape)
+                .border(1.dp, Gray600.copy(alpha = 0.6f), CalendarContainerShape)
+                .padding(16.dp),
+        ) {
+            MonthWeekDaysHeader(
+                locale = locale,
+                firstDayOfWeek = calendarState.firstDayOfWeek,
+                colors = colors
+            )
 
-        Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-        // 월간 캘린더
-        HorizontalCalendar(
-            state = calendarState,
-            dayContent = { day ->
-                val photoCount = photoCountByDate[day.date] ?: 0
-                MonthDayCell(
-                    day = day,
-                    isSelected = day.date == selectedDate,
-                    photoCount = photoCount,
-                    colors = colors,
-                    onClick = {
-                        // 다른 월의 날짜를 클릭한 경우 애니메이션 후 선택
-                        if (day.position != DayPosition.MonthDate) {
-                            coroutineScope.launch {
-                                calendarState.animateScrollToMonth(YearMonth.from(day.date))
+            HorizontalCalendar(
+                state = calendarState,
+                dayContent = { day ->
+                    val photoCount = photoCountByDate[day.date] ?: 0
+                    MonthDayCell(
+                        day = day,
+                        isSelected = day.date == selectedDate,
+                        photoCount = photoCount,
+                        colors = colors,
+                        onClick = {
+                            if (day.position != DayPosition.MonthDate) {
+                                coroutineScope.launch {
+                                    calendarState.animateScrollToMonth(YearMonth.from(day.date))
+                                    onDateSelected(day.date)
+                                }
+                            } else {
                                 onDateSelected(day.date)
                             }
-                        } else {
-                            // 현재 월의 날짜는 즉시 선택
-                            onDateSelected(day.date)
                         }
-                    }
-                )
-            }
-        )
+                    )
+                }
+            )
+        }
     }
 }
 
@@ -140,35 +163,61 @@ private fun MonthCalendarHeader(
     yearMonth: YearMonth,
     locale: Locale,
     colors: CalendarColors,
-    onPreviousClick: () -> Unit,
-    onNextClick: () -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "${yearMonth.month.getDisplayName(TextStyle.FULL, locale).uppercase()} ${yearMonth.year}",
+            text = "${yearMonth.year}년 ${yearMonth.monthValue}월",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = colors.headerText
+            color = colors.headerText,
         )
+        Icon(
+            imageVector = Icons.Default.ExpandMore,
+            contentDescription = "월 선택",
+            modifier = Modifier.size(24.dp),
+            tint = colors.iconTint,
+        )
+    }
+}
 
-        Row {
-            IconButton(onClick = onPreviousClick) {
-                Icon(
-                    imageVector = Icons.Default.ChevronLeft,
-                    contentDescription = "Previous",
-                    tint = colors.iconTint
-                )
-            }
-            IconButton(onClick = onNextClick) {
-                Icon(
-                    imageVector = Icons.Default.ChevronRight,
-                    contentDescription = "Next",
-                    tint = colors.iconTint
+@Composable
+private fun MonthSelectDropdown(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    currentYearMonth: YearMonth,
+    locale: Locale,
+    colors: CalendarColors,
+    onMonthSelected: (YearMonth) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        modifier = modifier
+            .heightIn(max = 320.dp)
+            .wrapContentSize(Alignment.TopStart),
+    ) {
+        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+            (1..12).forEach { monthValue ->
+                val yearMonth = YearMonth.of(currentYearMonth.year, monthValue)
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = "${yearMonth.year}년 ${monthValue}월",
+                            color = colors.headerText,
+                            fontSize = 14.sp,
+                        )
+                    },
+                    onClick = {
+                        onMonthSelected(yearMonth)
+                    },
                 )
             }
         }
@@ -215,63 +264,79 @@ private fun MonthDayCell(
         modifier = modifier
             .wrapContentSize()
             .clickable(onClick = onClick)
-            .padding(4.dp)
-            .background(
-                color = if (isSelected) colors.selectedBackground else Color.Transparent,
-                shape = RoundedCornerShape(8.dp)
-            ),
+            .padding(4.dp),
         contentAlignment = Alignment.TopCenter
     ) {
         Column(
-            modifier = Modifier.wrapContentSize(),
+            modifier = Modifier
+                .wrapContentSize()
+                .clip(RoundedCornerShape(8.dp))
+                .background(
+                    if (isSelected) colors.selectedBackground else White.copy(alpha = 0.02f)
+                ).padding(4.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            // Date number
+
+            ) {
+            // 날짜 숫자
             Text(
                 text = day.date.dayOfMonth.toString(),
-                fontSize = 16.sp,
+                style = p12,
                 color = when {
                     !isCurrentMonth -> colors.dayTextDisabled
                     isSelected -> colors.dayTextSelected
                     else -> colors.dayText
                 },
-                modifier = Modifier.padding(top = 8.dp)
+                modifier = Modifier.padding(top = 8.dp, bottom = 6.dp)
             )
 
-            // Inner box (from FD-19) with photo count overlay (from FD-29)
+            val dashedBorderColor = if (isSelected) Gray900 else colors.weekdayText
             Box(
                 modifier = Modifier
-                    .height(50.dp)
-                    .width(50.dp)
-                    .padding(horizontal = 4.dp, vertical = 6.dp)
+                    .size(32.dp)
+                    .clip(MonthDayInnerShape)
                     .background(
-                        color = if (isSelected) colors.selectedInnerBox else colors.unselectedInnerBox,
-                        shape = RoundedCornerShape(4.dp)
-                    ),
+                        if (isSelected) colors.selectedInnerBox else Transparent
+                    )
+                    .drawBehind {
+                        val path = Path().apply {
+                            addRoundRect(
+                                RoundRect(
+                                    left = 0f,
+                                    top = 0f,
+                                    right = size.width,
+                                    bottom = size.height,
+                                    cornerRadius = CornerRadius(4.dp.toPx()),
+                                )
+                            )
+                        }
+                        drawPath(
+                            path = path,
+                            color = dashedBorderColor,
+                            style = Stroke(
+                                width = 2.dp.toPx(),
+                                pathEffect = PathEffect.dashPathEffect(
+                                    intervals = floatArrayOf(3.dp.toPx(), 2.dp.toPx()),
+                                    phase = 0f,
+                                ),
+                            ),
+                        )
+                    },
                 contentAlignment = Alignment.Center
             ) {
-                // Photo count badge (from FD-29)
-                if (photoCount > 0 && isCurrentMonth) {
-                    Text(
-                        text = photoCount.toString(),
-                        fontSize = 12.sp,
-                        color = Color(0xFF4CAF50),
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                // 이미지 추가 예정
             }
         }
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF222222)
+@Preview
 @Composable
 private fun MonthlyCalendarPreview() {
     val state = rememberMonthCalendarState(
         selectedDate = LocalDate.now(),
         firstDayOfWeek = DayOfWeek.SUNDAY
     )
-    
+
     MonthlyCalendar(
         calendarState = state,
         selectedDate = LocalDate.now(),
