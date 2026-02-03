@@ -1,4 +1,4 @@
-package com.nexters.fooddiary.core.ui.calendar
+package com.nexters.fooddiary.presentation.calendar
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
