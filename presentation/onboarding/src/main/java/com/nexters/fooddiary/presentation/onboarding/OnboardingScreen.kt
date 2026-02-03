@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -62,6 +63,23 @@ internal fun OnboardingScreen(
                 pageNumber = page,
                 modifier = Modifier.fillMaxSize()
             )
+        }
+
+        // 우측 상단 - 건너뛰기 버튼 (마지막 페이지 제외)
+        if (pagerState.currentPage < PAGE_COUNT - 1) {
+            TextButton(
+                onClick = onComplete,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 16.dp, end = 16.dp)
+            ) {
+                Text(
+                    text = stringResource(OnboardingR.string.onboarding_button_skip),
+                    color = Color.White.copy(alpha = 0.7f),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Normal
+                )
+            }
         }
 
         // 하단 - Pagination Dots + Button
