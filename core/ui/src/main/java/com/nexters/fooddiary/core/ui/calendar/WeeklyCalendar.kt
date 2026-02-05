@@ -15,9 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -27,8 +24,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,8 +37,10 @@ import androidx.compose.ui.unit.sp
 import com.kizitonwose.calendar.compose.WeekCalendar
 import com.kizitonwose.calendar.compose.weekcalendar.WeekCalendarState
 import com.kizitonwose.calendar.compose.weekcalendar.rememberWeekCalendarState
+import com.nexters.fooddiary.core.ui.R.drawable
 import com.nexters.fooddiary.core.ui.calendar.theme.CalendarColors
 import com.nexters.fooddiary.core.ui.calendar.theme.calendarColors
+import com.nexters.fooddiary.core.ui.gradientBorder
 import com.nexters.fooddiary.core.ui.theme.Gray600
 import com.nexters.fooddiary.core.ui.theme.PrimBase
 import com.nexters.fooddiary.core.ui.theme.White
@@ -51,6 +53,15 @@ import java.util.Locale
 
 private val CalendarContainerShape = RoundedCornerShape(16.dp)
 private val DayDotShape = RoundedCornerShape(3.dp)
+
+private val WeeklyStrokeGradient = Brush.linearGradient(
+    *arrayOf(
+        0f to White.copy(alpha = 0.3f),
+        1f to White.copy(alpha = 0f),
+    ),
+    start = Offset(0f, 0f),
+    end = Offset(1000f, 1000f),
+)
 
 @Composable
 fun WeeklyCalendar(
@@ -91,9 +102,8 @@ fun WeeklyCalendar(
 
         Column(
             modifier = Modifier
-                .shadow(4.dp, CalendarContainerShape, spotColor = Gray600.copy(alpha = 0.25f))
                 .clip(CalendarContainerShape)
-                .border(1.dp, Gray600.copy(alpha = 0.6f), CalendarContainerShape)
+                .gradientBorder(1.dp, WeeklyStrokeGradient, CalendarContainerShape)
                 .padding(16.dp),
         ) {
             WeekCalendar(
@@ -132,13 +142,13 @@ private fun CalendarHeader(
             modifier = Modifier
                 .size(24.dp)
                 .clickable { onPreviousClick() },
-            imageVector = Icons.Default.ChevronLeft,
+            painter = painterResource(drawable.ic_back),
             colorFilter = ColorFilter.tint(Color.White),
             contentDescription = "Previous",
         )
         Text(
             modifier = Modifier.weight(1f),
-            text = "${yearMonth.year}년 ${yearMonth.monthValue}월",
+            text = "${yearMonth.monthValue}월",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = colors.headerText,
@@ -148,7 +158,7 @@ private fun CalendarHeader(
             modifier = Modifier
                 .size(24.dp)
                 .clickable { onNextClick() },
-            imageVector = Icons.Default.ChevronRight,
+            painter = painterResource(drawable.ic_next),
             colorFilter = ColorFilter.tint(Color.White),
             contentDescription = "Next",
         )

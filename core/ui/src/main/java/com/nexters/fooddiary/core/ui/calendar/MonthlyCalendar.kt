@@ -57,6 +57,7 @@ import com.nexters.fooddiary.core.ui.calendar.theme.calendarColors
 import com.nexters.fooddiary.core.ui.theme.AppTypography.p12
 import com.nexters.fooddiary.core.ui.theme.Gray600
 import com.nexters.fooddiary.core.ui.theme.Gray900
+import com.nexters.fooddiary.core.ui.theme.Sd900
 import com.nexters.fooddiary.core.ui.theme.White
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -122,6 +123,7 @@ fun MonthlyCalendar(
             modifier = Modifier
                 .shadow(4.dp, CalendarContainerShape, spotColor = Gray600.copy(alpha = 0.25f))
                 .clip(CalendarContainerShape)
+                .background(Sd900)
                 .border(1.dp, Gray600.copy(alpha = 0.6f), CalendarContainerShape)
                 .padding(16.dp),
         ) {

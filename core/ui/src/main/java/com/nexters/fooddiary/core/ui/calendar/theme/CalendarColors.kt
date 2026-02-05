@@ -52,14 +52,13 @@ private val DarkCalendarColors = CalendarColors(
 
     // 선택 상태
     selectedBackground = PrimBase,
-    selectedInnerBox = White.copy(0.2f),
+    selectedInnerBox =  Color.Transparent,
 
-    //TODO 디자인 문서에 343434로 되어있는데 선언안되어있어서 임의로 900 사용
-    unselectedInnerBox = Gray900,
+    unselectedInnerBox = Color.Transparent,
 
     // 배경
-    background = Sd900,
-    cellBackground = Gray800,
+    background = Color.Transparent,
+    cellBackground = Color.Transparent,
 )
 
 @Composable

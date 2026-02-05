@@ -1,7 +1,9 @@
 package com.nexters.fooddiary.presentation.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,12 +33,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color.Companion.Transparent
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.airbnb.mvrx.compose.collectAsState
@@ -45,6 +50,7 @@ import com.nexters.fooddiary.core.common.R.string
 import com.nexters.fooddiary.core.ui.R.drawable
 import com.nexters.fooddiary.core.ui.component.AddPhotoBox
 import com.nexters.fooddiary.core.ui.component.Header
+import com.nexters.fooddiary.core.ui.gradientBorder
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.Gray050
 import com.nexters.fooddiary.core.ui.theme.Gray750
@@ -56,6 +62,29 @@ import com.nexters.fooddiary.presentation.calendar.WeeklyCalendar
 import com.nexters.fooddiary.presentation.calendar.rememberMonthCalendarState
 import com.nexters.fooddiary.presentation.calendar.rememberWeeklyCalendarState
 import java.time.LocalDate
+
+private val ToggleCalendarStrokeGradient = Brush.linearGradient(
+    *arrayOf(
+        0f to White.copy(alpha = 0.10f),
+        1f to White.copy(alpha = 0f),
+    ),
+    start = Offset(0f, 0f),
+    end = Offset(60f, 60f),
+)
+
+private val SelectedTabStrokeGradient = Brush.linearGradient(
+    *arrayOf(
+        0f to White.copy(alpha = 0.11f),
+        0.54f to White.copy(alpha = 0f),
+        1f to White.copy(alpha = 0.05f),
+    ),
+    start = Offset(0f, 0f),
+    end = Offset(1000f, 1000f),
+)
+
+
+private fun Modifier.selectedTabGradientBorder(selected: Boolean) =
+    then(if (selected) Modifier.gradientBorder(1.dp, SelectedTabStrokeGradient, CircleShape) else Modifier)
 
 @Composable
 internal fun HomeScreen(
@@ -191,12 +220,14 @@ private fun HomeBottomBar(
     ) {
         HomeInsightToggle(
             selectedTab = currentRoute,
+            isDisabled = isMonthlyCalendarView,
             onHomeClick = onHomeClick,
             onInsightClick = onInsightClick,
-            modifier = modifier
+            modifier = Modifier.weight(1f),
         )
         IconButton(
-            modifier = modifier.size(60.dp),
+            modifier = Modifier.size(60.dp)
+                .gradientBorder(1.dp, ToggleCalendarStrokeGradient, CircleShape),
             onClick = onCalendarViewToggle,
             shape = CircleShape,
             colors = remember {
@@ -220,15 +251,28 @@ private fun HomeBottomBar(
 @Composable
 private fun HomeInsightToggle(
     selectedTab: HomeTab,
+    isDisabled: Boolean,
     onHomeClick: () -> Unit,
     onInsightClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val isHomeSelected = !isDisabled && selectedTab == HomeTab.HOME
+    val isInsightSelected = !isDisabled && selectedTab == HomeTab.INSIGHT
+
     Row(
         modifier = modifier
             .height(60.dp)
             .clip(CircleShape)
-            .background(Gray750.copy(alpha = 0.3f))
+            .background(
+                color = if (isDisabled) Gray750 else Gray750.copy(alpha = 0.3f),
+            )
+            .let { base ->
+                if (isDisabled) {
+                    base
+                } else {
+                    base.gradientBorder(1.dp, ToggleCalendarStrokeGradient, CircleShape)
+                }
+            }
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -239,8 +283,14 @@ private fun HomeInsightToggle(
                 .height(44.dp)
                 .width(75.dp)
                 .clip(CircleShape)
-                .background(if (selectedTab == HomeTab.HOME) PrimBase else Transparent)
-                .clickable(onClick = onHomeClick)
+                .background(if (isHomeSelected) PrimBase else Transparent)
+                .selectedTabGradientBorder(selected = isHomeSelected)
+                .clickable(
+                    enabled = !isDisabled,
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() },
+                    onClick = onHomeClick,
+                )
                 .padding(12.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
@@ -248,7 +298,7 @@ private fun HomeInsightToggle(
             Icon(
                 painter = painterResource(drawable.ic_home),
                 contentDescription = stringResource(string.home_nav_home),
-                tint = if (selectedTab == HomeTab.HOME) White else Gray050,
+                tint = if (isHomeSelected) White else Gray050,
                 modifier = Modifier.size(20.dp),
             )
             Text(
@@ -256,7 +306,7 @@ private fun HomeInsightToggle(
                 text = stringResource(string.home_nav_home),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                color = if (selectedTab == HomeTab.HOME) White else Gray050,
+                color = if (isHomeSelected) White else Gray050,
             )
         }
         // 인사이트
@@ -265,8 +315,14 @@ private fun HomeInsightToggle(
                 .height(44.dp)
                 .width(105.dp)
                 .clip(CircleShape)
-                .background(if (selectedTab == HomeTab.INSIGHT) PrimBase else Transparent)
-                .clickable(onClick = onInsightClick)
+                .background(if (isInsightSelected) PrimBase else Transparent)
+                .selectedTabGradientBorder(selected = isInsightSelected)
+                .clickable(
+                    enabled = !isDisabled,
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() },
+                    onClick = onInsightClick,
+                )
                 .padding(vertical = 12.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
@@ -274,7 +330,7 @@ private fun HomeInsightToggle(
             Icon(
                 painter = painterResource(drawable.ic_insights),
                 contentDescription = stringResource(string.home_nav_insight),
-                tint = if (selectedTab == HomeTab.INSIGHT) White else Gray050,
+                tint = if (isInsightSelected) White else Gray050,
                 modifier = Modifier.size(20.dp),
             )
             Text(
@@ -282,7 +338,7 @@ private fun HomeInsightToggle(
                 text = stringResource(string.home_nav_insight),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                color = if (selectedTab == HomeTab.INSIGHT) White else Gray050,
+                color = if (isInsightSelected) White else Gray050,
             )
         }
     }
@@ -292,6 +348,8 @@ private fun HomeInsightToggle(
 @Composable
 private fun HomeScreenPreview() {
     HomeScreen(
-        state = HomeScreenState(),
+        state = HomeScreenState(
+
+        ),
     )
 }
