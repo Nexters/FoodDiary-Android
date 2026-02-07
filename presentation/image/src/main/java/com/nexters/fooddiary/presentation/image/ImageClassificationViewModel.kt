@@ -48,15 +48,14 @@ class ImageClassificationViewModel @AssistedInject constructor(
                 val result = runCatching {
                     classifyImageUseCase(uri.toString())
                 }.getOrNull()
-                val idx = index
                 withContext(Dispatchers.Main) {
                     setState {
                         copy(
                             selectedItems = this.selectedItems.mapIndexed { i, item ->
-                                if (i == idx) item.copy(classificationResult = result)
+                                if (i == index) item.copy(classificationResult = result)
                                 else item
                             },
-                            isLoading = idx < loaded.lastIndex
+                            isLoading = index < loaded.lastIndex
                         )
                     }
                 }
