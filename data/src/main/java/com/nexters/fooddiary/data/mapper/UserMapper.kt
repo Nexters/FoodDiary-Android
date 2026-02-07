@@ -5,12 +5,13 @@ import com.nexters.fooddiary.domain.model.User
 import javax.inject.Inject
 
 class UserMapper @Inject constructor() {
-    fun toDomainUser(firebaseUser: FirebaseUser): User {
+    fun toDomainUser(firebaseUser: FirebaseUser, isFirst: Boolean = false): User {
         return User(
             id = firebaseUser.uid,
             email = firebaseUser.email,
             displayName = firebaseUser.displayName,
-            photoUrl = firebaseUser.photoUrl?.toString()
+            photoUrl = firebaseUser.photoUrl?.toString(),
+            isFirst = isFirst
         )
     }
 }
