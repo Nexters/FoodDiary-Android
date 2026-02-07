@@ -38,7 +38,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.airbnb.mvrx.compose.collectAsState
+import com.airbnb.mvrx.compose.collectAsStateWithLifecycle
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.common.toPercentageString
 import com.nexters.fooddiary.domain.model.ClassificationResult
@@ -49,8 +49,15 @@ internal fun ImageClassificationScreen(
     viewModel: ImageClassificationViewModel = mavericksViewModel()
 ) {
     val context = LocalContext.current
-    val state by viewModel.collectAsState()
+    val state by viewModel.collectAsStateWithLifecycle()
     var showImagePicker by remember { mutableStateOf(false) }
+    val mimeType = remember { context.getString(R.string.image_mime_type) }
+    
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { viewModel.loadImageFromUri(it) }
+    }
 
     LaunchedEffect(state.errorMessage) {
         state.errorMessage?.let { message ->

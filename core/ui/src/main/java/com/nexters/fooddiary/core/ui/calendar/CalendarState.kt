@@ -1,4 +1,4 @@
-package com.nexters.fooddiary.presentation.calendar
+package com.nexters.fooddiary.core.ui.calendar
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember

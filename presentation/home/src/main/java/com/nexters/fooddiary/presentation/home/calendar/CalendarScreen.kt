@@ -29,9 +29,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.nexters.fooddiary.core.common.permission.PermissionUtil
-import com.nexters.fooddiary.presentation.calendar.MonthlyCalendar
-import com.nexters.fooddiary.presentation.calendar.rememberMonthCalendarState
-import com.nexters.fooddiary.presentation.calendar.theme.calendarColors
+import com.nexters.fooddiary.core.ui.calendar.MonthlyCalendar
+import com.nexters.fooddiary.core.ui.calendar.rememberMonthCalendarState
+import com.nexters.fooddiary.core.ui.calendar.theme.calendarColors
 import com.nexters.fooddiary.presentation.home.R
 import java.time.DayOfWeek
 import java.time.LocalDate
