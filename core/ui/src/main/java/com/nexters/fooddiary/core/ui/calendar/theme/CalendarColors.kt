@@ -52,7 +52,7 @@ private val DarkCalendarColors = CalendarColors(
 
     // 선택 상태
     selectedBackground = PrimBase,
-    selectedInnerBox =  Color.Transparent,
+    selectedInnerBox =  Color.White.copy(alpha = 0.2f),
 
     unselectedInnerBox = Color.Transparent,
 

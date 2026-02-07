@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
@@ -270,65 +271,52 @@ private fun MonthDayCell(
             .padding(4.dp),
         contentAlignment = Alignment.TopCenter
     ) {
-        Column(
-            modifier = Modifier
-                .wrapContentSize()
-                .clip(RoundedCornerShape(8.dp))
-                .background(
-                    if (isSelected) colors.selectedBackground else White.copy(alpha = 0.02f)
-                ).padding(4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-
-            ) {
-            // 날짜 숫자
-            Text(
-                text = day.date.dayOfMonth.toString(),
-                style = p12,
-                color = when {
-                    !isCurrentMonth -> colors.dayTextDisabled
-                    isSelected -> colors.dayTextSelected
-                    else -> colors.dayText
-                },
-                modifier = Modifier.padding(top = 8.dp, bottom = 6.dp)
-            )
-
-            val dashedBorderColor = if (isSelected) Gray900 else colors.weekdayText
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(MonthDayInnerShape)
-                    .background(
-                        if (isSelected) colors.selectedInnerBox else Transparent
-                    )
-                    .drawBehind {
-                        val path = Path().apply {
-                            addRoundRect(
-                                RoundRect(
-                                    left = 0f,
-                                    top = 0f,
-                                    right = size.width,
-                                    bottom = size.height,
-                                    cornerRadius = CornerRadius(4.dp.toPx()),
-                                )
-                            )
-                        }
-                        drawPath(
-                            path = path,
-                            color = dashedBorderColor,
-                            style = Stroke(
-                                width = 2.dp.toPx(),
-                                pathEffect = PathEffect.dashPathEffect(
-                                    intervals = floatArrayOf(3.dp.toPx(), 2.dp.toPx()),
-                                    phase = 0f,
-                                ),
-                            ),
+        NeonStyleDay(
+            modifier = modifier
+                .clickable(onClick = onClick),
+            topText = day.date.dayOfMonth.toString(),
+            isSelected = isSelected,
+            showDot = false,
+            content = {
+                val dashedBorderColor = if (isSelected) Gray900 else colors.weekdayText
+                Box(
+                    modifier = Modifier
+                        .padding(top = 6.dp)
+                        .requiredSize(32.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(
+                            if (isSelected) colors.selectedInnerBox else Transparent
                         )
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                // 이미지 추가 예정
+                        .drawBehind {
+                            val path = Path().apply {
+                                addRoundRect(
+                                    RoundRect(
+                                        left = 0f,
+                                        top = 0f,
+                                        right = size.width,
+                                        bottom = size.height,
+                                        cornerRadius = CornerRadius(4.dp.toPx()),
+                                    )
+                                )
+                            }
+                            drawPath(
+                                path = path,
+                                color = dashedBorderColor,
+                                style = Stroke(
+                                    width = 2.dp.toPx(),
+                                    pathEffect = PathEffect.dashPathEffect(
+                                        intervals = floatArrayOf(3.dp.toPx(), 2.dp.toPx()),
+                                        phase = 0f,
+                                    ),
+                                ),
+                            )
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    // 이미지 추가 예정
+                }
             }
-        }
+        )
     }
 }
 

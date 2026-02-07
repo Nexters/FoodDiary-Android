@@ -1,7 +1,6 @@
 package com.nexters.fooddiary.presentation.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -36,18 +35,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color.Companion.Transparent
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.common.R.string
 import com.nexters.fooddiary.core.ui.R.drawable
+import com.nexters.fooddiary.core.ui.calendar.MonthlyCalendar
+import com.nexters.fooddiary.core.ui.calendar.rememberMonthCalendarState
+import com.nexters.fooddiary.core.ui.calendar.rememberWeeklyCalendarState
 import com.nexters.fooddiary.core.ui.component.AddPhotoBox
 import com.nexters.fooddiary.core.ui.component.Header
 import com.nexters.fooddiary.core.ui.gradientBorder
@@ -57,10 +57,7 @@ import com.nexters.fooddiary.core.ui.theme.Gray750
 import com.nexters.fooddiary.core.ui.theme.PrimBase
 import com.nexters.fooddiary.core.ui.theme.SdBase
 import com.nexters.fooddiary.core.ui.theme.White
-import com.nexters.fooddiary.presentation.calendar.MonthlyCalendar
-import com.nexters.fooddiary.presentation.calendar.WeeklyCalendar
-import com.nexters.fooddiary.presentation.calendar.rememberMonthCalendarState
-import com.nexters.fooddiary.presentation.calendar.rememberWeeklyCalendarState
+import com.nexters.fooddiary.core.ui.calendar.WeeklyCalendar
 import java.time.LocalDate
 
 private val ToggleCalendarStrokeGradient = Brush.linearGradient(
@@ -220,10 +217,8 @@ private fun HomeBottomBar(
     ) {
         HomeInsightToggle(
             selectedTab = currentRoute,
-            isDisabled = isMonthlyCalendarView,
             onHomeClick = onHomeClick,
             onInsightClick = onInsightClick,
-            modifier = Modifier.weight(1f),
         )
         IconButton(
             modifier = Modifier.size(60.dp)
@@ -251,95 +246,85 @@ private fun HomeBottomBar(
 @Composable
 private fun HomeInsightToggle(
     selectedTab: HomeTab,
-    isDisabled: Boolean,
     onHomeClick: () -> Unit,
     onInsightClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val isHomeSelected = !isDisabled && selectedTab == HomeTab.HOME
-    val isInsightSelected = !isDisabled && selectedTab == HomeTab.INSIGHT
+    val isHomeSelected = selectedTab == HomeTab.HOME
+    val isInsightSelected = selectedTab == HomeTab.INSIGHT
 
     Row(
         modifier = modifier
-            .height(60.dp)
-            .clip(CircleShape)
-            .background(
-                color = if (isDisabled) Gray750 else Gray750.copy(alpha = 0.3f),
-            )
-            .let { base ->
-                if (isDisabled) {
-                    base
-                } else {
-                    base.gradientBorder(1.dp, ToggleCalendarStrokeGradient, CircleShape)
-                }
-            }
+.height(60.dp)
+.clip(CircleShape)
+.background(
+    color =  Gray750.copy(alpha = 0.3f),
+).gradientBorder(1.dp, ToggleCalendarStrokeGradient, CircleShape)
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         // 홈
-        Row(
-            modifier = Modifier
-                .height(44.dp)
-                .width(75.dp)
-                .clip(CircleShape)
-                .background(if (isHomeSelected) PrimBase else Transparent)
-                .selectedTabGradientBorder(selected = isHomeSelected)
-                .clickable(
-                    enabled = !isDisabled,
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() },
-                    onClick = onHomeClick,
+            Row(
+                modifier = Modifier
+                    .height(44.dp)
+                    .width(75.dp)
+                    .clip(CircleShape)
+                    .background( if (isHomeSelected) PrimBase else Transparent)
+                    .selectedTabGradientBorder(selected = isHomeSelected)
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = onHomeClick,
+                    )
+                    .padding(12.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    painter = painterResource(drawable.ic_home),
+                    contentDescription = stringResource(string.home_nav_home),
+                    tint = if (isHomeSelected) White else Gray050,
+                    modifier = Modifier.size(20.dp),
                 )
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                painter = painterResource(drawable.ic_home),
-                contentDescription = stringResource(string.home_nav_home),
-                tint = if (isHomeSelected) White else Gray050,
-                modifier = Modifier.size(20.dp),
-            )
-            Text(
-                modifier = Modifier.padding(start = 8.dp),
-                text = stringResource(string.home_nav_home),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = if (isHomeSelected) White else Gray050,
-            )
-        }
-        // 인사이트
-        Row(
-            modifier = Modifier
-                .height(44.dp)
-                .width(105.dp)
-                .clip(CircleShape)
-                .background(if (isInsightSelected) PrimBase else Transparent)
-                .selectedTabGradientBorder(selected = isInsightSelected)
-                .clickable(
-                    enabled = !isDisabled,
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() },
-                    onClick = onInsightClick,
+                Text(
+                    modifier = Modifier.padding(start = 8.dp),
+                    text = stringResource(string.home_nav_home),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = if (isHomeSelected) White else Gray050,
                 )
-                .padding(vertical = 12.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                painter = painterResource(drawable.ic_insights),
-                contentDescription = stringResource(string.home_nav_insight),
-                tint = if (isInsightSelected) White else Gray050,
-                modifier = Modifier.size(20.dp),
-            )
-            Text(
-                modifier = Modifier.padding(start = 8.dp),
-                text = stringResource(string.home_nav_insight),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = if (isInsightSelected) White else Gray050,
-            )
+            }
+            // 인사이트
+            Row(
+                modifier = Modifier
+                    .height(44.dp)
+                    .width(105.dp)
+                    .clip(CircleShape)
+                    .background( if (isInsightSelected) PrimBase else Transparent)
+                    .selectedTabGradientBorder(selected = isInsightSelected)
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = onInsightClick,
+                    )
+                    .padding(vertical = 12.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    painter = painterResource(drawable.ic_insights),
+                    contentDescription = stringResource(string.home_nav_insight),
+                    tint =  if (isInsightSelected) White else Gray050,
+                    modifier = Modifier.size(20.dp),
+                )
+                Text(
+                    modifier = Modifier.padding(start = 8.dp),
+                    text = stringResource(string.home_nav_insight),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = if (isInsightSelected) White else Gray050,
+                )
         }
     }
 }

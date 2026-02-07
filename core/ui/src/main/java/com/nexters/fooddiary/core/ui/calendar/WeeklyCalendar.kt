@@ -1,17 +1,15 @@
-package com.nexters.fooddiary.presentation.calendar
+package com.nexters.fooddiary.core.ui.calendar
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,7 +21,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -51,8 +48,7 @@ import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
 
-private val CalendarContainerShape = RoundedCornerShape(16.dp)
-private val DayDotShape = RoundedCornerShape(3.dp)
+internal val CalendarContainerShape = RoundedCornerShape(16.dp)
 
 private val WeeklyStrokeGradient = Brush.linearGradient(
     *arrayOf(
@@ -115,7 +111,6 @@ fun WeeklyCalendar(
                         isSelected = day.date == selectedDate,
                         hasData = photoCount > 0,
                         locale = locale,
-                        colors = colors,
                         onClick = { onDateSelected(day.date) }
                     )
                 }
@@ -148,7 +143,7 @@ private fun CalendarHeader(
         )
         Text(
             modifier = Modifier.weight(1f),
-            text = "${yearMonth.monthValue}월",
+            text = "${yearMonth.year}년 ${yearMonth.monthValue}월",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = colors.headerText,
@@ -165,61 +160,24 @@ private fun CalendarHeader(
     }
 }
 
-private val DayCellShape = RoundedCornerShape(8.dp)
-
 @Composable
 private fun DayCell(
     date: LocalDate,
     isSelected: Boolean,
     hasData: Boolean,
     locale: Locale,
-    colors: CalendarColors,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
+    NeonStyleDay(
+        topText = date.dayOfWeek.getDisplayName(TextStyle.SHORT, locale),
+        bottomText = date.dayOfMonth.toString().padStart(2, '0'),
+        showDot = hasData,
+        isSelected = isSelected,
         modifier = modifier
-            .aspectRatio(1f)
-            .then(
-                if (isSelected) Modifier.shadow(
-                    4.dp,
-                    DayCellShape,
-                    spotColor = PrimBase.copy(alpha = 0.4f)
-                ) else Modifier
-            )
+            .heightIn(max = 56.dp)
             .clickable(onClick = onClick)
-            .background(
-                color = if (isSelected) colors.selectedBackground else Color.Transparent,
-                shape = DayCellShape
-            ),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        if (hasData) {
-            Box(
-                modifier = Modifier
-                    .size(6.dp)
-                    .background(
-                        color = if (isSelected) White else PrimBase,
-                        shape = DayDotShape,
-                    ),
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-        }
-        Text(
-            text = date.dayOfWeek.getDisplayName(TextStyle.SHORT, locale),
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Medium,
-            color = if (isSelected) colors.dayTextSelected else colors.weekdayText,
-        )
-        Spacer(modifier = Modifier.height(2.dp))
-        Text(
-            text = date.dayOfMonth.toString().padStart(2, '0'),
-            fontSize = 16.sp,
-            fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
-            color = if (isSelected) colors.dayTextSelected else colors.dayText,
-        )
-    }
+    )
 }
 
 @Preview
@@ -240,6 +198,7 @@ private fun WeeklyCalendarPreview() {
     WeeklyCalendar(
         calendarState = state,
         selectedDate = currentDate,
-        onDateSelected = {}
+        onDateSelected = {},
+        photoCountByDate = mapOf(currentDate to 1)
     )
 }
