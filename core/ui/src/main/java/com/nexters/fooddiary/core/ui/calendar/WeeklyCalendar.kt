@@ -38,8 +38,6 @@ import com.nexters.fooddiary.core.ui.R.drawable
 import com.nexters.fooddiary.core.ui.calendar.theme.CalendarColors
 import com.nexters.fooddiary.core.ui.calendar.theme.calendarColors
 import com.nexters.fooddiary.core.ui.gradientBorder
-import com.nexters.fooddiary.core.ui.theme.Gray600
-import com.nexters.fooddiary.core.ui.theme.PrimBase
 import com.nexters.fooddiary.core.ui.theme.White
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
