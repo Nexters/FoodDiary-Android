@@ -1,4 +1,4 @@
-package com.nexters.fooddiary.presentation.calendar.theme
+package com.nexters.fooddiary.core.ui.calendar.theme
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
