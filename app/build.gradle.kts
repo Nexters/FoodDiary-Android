@@ -29,6 +29,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+        buildConfigField("boolean", "USE_MOCK_API", "true")
+
         val webClientId = localProperties.getProperty("web.client.id", "")
             .takeIf { it.isNotEmpty() && it != "YOUR_WEB_CLIENT_ID_HERE" }
             ?: ""
@@ -52,6 +54,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("boolean", "USE_MOCK_API", "false")
         }
         debug {
             applicationIdSuffix = ".dev"

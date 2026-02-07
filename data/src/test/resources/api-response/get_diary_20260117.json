@@ -1,0 +1,24 @@
+{
+    "date": "2026-01-17",
+    "note": "오늘도 잘 먹었다!",
+    "photos": [
+        {
+            "photo_id": 42,
+            "image_url": "https://s3.example.com/photo/42",
+            "taken_at": "2026-01-17T12:30:00",
+            "restaurant_name": "명동교자",
+            "menu_name": "칼국수",
+            "menu_price": 10000,
+            "time_type": "lunch"
+        },
+        {
+            "photo_id": 43,
+            "image_url": "https://s3.example.com/photo/43",
+            "taken_at": "2026-01-17T18:30:00",
+            "restaurant_name": "을지면옥",
+            "menu_name": "평양냉면",
+            "menu_price": 13000,
+            "time_type": "dinner"
+        }
+    ]
+}

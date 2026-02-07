@@ -7,6 +7,8 @@ import com.nexters.fooddiary.core.common.auth.GoogleSignInIntentProvider
 import com.nexters.fooddiary.core.common.auth.getWebClientId
 import com.nexters.fooddiary.data.local.TokenStore
 import com.nexters.fooddiary.data.mapper.UserMapper
+import com.nexters.fooddiary.data.remote.auth.AuthApi
+import com.nexters.fooddiary.data.remote.auth.model.request.LoginRequest
 import com.nexters.fooddiary.data.security.EncryptionKeyManager
 import com.nexters.fooddiary.domain.model.User
 import com.nexters.fooddiary.domain.repository.AuthRepository
@@ -15,6 +17,7 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
+    private val authApi: AuthApi,
     private val firebaseAuth: FirebaseAuth,
     private val tokenStore: TokenStore,
     private val userMapper: UserMapper,
@@ -24,15 +27,18 @@ class AuthRepositoryImpl @Inject constructor(
 ) : AuthRepository {
 
     override suspend fun signInWithGoogle(idToken: String): Result<User> {
-        return try {
+        return runCatching {
             val credential = GoogleAuthProvider.getCredential(idToken, null)
-            val result = firebaseAuth.signInWithCredential(credential).await()
-            result.user?.let { firebaseUser ->
-                kotlin.runCatching { tokenStore.saveToken(idToken) }
-                Result.success(userMapper.toDomainUser(firebaseUser))
-            } ?: Result.failure(Exception("User is null"))
-        } catch (e: Exception) {
-            Result.failure(e)
+            val authResult = firebaseAuth.signInWithCredential(credential).await()
+            val firebaseUser = authResult.user ?: throw Exception("Firebase User is null")
+
+            val firebaseAuthToken = firebaseUser.getIdToken(true).await()?.token
+                ?: throw Exception("Failed to get Firebase ID Token")
+
+            tokenStore.saveToken(firebaseAuthToken)
+            val loginResponse = authApi.login(LoginRequest("google", firebaseAuthToken))
+
+            userMapper.toDomainUser(firebaseUser, loginResponse.isFirst)
         }
     }
 
@@ -54,15 +60,15 @@ class AuthRepositoryImpl @Inject constructor(
             val user = firebaseAuth.currentUser
             if (user != null) {
                 user.delete().await()
-                
+
                 kotlin.runCatching { tokenStore.deleteToken() }
                 kotlin.runCatching { encryptionKeyManager.deleteKey() }
-                
+
                 val webClientId = context.getWebClientId()
                 if (webClientId.isNotEmpty()) {
                     kotlin.runCatching { googleSignInIntentProvider.revokeAccess(context, webClientId) }
                 }
-                
+
                 Result.success(Unit)
             } else {
                 Result.failure(Exception("No user signed in"))
