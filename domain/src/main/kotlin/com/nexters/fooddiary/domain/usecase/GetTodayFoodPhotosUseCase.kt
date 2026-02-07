@@ -40,6 +40,6 @@ class GetTodayFoodPhotosUseCase @Inject constructor(
 
     private data class PhotoWithClassification(
         val uriString: String,
-        val result: com.nexters.fooddiary.domain.model.ClassificationResult?
+        val result: ClassificationResult?
     )
 }
