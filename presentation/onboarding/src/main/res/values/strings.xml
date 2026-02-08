@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="onboarding_page_1_description">여기저기 흩어진 음식 기록들,\n간편히 정리해 드릴게요</string>
-    <string name="onboarding_page_2_description">여기저기 흩어진 음식 기록들,\n간편히 정리해 드릴게요</string>
-    <string name="onboarding_page_3_description">음식 기록은 간편하게 시작하고,\n활용은 자유롭게 이어가세요.</string>
-    <string name="onboarding_page_4_description">음식 사진을 올리면 식당, 메뉴,\n방문 정보를 자동으로 정리해줘요.</string>
-    <string name="onboarding_page_5_description">정리된 기록을 블로그나 SNS에\n바로 활용할 수 있어요.</string>
-    <string name="onboarding_page_6_description">기록이 쌓일수록 무엇을, 언제,\n얼마나 먹는지 한눈에 보여요.</string>
+    <string name="onboarding_page_0_description">여기저기 흩어진 음식 기록들,\n간편히 정리해 드릴게요</string>
+    <string name="onboarding_page_1_description">음식 기록은 간편하게 시작하고,\n활용은 자유롭게 이어가세요.</string>
+    <string name="onboarding_page_2_description">음식 사진을 올리면 식당, 메뉴,\n방문 정보를 자동으로 정리해줘요.</string>
+    <string name="onboarding_page_3_description">정리된 기록을 블로그나 SNS에\n바로 활용할 수 있어요.</string>
+    <string name="onboarding_page_4_description">기록이 쌓일수록 무엇을, 언제,\n얼마나 먹는지 한눈에 보여요.</string>
     <string name="onboarding_button_next">다음</string>
     <string name="onboarding_button_start">시작하기</string>
     <string name="onboarding_button_skip">건너뛰기</string>

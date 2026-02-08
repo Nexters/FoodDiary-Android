@@ -2,7 +2,6 @@ package com.nexters.fooddiary.presentation.onboarding
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -193,22 +192,22 @@ private fun PaginationDots(
 
 private fun getDescriptionForPage(page: Int): Int {
     return when (page) {
-        0 -> OnboardingR.string.onboarding_page_1_description
-        1 -> OnboardingR.string.onboarding_page_2_description
-        2 -> OnboardingR.string.onboarding_page_3_description
-        3 -> OnboardingR.string.onboarding_page_4_description
-        4 -> OnboardingR.string.onboarding_page_5_description
-        5 -> OnboardingR.string.onboarding_page_6_description
-        else -> OnboardingR.string.onboarding_page_1_description
+        0 -> OnboardingR.string.onboarding_page_0_description
+        1 -> OnboardingR.string.onboarding_page_1_description
+        2 -> OnboardingR.string.onboarding_page_2_description
+        3 -> OnboardingR.string.onboarding_page_3_description
+        4 -> OnboardingR.string.onboarding_page_4_description
+        else -> OnboardingR.string.onboarding_page_0_description
     }
 }
 
 private fun getImageForPage(page: Int): Int {
     return when (page) {
-        0, 1, 2 -> OnboardingR.drawable.img_onboarding_key_visual_1
-        3 -> OnboardingR.drawable.img_onboarding_key_visual_2
-        4 -> OnboardingR.drawable.img_onboarding_key_visual_3
-        5 -> OnboardingR.drawable.img_onboarding_key_visual_4
+        0 -> OnboardingR.drawable.img_onboarding_key_visual_0
+        1 -> OnboardingR.drawable.img_onboarding_key_visual_1
+        2 -> OnboardingR.drawable.img_onboarding_key_visual_2
+        3 -> OnboardingR.drawable.img_onboarding_key_visual_3
+        4 -> OnboardingR.drawable.img_onboarding_key_visual_4
         else -> OnboardingR.drawable.img_onboarding_key_visual_1
     }
 }
@@ -226,6 +225,6 @@ private fun OnboardingPagePreview() {
         modifier = Modifier
             .background(OnboardingBackgroundColor)
     ) {
-        OnboardingPage(pageNumber = 0)
+        OnboardingPage(pageNumber = 1)
     }
 }
