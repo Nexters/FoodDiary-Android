@@ -29,7 +29,7 @@ class SplashViewModel @AssistedInject constructor(
     init {
         viewModelScope.launch {
             // 1초 표시 보장
-            delay(1000)
+            delay(SplashConstants.SPLASH_MINIMUM_DURATION_MILLIS)
 
             // 인증 상태 확인
             // TODO: /auth/verify API로 저장된 토큰의 유효성 검사 필요
