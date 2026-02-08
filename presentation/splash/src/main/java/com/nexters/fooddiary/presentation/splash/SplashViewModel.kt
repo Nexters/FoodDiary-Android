@@ -36,7 +36,7 @@ class SplashViewModel @AssistedInject constructor(
             initializeTokenCacheUseCase()
 
             // 1초 표시 보장
-            val minDelayDeferred = async { delay(1000)  }
+            val minDelayDeferred = async { delay(SplashConstants.SPLASH_MINIMUM_DURATION_MILLIS)  }
             // 토큰 검증 후 네비게이션 결정
             val destinationDeferred = async { determineNavigationDestination() }
 
