@@ -6,11 +6,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -140,29 +140,41 @@ private fun OnboardingPage(
     pageNumber: Int,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier.padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp),
+        contentAlignment = Alignment.Center
     ) {
         // 온보딩 이미지
         Image(
             painter = painterResource(id = getImageForPage(pageNumber)),
             contentDescription = null,
-            modifier = Modifier.size(220.dp),
+            modifier = if (pageNumber == 0) {
+                Modifier
+                    .align(Alignment.Center)
+                    .size(400.dp)
+                    .offset(y = (-42).dp)
+            } else {
+                Modifier
+                    .align(Alignment.Center)
+                    .size(220.dp)
+                    .offset(y = (-42).dp)
+            },
             contentScale = ContentScale.Fit
         )
 
-        Spacer(modifier = Modifier.height(48.dp))
-
-        // 설명 텍스트
+        // 설명 텍스트 (고정 위치)
         Text(
             text = stringResource(getDescriptionForPage(pageNumber)),
             color = Color.White,
             fontSize = 18.sp,
             fontWeight = FontWeight.Normal,
             textAlign = TextAlign.Center,
-            lineHeight = 26.sp
+            lineHeight = 26.sp,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .offset(y = 120.dp)
         )
     }
 }
