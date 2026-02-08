@@ -43,7 +43,7 @@ import com.nexters.fooddiary.presentation.onboarding.R as OnboardingR
 import kotlinx.coroutines.launch
 
 private val OnboardingColor = Color(0xFF191821)
-private const val PAGE_COUNT = 6
+private const val PAGE_COUNT = 5
 
 @Composable
 internal fun OnboardingScreen(
