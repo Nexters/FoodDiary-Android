@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - develop
+  pull_request:
+    branches:
+      - develop
+  workflow_dispatch:  # 수동 실행 가능
 
 jobs:
   deploy:
@@ -47,7 +51,15 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      - name: Build APK (PR preview)
+        if: github.event_name == 'pull_request'
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+        run: |
+          bundle exec fastlane build
+
       - name: Deploy to Firebase App Distribution
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         env:
           VERSION_CODE: ${{ github.run_number }}
           FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID_DEV }}
