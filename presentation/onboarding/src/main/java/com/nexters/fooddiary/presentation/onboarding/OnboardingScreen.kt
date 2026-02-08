@@ -179,10 +179,11 @@ private fun OnboardingPage(
         Text(
             text = stringResource(getDescriptionForPage(pageNumber)),
             color = Color.White,
-            fontSize = 18.sp,
+            fontSize = 15.sp,
             fontWeight = FontWeight.Normal,
             textAlign = TextAlign.Center,
-            lineHeight = 26.sp,
+            lineHeight = 19.5.sp,
+            letterSpacing = (-0.225).sp,
             modifier = Modifier
                 .align(Alignment.Center)
                 .offset(y = 120.dp)
