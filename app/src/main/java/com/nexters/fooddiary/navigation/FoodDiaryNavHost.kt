@@ -31,7 +31,9 @@ fun FoodDiaryNavHost(
     initialDeepLink: Uri? = null,
     onFinish: () -> Unit,
     navController: NavHostController = rememberNavController(),
-    onShowSignInError: (String) -> Unit
+    onShowDialog: (DialogData) -> Unit = {},
+    onShowSnackBar: (SnackBarData) -> Unit = {},
+    onShowToast: (String) -> Unit = {}
 ) {
     var authUiState by remember { mutableStateOf<AuthUiState?>(null) }
     var signOutRequestId by remember { mutableStateOf(0) }
@@ -45,7 +47,7 @@ fun FoodDiaryNavHost(
 
     LaunchedEffect(authUiState?.signInError) {
         authUiState?.signInError?.let { error ->
-            onShowSignInError(error)
+            onShowToast(error)
         }
     }
 

@@ -39,6 +39,7 @@ import com.airbnb.mvrx.compose.collectAsStateWithLifecycle
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.ui.theme.Gray540
 import com.nexters.fooddiary.presentation.auth.R as AuthR
+import com.nexters.fooddiary.core.ui.R as CoreR
 
 private val LoginBackgroundColor = Color(0xFF191821)
 private val GoogleButtonColor = Color.White
@@ -110,7 +111,7 @@ internal fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
-                painter = painterResource(id = AuthR.drawable.img_app_title_text),
+                painter = painterResource(id = CoreR.drawable.img_app_title_text),
                 contentDescription = stringResource(id = AuthR.string.app_title),
                 modifier = Modifier
                     .width(215.dp)
@@ -120,7 +121,7 @@ internal fun LoginScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             Image(
-                painter = painterResource(id = AuthR.drawable.img_app_title_image),
+                painter = painterResource(id = CoreR.drawable.img_app_title_image),
                 contentDescription = stringResource(id = AuthR.string.app_mascot_description),
                 modifier = Modifier.size(180.dp)
             )

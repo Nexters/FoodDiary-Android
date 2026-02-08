@@ -22,8 +22,14 @@ class MainActivity : ComponentActivity() {
                 FoodDiaryNavHost(
                     initialDeepLink = intent?.data,
                     onFinish = { finish() },
-                    onShowSignInError = { error ->
-                        Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+                    onShowDialog = { dialogData ->
+                        // TODO: Dialog 구현
+                    },
+                    onShowSnackBar = { snackBarData ->
+                        // TODO: SnackBar 구현
+                    },
+                    onShowToast = { message ->
+                        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                     }
                 )
             }
