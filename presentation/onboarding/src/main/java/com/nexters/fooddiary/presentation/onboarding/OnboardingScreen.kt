@@ -36,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.nexters.fooddiary.core.ui.theme.Gray050
 import com.nexters.fooddiary.core.ui.theme.Gray540
 import com.nexters.fooddiary.core.ui.theme.PrimBase
 import com.nexters.fooddiary.presentation.onboarding.R as OnboardingR
@@ -87,7 +88,7 @@ internal fun OnboardingScreen(
             ) {
                 Text(
                     text = stringResource(OnboardingR.string.onboarding_button_skip),
-                    color = Color.White.copy(alpha = 0.7f),
+                    color = Gray050,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal
                 )
