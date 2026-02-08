@@ -7,37 +7,19 @@ platform :android do
   # Helper Methods
   # ============================================================================
 
-  # Extract release notes from recent merge commits (PR titles)
+  # Extract release notes from recent merge commits (PR titles only)
   def extract_release_notes
     begin
-      # Get recent merge commit messages (PR titles)
-      # Use origin/develop for CI/PR compatibility
-      merge_messages = sh(
+      # Get PR titles from merge commits
+      # %b = commit body (contains PR title for GitHub merge commits)
+      pr_titles = sh(
         "git log --first-parent origin/develop --merges --pretty=format:'%b' -10 2>/dev/null | grep -v '^$' | head -5",
         log: false
       ).strip
 
-      if !merge_messages.empty?
-        return merge_messages
-          .split("\n")
-          .map { |line| "• #{line.strip}" }
-          .join("\n")
-      end
-
-      # Fallback to recent commits
-      commit_messages = sh(
-        "git log origin/develop --pretty=format:'%s' -5 2>/dev/null",
-        log: false
-      ).strip
-
-      if !commit_messages.empty?
-        return commit_messages
-          .split("\n")
-          .map { |line| "• #{line.strip}" }
-          .join("\n")
-      end
-
-      return "최근 업데이트가 포함된 릴리즈입니다."
+      return pr_titles.empty? ?
+        "최근 업데이트가 포함된 릴리즈입니다." :
+        pr_titles.split("\n").map { |line| "• #{line.strip}" }.join("\n")
     rescue => e
       UI.error("Failed to extract release notes: #{e.message}")
       return "최근 업데이트가 포함된 릴리즈입니다."
