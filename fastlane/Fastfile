@@ -10,26 +10,34 @@ platform :android do
   # Extract release notes from recent merge commits (PR titles)
   def extract_release_notes
     begin
-      # Get recent merge commit messages (PR titles) from develop branch
-      # --first-parent: Only follow first parent for merge commits
-      # --merges: Only show merge commits
-      # --pretty=format:'%b': Show commit body (contains PR title)
+      # Get recent merge commit messages (PR titles)
+      # Use origin/develop for CI/PR compatibility
       merge_messages = sh(
-        "git log --first-parent develop --merges --pretty=format:'%b' -10 | grep -v '^$' | head -5",
+        "git log --first-parent origin/develop --merges --pretty=format:'%b' -10 2>/dev/null | grep -v '^$' | head -5",
         log: false
       ).strip
 
-      if merge_messages.empty?
-        return "최근 업데이트가 포함된 릴리즈입니다."
+      if !merge_messages.empty?
+        return merge_messages
+          .split("\n")
+          .map { |line| "• #{line.strip}" }
+          .join("\n")
       end
 
-      # Format as bullet list
-      release_notes = merge_messages
-        .split("\n")
-        .map { |line| "• #{line.strip}" }
-        .join("\n")
+      # Fallback to recent commits
+      commit_messages = sh(
+        "git log origin/develop --pretty=format:'%s' -5 2>/dev/null",
+        log: false
+      ).strip
 
-      return release_notes.empty? ? "최근 업데이트가 포함된 릴리즈입니다." : release_notes
+      if !commit_messages.empty?
+        return commit_messages
+          .split("\n")
+          .map { |line| "• #{line.strip}" }
+          .join("\n")
+      end
+
+      return "최근 업데이트가 포함된 릴리즈입니다."
     rescue => e
       UI.error("Failed to extract release notes: #{e.message}")
       return "최근 업데이트가 포함된 릴리즈입니다."
@@ -208,6 +216,14 @@ platform :android do
     # Extract release notes
     release_notes = extract_release_notes
     UI.message("Release notes:\n#{release_notes}")
+
+    # Debug: Print Firebase config (without sensitive data)
+    UI.important("Firebase Config Debug:")
+    UI.message("  App ID: #{app_id[0..20]}... (truncated)")
+    UI.message("  Token: #{firebase_token ? 'SET' : 'NOT SET'}")
+    UI.message("  Version Code: #{version_code}")
+    UI.message("  APK Path: app/build/outputs/apk/debug/app-debug.apk")
+    UI.message("  Groups: internal-testers")
 
     # Upload to Firebase App Distribution
     firebase_app_distribution(
