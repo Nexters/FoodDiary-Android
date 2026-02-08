@@ -1,8 +1,7 @@
 package com.nexters.fooddiary.data.network
 
+import android.util.Log
 import com.nexters.fooddiary.data.local.TokenStore
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Response
 import javax.inject.Inject
@@ -23,9 +22,7 @@ class AuthInterceptor @Inject constructor(
             return chain.proceed(originalRequest)
         }
 
-        val token = runBlocking(Dispatchers.IO) {
-            tokenStore.getToken()
-        }
+        val token = tokenStore.getCachedToken()
 
         if (token.isNullOrBlank()) {
             return chain.proceed(originalRequest)

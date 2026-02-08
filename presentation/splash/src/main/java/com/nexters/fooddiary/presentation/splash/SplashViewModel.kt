@@ -5,6 +5,7 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
+import com.nexters.fooddiary.domain.usecase.InitializeTokenCacheUseCase
 import com.nexters.fooddiary.domain.usecase.SignOutUseCase
 import com.nexters.fooddiary.domain.usecase.VerifyTokenUseCase
 import dagger.assisted.Assisted
@@ -27,10 +28,13 @@ class SplashViewModel @AssistedInject constructor(
     @Assisted initialState: SplashUiState,
     private val verifyTokenUseCase: VerifyTokenUseCase,
     private val signOutUseCase: SignOutUseCase,
+    private val initializeTokenCacheUseCase: InitializeTokenCacheUseCase,
 ) : MavericksViewModel<SplashUiState>(initialState) {
 
     init {
         viewModelScope.launch {
+            initializeTokenCacheUseCase()
+
             // 1초 표시 보장
             val minDelayDeferred = async { delay(1000)  }
             // 토큰 검증 후 네비게이션 결정

@@ -50,6 +50,10 @@ class AuthRepositoryImpl @Inject constructor(
         return runCatching { authApi.verifyToken() }
     }
 
+    override suspend fun initializeTokenCache() {
+        tokenStore.initializeCache()
+    }
+
     override suspend fun signOut() {
         firebaseAuth.signOut()
         kotlin.runCatching { tokenStore.deleteToken() }
