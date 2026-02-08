@@ -230,7 +230,7 @@ platform :android do
       app: app_id,
       firebase_cli_token: firebase_token,
       apk_path: "app/build/outputs/apk/debug/app-debug.apk",
-      groups: "internal-testers",
+      # groups: "internal-testers",  # TODO: 그룹 생성 후 활성화
       release_notes: release_notes
     )
 
