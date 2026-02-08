@@ -54,8 +54,6 @@ class AuthRepositoryImpl @Inject constructor(
             Result.success(Unit)
         } catch (e: HttpException) {
             Result.failure(AuthException.InvalidToken())
-        } catch (e: java.io.IOException) {
-            Result.failure(AuthException.NetworkError(e))
         } catch (e: Exception) {
             Result.failure(e)
         }
