@@ -1,10 +1,12 @@
 package com.nexters.fooddiary.presentation.splash
 
+import android.net.http.HttpException
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
+import com.nexters.fooddiary.domain.exception.AuthException
 import com.nexters.fooddiary.domain.usecase.InitializeTokenCacheUseCase
 import com.nexters.fooddiary.domain.usecase.SignOutUseCase
 import com.nexters.fooddiary.domain.usecase.VerifyTokenUseCase
@@ -57,8 +59,10 @@ class SplashViewModel @AssistedInject constructor(
         return if (verificationResult.isSuccess) {
             NavigationDestination.Home
         } else {
-            // 서버 토큰이 유효하지 않으면 Firebase와 로컬 토큰 모두 정리
-            signOutUseCase()
+            val exception = verificationResult.exceptionOrNull()
+            if (exception is AuthException.InvalidToken) {
+                signOutUseCase()
+            }
             NavigationDestination.Login
         }
     }
