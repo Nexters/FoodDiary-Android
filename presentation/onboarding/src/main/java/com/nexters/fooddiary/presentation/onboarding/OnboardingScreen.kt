@@ -42,7 +42,7 @@ import com.nexters.fooddiary.core.ui.theme.PrimBase
 import com.nexters.fooddiary.presentation.onboarding.R as OnboardingR
 import kotlinx.coroutines.launch
 
-private val OnboardingBackgroundColor = Color(0xFF191821)
+private val OnboardingColor = Color(0xFF191821)
 private const val PAGE_COUNT = 6
 
 @Composable
@@ -63,7 +63,7 @@ internal fun OnboardingScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(OnboardingBackgroundColor)
+            .background(OnboardingColor)
             .statusBarsPadding()
             .navigationBarsPadding()
     ) {
@@ -132,7 +132,7 @@ internal fun OnboardingScreen(
                     .height(54.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = PrimBase,
-                    contentColor = Color.White
+                    contentColor = OnboardingColor
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
@@ -246,7 +246,7 @@ private fun OnboardingScreenPreview() {
 private fun OnboardingPagePreview() {
     Box(
         modifier = Modifier
-            .background(OnboardingBackgroundColor)
+            .background(OnboardingColor)
     ) {
         OnboardingPage(pageNumber = 1)
     }
