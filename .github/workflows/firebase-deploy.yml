@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - develop
-  pull_request:
-    branches:
-      - develop
   workflow_dispatch:  # 수동 실행 가능
 
 jobs:
