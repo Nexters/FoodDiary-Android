@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -62,6 +63,7 @@ internal fun OnboardingScreen(
         modifier = modifier
             .fillMaxSize()
             .background(OnboardingBackgroundColor)
+            .statusBarsPadding()
             .navigationBarsPadding()
     ) {
         // 중앙 - HorizontalPager
