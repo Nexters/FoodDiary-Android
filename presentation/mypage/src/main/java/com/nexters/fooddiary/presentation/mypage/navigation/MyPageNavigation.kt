@@ -16,13 +16,15 @@ enum class WebViewPage {
 fun NavGraphBuilder.myPageScreen(
     navigateToWebView: (WebViewPage) -> Unit = {},
     onSignOut: () -> Unit = {},
-    onRequireReAuthForDeleteAccount: () -> Unit = {}
+    onRequireReAuthForDeleteAccount: () -> Unit = {},
+    onNavigateToAlarmSettings: () -> Unit = {}
 ) {
     composable<MyPageRoute> {
         MyPageScreen(
             navigateToWebView = navigateToWebView,
             onSignOut = onSignOut,
-            onRequireReAuthForDeleteAccount = onRequireReAuthForDeleteAccount
+            onRequireReAuthForDeleteAccount = onRequireReAuthForDeleteAccount,
+            onNavigateToAlarmSettings = onNavigateToAlarmSettings
         )
     }
 }

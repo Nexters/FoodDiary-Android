@@ -253,7 +253,7 @@ internal fun MyPageSection(
     Column(
         modifier = modifier.padding(start = 16.dp, end = 16.dp, top = 32.dp)
     ) {
-            if(iconId != 0 || sectionNameId != 0) Row(
+            if(iconId != 0 && sectionNameId != 0) Row(
             modifier = modifier.padding(bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
