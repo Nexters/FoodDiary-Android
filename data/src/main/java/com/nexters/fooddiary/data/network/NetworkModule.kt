@@ -35,10 +35,12 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(
+        authInterceptor: AuthInterceptor,
         @Named("isDebug") isDebug: Boolean,
         @Named("useMockApi") useMockApi: Boolean,
         @ApplicationContext context: Context
     ): OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(authInterceptor)
         .addMockInterceptor(useMockApi, context)
         .addDebugInterceptors(isDebug)
         .connectTimeout(30, TimeUnit.SECONDS)

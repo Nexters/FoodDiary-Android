@@ -28,6 +28,14 @@ class TokenStore @Inject constructor(
     
     private val TOKEN_KEY = stringPreferencesKey("encrypted_auth_token")
 
+    private var cachedToken: String? = null
+
+    fun getCachedToken(): String? = cachedToken
+
+    suspend fun initializeCache() {
+        cachedToken = getToken()
+    }
+
     suspend fun saveToken(token: String) {
         val encryptionKey = encryptionKeyManager.getOrCreateKey()
         val encryptedToken = AesEncryption.encrypt(token, encryptionKey)
@@ -35,6 +43,8 @@ class TokenStore @Inject constructor(
         dataStore.edit { preferences ->
             preferences[TOKEN_KEY] = encryptedToken
         }
+
+        cachedToken = token
     }
 
     suspend fun getToken(): String? = runCatching {
@@ -61,6 +71,8 @@ class TokenStore @Inject constructor(
         dataStore.edit { preferences ->
             preferences.remove(TOKEN_KEY)
         }
+
+        cachedToken = null
     }
 
     suspend fun hasToken(): Boolean = 
