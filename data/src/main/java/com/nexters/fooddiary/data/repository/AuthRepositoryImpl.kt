@@ -12,11 +12,13 @@ import com.nexters.fooddiary.data.remote.auth.model.request.LoginRequest
 import com.nexters.fooddiary.data.security.EncryptionKeyManager
 import com.nexters.fooddiary.domain.model.DeleteAccountError
 import com.nexters.fooddiary.domain.model.DeleteAccountException
+import com.nexters.fooddiary.domain.exception.AuthException
 import com.nexters.fooddiary.domain.model.User
 import com.nexters.fooddiary.domain.repository.AuthRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import kotlinx.coroutines.tasks.await
+import retrofit2.HttpException
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
@@ -38,8 +40,8 @@ class AuthRepositoryImpl @Inject constructor(
             val firebaseAuthToken = firebaseUser.getIdToken(true).await()?.token
                 ?: throw Exception("Failed to get Firebase ID Token")
 
-            tokenStore.saveToken(firebaseAuthToken)
             val loginResponse = authApi.login(LoginRequest("google", firebaseAuthToken))
+            tokenStore.saveToken(loginResponse.accessToken)
 
             userMapper.toDomainUser(firebaseUser, loginResponse.isFirst)
         }
@@ -47,6 +49,21 @@ class AuthRepositoryImpl @Inject constructor(
 
     override fun getCurrentUser(): User? {
         return firebaseAuth.currentUser?.let { userMapper.toDomainUser(it) }
+    }
+
+    override suspend fun verifyToken(): Result<Unit> {
+        return try {
+            authApi.verifyToken()
+            Result.success(Unit)
+        } catch (e: HttpException) {
+            Result.failure(AuthException.InvalidToken())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun initializeTokenCache() {
+        tokenStore.initializeCache()
     }
 
     override suspend fun signOut() {

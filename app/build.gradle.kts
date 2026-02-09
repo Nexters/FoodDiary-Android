@@ -94,6 +94,7 @@ dependencies {
     implementation(projects.presentation.auth)
     implementation(projects.presentation.mypage)
     implementation(projects.presentation.webview)
+    implementation(projects.presentation.splash)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
