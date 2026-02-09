@@ -67,8 +67,6 @@ import java.time.format.TextStyle
 import java.util.Collections.emptyMap
 import java.util.Locale
 
-private val CalendarContainerShape = RoundedCornerShape(16.dp)
-private val MonthDayInnerShape = RoundedCornerShape(4.dp)
 
 @Composable
 fun MonthlyCalendar(
