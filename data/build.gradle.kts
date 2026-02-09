@@ -23,10 +23,15 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+        // Default to a placeholder URL if not set in local.properties
+        // This prevents runtime crashes when API_BASE_URL is missing
+        val apiBaseUrl = localProperties.getProperty("API_BASE_URL")
+            ?: "https://api.example.com/"
+
         buildConfigField(
             "String",
             "API_BASE_URL",
-            "\"${localProperties.getProperty("API_BASE_URL")}\""
+            "\"$apiBaseUrl\""
         )
     }
 

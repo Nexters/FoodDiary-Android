@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Scaffold
@@ -21,6 +20,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.nexters.fooddiary.core.common.R as CommonR
 
 @Composable
 internal fun HomeScreen(
@@ -28,6 +28,7 @@ internal fun HomeScreen(
     onDeleteAccount: () -> Unit,
     onNavigateToImage: () -> Unit,
     onNavigateToCalendar: () -> Unit,
+    onNavigateToMyPage: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showSignOutDialog by remember { mutableStateOf(false) }
@@ -79,6 +80,14 @@ internal fun HomeScreen(
                         .padding(top = 8.dp)
                 ) {
                     Text(text = stringResource(R.string.calendar))
+                }
+
+                Button(
+                    onClick = onNavigateToMyPage,
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                ) {
+                    Text(text = stringResource(CommonR.string.my_page_title))
                 }
             }
         }

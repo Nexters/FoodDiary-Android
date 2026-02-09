@@ -13,6 +13,7 @@ fun NavGraphBuilder.homeScreen(
     onDeleteAccount: () -> Unit,
     onNavigateToImage: () -> Unit,
     onNavigateToCalendar: () -> Unit,
+    onNavigateToMyPage: () -> Unit,
 ) {
     composable<HomeRoute> {
         HomeScreen(
@@ -20,6 +21,7 @@ fun NavGraphBuilder.homeScreen(
             onSignOut = onSignOut,
             onDeleteAccount = onDeleteAccount,
             onNavigateToImage = onNavigateToImage,
+            onNavigateToMyPage = onNavigateToMyPage
         )
     }
 }

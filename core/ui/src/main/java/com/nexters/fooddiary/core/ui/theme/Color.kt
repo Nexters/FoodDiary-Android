@@ -74,3 +74,7 @@ val Gray100 = Color(0xFFE9E9E9)
 val Gray050 = Color(0xFFF4F4F4)
 val Gray020 = Color(0xFFFBFBFB)
 val White = Color(0xFFFFFFFF)
+
+val SdBase = Color(0xFF191821)
+val Color363347 = Color(0xFF363347)
+

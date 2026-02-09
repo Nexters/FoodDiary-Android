@@ -10,9 +10,12 @@ import com.nexters.fooddiary.data.mapper.UserMapper
 import com.nexters.fooddiary.data.remote.auth.AuthApi
 import com.nexters.fooddiary.data.remote.auth.model.request.LoginRequest
 import com.nexters.fooddiary.data.security.EncryptionKeyManager
+import com.nexters.fooddiary.domain.model.DeleteAccountError
+import com.nexters.fooddiary.domain.model.DeleteAccountException
 import com.nexters.fooddiary.domain.model.User
 import com.nexters.fooddiary.domain.repository.AuthRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -58,23 +61,37 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun deleteAccount(): Result<Unit> {
         return try {
             val user = firebaseAuth.currentUser
-            if (user != null) {
+                ?: return Result.failure(
+                    DeleteAccountException(DeleteAccountError.NoUserSignedIn)
+                )
+
+            try {
                 user.delete().await()
-
-                kotlin.runCatching { tokenStore.deleteToken() }
-                kotlin.runCatching { encryptionKeyManager.deleteKey() }
-
-                val webClientId = context.getWebClientId()
-                if (webClientId.isNotEmpty()) {
-                    kotlin.runCatching { googleSignInIntentProvider.revokeAccess(context, webClientId) }
-                }
-
-                Result.success(Unit)
-            } else {
-                Result.failure(Exception("No user signed in"))
+            } catch (e: FirebaseAuthRecentLoginRequiredException) {
+                return Result.failure(
+                    DeleteAccountException(DeleteAccountError.RecentLoginRequired)
+                )
+            } catch (e: Exception) {
+                return Result.failure(
+                    DeleteAccountException(DeleteAccountError.Unknown(e))
+                )
             }
-        } catch (e: Exception) {
+
+            kotlin.runCatching { tokenStore.deleteToken() }
+            kotlin.runCatching { encryptionKeyManager.deleteKey() }
+
+            val webClientId = context.getWebClientId()
+            if (webClientId.isNotEmpty()) {
+                kotlin.runCatching { googleSignInIntentProvider.revokeAccess(context, webClientId) }
+            }
+
+            Result.success(Unit)
+        } catch (e: DeleteAccountException) {
             Result.failure(e)
+        } catch (e: Exception) {
+            Result.failure(
+                DeleteAccountException(DeleteAccountError.Unknown(e))
+            )
         }
     }
 }
