@@ -1,5 +1,3 @@
-import kotlin.text.toInt
-
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
@@ -10,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.nexters.fooddiary.presentation.auth"
+    namespace = "com.nexters.fooddiary.presentation.splash"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {

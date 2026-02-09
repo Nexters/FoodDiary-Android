@@ -1,6 +1,8 @@
 package com.nexters.fooddiary.navigation
 
 import android.net.Uri
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -18,47 +20,85 @@ import com.nexters.fooddiary.presentation.home.navigation.HomeRoute
 import com.nexters.fooddiary.presentation.home.navigation.homeScreen
 import com.nexters.fooddiary.presentation.image.navigation.ImagePickerRoute
 import com.nexters.fooddiary.presentation.image.navigation.imageScreen
+import com.nexters.fooddiary.presentation.home.calendar.navigation.CalendarRoute
+import com.nexters.fooddiary.presentation.home.calendar.navigation.calendarScreen
+import com.nexters.fooddiary.presentation.splash.navigation.SplashRoute
+import com.nexters.fooddiary.presentation.splash.navigation.splashScreen
 
 @Composable
 fun FoodDiaryNavHost(
     initialDeepLink: Uri? = null,
     onFinish: () -> Unit,
     navController: NavHostController = rememberNavController(),
-    onShowSignInError: (String) -> Unit
+    onShowDialog: (DialogData) -> Unit = {},
+    onShowSnackBar: (SnackBarData) -> Unit = {},
+    onShowToast: (String) -> Unit = {}
 ) {
     var authUiState by remember { mutableStateOf<AuthUiState?>(null) }
     var signOutRequestId by remember { mutableStateOf(0) }
     var deleteAccountRequestId by remember { mutableStateOf(0) }
+    var hasNavigatedFromSplash by remember { mutableStateOf(false) }
     val startDestination = if (initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_IMAGE) {
         ImagePickerRoute
     } else {
-        HomeRoute
+        SplashRoute
     }
 
+    LaunchedEffect(authUiState?.signInError) {
+        authUiState?.signInError?.let { error ->
+            onShowToast(error)
+        }
+    }
+
+    // Splash 이후 인증 상태 변경 감지 (Login 후 Home 이동, Logout 후 Login 이동)
     LaunchedEffect(authUiState?.isAuthenticated) {
+        if (!hasNavigatedFromSplash) return@LaunchedEffect
+
+        // 로그아웃 완료 시 signOutRequestId 리셋
+        if (signOutRequestId > 0 && authUiState?.isAuthenticated == false) {
+            signOutRequestId = 0
+        }
+
         authUiState?.isAuthenticated?.let { isAuthenticated ->
-            if (isAuthenticated) {
-                navController.navigate(HomeRoute) {
-                    popUpTo(LoginRoute) { inclusive = true }
-                }
-            } else {
+            if (!isAuthenticated) {
+                // 로그아웃 → LoginRoute로 이동
                 navController.navigate(LoginRoute) {
-                    popUpTo(HomeRoute) { inclusive = true }
+                    popUpTo(0) { inclusive = false }
+                    launchSingleTop = true
+                }
+            } else if (signOutRequestId == 0) {
+                // 로그인 → HomeRoute로 이동 (단, 로그아웃 중이 아닐 때만)
+                navController.navigate(HomeRoute) {
+                    popUpTo(0) { inclusive = false }
+                    launchSingleTop = true
                 }
             }
         }
     }
 
-    LaunchedEffect(authUiState?.signInError) {
-        authUiState?.signInError?.let { error ->
-            onShowSignInError(error)
-        }
-    }
-
     NavHost(
         navController = navController,
-        startDestination = startDestination
+        startDestination = startDestination,
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None },
+        popEnterTransition = { EnterTransition.None },
+        popExitTransition = { ExitTransition.None }
     ) {
+        splashScreen(
+            onNavigateToHome = {
+                hasNavigatedFromSplash = true
+                navController.navigate(HomeRoute) {
+                    popUpTo(SplashRoute) { inclusive = true }
+                }
+            },
+            onNavigateToLogin = {
+                hasNavigatedFromSplash = true
+                navController.navigate(LoginRoute) {
+                    popUpTo(SplashRoute) { inclusive = true }
+                }
+            }
+        )
+
         loginScreen(
             onAuthStateChange = { state ->
                 authUiState = state
