@@ -59,6 +59,7 @@ fun MyPageScreen(
     navigateToWebView: (WebViewPage) -> Unit = {},
     onSignOut: () -> Unit = {},
     onRequireReAuthForDeleteAccount: () -> Unit = {},
+    onNavigateToAlarmSettings: () -> Unit = {},
     viewModel: MyPageViewModel = mavericksViewModel()
 ) {
     val state by viewModel.collectAsStateWithLifecycle()
@@ -118,7 +119,8 @@ fun MyPageScreen(
         navigateToWebView = navigateToWebView,
         onSIgnOut = viewModel::signOut,
         onDeleteAccount = viewModel::deleteAccount,
-        deleteInProgressMessage = deleteInProgressMessage
+        deleteInProgressMessage = deleteInProgressMessage,
+        onNavigateToAlarmSettings = onNavigateToAlarmSettings
     )
 }
 
@@ -129,7 +131,8 @@ internal fun MyPageScreen(
     navigateToWebView: (WebViewPage) -> Unit = {},
     onSIgnOut: () -> Unit = {},
     onDeleteAccount: () -> Unit = {},
-    deleteInProgressMessage: String = ""
+    deleteInProgressMessage: String = "",
+    onNavigateToAlarmSettings: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
@@ -159,7 +162,10 @@ internal fun MyPageScreen(
                 iconId = drawable.ic_alert,
                 sectionNameId = string.my_page_section_alert
             ) {
-                MyPageSubMenu(menuName = stringResource(string.my_page_menu_set_alarm))
+                MyPageSubMenu(
+                    menuName = stringResource(string.my_page_menu_set_alarm),
+                    onClick = onNavigateToAlarmSettings
+                )
             }
             MyPageSection(
                 iconId = drawable.ic_setting,

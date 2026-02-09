@@ -1,6 +1,8 @@
 package com.nexters.fooddiary.navigation
 
+import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -120,6 +122,12 @@ fun FoodDiaryNavHost(
                 navController.navigate(LoginRoute) {
                     popUpTo(HomeRoute) { inclusive = false }
                 }
+            },
+            onNavigateToAlarmSettings = {
+                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                }
+                context.startActivity(intent)
             }
         )
         webViewScreen(
