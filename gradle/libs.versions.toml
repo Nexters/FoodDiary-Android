@@ -39,7 +39,7 @@ targetSdk = "36"
 calendar = "2.6.2"
 mockk = "1.14.7"
 coil = "3.3.0"
-haze = "1.7.1"
+haze = "1.6.10"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
