@@ -23,7 +23,7 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        val apiBaseUrl = localProperties.getProperty("API_BASE_URL")
+        val apiBaseUrl = localProperties.getProperty("api.base.url")
             ?: "https://api.example.com/"
 
         buildConfigField(
@@ -35,7 +35,8 @@ android {
 
     buildTypes {
         release {
-            val apiBaseUrl = localProperties.getProperty("API_BASE_URL")
+            val apiBaseUrl = localProperties.getProperty("api.base.url")
+
             if (!apiBaseUrl.isNullOrBlank()) {
                 buildConfigField(
                     "String",
@@ -67,10 +68,11 @@ afterEvaluate {
         (it.name.contains("assemble", ignoreCase = true) || it.name.contains("bundle", ignoreCase = true))
     }.configureEach {
         doFirst {
-            val apiBaseUrl = localProperties.getProperty("API_BASE_URL")
+            val apiBaseUrl = localProperties.getProperty("api.base.url")
+
             if (apiBaseUrl.isNullOrBlank()) {
                 throw GradleException(
-                    "API_BASE_URL must be set in local.properties for release builds"
+                    "api.base.url must be set in local.properties for release builds"
                 )
             }
         }
