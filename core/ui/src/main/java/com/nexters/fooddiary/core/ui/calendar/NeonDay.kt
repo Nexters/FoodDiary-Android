@@ -1,4 +1,4 @@
-package com.nexters.fooddiary.presentation.calendar
+package com.nexters.fooddiary.core.ui.calendar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,14 +17,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.alpha
+import com.nexters.fooddiary.core.ui.theme.AppTypography.p12
+import com.nexters.fooddiary.core.ui.theme.Gray050
 import com.nexters.fooddiary.core.ui.theme.neonShadow
 
 @Composable
 fun NeonStyleDay(
+    modifier: Modifier = Modifier,
     topText: String,
-    bottomText: String,
+    bottomText: String? = null,
     showDot: Boolean,
-    modifier: Modifier = Modifier
+    isSelected: Boolean = false,
+    content: (@Composable () -> Unit)? = null
 ) {
     val backgroundBrush = Brush.verticalGradient(
         colors = listOf(Color(0xFFFE670E), Color(0xFFFF853D))
@@ -34,24 +38,42 @@ fun NeonStyleDay(
         colors = listOf(Color.White.copy(alpha = 0.3f), Color.Transparent)
     )
 
+    val dotColor = if (isSelected) Color.White else Color(0xFFFF853D)
+
     Box(
         modifier = modifier
-            .size(width = 40.dp, height = 56.dp)
-            .neonShadow(
-                color = Color(0x66FF8842),
-                blurRadius = 16.dp,
-                borderRadius = 8.dp
+            .width(40.dp)
+            .heightIn(min = 56.dp)
+            .wrapContentHeight()
+            .then(
+                if (isSelected) {
+                    Modifier.neonShadow(
+                        color = Color(0x66FF8842),
+                        blurRadius = 16.dp,
+                        borderRadius = 8.dp
+                    )
+                } else {
+                    Modifier
+                }
             )
-            .border(width = 1.dp, brush = borderBrush, shape = RoundedCornerShape(8.dp))
-            .background(brush = backgroundBrush, shape = RoundedCornerShape(8.dp))
+            .then(
+                if (isSelected) {
+                    Modifier
+                        .border(width = 1.dp, brush = borderBrush, shape = RoundedCornerShape(8.dp))
+                        .background(brush = backgroundBrush, shape = RoundedCornerShape(8.dp))
+                } else {
+                    Modifier
+                }
+            )
             .padding(vertical = 8.dp, horizontal = 4.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            // 정렬을 SpaceBetween으로 고정하여 점의 유무와 상관없이 텍스트 위치를 고정합니다.
             verticalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxHeight()
+            modifier = Modifier
+                .heightIn(min = 56.dp)
+                .wrapContentHeight()
         ) {
             // 점(Dot) 영역: showDot이 false여도 공간은 계속 차지합니다.
             Box(
@@ -59,27 +81,26 @@ fun NeonStyleDay(
                     .size(4.dp)
                     // 핵심: false일 때 투명도를 0으로 만들어 공간은 유지하되 숨깁니다.
                     .alpha(if (showDot) 1f else 0f)
-                    .background(Color.White, shape = CircleShape)
+                    .background(dotColor, shape = CircleShape)
             )
 
             // 텍스트 영역 (점의 상태와 상관없이 항상 같은 위치에 고정됨)
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = topText,
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    lineHeight = 14.sp,
+                    color = Gray050,
+                    style = p12,
                     textAlign = TextAlign.Center
                 )
-                Text(
-                    text = bottomText,
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    lineHeight = 14.sp,
-                    textAlign = TextAlign.Center
-                )
+                content?.invoke() ?: bottomText?.let {
+                    Text(
+                        text = it,
+                        color = Gray050,
+                        style = p12,
+                        lineHeight = 14.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }
@@ -92,10 +113,13 @@ fun NeonStyleDayComparisonPreview() {
         modifier = Modifier.padding(20.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // 1. 점이 있는 기본 상태
-        NeonStyleDay(topText = "DD", bottomText = "01", showDot = true)
+        // 1. 선택된 셀 (오렌지 배경 + 흰색 점)
+        NeonStyleDay(topText = "DD", bottomText = "01", showDot = true, isSelected = true)
 
-        // 2. 점이 없는 상태
-        NeonStyleDay(topText = "DD", bottomText = "02", showDot = false)
+        // 2. 선택되지 않은 셀 (투명 배경 + 오렌지 점)
+        NeonStyleDay(topText = "DD", bottomText = "02", showDot = true, isSelected = false)
+
+        // 3. 점이 없는 상태
+        NeonStyleDay(topText = "DD", bottomText = "03", showDot = false, isSelected = false)
     }
 }
