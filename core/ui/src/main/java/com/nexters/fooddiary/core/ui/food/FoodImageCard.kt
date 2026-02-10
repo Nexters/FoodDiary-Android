@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.nexters.fooddiary.core.ui.R
-import com.nexters.fooddiary.core.ui.theme.GrayBase
+import com.nexters.fooddiary.core.ui.theme.PretendardFontFamily
 import com.nexters.fooddiary.core.ui.theme.PrimBase
 import com.nexters.fooddiary.core.ui.theme.Shadow40
 import com.nexters.fooddiary.core.ui.theme.TimeLocationBg
@@ -289,7 +289,8 @@ private fun TagChip(
             color = textColor,
             fontSize = fontSize.sp,
             fontWeight = FontWeight.Medium,
-            lineHeight = 12.sp
+            fontFamily = PretendardFontFamily,
+            lineHeight = fontSize.sp
         )
     }
 }
