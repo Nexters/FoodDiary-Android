@@ -26,6 +26,7 @@ import androidx.compose.ui.zIndex
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -122,8 +123,8 @@ private fun FoodImageFullUI(
                 model = imageUrl,
                 contentDescription = "Food image",
                 contentScale = ContentScale.Crop,
-                placeholder = painterResource(R.drawable.preview_food),
-                error = painterResource(R.drawable.preview_food),
+                placeholder = previewPlaceholder(),
+                error = previewPlaceholder(),
                 modifier = Modifier.fillMaxSize()
             )
         }
@@ -312,8 +313,8 @@ private fun FoodImageSummary(
                 model = imageUrl,
                 contentDescription = "Food image",
                 contentScale = ContentScale.Crop,
-                placeholder = painterResource(R.drawable.preview_food),
-                error = painterResource(R.drawable.preview_food),
+                placeholder = previewPlaceholder(),
+                error = previewPlaceholder(),
                 modifier = Modifier.fillMaxSize()
             )
         }
@@ -363,8 +364,8 @@ private fun FoodImageFullBlur(
                 model = imageUrl,
                 contentDescription = "Food image",
                 contentScale = ContentScale.Crop,
-                placeholder = painterResource(R.drawable.preview_food),
-                error = painterResource(R.drawable.preview_food),
+                placeholder = previewPlaceholder(),
+                error = previewPlaceholder(),
                 modifier = Modifier.fillMaxSize()
             )
         }
@@ -399,6 +400,13 @@ private fun FoodImageCardFullUIPreview() {
             onShareClick = {},
         )
     )
+}
+
+@Composable
+private fun previewPlaceholder() = if (LocalInspectionMode.current) {
+    painterResource(R.drawable.preview_food)
+} else {
+    null
 }
 
 @Preview(
