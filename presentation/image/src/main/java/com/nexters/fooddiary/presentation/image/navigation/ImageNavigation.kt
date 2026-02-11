@@ -6,12 +6,12 @@ import com.nexters.fooddiary.presentation.image.ImageClassificationScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
-object ImageRoute
+object ImagePickerRoute
 
 fun NavGraphBuilder.imageScreen(
     onClose: () -> Unit
 ) {
-    composable<ImageRoute> {
+    composable<ImagePickerRoute> {
         ImageClassificationScreen(onClose = onClose)
     }
 }
