@@ -48,6 +48,8 @@ sentryAndroid = "7.5.0"
 appcompat = "1.7.1"
 material = "1.13.0"
 material3 = "1.4.0"
+sentryGradle = "4.3.0"
+sentryAndroid = "7.5.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

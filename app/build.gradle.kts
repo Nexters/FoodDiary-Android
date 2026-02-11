@@ -186,7 +186,9 @@ dependencies {
     // Firebase Cloud Messaging
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
+    implementation(libs.sentry.android)
 
+    // sentry
     implementation(libs.sentry.android)
 
     // Testing
