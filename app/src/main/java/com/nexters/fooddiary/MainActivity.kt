@@ -19,10 +19,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.nexters.fooddiary.core.ui.alert.DialogData
+import com.nexters.fooddiary.core.ui.alert.SnackBarData
+import com.nexters.fooddiary.core.ui.component.FoodDiaryDialog
 import com.nexters.fooddiary.core.ui.component.FoodDiarySnackBar
 import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
 import com.nexters.fooddiary.navigation.FoodDiaryNavHost
-import com.nexters.fooddiary.core.ui.alert.SnackBarData
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -36,6 +38,7 @@ class MainActivity : ComponentActivity() {
             val snackbarHostState = remember { SnackbarHostState() }
             val scope = rememberCoroutineScope()
             var customSnackBarData by remember { mutableStateOf<SnackBarData?>(null) }
+            var dialogData by remember { mutableStateOf<DialogData?>(null) }
 
             @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
             FoodDiaryTheme {
@@ -53,8 +56,8 @@ class MainActivity : ComponentActivity() {
                     FoodDiaryNavHost(
                         initialDeepLink = intent?.data,
                         onFinish = { finish() },
-                        onShowDialog = { dialogData ->
-                            // TODO: Dialog 구현
+                        onShowDialog = { data ->
+                            dialogData = data
                         },
                         onShowSnackBar = { snackBarData ->
                             scope.launch {
@@ -72,6 +75,13 @@ class MainActivity : ComponentActivity() {
                             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                         }
                     )
+
+                    dialogData?.let { data ->
+                        FoodDiaryDialog(
+                            dialogData = data,
+                            onDismissRequest = { dialogData = null }
+                        )
+                    }
                 }
             }
         }
