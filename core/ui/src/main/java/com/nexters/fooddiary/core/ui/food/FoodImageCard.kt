@@ -68,19 +68,14 @@ fun FoodImageCard(
     ) {
         when (state) {
             is FoodImageState.FullUI -> {
-                FoodImageFullUI(
+                FoodImage(
                     imageUrl = imageUrl,
                     timeText = state.timeText,
                     locationText = state.locationText,
-                    placeText = state.placeText,
-                    category = state.category,
-                    keywords = state.keywords,
-                    onSaveClick = state.onSaveClick,
-                    onShareClick = state.onShareClick,
                 )
             }
             is FoodImageState.Summary -> {
-                FoodImageSummary(
+                FoodImage(
                     imageUrl = imageUrl,
                     timeText = state.timeText,
                     locationText = state.locationText,
@@ -90,178 +85,6 @@ fun FoodImageCard(
                 FoodImageFullBlur(
                     imageUrl = imageUrl,
                 )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun FoodImageFullUI(
-    imageUrl: String,
-    timeText: String,
-    locationText: String,
-    placeText: String,
-    category: String,
-    keywords: List<String>,
-    onSaveClick: () -> Unit,
-    onShareClick: () -> Unit,
-) {
-    val hazeState = rememberHazeState()
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        // 배경 이미지 (blur 원본)
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    color = Color.White
-                )
-                .hazeSource(state = hazeState)
-        ) {
-            AsyncImage(
-                model = imageUrl,
-                contentDescription = "Food image",
-                contentScale = ContentScale.Crop,
-                placeholder = previewPlaceholder(),
-                error = previewPlaceholder(),
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-
-        // 상단: 시간 태그 + 위치 텍스트
-        Row(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(10.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // 시간 태그
-            TagChip(
-                text = timeText,
-                backgroundColor = TimeLocationBg,
-                textColor = White,
-                fontSize = 10,
-            )
-
-            // 위치 태그
-            TagChip(
-                text = locationText,
-                backgroundColor = TimeLocationBg,
-                textColor = White,
-                fontSize = 10,
-            )
-        }
-
-        TagChip(
-            text = category,
-            backgroundColor = PrimBase,
-            textColor = White,
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(bottom = 72.dp, start = 22.dp) // 블러 영역 높이의 중간 지점
-                .zIndex(1f) // 맨 앞으로
-        )
-
-        // 하단 블러 오버레이
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .hazeEffect(state = hazeState) {
-                    blurRadius = 20.dp
-                }
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Black.copy(alpha = 0.3f),
-                            Color.Black.copy(alpha = 0.5f)
-                        )
-                    )
-                )
-                .padding(horizontal = 22.dp, vertical = 22.dp)
-        ) {
-            // 좌측: 장소 + keywords
-            Column(
-                modifier = Modifier.align(Alignment.CenterStart),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                // 장소 텍스트
-                Text(
-                    text = placeText,
-                    color = White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                // keywords (배경색 없음)
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                    keywords.forEach { keyword ->
-                        Text(
-                            text = keyword,
-                            color = White.copy(alpha = 0.8f),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Normal
-                        )
-                    }
-                }
-            }
-
-            // 우측: 액션 아이콘들
-            Row(
-                modifier = Modifier.align(Alignment.CenterEnd),
-                horizontalArrangement = Arrangement.spacedBy(18.dp)
-            ) {
-                // 복사
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    IconButton(
-                        onClick = onSaveClick,
-                        modifier = Modifier.size(20.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_copy),
-                            contentDescription = "copy",
-                            tint = White,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                    Text(
-                        text = "복사",
-                        color = White,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Normal
-                    )
-                }
-
-                // 공유
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    IconButton(
-                        onClick = onShareClick,
-                        modifier = Modifier.size(20.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_share),
-                            contentDescription = "Share",
-                            tint = White,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                    Text(
-                        text = "공유",
-                        color = White,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Normal
-                    )
-                }
             }
         }
     }
@@ -297,7 +120,7 @@ private fun TagChip(
 }
 
 @Composable
-private fun FoodImageSummary(
+private fun FoodImage(
     imageUrl: String,
     timeText: String,
     locationText: String,
@@ -404,7 +227,7 @@ private fun FoodImageCardFullUIPreview() {
 
 @Composable
 private fun previewPlaceholder() = if (LocalInspectionMode.current) {
-    painterResource(R.drawable.preview_food)
+    painterResource(R.drawable.ic_analyze_food)
 } else {
     null
 }
