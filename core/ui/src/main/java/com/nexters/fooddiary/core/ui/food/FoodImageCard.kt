@@ -1,48 +1,85 @@
 package com.nexters.fooddiary.core.ui.food
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.zIndex
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.nexters.fooddiary.core.common.R.string
 import com.nexters.fooddiary.core.ui.R
+import com.nexters.fooddiary.core.ui.R.drawable
+import com.nexters.fooddiary.core.ui.theme.AppTypography
+import com.nexters.fooddiary.core.ui.theme.Gray900
 import com.nexters.fooddiary.core.ui.theme.PretendardFontFamily
 import com.nexters.fooddiary.core.ui.theme.PrimBase
+import com.nexters.fooddiary.core.ui.theme.SdBase
 import com.nexters.fooddiary.core.ui.theme.Shadow40
 import com.nexters.fooddiary.core.ui.theme.TimeLocationBg
 import com.nexters.fooddiary.core.ui.theme.White
 import com.nexters.fooddiary.core.ui.theme.neonShadow
-import dev.chrisbanes.haze.hazeEffect
-import dev.chrisbanes.haze.hazeSource
-import dev.chrisbanes.haze.rememberHazeState
+
+// Dashed border modifier
+private fun Modifier.dashedBorder() = this.clip(RoundedCornerShape(16.dp))
+    .background(color = White.copy(alpha = 0.02f))
+    .drawBehind {
+        val path = Path().apply {
+            addRoundRect(
+                RoundRect(
+                    left = 0f,
+                    top = 0f,
+                    right = size.width,
+                    bottom = size.height,
+                    cornerRadius = CornerRadius(16.dp.toPx()),
+                )
+            )
+        }
+        drawPath(
+            path = path,
+            color = Gray900,
+            style = Stroke(
+                width = 2.dp.toPx(),
+                pathEffect = PathEffect.dashPathEffect(
+                    intervals = floatArrayOf(3.dp.toPx(), 3.dp.toPx()),
+                    phase = 0f,
+                ),
+            ),
+        )
+    }
 
 @Composable
 fun FoodImageCard(
@@ -50,21 +87,24 @@ fun FoodImageCard(
     state: FoodImageState,
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier
-            .size(300.dp)
-            .neonShadow(
-                color = Shadow40,
-                borderRadius = 20.dp,
-                blurRadius = 18.dp,
-                offset = Offset(0f, 3.dp.value)
-            )
-            .clip(RoundedCornerShape(20.dp))
-            .border(
+    // State에 따라 다른 border 적용
+    val borderModifier = when (state) {
+        is FoodImageState.Pending -> {
+            Modifier.dashedBorder()
+        }
+        else -> {
+            Modifier.border(
                 width = 4.dp,
                 color = White,
-                shape = RoundedCornerShape(20.dp)
+                shape = RoundedCornerShape(16.dp)
             )
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .then(borderModifier)
     ) {
         when (state) {
             is FoodImageState.FullUI -> {
@@ -81,9 +121,9 @@ fun FoodImageCard(
                     locationText = state.locationText,
                 )
             }
-            is FoodImageState.FullBlur -> {
-                FoodImageFullBlur(
-                    imageUrl = imageUrl,
+            is FoodImageState.Pending -> {
+                FoodImagePending(
+                    modifier = Modifier.fillMaxSize(),
                 )
             }
         }
@@ -95,7 +135,6 @@ private fun TagChip(
     text: String,
     backgroundColor: Color,
     textColor: Color,
-    fontSize: Int = 12,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -111,10 +150,9 @@ private fun TagChip(
         Text(
             text = text,
             color = textColor,
-            fontSize = fontSize.sp,
+            style = AppTypography.p12,
             fontWeight = FontWeight.Medium,
             fontFamily = PretendardFontFamily,
-            lineHeight = fontSize.sp
         )
     }
 }
@@ -150,67 +188,62 @@ private fun FoodImage(
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 시간 태그
             TagChip(
                 text = timeText,
                 backgroundColor = TimeLocationBg,
                 textColor = White,
-                fontSize = 10,
             )
-
-            // 위치 태그
             TagChip(
                 text = locationText,
                 backgroundColor = TimeLocationBg,
                 textColor = White,
-                fontSize = 10,
             )
         }
     }
 }
 
 @Composable
-private fun FoodImageFullBlur(
-    imageUrl: String,
+private fun FoodImagePending(
+    modifier: Modifier,
 ) {
-    val hazeState = rememberHazeState()
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        // 배경 이미지
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = Color.White)
-                .hazeSource(state = hazeState)
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(color = White.copy(alpha = 0.02f)),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
         ) {
-            AsyncImage(
-                model = imageUrl,
-                contentDescription = "Food image",
-                contentScale = ContentScale.Crop,
-                placeholder = previewPlaceholder(),
-                error = previewPlaceholder(),
-                modifier = Modifier.fillMaxSize()
+            Image(
+                painter = painterResource(drawable.ic_analyze_food),
+                contentDescription = null,
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = stringResource(string.detail_food_analyze),
+                style = AppTypography.p12,
+                color = White,
             )
         }
-
-        // 전체 블러 오버레이
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .hazeEffect(state = hazeState) {
-                    blurRadius = 30.dp
-                }
-        )
     }
+}
+
+@Composable
+private fun previewPlaceholder() = if (LocalInspectionMode.current) {
+    null
+} else {
+    null
 }
 
 @Preview(
     name = "FullUI State",
     showBackground = true,
-    backgroundColor = 0xFF222222
+    backgroundColor = 0xFF191821
 )
 @Composable
-private fun FoodImageCardFullUIPreview() {
+private fun FoodImageFullPreview() {
     FoodImageCard(
         imageUrl = "https://picsum.photos/300",
         state = FoodImageState.FullUI(
@@ -221,42 +254,38 @@ private fun FoodImageCardFullUIPreview() {
             keywords = listOf("#양장피", "#어향동고"),
             onSaveClick = {},
             onShareClick = {},
-        )
+        ),
+        modifier = Modifier.size(300.dp)
     )
-}
-
-@Composable
-private fun previewPlaceholder() = if (LocalInspectionMode.current) {
-    painterResource(R.drawable.ic_analyze_food)
-} else {
-    null
 }
 
 @Preview(
     name = "Summary State",
     showBackground = true,
-    backgroundColor = 0xFF222222
+    backgroundColor = 0xFF191821
 )
 @Composable
-private fun FoodImageCardSummaryPreview() {
+private fun FoodImageSummaryPreview() {
     FoodImageCard(
         imageUrl = "https://picsum.photos/300",
         state = FoodImageState.Summary(
             timeText = "07:00",
             locationText = "마포구",
-        )
+        ),
+        modifier = Modifier.size(300.dp)
     )
 }
 
 @Preview(
-    name = "FullBlur State",
+    name = "Pending State",
     showBackground = true,
-    backgroundColor = 0xFF222222
+    backgroundColor = 0xFF191821
 )
 @Composable
-private fun FoodImageCardFullBlurPreview() {
+private fun FoodImagePendingPreview() {
     FoodImageCard(
         imageUrl = "https://picsum.photos/300",
-        state = FoodImageState.FullBlur
+        state = FoodImageState.Pending,
+        modifier = Modifier.size(300.dp)
     )
 }

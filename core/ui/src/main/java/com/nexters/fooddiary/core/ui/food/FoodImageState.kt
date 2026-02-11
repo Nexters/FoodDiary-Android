@@ -17,5 +17,5 @@ sealed interface FoodImageState {
         val locationText: String,       // 마포구
     ) : FoodImageState
 
-    data object FullBlur : FoodImageState
+    data object Pending : FoodImageState  // AI 분석 중 상태
 }

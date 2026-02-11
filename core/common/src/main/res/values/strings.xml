@@ -19,5 +19,11 @@
     <string name="home_add_food_photo">오늘의 음식 사진을 추가해보세요.</string>
     <string name="home_nav_home">홈</string>
     <string name="home_nav_insight">인사이트</string>
+
+    <!-- Detail -->
+    <string name="detail_food_analyze">귀찮은 입력은 AI가 대신하고 있어요..</string>
+
+    <!-- Calendar -->
+    <string name="calendar">캘린더</string>
 </resources>
 
