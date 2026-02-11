@@ -38,6 +38,8 @@ compileSdk = "36"
 targetSdk = "36"
 calendar = "2.6.2"
 mockk = "1.14.7"
+sentryGradle = "4.3.0"
+sentryAndroid = "7.5.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -135,8 +137,11 @@ firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.r
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 
+sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentryAndroid" }
+
 [plugins]
 google-gms-services = { id = "com.google.gms.google-services", version = "4.4.4" }
+sentry-android-gradle = { id = "io.sentry.android.gradle", version.ref = "sentryGradle" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

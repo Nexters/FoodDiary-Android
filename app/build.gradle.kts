@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.google.gms.services)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.sentry.android.gradle)
 }
 
 val localProperties = Properties()
@@ -41,6 +42,10 @@ android {
         } else {
             println("Warning: web.client.id not found in local.properties")
         }
+
+        val sentryDsn = localProperties.getProperty("sentry.dsn", "").trim()
+        buildConfigField("String", "SENTRY_DSN", "\"$sentryDsn\"")
+        manifestPlaceholders["sentryDsn"] = sentryDsn
     }
 
     buildFeatures {
@@ -80,6 +85,17 @@ android {
     }
 }
 
+sentry {
+    org.set(localProperties.getProperty("sentry.org", ""))
+    projectName.set(localProperties.getProperty("sentry.project", ""))
+    authToken.set(System.getenv("SENTRY_AUTH_TOKEN") ?: localProperties.getProperty("sentry.auth.token", ""))
+    includeSourceContext.set(true)
+    autoInstallation {
+        enabled.set(true)
+        sentryVersion.set(libs.versions.sentryAndroid.get())
+    }
+}
+
 dependencies {
     // Modules
     implementation(projects.core.common)
@@ -114,6 +130,8 @@ dependencies {
 
     // Mavericks
     implementation(libs.mavericks.compose)
+
+    implementation(libs.sentry.android)
 
     // Testing
     testImplementation(libs.junit)
