@@ -1,0 +1,26 @@
+package com.nexters.fooddiary.presentation.detail.navigation
+
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
+import com.nexters.fooddiary.presentation.detail.DetailScreen
+import kotlinx.serialization.Serializable
+import java.time.LocalDate
+
+@Serializable
+data class DetailRoute(
+    val dateString: String,  // ISO-8601: "2026-01-16"
+)
+
+fun NavGraphBuilder.detailScreen(
+    onNavigateBack: () -> Unit,
+) {
+    composable<DetailRoute> { backStackEntry ->
+        val route = backStackEntry.toRoute<DetailRoute>()
+        val selectedDate = LocalDate.parse(route.dateString)
+
+        DetailScreen(
+            onNavigateBack = onNavigateBack,
+        )
+    }
+}
