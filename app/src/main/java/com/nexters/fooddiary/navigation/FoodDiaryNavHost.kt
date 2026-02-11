@@ -15,6 +15,8 @@ import androidx.navigation.compose.rememberNavController
 import com.nexters.fooddiary.presentation.auth.AuthUiState
 import com.nexters.fooddiary.presentation.auth.navigation.LoginRoute
 import com.nexters.fooddiary.presentation.auth.navigation.loginScreen
+import com.nexters.fooddiary.presentation.detail.navigation.DetailRoute
+import com.nexters.fooddiary.presentation.detail.navigation.detailScreen
 import com.nexters.fooddiary.presentation.home.calendar.navigation.calendarScreen
 import com.nexters.fooddiary.presentation.home.navigation.HomeRoute
 import com.nexters.fooddiary.presentation.home.navigation.homeScreen
@@ -41,7 +43,7 @@ fun FoodDiaryNavHost(
     val startDestination = if (initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_IMAGE) {
         ImagePickerRoute
     } else {
-        SplashRoute
+        DetailRoute("2026-01-16")  // ✅ 정상적인 앱 플로우: Splash → Login/Home
     }
 
     LaunchedEffect(authUiState?.signInError) {
@@ -109,8 +111,17 @@ fun FoodDiaryNavHost(
 
         homeScreen(
             onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
+            onNavigateToDetail = { date ->
+                navController.navigate(DetailRoute(dateString = date.toString()))
+            }
         )
+
+        detailScreen(
+            onNavigateBack = { navController.popBackStack() }
+        )
+
         calendarScreen()
+
         imageScreen(
             onClose = {
                 if (!navController.popBackStack()) {

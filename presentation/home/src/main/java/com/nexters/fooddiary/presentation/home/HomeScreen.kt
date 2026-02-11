@@ -87,6 +87,7 @@ private fun Modifier.selectedTabGradientBorder(selected: Boolean) =
 internal fun HomeScreen(
     modifier: Modifier = Modifier,
     onNavigateToImagePicker: () -> Unit = {},
+    onNavigateToDetail: (LocalDate) -> Unit = {},
     viewModel: HomeViewModel = mavericksViewModel(),
 ) {
     val state by viewModel.collectAsState()
@@ -95,7 +96,10 @@ internal fun HomeScreen(
     HomeScreen(
         state = state,
         photoCountByDate = photoCountByDate,
-        onDateSelected = viewModel::onDateSelected,
+        onDateSelected = { date ->
+            viewModel.onDateSelected(date)
+            onNavigateToDetail(date)
+        },
         onToggleCalendarView = viewModel::onToggleCalendarView,
         onNavigateToImagePicker = onNavigateToImagePicker,
         modifier = modifier,
@@ -236,7 +240,7 @@ private fun HomeBottomBar(
         ) {
             Icon(
                 painter = painterResource(id = if (isMonthlyCalendarView) drawable.ic_weekly_calendar else drawable.ic_monthly_calendar),
-                contentDescription = stringResource(R.string.calendar),
+                contentDescription = stringResource(string.calendar),
                 tint = Gray050,
             )
         }
