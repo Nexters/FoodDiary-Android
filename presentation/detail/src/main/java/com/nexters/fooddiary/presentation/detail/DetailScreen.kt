@@ -40,6 +40,8 @@ import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.PretendardFontFamily
 import com.nexters.fooddiary.core.ui.theme.SdBase
 import com.nexters.fooddiary.core.ui.theme.White
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import java.time.LocalDate
 
 @Composable
@@ -52,6 +54,8 @@ internal fun DetailScreen(
     DetailContent(
         selectedDateString = state.selectedDateString,
         dailyMeals = state.dailyMeals,
+        onPreviousDay = viewModel::navigateToPreviousDay,
+        onNextDay = viewModel::navigateToNextDay,
         onMealCardClick = viewModel::onMealCardClick,
         onEditClick = viewModel::onEditClick,
         onSaveClick = viewModel::onSaveClick,
@@ -63,6 +67,8 @@ internal fun DetailScreen(
 private fun DetailContent(
     selectedDateString: String,
     dailyMeals: Map<String, List<MealUiModel>>,  // Key: ISO-8601 date string
+    onPreviousDay: () -> Unit = {},
+    onNextDay: () -> Unit = {},
     onMealCardClick: (String) -> Unit = {},
     onEditClick: (String, String) -> Unit = { _, _ -> }, // (mealType, dateString)
     onSaveClick: (String) -> Unit = {},
@@ -71,6 +77,7 @@ private fun DetailContent(
     // 선택된 날짜의 식사만 가져오기
     val meals = dailyMeals[selectedDateString] ?: emptyList()
     val date = LocalDate.parse(selectedDateString)
+    val hazeState = rememberHazeState()
 
     Scaffold(
         containerColor = SdBase,
@@ -78,6 +85,7 @@ private fun DetailContent(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .hazeSource(state = hazeState)
                 .padding(padding),
             verticalArrangement = Arrangement.spacedBy(24.dp),
             contentPadding = PaddingValues(bottom = 20.dp)
@@ -85,6 +93,9 @@ private fun DetailContent(
             stickyHeader(key = selectedDateString) {
                 DailyHeader(
                     date = date,
+                    onPreviousDay = onPreviousDay,
+                    onNextDay = onNextDay,
+                    hazeState = hazeState,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)

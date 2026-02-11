@@ -61,6 +61,10 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
+    // 블러, glassmorphism
+    implementation(libs.haze)
+    implementation(libs.haze.materials)
+
     // Testing
     testImplementation(libs.junit)
 }

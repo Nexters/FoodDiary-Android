@@ -97,6 +97,80 @@ class DetailViewModel @AssistedInject constructor(
         setState { copy(dailyMeals = mockMeals) }
     }
 
+    private fun loadMockDataForDate(date: LocalDate) {
+        val dateString = date.toString()
+
+        // 이미 데이터가 있으면 스킵
+        if (withState(this) { it.dailyMeals.containsKey(dateString) }) {
+            return
+        }
+
+        // 날짜 기반 시드로 다양한 Mock 데이터 생성
+        val seed = date.toEpochDay().toInt()
+        val newMeals = listOf(
+            MealUiModel(
+                id = "meal_${dateString}_1",
+                dateString = dateString,
+                mealType = "아침",
+                time = "07:30",
+                location = "서울시",
+                place = "모닝카페",
+                category = "양식",
+                keywords = listOf("#브런치", "#커피"),
+                imageUrls = listOf(
+                    "https://picsum.photos/300/300?random=${seed * 3 + 1}",
+                    "https://picsum.photos/300/300?random=${seed * 3 + 2}"
+                ),
+                isEmpty = false,
+                isPending = false,
+            ),
+            MealUiModel(
+                id = "meal_${dateString}_2",
+                dateString = dateString,
+                mealType = "점심",
+                time = "12:00",
+                location = "강남구",
+                place = "점심 식당",
+                category = "한식",
+                keywords = listOf("#비빔밥", "#된장찌개"),
+                imageUrls = listOf("https://picsum.photos/300/300?random=${seed * 3 + 3}"),
+                isEmpty = false,
+                isPending = false,
+            ),
+            MealUiModel(
+                id = "meal_${dateString}_3",
+                dateString = dateString,
+                mealType = "저녁",
+                time = "18:30",
+                location = "",
+                place = "",
+                category = "",
+                keywords = emptyList(),
+                imageUrls = emptyList(),
+                isEmpty = true,
+                isPending = false,
+            ),
+        )
+
+        setState {
+            copy(dailyMeals = dailyMeals + (dateString to newMeals))
+        }
+    }
+
+    fun navigateToPreviousDay() {
+        val currentDate = LocalDate.parse(state.selectedDateString)
+        val previousDate = currentDate.minusDays(1)
+        setState { copy(selectedDateString = previousDate.toString()) }
+        loadMockDataForDate(previousDate)
+    }
+
+    fun navigateToNextDay() {
+        val currentDate = LocalDate.parse(state.selectedDateString)
+        val nextDate = currentDate.plusDays(1)
+        setState { copy(selectedDateString = nextDate.toString()) }
+        loadMockDataForDate(nextDate)
+    }
+
     fun onMealCardClick(mealId: String) {
         // TODO: Navigate to image picker or detail
     }
