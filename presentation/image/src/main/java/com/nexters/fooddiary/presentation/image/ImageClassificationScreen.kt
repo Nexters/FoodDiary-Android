@@ -1,7 +1,6 @@
 package com.nexters.fooddiary.presentation.image
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -51,13 +50,6 @@ internal fun ImageClassificationScreen(
     val context = LocalContext.current
     val state by viewModel.collectAsStateWithLifecycle()
     var showImagePicker by remember { mutableStateOf(false) }
-    val mimeType = remember { context.getString(R.string.image_mime_type) }
-    
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let { viewModel.loadImageFromUri(it) }
-    }
 
     LaunchedEffect(state.errorMessage) {
         state.errorMessage?.let { message ->
