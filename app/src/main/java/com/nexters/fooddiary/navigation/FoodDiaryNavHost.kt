@@ -25,7 +25,8 @@ import com.nexters.fooddiary.presentation.home.navigation.homeScreen
 import com.nexters.fooddiary.presentation.image.navigation.ImagePickerRoute
 import com.nexters.fooddiary.presentation.image.navigation.imageScreen
 import com.nexters.fooddiary.presentation.home.calendar.navigation.CalendarRoute
-import com.nexters.fooddiary.presentation.home.calendar.navigation.calendarScreen
+import com.nexters.fooddiary.presentation.onboarding.navigation.OnboardingRoute
+import com.nexters.fooddiary.presentation.onboarding.navigation.onboardingScreen
 import com.nexters.fooddiary.presentation.mypage.navigation.MyPageRoute
 import com.nexters.fooddiary.presentation.mypage.navigation.WebViewPage
 import com.nexters.fooddiary.presentation.mypage.navigation.myPageScreen
@@ -60,8 +61,8 @@ fun FoodDiaryNavHost(
         }
     }
 
-    // Splash 이후 인증 상태 변경 감지 (Login 후 Home 이동, Logout 후 Login 이동)
-    LaunchedEffect(authUiState?.isAuthenticated) {
+    // Splash 이후 인증 상태 변경 감지 (Login 후 Onboarding/Home 이동, Logout 후 Login 이동)
+    LaunchedEffect(authUiState?.isAuthenticated, authUiState?.isFirst) {
         if (!hasNavigatedFromSplash) return@LaunchedEffect
 
         // 로그아웃/회원탈퇴 완료 시 requestId 리셋
@@ -80,8 +81,13 @@ fun FoodDiaryNavHost(
                     launchSingleTop = true
                 }
             } else if (signOutRequestId == 0 && deleteAccountRequestId == 0) {
-                // 로그인 → HomeRoute로 이동 (단, 로그아웃 중이나 회원탈퇴 중이 아닐 때만)
-                navController.navigate(HomeRoute) {
+                // 로그인 → isFirst 체크해서 Onboarding 또는 Home으로 이동 (단, 로그아웃/회원탈퇴 중이 아닐 때만)
+                val destination = if (authUiState?.isFirst == true) {
+                    OnboardingRoute
+                } else {
+                    HomeRoute
+                }
+                navController.navigate(destination) {
                     popUpTo(0) { inclusive = false }
                     launchSingleTop = true
                 }
@@ -118,6 +124,15 @@ fun FoodDiaryNavHost(
             },
             signOutRequestId = { signOutRequestId },
             deleteAccountRequestId = { deleteAccountRequestId }
+        )
+
+        onboardingScreen(
+            onComplete = {
+                navController.navigate(HomeRoute) {
+                    popUpTo(OnboardingRoute) { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
         )
 
         homeScreen(
@@ -169,4 +184,3 @@ fun FoodDiaryNavHost(
         )
     }
 }
-

@@ -7,9 +7,9 @@ import androidx.compose.runtime.Composable
 private val FoodDiaryColorScheme = lightColorScheme(
     primary = PrimBase,
     onPrimary = White,
-    secondary = ComBase,
+//    secondary = ComBase,
     onSecondary = White,
-    tertiary = PersBase,
+//    tertiary = PersBase,
     onTertiary = White,
     error = RnBase,
     onError = White,

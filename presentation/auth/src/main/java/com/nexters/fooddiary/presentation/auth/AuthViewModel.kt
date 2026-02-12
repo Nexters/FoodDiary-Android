@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 
 data class AuthUiState(
     val isAuthenticated: Boolean? = null,
+    val isFirst: Boolean? = null,
     val isLoading: Boolean = false,
     val signInError: String? = null,
     val signInIntent: Intent? = null
@@ -124,7 +125,7 @@ class AuthViewModel @AssistedInject constructor(
     private suspend fun handleSignInSuccess(account: GoogleSignInAccount) {
         val result = signInWithGoogleUseCase(account.idToken)
         result.onSuccess { user ->
-            setState { copy(isAuthenticated = true) }
+            setState { copy(isAuthenticated = true, isFirst = user.isFirst) }
         }.onFailure { exception ->
             setState {
                 copy(signInError = exception.message ?: resourceProvider.getString(AuthR.string.error_sign_in_failed))
