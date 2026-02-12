@@ -54,7 +54,7 @@ fun FoodDiaryNavHost(
     val startDestination = if (initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_IMAGE) {
         ImagePickerRoute
     } else {
-        DetailRoute("2026-01-16")
+        SplashRoute
     }
 
     LaunchedEffect(authUiState?.signInError) {
