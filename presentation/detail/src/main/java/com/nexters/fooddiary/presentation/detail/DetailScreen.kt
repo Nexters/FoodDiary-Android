@@ -74,8 +74,8 @@ private fun DetailContent(
     onSaveClick: (String) -> Unit = {},
     onShareClick: (String) -> Unit = {},
 ) {
-    // 선택된 날짜의 식사만 가져오기
-    val meals = dailyMeals[selectedDateString] ?: emptyList()
+    // 선택된 날짜의 식사 가져오기 (없으면 기본 슬롯 생성)
+    val meals = dailyMeals[selectedDateString] ?: createDefaultMeals(selectedDateString)
     val date = LocalDate.parse(selectedDateString)
     val hazeState = rememberHazeState()
 
@@ -368,5 +368,49 @@ private fun DetailScreenPreview() {
     DetailContent(
         selectedDateString = today.toString(),
         dailyMeals = mockMeals,
+    )
+}
+
+private fun createDefaultMeals(dateString: String): List<MealUiModel> {
+    return listOf(
+        MealUiModel(
+            id = "${dateString}_breakfast",
+            dateString = dateString,
+            mealType = "아침",
+            time = "",
+            location = "",
+            place = "",
+            category = "",
+            keywords = emptyList(),
+            imageUrls = emptyList(),
+            isEmpty = true,
+            isPending = false,
+        ),
+        MealUiModel(
+            id = "${dateString}_lunch",
+            dateString = dateString,
+            mealType = "점심",
+            time = "",
+            location = "",
+            place = "",
+            category = "",
+            keywords = emptyList(),
+            imageUrls = emptyList(),
+            isEmpty = true,
+            isPending = false,
+        ),
+        MealUiModel(
+            id = "${dateString}_dinner",
+            dateString = dateString,
+            mealType = "저녁",
+            time = "",
+            location = "",
+            place = "",
+            category = "",
+            keywords = emptyList(),
+            imageUrls = emptyList(),
+            isEmpty = true,
+            isPending = false,
+        ),
     )
 }

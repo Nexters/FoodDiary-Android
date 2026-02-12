@@ -1,8 +1,10 @@
 package com.nexters.fooddiary.presentation.detail
 
+import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
+import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import dagger.assisted.Assisted
@@ -13,162 +15,45 @@ import java.time.LocalDate
 data class DetailState(
     val selectedDateString: String = LocalDate.now().toString(),  // ISO-8601: "2026-01-16"
     val dailyMeals: Map<String, List<MealUiModel>> = emptyMap(),  // Key: ISO-8601 date string
-    val isLoading: Boolean = false,
+    val loadMealsRequest: Async<Unit> = Uninitialized,  // 식사 데이터 로딩 상태
 ) : MavericksState
 
 class DetailViewModel @AssistedInject constructor(
     @Assisted initialState: DetailState,
 ) : MavericksViewModel<DetailState>(initialState) {
 
-    init {
-        loadMockData()
+    private inline fun executeAsync(
+        crossinline action: suspend () -> Unit,
+        crossinline updateState: DetailState.(Async<Unit>) -> DetailState
+    ) = suspend { action() }.execute { result ->
+        updateState(result)
     }
 
-    private fun loadMockData() {
-        val today = LocalDate.now()
-        val yesterday = today.minusDays(1)
-
-        val mockMeals = mapOf(
-            today.toString() to listOf(
-                MealUiModel(
-                    id = "1",
-                    dateString = today.toString(),
-                    mealType = "아침",
-                    time = "07:00",
-                    location = "마포구",
-                    place = "호진이네",
-                    category = "중식",
-                    keywords = listOf("#양장피", "#어향동고"),
-                    imageUrls = listOf(
-                        "https://picsum.photos/300/300?random=1",
-                        "https://picsum.photos/300/300?random=2",
-                        "https://picsum.photos/300/300?random=3"
-                    ),
-                    isEmpty = false,
-                    isPending = false,
-                ),
-                MealUiModel(
-                    id = "2",
-                    dateString = today.toString(),
-                    mealType = "점심",
-                    time = "12:30",
-                    location = "강남구",
-                    place = "",
-                    category = "",
-                    keywords = emptyList(),
-                    imageUrls = listOf("https://picsum.photos/300/300?random=4"),
-                    isEmpty = false,
-                    isPending = true, // AI 분석 중
-                ),
-                MealUiModel(
-                    id = "3",
-                    dateString = today.toString(),
-                    mealType = "저녁",
-                    time = "19:00",
-                    location = "",
-                    place = "",
-                    category = "",
-                    keywords = emptyList(),
-                    imageUrls = emptyList(),
-                    isEmpty = true, // 이미지 없음
-                    isPending = false,
-                ),
-            ),
-            yesterday.toString() to listOf(
-                MealUiModel(
-                    id = "4",
-                    dateString = yesterday.toString(),
-                    mealType = "점심",
-                    time = "13:00",
-                    location = "용산구",
-                    place = "맛있는 집",
-                    category = "한식",
-                    keywords = listOf("#김치찌개", "#제육볶음"),
-                    imageUrls = listOf(
-                        "https://picsum.photos/300/300?random=5",
-                        "https://picsum.photos/300/300?random=6"
-                    ),
-                    isEmpty = false,
-                    isPending = false,
-                ),
-            )
+    fun loadMealsForDate(dateString: String) {
+        executeAsync(
+            action = {
+                // TODO: 실제 API 호출 또는 Repository에서 데이터 로딩
+                // val meals = repository.getMealsByDate(dateString)
+                // setState { copy(dailyMeals = dailyMeals + (dateString to meals)) }
+            },
+            updateState = { copy(loadMealsRequest = it) }
         )
-
-        setState { copy(dailyMeals = mockMeals) }
-    }
-
-    private fun loadMockDataForDate(date: LocalDate) {
-        val dateString = date.toString()
-
-        // 이미 데이터가 있으면 스킵
-        if (withState(this) { it.dailyMeals.containsKey(dateString) }) {
-            return
-        }
-
-        // 날짜 기반 시드로 다양한 Mock 데이터 생성
-        val seed = date.toEpochDay().toInt()
-        val newMeals = listOf(
-            MealUiModel(
-                id = "meal_${dateString}_1",
-                dateString = dateString,
-                mealType = "아침",
-                time = "07:30",
-                location = "서울시",
-                place = "모닝카페",
-                category = "양식",
-                keywords = listOf("#브런치", "#커피"),
-                imageUrls = listOf(
-                    "https://picsum.photos/300/300?random=${seed * 3 + 1}",
-                    "https://picsum.photos/300/300?random=${seed * 3 + 2}"
-                ),
-                isEmpty = false,
-                isPending = false,
-            ),
-            MealUiModel(
-                id = "meal_${dateString}_2",
-                dateString = dateString,
-                mealType = "점심",
-                time = "12:00",
-                location = "강남구",
-                place = "점심 식당",
-                category = "한식",
-                keywords = listOf("#비빔밥", "#된장찌개"),
-                imageUrls = listOf("https://picsum.photos/300/300?random=${seed * 3 + 3}"),
-                isEmpty = false,
-                isPending = false,
-            ),
-            MealUiModel(
-                id = "meal_${dateString}_3",
-                dateString = dateString,
-                mealType = "저녁",
-                time = "18:30",
-                location = "",
-                place = "",
-                category = "",
-                keywords = emptyList(),
-                imageUrls = emptyList(),
-                isEmpty = true,
-                isPending = false,
-            ),
-        )
-
-        setState {
-            copy(dailyMeals = dailyMeals + (dateString to newMeals))
-        }
     }
 
     fun navigateToPreviousDay() {
-        val currentDate = LocalDate.parse(state.selectedDateString)
-        val previousDate = currentDate.minusDays(1)
-        setState { copy(selectedDateString = previousDate.toString()) }
-        loadMockDataForDate(previousDate)
+        setState {
+            val currentDate = LocalDate.parse(selectedDateString)
+            val previousDate = currentDate.minusDays(1)
+            copy(selectedDateString = previousDate.toString())
+        }
     }
 
     fun navigateToNextDay() {
-        val currentDate = LocalDate.parse(state.selectedDateString)
-        val nextDate = currentDate.plusDays(1)
-        setState { copy(selectedDateString = nextDate.toString()) }
-        loadMockDataForDate(nextDate)
+        setState {
+            val currentDate = LocalDate.parse(selectedDateString)
+            val nextDate = currentDate.plusDays(1)
+            copy(selectedDateString = nextDate.toString())
+        }
     }
 
     fun onMealCardClick(mealId: String) {
