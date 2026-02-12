@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,8 +17,8 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -138,64 +137,60 @@ internal fun MyPageScreen(
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
-    
-    Box(
-        modifier = modifier
+    Column(
+        modifier = Modifier
+            .background(SdBase)
             .fillMaxSize()
-            .background(color = SdBase)
+            .verticalScroll(scrollState),
+        horizontalAlignment = Alignment.End
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
+        DetailScreenHeader(
+            onBackButtonClick = onBack
         ) {
-            DetailScreenHeader(
-                onBackButtonClick = onBack
-            ) {
-                Text(
-                    text = stringResource(string.my_page_title),
-                    color = Gray050
-                )
-            }
-            ProfileCard(
-                modifier = Modifier,
-                nickName = state.nickName
+            Text(
+                text = stringResource(string.my_page_title),
+                color = Gray050
             )
-            MyPageSection(
-                iconId = drawable.ic_alert,
-                sectionNameId = string.my_page_section_alert
-            ) {
-                MyPageSubMenu(
-                    menuName = stringResource(string.my_page_menu_set_alarm),
-                    onClick = onNavigateToAlarmSettings
-                )
-            }
-            MyPageSection(
-                iconId = drawable.ic_setting,
-                sectionNameId = string.my_page_section_setting
-            ) {
-                MyPageSubMenu(
-                    menuName = stringResource(
-                        string.my_page_menu_app_version,
-                        if (LocalInspectionMode.current) "1.0.0" else context.getAppVersionName()
-                    )
-                )
-                MyPageSubMenu(
-                    menuName = stringResource(string.my_page_menu_terms_of_service),
-                    onClick = { navigateToWebView(WebViewPage.TermsOfService) })
-                MyPageSubMenu(
-                    menuName = stringResource(string.my_page_menu_privacy_policy),
-                    onClick = { navigateToWebView(WebViewPage.PrivacyPolicy) })
-            }
-            MyPageSection() {
-                MyPageSubMenu(menuName = stringResource(string.my_page_menu_logout), onClick = onSignOut)
-            }
-            Spacer(modifier = Modifier.padding(bottom = 80.dp))
         }
-        
+        ProfileCard(
+            modifier = Modifier,
+            nickName = state.nickName
+        )
+        MyPageSection(
+            iconId = drawable.ic_alert,
+            sectionNameId = string.my_page_section_alert
+        ) {
+            MyPageSubMenu(
+                menuName = stringResource(string.my_page_menu_set_alarm),
+                onClick = onNavigateToAlarmSettings
+            )
+        }
+        MyPageSection(
+            iconId = drawable.ic_setting,
+            sectionNameId = string.my_page_section_setting
+        ) {
+            MyPageSubMenu(
+                menuName = stringResource(
+                    string.my_page_menu_app_version,
+                    if (LocalInspectionMode.current) "1.0.0" else context.getAppVersionName()
+                )
+            )
+            MyPageSubMenu(
+                menuName = stringResource(string.my_page_menu_terms_of_service),
+                onClick = { navigateToWebView(WebViewPage.TermsOfService) })
+            MyPageSubMenu(
+                menuName = stringResource(string.my_page_menu_privacy_policy),
+                onClick = { navigateToWebView(WebViewPage.PrivacyPolicy) })
+        }
+        MyPageSection() {
+            MyPageSubMenu(
+                menuName = stringResource(string.my_page_menu_logout),
+                onClick = onSignOut
+            )
+        }
+        Spacer(modifier = Modifier.padding(bottom = 80.dp))
         Text(
             modifier = Modifier
-                .align(Alignment.BottomEnd)
                 .clickable {
                     Toast
                         .makeText(
@@ -255,7 +250,7 @@ internal fun MyPageSection(
     Column(
         modifier = modifier.padding(start = 16.dp, end = 16.dp, top = 32.dp)
     ) {
-            if(iconId != 0 && sectionNameId != 0) Row(
+        if (iconId != 0 && sectionNameId != 0) Row(
             modifier = modifier.padding(bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)

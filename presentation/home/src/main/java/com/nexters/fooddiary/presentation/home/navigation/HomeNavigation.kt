@@ -10,10 +10,12 @@ object HomeRoute
 
 fun NavGraphBuilder.homeScreen(
     onNavigateToImagePicker: () -> Unit,
+    onNavigateToMyPage: () -> Unit,
 ) {
     composable<HomeRoute> {
         HomeScreen(
             onNavigateToImagePicker = onNavigateToImagePicker,
+            onNavigateToMyPage = onNavigateToMyPage,
         )
     }
 }
