@@ -45,7 +45,12 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
     debugImplementation(libs.androidx.compose.ui.tooling)
+
+    // Mavericks
+    implementation(libs.mavericks.compose)
+    implementation(libs.mavericks.hilt)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
@@ -55,6 +60,11 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
+
+    // Mavericks
+    implementation(libs.mavericks)
+    implementation(libs.mavericks.compose)
+    implementation(libs.mavericks.hilt)
 
     // Testing
     testImplementation(libs.junit)

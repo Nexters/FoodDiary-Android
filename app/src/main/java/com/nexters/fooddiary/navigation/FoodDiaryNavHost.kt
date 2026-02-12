@@ -1,6 +1,8 @@
 package com.nexters.fooddiary.navigation
 
+import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
@@ -9,20 +11,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
+import com.nexters.fooddiary.core.common.R
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.nexters.fooddiary.presentation.auth.AuthUiState
 import com.nexters.fooddiary.presentation.auth.navigation.LoginRoute
 import com.nexters.fooddiary.presentation.auth.navigation.loginScreen
-import com.nexters.fooddiary.presentation.image.navigation.ImageRoute
-import com.nexters.fooddiary.presentation.image.navigation.imageScreen
+import com.nexters.fooddiary.presentation.home.calendar.navigation.calendarScreen
 import com.nexters.fooddiary.presentation.home.navigation.HomeRoute
 import com.nexters.fooddiary.presentation.home.navigation.homeScreen
+import com.nexters.fooddiary.presentation.image.navigation.ImagePickerRoute
+import com.nexters.fooddiary.presentation.image.navigation.imageScreen
 import com.nexters.fooddiary.presentation.home.calendar.navigation.CalendarRoute
-import com.nexters.fooddiary.presentation.home.calendar.navigation.calendarScreen
 import com.nexters.fooddiary.presentation.onboarding.navigation.OnboardingRoute
 import com.nexters.fooddiary.presentation.onboarding.navigation.onboardingScreen
+import com.nexters.fooddiary.presentation.mypage.navigation.MyPageRoute
+import com.nexters.fooddiary.presentation.mypage.navigation.WebViewPage
+import com.nexters.fooddiary.presentation.mypage.navigation.myPageScreen
+import com.nexters.fooddiary.presentation.webview.navigation.WebViewRoute
+import com.nexters.fooddiary.presentation.webview.navigation.webViewScreen
 import com.nexters.fooddiary.presentation.splash.navigation.SplashRoute
 import com.nexters.fooddiary.presentation.splash.navigation.splashScreen
 
@@ -35,12 +44,13 @@ fun FoodDiaryNavHost(
     onShowSnackBar: (SnackBarData) -> Unit = {},
     onShowToast: (String) -> Unit = {}
 ) {
+    val context = LocalContext.current
     var authUiState by remember { mutableStateOf<AuthUiState?>(null) }
     var signOutRequestId by remember { mutableStateOf(0) }
     var deleteAccountRequestId by remember { mutableStateOf(0) }
     var hasNavigatedFromSplash by remember { mutableStateOf(false) }
     val startDestination = if (initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_IMAGE) {
-        ImageRoute
+        ImagePickerRoute
     } else {
         SplashRoute
     }
@@ -55,9 +65,12 @@ fun FoodDiaryNavHost(
     LaunchedEffect(authUiState?.isAuthenticated, authUiState?.isFirst) {
         if (!hasNavigatedFromSplash) return@LaunchedEffect
 
-        // 로그아웃 완료 시 signOutRequestId 리셋
+        // 로그아웃/회원탈퇴 완료 시 requestId 리셋
         if (signOutRequestId > 0 && authUiState?.isAuthenticated == false) {
             signOutRequestId = 0
+        }
+        if (deleteAccountRequestId > 0 && authUiState?.isAuthenticated == false) {
+            deleteAccountRequestId = 0
         }
 
         authUiState?.isAuthenticated?.let { isAuthenticated ->
@@ -67,8 +80,8 @@ fun FoodDiaryNavHost(
                     popUpTo(0) { inclusive = false }
                     launchSingleTop = true
                 }
-            } else if (signOutRequestId == 0) {
-                // 로그인 → isFirst 체크해서 Onboarding 또는 Home으로 이동 (단, 로그아웃 중이 아닐 때만)
+            } else if (signOutRequestId == 0 && deleteAccountRequestId == 0) {
+                // 로그인 → isFirst 체크해서 Onboarding 또는 Home으로 이동 (단, 로그아웃/회원탈퇴 중이 아닐 때만)
                 val destination = if (authUiState?.isFirst == true) {
                     OnboardingRoute
                 } else {
@@ -123,22 +136,8 @@ fun FoodDiaryNavHost(
         )
 
         homeScreen(
-            onNavigateToImage = { navController.navigate(ImageRoute) },
-            onSignOut = {
-                signOutRequestId++
-                navController.navigate(LoginRoute) {
-                    popUpTo(0) { inclusive = false }
-                    launchSingleTop = true
-                }
-            },
-            onDeleteAccount = {
-                deleteAccountRequestId++
-                navController.navigate(LoginRoute) {
-                    popUpTo(0) { inclusive = false }
-                    launchSingleTop = true
-                }
-            },
-            onNavigateToCalendar = { navController.navigate(CalendarRoute) }
+            onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
+            onNavigateToMyPage = { navController.navigate(MyPageRoute)}
         )
         calendarScreen()
         imageScreen(
@@ -148,6 +147,40 @@ fun FoodDiaryNavHost(
                 }
             }
         )
+        myPageScreen(
+            navigateToWebView = { page ->
+                val url = when (page) {
+                    WebViewPage.TermsOfService -> context.getString(R.string.webview_url_terms_of_service)
+                    WebViewPage.PrivacyPolicy -> context.getString(R.string.webview_url_privacy_policy)
+                }
+                navController.navigate(WebViewRoute(url = url))
+            },
+            onBack = { navController.popBackStack() },
+            onSignOut = {
+                signOutRequestId++
+                navController.navigate(LoginRoute) {
+                    popUpTo(HomeRoute) { inclusive = false }
+                }
+            },
+            onRequireReAuthForDeleteAccount = {
+                deleteAccountRequestId++
+                navController.navigate(LoginRoute) {
+                    popUpTo(HomeRoute) { inclusive = false }
+                }
+            },
+            onNavigateToAlarmSettings = {
+                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                }
+                context.startActivity(intent)
+            }
+        )
+        webViewScreen(
+            onClose = {
+                if (!navController.popBackStack()) {
+                    onFinish()
+                }
+            }
+        )
     }
 }
-
