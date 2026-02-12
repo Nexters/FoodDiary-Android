@@ -21,11 +21,12 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.DropdownMenu
@@ -43,6 +44,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -112,7 +114,9 @@ private fun DetailContent(
         ?: createDefaultMeals(selectedDateString, breakfastLabel, lunchLabel, dinnerLabel)
     val date = LocalDate.parse(selectedDateString)
     val hazeState = rememberHazeState()
+    val density = androidx.compose.ui.platform.LocalDensity.current
     val listState = rememberLazyListState()
+    var dailyHeaderHeightPx by remember { mutableIntStateOf(0) }
     var isHeaderVisible by remember { mutableStateOf(true) }
     var previousScrollPosition by remember { mutableIntStateOf(0) }
 
@@ -199,20 +203,33 @@ private fun DetailContent(
             }
 
             stickyHeader(key = selectedDateString) {
-                AnimatedVisibility(
-                    visible = isHeaderVisible,
-                    enter = fadeIn() + slideInVertically(initialOffsetY = { -it / 2 }),
-                    exit = fadeOut() + slideOutVertically(targetOffsetY = { -it / 2 }),
-                ) {
-                    DailyHeader(
-                        date = date,
-                        onPreviousDay = onPreviousDay,
-                        onNextDay = onNextDay,
-                        hazeState = hazeState,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                    )
+                val spacerHeight = with(density) { dailyHeaderHeightPx.toDp() }
+                AnimatedContent(
+                    targetState = isHeaderVisible,
+                    transitionSpec = {
+                        (fadeIn() + slideInVertically(initialOffsetY = { -it / 2 })) togetherWith
+                            (fadeOut() + slideOutVertically(targetOffsetY = { -it / 2 }))
+                    },
+                    label = "dailyHeaderToggle",
+                ) { visible ->
+                    if (visible) {
+                        DailyHeader(
+                            date = date,
+                            onPreviousDay = onPreviousDay,
+                            onNextDay = onNextDay,
+                            hazeState = hazeState,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .onSizeChanged { dailyHeaderHeightPx = it.height }
+                        )
+                    } else {
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(spacerHeight)
+                        )
+                    }
                 }
             }
 
