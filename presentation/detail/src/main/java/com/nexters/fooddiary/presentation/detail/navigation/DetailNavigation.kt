@@ -17,7 +17,6 @@ fun NavGraphBuilder.detailScreen(
 ) {
     composable<DetailRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<DetailRoute>()
-        val selectedDate = LocalDate.parse(route.dateString)
 
         DetailScreen(
             onNavigateBack = onNavigateBack,

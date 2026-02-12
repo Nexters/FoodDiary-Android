@@ -45,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -85,6 +86,7 @@ internal fun DetailScreen(
     DetailContent(
         selectedDateString = state.selectedDateString,
         dailyMeals = state.dailyMeals,
+        onNavigateBack = onNavigateBack,
         onPreviousDay = viewModel::navigateToPreviousDay,
         onNextDay = viewModel::navigateToNextDay,
         onMealCardClick = viewModel::onMealCardClick,
@@ -98,6 +100,7 @@ internal fun DetailScreen(
 private fun DetailContent(
     selectedDateString: String,
     dailyMeals: Map<String, List<MealUiModel>>,  // Key: ISO-8601 date string
+    onNavigateBack: () -> Unit = {},
     onPreviousDay: () -> Unit = {},
     onNextDay: () -> Unit = {},
     onMealCardClick: (String) -> Unit = {},
@@ -105,7 +108,6 @@ private fun DetailContent(
     onSaveClick: (String) -> Unit = {},
     onShareClick: (String) -> Unit = {},
 ) {
-    // 선택된 날짜의 식사 가져오기 (없으면 기본 슬롯 생성)
     var isMoreMenuExpanded by remember { mutableStateOf(false) }
     val breakfastLabel = stringResource(id = R.string.detail_meal_breakfast)
     val lunchLabel = stringResource(id = R.string.detail_meal_lunch)
@@ -114,12 +116,13 @@ private fun DetailContent(
         ?: createDefaultMeals(selectedDateString, breakfastLabel, lunchLabel, dinnerLabel)
     val date = LocalDate.parse(selectedDateString)
     val hazeState = rememberHazeState()
-    val density = androidx.compose.ui.platform.LocalDensity.current
+    val density = LocalDensity.current
     val listState = rememberLazyListState()
     var dailyHeaderHeightPx by remember { mutableIntStateOf(0) }
     var isHeaderVisible by remember { mutableStateOf(true) }
     var previousScrollPosition by remember { mutableIntStateOf(0) }
 
+    // 스크롤 방향 감지해서 헤더 표시, 미표시
     LaunchedEffect(listState) {
         snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
             .map { (index, offset) -> index * 10_000 + offset }
@@ -153,7 +156,7 @@ private fun DetailContent(
 
             item(key = "detail_header") {
                 DetailScreenHeader(
-                    onBackButtonClick = {},
+                    onBackButtonClick = onNavigateBack,
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
