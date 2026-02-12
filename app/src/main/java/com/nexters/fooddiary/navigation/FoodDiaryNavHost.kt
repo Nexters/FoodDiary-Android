@@ -1,6 +1,8 @@
 package com.nexters.fooddiary.navigation
 
+import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
@@ -9,7 +11,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
+import com.nexters.fooddiary.core.common.R
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.nexters.fooddiary.presentation.auth.AuthUiState
@@ -22,6 +26,11 @@ import com.nexters.fooddiary.presentation.image.navigation.ImagePickerRoute
 import com.nexters.fooddiary.presentation.image.navigation.imageScreen
 import com.nexters.fooddiary.presentation.home.calendar.navigation.CalendarRoute
 import com.nexters.fooddiary.presentation.home.calendar.navigation.calendarScreen
+import com.nexters.fooddiary.presentation.mypage.navigation.MyPageRoute
+import com.nexters.fooddiary.presentation.mypage.navigation.WebViewPage
+import com.nexters.fooddiary.presentation.mypage.navigation.myPageScreen
+import com.nexters.fooddiary.presentation.webview.navigation.WebViewRoute
+import com.nexters.fooddiary.presentation.webview.navigation.webViewScreen
 import com.nexters.fooddiary.presentation.splash.navigation.SplashRoute
 import com.nexters.fooddiary.presentation.splash.navigation.splashScreen
 
@@ -34,6 +43,7 @@ fun FoodDiaryNavHost(
     onShowSnackBar: (SnackBarData) -> Unit = {},
     onShowToast: (String) -> Unit = {}
 ) {
+    val context = LocalContext.current
     var authUiState by remember { mutableStateOf<AuthUiState?>(null) }
     var signOutRequestId by remember { mutableStateOf(0) }
     var deleteAccountRequestId by remember { mutableStateOf(0) }
@@ -109,9 +119,45 @@ fun FoodDiaryNavHost(
 
         homeScreen(
             onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
+            onNavigateToMyPage = { navController.navigate(MyPageRoute)}
         )
         calendarScreen()
         imageScreen(
+            onClose = {
+                if (!navController.popBackStack()) {
+                    onFinish()
+                }
+            }
+        )
+        myPageScreen(
+            navigateToWebView = { page ->
+                val url = when (page) {
+                    WebViewPage.TermsOfService -> context.getString(R.string.webview_url_terms_of_service)
+                    WebViewPage.PrivacyPolicy -> context.getString(R.string.webview_url_privacy_policy)
+                }
+                navController.navigate(WebViewRoute(url = url))
+            },
+            onBack = { navController.popBackStack() },
+            onSignOut = {
+                signOutRequestId++
+                navController.navigate(LoginRoute) {
+                    popUpTo(HomeRoute) { inclusive = false }
+                }
+            },
+            onRequireReAuthForDeleteAccount = {
+                deleteAccountRequestId++
+                navController.navigate(LoginRoute) {
+                    popUpTo(HomeRoute) { inclusive = false }
+                }
+            },
+            onNavigateToAlarmSettings = {
+                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                }
+                context.startActivity(intent)
+            }
+        )
+        webViewScreen(
             onClose = {
                 if (!navController.popBackStack()) {
                     onFinish()

@@ -61,6 +61,11 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
+    // Mavericks
+    implementation(libs.mavericks)
+    implementation(libs.mavericks.compose)
+    implementation(libs.mavericks.hilt)
+
     // Testing
     testImplementation(libs.junit)
 }
