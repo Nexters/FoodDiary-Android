@@ -6,7 +6,6 @@ sealed interface FoodImageState {
         val timeText: String,           // 07:00
         val locationText: String,       // 마포구
         val placeText: String,          // 호진이네
-        val category: String,           // 중식
         val keywords: List<String>,     // #양장피 #어향동고
         val onSaveClick: () -> Unit,    // 저장 버튼
         val onShareClick: () -> Unit,   // 공유 버튼

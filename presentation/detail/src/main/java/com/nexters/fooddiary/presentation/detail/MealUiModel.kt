@@ -7,7 +7,6 @@ data class MealUiModel(
     val time: String,          // "07:00"
     val location: String,      // "마포구"
     val place: String,         // "호진이네"
-    val category: String,      // "중식"
     val keywords: List<String>, // ["#양장피", "#어향동고"]
     val imageUrls: List<String>, // 여러 이미지 URL 목록
     val isEmpty: Boolean,       // Empty 상태 플래그

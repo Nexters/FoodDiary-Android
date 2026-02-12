@@ -250,7 +250,6 @@ private fun FoodImageFullPreview() {
             timeText = "07:00",
             locationText = "마포구",
             placeText = "호진이네",
-            category = "중식",
             keywords = listOf("#양장피", "#어향동고"),
             onSaveClick = {},
             onShareClick = {},
