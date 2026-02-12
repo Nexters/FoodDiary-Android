@@ -17,14 +17,16 @@ fun NavGraphBuilder.myPageScreen(
     navigateToWebView: (WebViewPage) -> Unit = {},
     onSignOut: () -> Unit = {},
     onRequireReAuthForDeleteAccount: () -> Unit = {},
-    onNavigateToAlarmSettings: () -> Unit = {}
+    onNavigateToAlarmSettings: () -> Unit = {},
+    onBack: () -> Unit = {}
 ) {
     composable<MyPageRoute> {
         MyPageScreen(
             navigateToWebView = navigateToWebView,
             onSignOut = onSignOut,
             onRequireReAuthForDeleteAccount = onRequireReAuthForDeleteAccount,
-            onNavigateToAlarmSettings = onNavigateToAlarmSettings
+            onNavigateToAlarmSettings = onNavigateToAlarmSettings,
+            onBack = onBack
         )
     }
 }

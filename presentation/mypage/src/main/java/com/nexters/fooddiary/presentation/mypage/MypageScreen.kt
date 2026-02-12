@@ -1,6 +1,5 @@
 package com.nexters.fooddiary.presentation.mypage
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -60,6 +59,7 @@ fun MyPageScreen(
     onSignOut: () -> Unit = {},
     onRequireReAuthForDeleteAccount: () -> Unit = {},
     onNavigateToAlarmSettings: () -> Unit = {},
+    onBack: () -> Unit = {},
     viewModel: MyPageViewModel = mavericksViewModel()
 ) {
     val state by viewModel.collectAsStateWithLifecycle()
@@ -117,10 +117,11 @@ fun MyPageScreen(
         modifier = modifier,
         state = state,
         navigateToWebView = navigateToWebView,
-        onSIgnOut = viewModel::signOut,
+        onSignOut = viewModel::signOut,
         onDeleteAccount = viewModel::deleteAccount,
         deleteInProgressMessage = deleteInProgressMessage,
-        onNavigateToAlarmSettings = onNavigateToAlarmSettings
+        onNavigateToAlarmSettings = onNavigateToAlarmSettings,
+        onBack = onBack
     )
 }
 
@@ -129,10 +130,11 @@ internal fun MyPageScreen(
     modifier: Modifier = Modifier,
     state: MyPageState,
     navigateToWebView: (WebViewPage) -> Unit = {},
-    onSIgnOut: () -> Unit = {},
+    onSignOut: () -> Unit = {},
     onDeleteAccount: () -> Unit = {},
     deleteInProgressMessage: String = "",
-    onNavigateToAlarmSettings: () -> Unit = {}
+    onNavigateToAlarmSettings: () -> Unit = {},
+    onBack: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
@@ -147,11 +149,12 @@ internal fun MyPageScreen(
                 .fillMaxSize()
                 .verticalScroll(scrollState)
         ) {
-            DetailScreenHeader {
+            DetailScreenHeader(
+                onBackButtonClick = onBack
+            ) {
                 Text(
                     text = stringResource(string.my_page_title),
-                    color = Gray050,
-                    modifier = Modifier
+                    color = Gray050
                 )
             }
             ProfileCard(
@@ -185,7 +188,7 @@ internal fun MyPageScreen(
                     onClick = { navigateToWebView(WebViewPage.PrivacyPolicy) })
             }
             MyPageSection() {
-                MyPageSubMenu(menuName = stringResource(string.my_page_menu_logout), onClick = onSIgnOut)
+                MyPageSubMenu(menuName = stringResource(string.my_page_menu_logout), onClick = onSignOut)
             }
             Spacer(modifier = Modifier.padding(bottom = 80.dp))
         }
@@ -230,15 +233,14 @@ internal fun ProfileCard(
         // todo : 닉네임 font style p12로 변경 필요
         Text(
             text = stringResource(string.my_page_nick_name_description),
-            color = Gray050,
-            modifier = modifier
+            color = Gray050
         )
         Text(
             text = stringResource(string.my_page_nick_name, nickName),
             color = Gray050,
             fontWeight = FontWeight.SemiBold,
             fontSize = 18.sp,
-            modifier = modifier.padding(top = 7.dp)
+            modifier = Modifier.padding(top = 7.dp)
         )
     }
 }

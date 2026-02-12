@@ -151,6 +151,7 @@ fun FoodDiaryNavHost(
                 }
                 navController.navigate(WebViewRoute(url = url))
             },
+            onBack = { navController.popBackStack() },
             onSignOut = {
                 signOutRequestId++
                 navController.navigate(LoginRoute) {

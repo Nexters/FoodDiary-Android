@@ -26,7 +26,7 @@ fun WebViewScreen(
             .fillMaxSize()
             .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
     ) {
-        DetailScreenHeader(onBackButonClick = onClose)
+        DetailScreenHeader(onBackButtonClick = onClose)
         AndroidView(
             modifier = Modifier
                 .fillMaxWidth()

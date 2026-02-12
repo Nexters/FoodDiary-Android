@@ -24,7 +24,7 @@ import com.nexters.fooddiary.core.ui.theme.SdBase
 @Composable
 fun DetailScreenHeader(
     modifier: Modifier = Modifier,
-    onBackButonClick: () -> Unit = {},
+    onBackButtonClick: () -> Unit = {},
     content : @Composable () -> Unit = {}
 ) {
     Row(
@@ -35,7 +35,7 @@ fun DetailScreenHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
-            onClick = onBackButonClick
+            onClick = onBackButtonClick
         ) {
             Image(painter = painterResource(R.drawable.ic_back), contentDescription = "back_button")
         }
@@ -47,7 +47,7 @@ fun DetailScreenHeader(
 @Preview
 fun DetailScreenHeaderPreview() {
     DetailScreenHeader(
-        onBackButonClick = {},
+        onBackButtonClick = {},
     ) {
         Text (
             text = "내 정보",
