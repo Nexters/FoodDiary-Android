@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="detail_title">상세보기</string>
+    <string name="detail_more">더보기</string>
+    <string name="detail_edit">수정</string>
+    <string name="detail_copy">복사</string>
+    <string name="detail_share">공유</string>
+    <string name="detail_menu_test">테스트</string>
+    <string name="detail_meal_breakfast">아침</string>
+    <string name="detail_meal_lunch">점심</string>
+    <string name="detail_meal_dinner">저녁</string>
+</resources>

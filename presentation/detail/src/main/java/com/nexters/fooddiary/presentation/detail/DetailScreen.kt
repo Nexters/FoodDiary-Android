@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -27,7 +28,8 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,6 +43,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,7 +52,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
-import com.nexters.fooddiary.core.ui.R
+import com.nexters.fooddiary.core.ui.R as CoreUiR
 import com.nexters.fooddiary.core.ui.component.AddPhotoBox
 import com.nexters.fooddiary.core.ui.component.DailyHeader
 import com.nexters.fooddiary.core.ui.component.DetailScreenHeader
@@ -101,7 +104,12 @@ private fun DetailContent(
     onShareClick: (String) -> Unit = {},
 ) {
     // 선택된 날짜의 식사 가져오기 (없으면 기본 슬롯 생성)
-    val meals = dailyMeals[selectedDateString] ?: createDefaultMeals(selectedDateString)
+    var isMoreMenuExpanded by remember { mutableStateOf(false) }
+    val breakfastLabel = stringResource(id = R.string.detail_meal_breakfast)
+    val lunchLabel = stringResource(id = R.string.detail_meal_lunch)
+    val dinnerLabel = stringResource(id = R.string.detail_meal_dinner)
+    val meals = dailyMeals[selectedDateString]
+        ?: createDefaultMeals(selectedDateString, breakfastLabel, lunchLabel, dinnerLabel)
     val date = LocalDate.parse(selectedDateString)
     val hazeState = rememberHazeState()
     val listState = rememberLazyListState()
@@ -149,18 +157,37 @@ private fun DetailContent(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "상세보기",
+                            text = stringResource(id = R.string.detail_title),
                             style = AppTypography.hd18,
                             color = White,
                             fontFamily = PretendardFontFamily,
                             modifier = Modifier.padding(start = 4.dp)
                         )
-                        IconButton(onClick = {}) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_more),
-                                contentDescription = "더보기",
-                                tint = Color.White
-                            )
+                        Box(
+                            modifier = Modifier.wrapContentSize(align = Alignment.TopEnd)
+                        ) {
+                            IconButton(onClick = { isMoreMenuExpanded = true }) {
+                                Icon(
+                                    painter = painterResource(CoreUiR.drawable.ic_more),
+                                    contentDescription = stringResource(id = R.string.detail_more),
+                                    tint = Color.White
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = isMoreMenuExpanded,
+                                onDismissRequest = { isMoreMenuExpanded = false },
+                                offset = DpOffset(x = 0.dp, y = 0.dp),
+                            ) {
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = stringResource(id = R.string.detail_menu_test),
+                                            color = Color.Black
+                                        )
+                                    },
+                                    onClick = { isMoreMenuExpanded = false },
+                                )
+                            }
                         }
                     }
 
@@ -240,7 +267,7 @@ private fun MealSection(
             // FullUI 상태일 때만 수정 버튼 표시
             if (!meal.isEmpty && !meal.isPending) {
                 Text(
-                    text = "수정",
+                    text = stringResource(id = R.string.detail_edit),
                     style = AppTypography.p14.copy(
                         textDecoration = TextDecoration.Underline
                     ),
@@ -353,13 +380,13 @@ private fun MealInfoSection(
                     horizontalArrangement = Arrangement.spacedBy(4.dp) // 아이콘과 텍스트 사이 간격
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_copy),
-                        contentDescription = "복사",
+                        painter = painterResource(CoreUiR.drawable.ic_copy),
+                        contentDescription = stringResource(id = R.string.detail_copy),
                         tint = White,
                         modifier = Modifier.size(18.dp)
                     )
                     Text(
-                        text = "복사",
+                        text = stringResource(id = R.string.detail_copy),
                         color = White,
                         style = AppTypography.p12,
                         fontWeight = FontWeight.Medium,
@@ -374,13 +401,13 @@ private fun MealInfoSection(
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_share),
-                        contentDescription = "공유",
+                        painter = painterResource(CoreUiR.drawable.ic_share),
+                        contentDescription = stringResource(id = R.string.detail_share),
                         tint = White,
                         modifier = Modifier.size(18.dp)
                     )
                     Text(
-                        text = "공유",
+                        text = stringResource(id = R.string.detail_share),
                         color = White,
                         style = AppTypography.p12,
                         fontWeight = FontWeight.Medium,
@@ -415,12 +442,15 @@ private fun MealInfoSection(
 @Composable
 private fun DetailScreenPreview() {
     val today = LocalDate.now()
+    val breakfastLabel = stringResource(id = R.string.detail_meal_breakfast)
+    val lunchLabel = stringResource(id = R.string.detail_meal_lunch)
+    val dinnerLabel = stringResource(id = R.string.detail_meal_dinner)
     val mockMeals = mapOf(
         today.toString() to listOf(
             MealUiModel(
                 id = "1",
                 dateString = today.toString(),
-                mealType = "아침",
+                mealType = breakfastLabel,
                 time = "07:00",
                 location = "마포구",
                 place = "호진이네",
@@ -433,7 +463,7 @@ private fun DetailScreenPreview() {
             MealUiModel(
                 id = "2",
                 dateString = today.toString(),
-                mealType = "점심",
+                mealType = lunchLabel,
                 time = "12:30",
                 location = "강남구",
                 place = "",
@@ -446,7 +476,7 @@ private fun DetailScreenPreview() {
             MealUiModel(
                 id = "3",
                 dateString = today.toString(),
-                mealType = "저녁",
+                mealType = dinnerLabel,
                 time = "19:00",
                 location = "",
                 place = "",
@@ -465,12 +495,17 @@ private fun DetailScreenPreview() {
     )
 }
 
-private fun createDefaultMeals(dateString: String): List<MealUiModel> {
+private fun createDefaultMeals(
+    dateString: String,
+    breakfastLabel: String,
+    lunchLabel: String,
+    dinnerLabel: String,
+): List<MealUiModel> {
     return listOf(
         MealUiModel(
             id = "${dateString}_breakfast",
             dateString = dateString,
-            mealType = "아침",
+            mealType = breakfastLabel,
             time = "",
             location = "",
             place = "",
@@ -483,7 +518,7 @@ private fun createDefaultMeals(dateString: String): List<MealUiModel> {
         MealUiModel(
             id = "${dateString}_lunch",
             dateString = dateString,
-            mealType = "점심",
+            mealType = lunchLabel,
             time = "",
             location = "",
             place = "",
@@ -496,7 +531,7 @@ private fun createDefaultMeals(dateString: String): List<MealUiModel> {
         MealUiModel(
             id = "${dateString}_dinner",
             dateString = dateString,
-            mealType = "저녁",
+            mealType = dinnerLabel,
             time = "",
             location = "",
             place = "",
