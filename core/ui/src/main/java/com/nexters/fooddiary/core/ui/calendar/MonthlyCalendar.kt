@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -19,12 +18,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -67,7 +71,9 @@ import java.time.format.TextStyle
 import java.util.Collections.emptyMap
 import java.util.Locale
 
+private val MonthDayCellCornerShape = RoundedCornerShape(4.dp)
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MonthlyCalendar(
     modifier: Modifier = Modifier,
@@ -81,7 +87,8 @@ fun MonthlyCalendar(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val visibleMonth = remember { derivedStateOf { calendarState.firstVisibleMonth.yearMonth } }
-    var monthDropdownExpanded by remember { mutableStateOf(false) }
+    var monthBottomSheetVisible by remember { mutableStateOf(false) }
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     LaunchedEffect(calendarState) {
         snapshotFlow { calendarState.firstVisibleMonth.yearMonth }
@@ -91,25 +98,32 @@ fun MonthlyCalendar(
             }
     }
 
+    LaunchedEffect(monthBottomSheetVisible) {
+        if (monthBottomSheetVisible) {
+            bottomSheetState.show()
+        }
+    }
+
     Column(modifier = modifier) {
-        Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
-            MonthCalendarHeader(
-                yearMonth = visibleMonth.value,
-                locale = locale,
-                colors = colors,
-                onClick = { monthDropdownExpanded = true },
-            )
-            MonthSelectDropdown(
-                expanded = monthDropdownExpanded,
-                onDismissRequest = { monthDropdownExpanded = false },
+        MonthCalendarHeader(
+            yearMonth = visibleMonth.value,
+            locale = locale,
+            colors = colors,
+            onClick = { monthBottomSheetVisible = true },
+        )
+        if (monthBottomSheetVisible) {
+            MonthSelectBottomSheet(
+                sheetState = bottomSheetState,
+                onDismissRequest = { monthBottomSheetVisible = false },
                 currentYearMonth = visibleMonth.value,
                 locale = locale,
                 colors = colors,
                 onMonthSelected = { targetYearMonth ->
                     coroutineScope.launch {
+                        bottomSheetState.hide()
+                        monthBottomSheetVisible = false
                         calendarState.animateScrollToMonth(targetYearMonth)
                     }
-                    monthDropdownExpanded = false
                 },
             )
         }
@@ -135,23 +149,25 @@ fun MonthlyCalendar(
             HorizontalCalendar(
                 state = calendarState,
                 dayContent = { day ->
-                    val photoCount = photoCountByDate[day.date] ?: 0
-                    MonthDayCell(
-                        day = day,
-                        isSelected = day.date == selectedDate,
-                        photoCount = photoCount,
-                        colors = colors,
-                        onClick = {
-                            if (day.position != DayPosition.MonthDate) {
-                                coroutineScope.launch {
-                                    calendarState.animateScrollToMonth(YearMonth.from(day.date))
+                    key(day.date) {
+                        val photoCount = photoCountByDate[day.date] ?: 0
+                        MonthDayCell(
+                            day = day,
+                            isSelected = day.date == selectedDate,
+                            photoCount = photoCount,
+                            colors = colors,
+                            onClick = {
+                                if (day.position != DayPosition.MonthDate) {
+                                    coroutineScope.launch {
+                                        calendarState.animateScrollToMonth(YearMonth.from(day.date))
+                                        onDateSelected(day.date)
+                                    }
+                                } else {
                                     onDateSelected(day.date)
                                 }
-                            } else {
-                                onDateSelected(day.date)
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             )
         }
@@ -187,9 +203,10 @@ private fun MonthCalendarHeader(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun MonthSelectDropdown(
-    expanded: Boolean,
+private fun MonthSelectBottomSheet(
+    sheetState: SheetState,
     onDismissRequest: () -> Unit,
     currentYearMonth: YearMonth,
     locale: Locale,
@@ -197,28 +214,33 @@ private fun MonthSelectDropdown(
     onMonthSelected: (YearMonth) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    DropdownMenu(
-        expanded = expanded,
+    ModalBottomSheet(
         onDismissRequest = onDismissRequest,
-        modifier = modifier
-            .heightIn(max = 320.dp)
-            .wrapContentSize(Alignment.TopStart),
+        sheetState = sheetState,
+        containerColor = Sd900,
+        modifier = modifier,
     ) {
-        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 320.dp)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
             (1..12).forEach { monthValue ->
-                val yearMonth = YearMonth.of(currentYearMonth.year, monthValue)
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = "${yearMonth.year}년 ${monthValue}월",
-                            color = colors.headerText,
-                            fontSize = 14.sp,
-                        )
-                    },
-                    onClick = {
-                        onMonthSelected(yearMonth)
-                    },
-                )
+                key(monthValue) {
+                    val yearMonth = YearMonth.of(currentYearMonth.year, monthValue)
+                    Text(
+                        text = "${monthValue}월",
+                        color = colors.headerText,
+                        fontSize = 16.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onMonthSelected(yearMonth) }
+                            .padding(vertical = 12.dp),
+                    )
+                }
             }
         }
     }
@@ -258,8 +280,6 @@ private fun MonthDayCell(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isCurrentMonth = day.position == DayPosition.MonthDate
-
     Box(
         modifier = modifier
             .wrapContentSize()
@@ -268,8 +288,7 @@ private fun MonthDayCell(
         contentAlignment = Alignment.TopCenter
     ) {
         NeonStyleDay(
-            modifier = modifier
-                .clickable(onClick = onClick),
+            modifier = Modifier,
             topText = day.date.dayOfMonth.toString(),
             isSelected = isSelected,
             showDot = false,
@@ -279,7 +298,7 @@ private fun MonthDayCell(
                     modifier = Modifier
                         .padding(top = 6.dp)
                         .requiredSize(32.dp)
-                        .clip(RoundedCornerShape(4.dp))
+                        .clip(MonthDayCellCornerShape)
                         .background(
                             if (isSelected) colors.selectedInnerBox else Transparent
                         )
