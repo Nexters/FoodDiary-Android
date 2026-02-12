@@ -64,9 +64,12 @@ fun FoodDiaryNavHost(
     LaunchedEffect(authUiState?.isAuthenticated) {
         if (!hasNavigatedFromSplash) return@LaunchedEffect
 
-        // 로그아웃 완료 시 signOutRequestId 리셋
+        // 로그아웃/회원탈퇴 완료 시 requestId 리셋
         if (signOutRequestId > 0 && authUiState?.isAuthenticated == false) {
             signOutRequestId = 0
+        }
+        if (deleteAccountRequestId > 0 && authUiState?.isAuthenticated == false) {
+            deleteAccountRequestId = 0
         }
 
         authUiState?.isAuthenticated?.let { isAuthenticated ->
@@ -76,8 +79,8 @@ fun FoodDiaryNavHost(
                     popUpTo(0) { inclusive = false }
                     launchSingleTop = true
                 }
-            } else if (signOutRequestId == 0) {
-                // 로그인 → HomeRoute로 이동 (단, 로그아웃 중이 아닐 때만)
+            } else if (signOutRequestId == 0 && deleteAccountRequestId == 0) {
+                // 로그인 → HomeRoute로 이동 (단, 로그아웃 중이나 회원탈퇴 중이 아닐 때만)
                 navController.navigate(HomeRoute) {
                     popUpTo(0) { inclusive = false }
                     launchSingleTop = true
