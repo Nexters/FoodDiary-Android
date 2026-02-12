@@ -29,11 +29,17 @@ fun DailyHeader(
     onPreviousDay: () -> Unit,
     onNextDay: () -> Unit,
     modifier: Modifier = Modifier,
-    hazeState: HazeState? = null
+    hazeState: HazeState? = null,
+    useGlassmorphism: Boolean = true,
 ) {
+    val headerModifier = if (useGlassmorphism) {
+        modifier.glassmorphism(hazeState = hazeState)
+    } else {
+        modifier
+    }
+
     Row(
-        modifier = modifier
-            .glassmorphism(hazeState = hazeState)
+        modifier = headerModifier
             .padding(vertical = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically

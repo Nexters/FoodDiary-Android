@@ -8,13 +8,15 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -24,6 +26,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,7 +40,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,6 +52,7 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.ui.R
 import com.nexters.fooddiary.core.ui.component.AddPhotoBox
 import com.nexters.fooddiary.core.ui.component.DailyHeader
+import com.nexters.fooddiary.core.ui.component.DetailScreenHeader
 import com.nexters.fooddiary.core.ui.food.FoodImageCard
 import com.nexters.fooddiary.core.ui.food.FoodImageState
 import com.nexters.fooddiary.core.ui.theme.AppTypography
@@ -128,9 +135,42 @@ private fun DetailContent(
                 .fillMaxSize()
                 .hazeSource(state = hazeState)
                 .padding(padding),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
+            verticalArrangement = Arrangement.Top,
             contentPadding = PaddingValues(bottom = 20.dp)
         ) {
+
+            item(key = "detail_header") {
+                DetailScreenHeader(
+                    onBackButtonClick = {},
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "상세보기",
+                            style = AppTypography.hd18,
+                            color = White,
+                            fontFamily = PretendardFontFamily,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+                        IconButton(onClick = {}) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_more),
+                                contentDescription = "더보기",
+                                tint = Color.White
+                            )
+                        }
+                    }
+
+                }
+            }
+
+            item(key = "gap_detail_to_daily") {
+                Spacer(modifier = Modifier.height(32.dp))
+            }
+
             stickyHeader(key = selectedDateString) {
                 AnimatedVisibility(
                     visible = isHeaderVisible,
@@ -144,13 +184,16 @@ private fun DetailContent(
                         hazeState = hazeState,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 20.dp)
-                            .padding(top = 16.dp)
+                            .padding(horizontal = 16.dp)
                     )
                 }
             }
 
-            items(meals, key = { it.id }) { meal ->
+            item(key = "gap_after_daily_header") {
+                Spacer(modifier = Modifier.height(42.dp))
+            }
+
+            itemsIndexed(meals, key = { _, meal -> meal.id }) { index, meal ->
                 MealSection(
                     meal = meal,
                     onCardClick = { onMealCardClick(meal.id) },
@@ -158,6 +201,10 @@ private fun DetailContent(
                     onSaveClick = { onSaveClick(meal.id) },
                     onShareClick = { onShareClick(meal.id) },
                 )
+
+                if (index != meals.lastIndex) {
+                    Spacer(modifier = Modifier.height(42.dp))
+                }
             }
         }
     }
