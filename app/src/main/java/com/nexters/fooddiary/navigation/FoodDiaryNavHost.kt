@@ -19,10 +19,11 @@ import androidx.navigation.compose.rememberNavController
 import com.nexters.fooddiary.presentation.auth.AuthUiState
 import com.nexters.fooddiary.presentation.auth.navigation.LoginRoute
 import com.nexters.fooddiary.presentation.auth.navigation.loginScreen
-import com.nexters.fooddiary.presentation.image.navigation.ImageRoute
-import com.nexters.fooddiary.presentation.image.navigation.imageScreen
+import com.nexters.fooddiary.presentation.home.calendar.navigation.calendarScreen
 import com.nexters.fooddiary.presentation.home.navigation.HomeRoute
 import com.nexters.fooddiary.presentation.home.navigation.homeScreen
+import com.nexters.fooddiary.presentation.image.navigation.ImagePickerRoute
+import com.nexters.fooddiary.presentation.image.navigation.imageScreen
 import com.nexters.fooddiary.presentation.home.calendar.navigation.CalendarRoute
 import com.nexters.fooddiary.presentation.home.calendar.navigation.calendarScreen
 import com.nexters.fooddiary.presentation.mypage.navigation.MyPageRoute
@@ -48,7 +49,7 @@ fun FoodDiaryNavHost(
     var deleteAccountRequestId by remember { mutableStateOf(0) }
     var hasNavigatedFromSplash by remember { mutableStateOf(false) }
     val startDestination = if (initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_IMAGE) {
-        ImageRoute
+        ImagePickerRoute
     } else {
         SplashRoute
     }
@@ -117,23 +118,7 @@ fun FoodDiaryNavHost(
         )
 
         homeScreen(
-            onNavigateToImage = { navController.navigate(ImageRoute) },
-            onSignOut = {
-                signOutRequestId++
-                navController.navigate(LoginRoute) {
-                    popUpTo(0) { inclusive = false }
-                    launchSingleTop = true
-                }
-            },
-            onDeleteAccount = {
-                deleteAccountRequestId++
-                navController.navigate(LoginRoute) {
-                    popUpTo(0) { inclusive = false }
-                    launchSingleTop = true
-                }
-            },
-            onNavigateToCalendar = { navController.navigate(CalendarRoute) },
-            onNavigateToMyPage =  { navController.navigate(MyPageRoute)}
+            onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
         )
         calendarScreen()
         imageScreen(

@@ -30,5 +30,12 @@
     <string name="webview_url_privacy_policy">https://naver.com</string>
     <string name="my_page_sign_out">탈퇴</string>
     <string name="home_add_food_photo">음식 사진 추가하기</string>
+    <!-- Home -->
+    <string name="home_description_empty">이번주 음식 사진을 기록해 보세요</string>
+    <string name="home_description_with_count">이번주 음식 사진 %1$s개</string>
+    <string name="home_sub_description">길동님의 음식 기록, \n지금 바로 쓸 수 있어요</string>
+    <string name="home_add_food_photo">오늘의 음식 사진을 추가해보세요.</string>
+    <string name="home_nav_home">홈</string>
+    <string name="home_nav_insight">인사이트</string>
 </resources>
 
