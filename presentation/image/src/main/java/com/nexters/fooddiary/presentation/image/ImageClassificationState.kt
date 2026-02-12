@@ -2,22 +2,21 @@ package com.nexters.fooddiary.presentation.image
 
 import android.graphics.Bitmap
 import com.airbnb.mvrx.MavericksState
-import com.nexters.fooddiary.core.classification.FoodClassificationResult
+import com.nexters.fooddiary.domain.model.ClassificationResult
+
+data class ClassifiedImageItem(
+    val bitmap: Bitmap,
+    val classificationResult: ClassificationResult? = null
+)
 
 data class ImageClassificationState(
-    val selectedImage: Bitmap? = null,
-    val classificationResult: ClassificationResult? = null,
+    val selectedItems: List<ClassifiedImageItem> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null
 ) : MavericksState {
     val hasSelectedImage: Boolean
-        get() = selectedImage != null
+        get() = selectedItems.isNotEmpty()
 
     val isClassifying: Boolean
-        get() = isLoading && selectedImage != null
+        get() = isLoading && selectedItems.isNotEmpty()
 }
-
-sealed class ClassificationResult {
-    data class Complete(val result: FoodClassificationResult) : ClassificationResult()
-}
-

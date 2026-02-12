@@ -47,6 +47,7 @@ android {
 dependencies {
     // Modules
     implementation(projects.core.common)
+    implementation(projects.core.classification)
     implementation(projects.domain)
 
     // Coroutines
