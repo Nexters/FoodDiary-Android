@@ -88,6 +88,7 @@ internal fun HomeScreen(
     modifier: Modifier = Modifier,
     onNavigateToImagePicker: () -> Unit = {},
     onNavigateToDetail: (LocalDate) -> Unit = {},
+    onNavigateToMyPage: () -> Unit = {},
     viewModel: HomeViewModel = mavericksViewModel(),
 ) {
     val state by viewModel.collectAsState()
@@ -102,6 +103,7 @@ internal fun HomeScreen(
         },
         onToggleCalendarView = viewModel::onToggleCalendarView,
         onNavigateToImagePicker = onNavigateToImagePicker,
+        onNavigateToMyPage = onNavigateToMyPage,
         modifier = modifier,
     )
 }
@@ -114,6 +116,7 @@ private fun HomeScreen(
     onDateSelected: (LocalDate) -> Unit = {},
     onToggleCalendarView: () -> Unit = {},
     onNavigateToImagePicker: () -> Unit = {},
+    onNavigateToMyPage: () -> Unit = {},
 ) {
     val weeklyCalendarState = rememberWeeklyCalendarState(selectedDate = state.selectedDate)
     val monthlyCalendarState = rememberMonthCalendarState(selectedDate = state.selectedDate)
@@ -147,7 +150,7 @@ private fun HomeScreen(
             ) {
                 Header(
                     modifier = Modifier.padding(vertical = 18.dp),
-                    onClickMyPage = { },
+                    onClickMyPage = onNavigateToMyPage,
                 )
                 Text(
                     text = homeDescriptionText(photoCountByDate),

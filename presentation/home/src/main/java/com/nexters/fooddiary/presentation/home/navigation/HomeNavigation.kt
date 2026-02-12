@@ -12,11 +12,13 @@ object HomeRoute
 fun NavGraphBuilder.homeScreen(
     onNavigateToImagePicker: () -> Unit,
     onNavigateToDetail: (LocalDate) -> Unit,
+    onNavigateToMyPage: () -> Unit,
 ) {
     composable<HomeRoute> {
         HomeScreen(
             onNavigateToImagePicker = onNavigateToImagePicker,
             onNavigateToDetail = onNavigateToDetail,
+            onNavigateToMyPage = onNavigateToMyPage,
         )
     }
 }

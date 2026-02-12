@@ -2,11 +2,13 @@ package com.nexters.fooddiary.data.di
 
 import com.google.firebase.auth.FirebaseAuth
 import com.nexters.fooddiary.data.auth.GoogleSignInHelper
+import com.nexters.fooddiary.data.repository.DiaryRepositoryImpl
 import com.nexters.fooddiary.data.repository.AuthRepositoryImpl
 import com.nexters.fooddiary.core.common.auth.GoogleSignInIntentProvider
 import com.nexters.fooddiary.core.common.resource.ResourceProvider
 import com.nexters.fooddiary.core.common.resource.AndroidResourceProvider
 import com.nexters.fooddiary.domain.repository.AuthRepository
+import com.nexters.fooddiary.domain.repository.DiaryRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -23,6 +25,12 @@ abstract class DataModule {
     abstract fun bindAuthRepository(
         authRepositoryImpl: AuthRepositoryImpl
     ): AuthRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindDiaryRepository(
+        diaryRepositoryImpl: DiaryRepositoryImpl
+    ): DiaryRepository
 
     @Binds
     @Singleton

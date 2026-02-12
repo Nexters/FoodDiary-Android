@@ -43,5 +43,7 @@ val Gray020 = Color(0xFFFBFBFB)
 val White = Color(0xFFFFFFFF)
 
 val Shadow40 = Color(0x66000000)
+val Color363347 = Color(0xFF363347)
+
 
 val TimeLocationBg = Color(0xB2191821)

@@ -7,10 +7,15 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
+import com.nexters.fooddiary.domain.model.DiaryDetail
+import com.nexters.fooddiary.domain.model.DiaryPhotoDetail
+import com.nexters.fooddiary.domain.model.MealType
+import com.nexters.fooddiary.domain.usecase.GetDiaryByDateUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 data class DetailState(
     val selectedDateString: String = LocalDate.now().toString(),  // ISO-8601: "2026-01-16"
@@ -20,6 +25,7 @@ data class DetailState(
 
 class DetailViewModel @AssistedInject constructor(
     @Assisted initialState: DetailState,
+    private val getDiaryByDateUseCase: GetDiaryByDateUseCase,
 ) : MavericksViewModel<DetailState>(initialState) {
 
     private inline fun executeAsync(
@@ -30,11 +36,19 @@ class DetailViewModel @AssistedInject constructor(
     }
 
     fun loadMealsForDate(dateString: String) {
+        withState { state ->
+            if (state.dailyMeals.containsKey(dateString)) {
+                return@withState
+            }
+        }
+
         executeAsync(
             action = {
-                // TODO: 실제 API 호출 또는 Repository에서 데이터 로딩
-                // val meals = repository.getMealsByDate(dateString)
-                // setState { copy(dailyMeals = dailyMeals + (dateString to meals)) }
+                val diary = getDiaryByDateUseCase(LocalDate.parse(dateString))
+                val meals = diary.toMealUiModels(dateString)
+                setState {
+                    copy(dailyMeals = dailyMeals + (dateString to meals))
+                }
             },
             updateState = { copy(loadMealsRequest = it) }
         )
@@ -78,4 +92,61 @@ class DetailViewModel @AssistedInject constructor(
     }
 
     companion object : MavericksViewModelFactory<DetailViewModel, DetailState> by hiltMavericksViewModelFactory()
+}
+
+private fun DiaryDetail.toMealUiModels(dateString: String): List<MealUiModel> {
+    val photosByMeal = photos.groupBy { it.mealType }
+    return listOf(
+        MealType.BREAKFAST.toMealUiModel(dateString, photosByMeal[MealType.BREAKFAST].orEmpty()),
+        MealType.LUNCH.toMealUiModel(dateString, photosByMeal[MealType.LUNCH].orEmpty()),
+        MealType.DINNER.toMealUiModel(dateString, photosByMeal[MealType.DINNER].orEmpty()),
+    )
+}
+
+private fun MealType.toMealUiModel(
+    dateString: String,
+    photos: List<DiaryPhotoDetail>,
+): MealUiModel {
+    if (photos.isEmpty()) {
+        return MealUiModel(
+            id = "${dateString}_${name.lowercase()}",
+            dateString = dateString,
+            mealType = displayName(),
+            time = "",
+            location = "",
+            place = "",
+            category = "",
+            keywords = emptyList(),
+            imageUrls = emptyList(),
+            isEmpty = true,
+            isPending = false,
+        )
+    }
+
+    val firstPhoto = photos.first()
+    val imageUrls = photos.map { it.imageUrl }
+    val menuKeyword = firstPhoto.menuName?.takeIf { it.isNotBlank() }?.let { "#$it" }
+
+    return MealUiModel(
+        id = "${dateString}_${name.lowercase()}",
+        dateString = dateString,
+        mealType = displayName(),
+        time = firstPhoto.takenAt.format(DateTimeFormatter.ofPattern("HH:mm")),
+        location = firstPhoto.location.orEmpty(),
+        place = firstPhoto.restaurantName.orEmpty(),
+        category = firstPhoto.menuName.orEmpty(),
+        keywords = listOfNotNull(menuKeyword),
+        imageUrls = imageUrls,
+        isEmpty = false,
+        isPending = false,
+    )
+}
+
+private fun MealType.displayName(): String {
+    return when (this) {
+        MealType.BREAKFAST -> "아침"
+        MealType.LUNCH -> "점심"
+        MealType.DINNER -> "저녁"
+        MealType.UNKNOWN -> "기타"
+    }
 }

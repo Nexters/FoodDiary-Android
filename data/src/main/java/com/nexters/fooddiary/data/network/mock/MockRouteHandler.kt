@@ -38,13 +38,7 @@ object MockRouteHandler {
 
             // Diary
             path == PATH_DIARIES && method == "POST" -> MOCK_CREATE_DIARY_SUCCESS
-            path.matches(REGEX_DIARY_DATE) && method == "GET" -> {
-                if (path.contains("2026-01-17")) {
-                    MOCK_GET_DIARY_20260117
-                } else {
-                    null
-                }
-            }
+            path.matches(REGEX_DIARY_DATE) && method == "GET" -> MOCK_GET_DIARY_20260117
 
             // Photo
             path == PATH_PHOTOS && method == "POST" -> MOCK_UPLOAD_URL_SUCCESS

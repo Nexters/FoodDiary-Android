@@ -66,6 +66,10 @@ internal fun DetailScreen(
 ) {
     val state by viewModel.collectAsState()
 
+    LaunchedEffect(state.selectedDateString) {
+        viewModel.loadMealsForDate(state.selectedDateString)
+    }
+
     DetailContent(
         selectedDateString = state.selectedDateString,
         dailyMeals = state.dailyMeals,

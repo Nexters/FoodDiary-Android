@@ -11,6 +11,8 @@ data class DiaryPhoto(
     val imageUrl: String,
     @SerialName("taken_at")
     val takenAt: String,
+    @SerialName("location")
+    val location: String?,
     @SerialName("restaurant_name")
     val restaurantName: String?,
     @SerialName("menu_name")

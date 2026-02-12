@@ -12,6 +12,24 @@
     <string name="sign_in_error_intent_null">Intent is null</string>
     <string name="sign_in_error_id_token_null">idToken is null</string>
 
+    <string name="my_page_title">마이페이지</string>
+    <string name="my_page_nick_name_description">안녕하세요,</string>
+    <string name="my_page_nick_name">%s님</string>
+    <string name="my_page_section_alert">알림</string>
+    <string name="my_page_menu_set_alarm">알림설정</string>
+    <string name="my_page_section_setting">관리</string>
+    <string name="my_page_menu_logout">로그아웃</string>
+    <string name="my_page_menu_app_version">앱 버전  %s</string>
+    <string name="my_page_menu_terms_of_service">서비스 이용약관</string>
+    <string name="my_page_menu_privacy_policy">개인정보 처리방침</string>
+    <string name="my_page_recent_login_required">보안을 위해 다시 로그인 후 탈퇴를 진행해 주세요.</string>
+    <string name="my_page_delete_in_progress">탈퇴를 진행하고 있어요…</string>
+    <string name="my_page_delete_failed">탈퇴에 실패했어요. 잠시 후 다시 시도해 주세요.</string>
+    <string name="my_page_sign_out">탈퇴</string>
+
+    <!-- WebView URLs -->
+    <string name="webview_url_terms_of_service">https://google.com</string>
+    <string name="webview_url_privacy_policy">https://naver.com</string>
     <!-- Home -->
     <string name="home_description_empty">이번주 음식 사진을 기록해 보세요</string>
     <string name="home_description_with_count">이번주 음식 사진 %1$s개</string>
