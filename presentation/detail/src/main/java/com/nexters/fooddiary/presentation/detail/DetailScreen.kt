@@ -15,13 +15,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -42,6 +54,9 @@ import com.nexters.fooddiary.core.ui.theme.SdBase
 import com.nexters.fooddiary.core.ui.theme.White
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 
 @Composable
@@ -78,11 +93,33 @@ private fun DetailContent(
     val meals = dailyMeals[selectedDateString] ?: createDefaultMeals(selectedDateString)
     val date = LocalDate.parse(selectedDateString)
     val hazeState = rememberHazeState()
+    val listState = rememberLazyListState()
+    var isHeaderVisible by remember { mutableStateOf(true) }
+    var previousScrollPosition by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
+            .map { (index, offset) -> index * 10_000 + offset }
+            .distinctUntilChanged()
+            .collectLatest { currentPosition ->
+                if (currentPosition > previousScrollPosition) {
+                    isHeaderVisible = false
+                } else if (currentPosition < previousScrollPosition) {
+                    isHeaderVisible = true
+                }
+                previousScrollPosition = currentPosition
+            }
+    }
+
+    LaunchedEffect(selectedDateString) {
+        isHeaderVisible = true
+    }
 
     Scaffold(
         containerColor = SdBase,
     ) { padding ->
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .fillMaxSize()
                 .hazeSource(state = hazeState)
@@ -91,16 +128,22 @@ private fun DetailContent(
             contentPadding = PaddingValues(bottom = 20.dp)
         ) {
             stickyHeader(key = selectedDateString) {
-                DailyHeader(
-                    date = date,
-                    onPreviousDay = onPreviousDay,
-                    onNextDay = onNextDay,
-                    hazeState = hazeState,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
-                        .padding(top = 16.dp)
-                )
+                AnimatedVisibility(
+                    visible = isHeaderVisible,
+                    enter = fadeIn() + slideInVertically(initialOffsetY = { -it / 2 }),
+                    exit = fadeOut() + slideOutVertically(targetOffsetY = { -it / 2 }),
+                ) {
+                    DailyHeader(
+                        date = date,
+                        onPreviousDay = onPreviousDay,
+                        onNextDay = onNextDay,
+                        hazeState = hazeState,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp)
+                            .padding(top = 16.dp)
+                    )
+                }
             }
 
             items(meals, key = { it.id }) { meal ->

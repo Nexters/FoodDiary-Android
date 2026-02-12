@@ -17,10 +17,9 @@ import androidx.compose.ui.unit.dp
 import com.nexters.fooddiary.core.ui.R
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.PretendardFontFamily
-import com.nexters.fooddiary.core.ui.theme.SdBase
 import com.nexters.fooddiary.core.ui.theme.White
+import com.nexters.fooddiary.core.ui.theme.glassmorphism
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeEffect
 import java.time.DayOfWeek
 import java.time.LocalDate
 
@@ -34,16 +33,7 @@ fun DailyHeader(
 ) {
     Row(
         modifier = modifier
-            .then(
-                if (hazeState != null) {
-                    Modifier.hazeEffect(state = hazeState) {
-                        backgroundColor = SdBase.copy(alpha = 0.7f)
-                        blurRadius = 20.dp
-                    }
-                } else {
-                    Modifier
-                }
-            )
+            .glassmorphism(hazeState = hazeState)
             .padding(vertical = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
