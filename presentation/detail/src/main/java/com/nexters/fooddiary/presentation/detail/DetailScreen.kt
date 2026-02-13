@@ -125,7 +125,7 @@ internal fun DetailScreen(
         onNavigateBack = onNavigateBack,
         onPreviousDay = viewModel::navigateToPreviousDay,
         onNextDay = viewModel::navigateToNextDay,
-        onMealCardClick = viewModel::onMealCardClick,
+        onAddPhoto = viewModel::onAddPhoto,
         onEditClick = viewModel::onEditClick,
         onCopyClick = viewModel::onCopyClick,
         onShareClick = viewModel::onShareClick,
@@ -139,7 +139,7 @@ private fun DetailContent(
     onNavigateBack: () -> Unit = {},
     onPreviousDay: () -> Unit = {},
     onNextDay: () -> Unit = {},
-    onMealCardClick: (MealSlot, LocalDate) -> Unit = { _, _ -> },
+    onAddPhoto: (MealSlot, LocalDate) -> Unit = { _, _ -> },
     onEditClick: (MealSlot, LocalDate) -> Unit = { _, _ -> },
     onCopyClick: (String) -> Unit = {},
     onShareClick: (String, String) -> Unit = { _, _ -> }, // (place, mapLink)
@@ -276,7 +276,7 @@ private fun DetailContent(
                 MealSection(
                     meal = meal,
                     mealLabel = meal.slot.toLabel(),
-                    onCardClick = { onMealCardClick(meal.slot, meal.date) },
+                    onAddPhoto = { onAddPhoto(meal.slot, meal.date) },
                     onEditClick = { onEditClick(meal.slot, meal.date) },
                     onCopyClick = { onCopyClick(meal.mapLink) },
                     onShareClick = { onShareClick(meal.place, meal.mapLink) },
@@ -295,7 +295,7 @@ private fun DetailContent(
 private fun MealSection(
     meal: MealCardUiModel,
     mealLabel: String,
-    onCardClick: () -> Unit,
+    onAddPhoto: () -> Unit,
     onEditClick: () -> Unit,
     onCopyClick: () -> Unit,
     onShareClick: () -> Unit,
@@ -346,7 +346,7 @@ private fun MealSection(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f),
-                    onAddPhoto = onCardClick
+                    onAddPhoto = onAddPhoto
                 )
             }
         } else {

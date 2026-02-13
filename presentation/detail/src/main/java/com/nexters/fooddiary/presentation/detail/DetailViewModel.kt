@@ -99,8 +99,8 @@ class DetailViewModel @AssistedInject constructor(
         }
     }
 
-    fun onMealCardClick(slot: MealSlot, date: LocalDate) {
-        // TODO: Navigate to image picker or detail
+    fun onAddPhoto(slot: MealSlot, date: LocalDate) {
+        // TODO: 이미지 피커 화면으로 이동
     }
 
     fun onEditClick(slot: MealSlot, date: LocalDate) {
