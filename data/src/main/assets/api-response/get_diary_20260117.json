@@ -7,6 +7,11 @@
         "analysis_status": "processing",
         "restaurant_name": null,
         "category": null,
+        "location": "명동",
+        "tags": [
+          "칼국수",
+          "만두"
+        ],
         "cover_photo_url": "https://mumuk.ai.kr/static/images/test.jpeg",
         "maplink": "https://map.naver.com/p/entry/place/123456",
         "photo_count": 3,
@@ -14,6 +19,33 @@
           {
             "photo_id": 101,
             "image_url": "https://mumuk.ai.kr/static/images/test.jpeg"
+          }
+        ]
+      },
+      {
+        "diary_id": 13,
+        "time_type": "dinner",
+        "analysis_status": "done",
+        "restaurant_name": "명동교자",
+        "category": "한식",
+        "location": "을지로",
+        "tags": [
+          "평양냉면",
+          "수육"
+        ],
+        "cover_photo_url": "https://mumuk.ai.kr/static/images/test.jpeg",
+        "photo_count": 2,
+        "maplink": "https://map.naver.com/p/entry/place/654321",
+        "photos": [
+          {
+            "photo_id": 201,
+            "image_url": "https://mumuk.ai.kr/static/images/test.jpeg",
+            "taken_at": "2026-01-19T18:30:00"
+          },
+          {
+            "photo_id": 202,
+            "image_url": "https://mumuk.ai.kr/static/images/test.jpeg",
+            "taken_at": "2026-01-19T18:35:00"
           }
         ]
       }

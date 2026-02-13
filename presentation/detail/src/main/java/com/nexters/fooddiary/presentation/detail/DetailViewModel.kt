@@ -7,8 +7,9 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
+import com.nexters.fooddiary.domain.model.AnalysisStatus
 import com.nexters.fooddiary.domain.model.DiaryDetail
-import com.nexters.fooddiary.domain.model.DiaryPhotoDetail
+import com.nexters.fooddiary.domain.model.DiaryEntry
 import com.nexters.fooddiary.domain.model.MealType
 import com.nexters.fooddiary.domain.usecase.GetDiaryByDateUseCase
 import dagger.assisted.Assisted
@@ -102,19 +103,19 @@ class DetailViewModel @AssistedInject constructor(
 }
 
 private fun DiaryDetail.toMealUiModels(dateString: String): List<MealUiModel> {
-    val photosByMeal = photos.groupBy { it.mealType }
+    val diaryByMeal = diaries.associateBy { it.mealType }
     return listOf(
-        MealType.BREAKFAST.toMealUiModel(dateString, photosByMeal[MealType.BREAKFAST].orEmpty()),
-        MealType.LUNCH.toMealUiModel(dateString, photosByMeal[MealType.LUNCH].orEmpty()),
-        MealType.DINNER.toMealUiModel(dateString, photosByMeal[MealType.DINNER].orEmpty()),
+        MealType.BREAKFAST.toMealUiModel(dateString, diaryByMeal[MealType.BREAKFAST]),
+        MealType.LUNCH.toMealUiModel(dateString, diaryByMeal[MealType.LUNCH]),
+        MealType.DINNER.toMealUiModel(dateString, diaryByMeal[MealType.DINNER]),
     )
 }
 
 private fun MealType.toMealUiModel(
     dateString: String,
-    photos: List<DiaryPhotoDetail>,
+    diary: DiaryEntry?,
 ): MealUiModel {
-    if (photos.isEmpty()) {
+    if (diary == null) {
         return MealUiModel(
             id = "${dateString}_${name.lowercase()}",
             dateString = dateString,
@@ -130,22 +131,20 @@ private fun MealType.toMealUiModel(
         )
     }
 
-    val firstPhoto = photos.first()
-    val imageUrls = photos.map { it.imageUrl }
-    val menuKeyword = firstPhoto.menuName?.takeIf { it.isNotBlank() }?.let { "#$it" }
-
+    val firstPhoto = diary.photos.firstOrNull()
+    val imageUrls = diary.photos.map { it.imageUrl }
     return MealUiModel(
         id = "${dateString}_${name.lowercase()}",
         dateString = dateString,
         mealType = displayName(),
-        time = firstPhoto.takenAt?.format(DateTimeFormatter.ofPattern("HH:mm")).orEmpty(),
-        location = firstPhoto.location.orEmpty(),
-        place = firstPhoto.restaurantName.orEmpty(),
-        keywords = listOfNotNull(menuKeyword),
-        mapLink = firstPhoto.mapLink.orEmpty(),
+        time = firstPhoto?.takenAt?.format(DateTimeFormatter.ofPattern("HH:mm")).orEmpty(),
+        location = diary.location.orEmpty(),
+        place = diary.restaurantName.orEmpty(),
+        keywords = diary.tags,
+        mapLink = diary.mapLink.orEmpty(),
         imageUrls = imageUrls,
         isEmpty = false,
-        isPending = photos.any { it.isProcessing },
+        isPending = diary.analysisStatus == AnalysisStatus.PROCESSING,
     )
 }
 

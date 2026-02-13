@@ -21,6 +21,10 @@ data class DiarySummaryResponse(
     val restaurantName: String?,
     @SerialName("category")
     val category: String?,
+    @SerialName("location")
+    val location: String? = null,
+    @SerialName("tags")
+    val tags: List<String> = emptyList(),
     @SerialName("cover_photo_url")
     val coverPhotoUrl: String?,
     @SerialName("maplink")

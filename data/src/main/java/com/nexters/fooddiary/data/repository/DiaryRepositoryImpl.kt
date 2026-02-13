@@ -1,8 +1,10 @@
 package com.nexters.fooddiary.data.repository
 
 import com.nexters.fooddiary.data.remote.diary.DiaryApi
+import com.nexters.fooddiary.domain.model.AnalysisStatus
 import com.nexters.fooddiary.domain.model.DiaryDetail
-import com.nexters.fooddiary.domain.model.DiaryPhotoDetail
+import com.nexters.fooddiary.domain.model.DiaryEntry
+import com.nexters.fooddiary.domain.model.DiaryPhoto
 import com.nexters.fooddiary.domain.model.MealType
 import com.nexters.fooddiary.domain.repository.DiaryRepository
 import java.time.LocalDate
@@ -18,31 +20,32 @@ class DiaryRepositoryImpl @Inject constructor(
         val dayResponse = responseByDate[date.toString()] ?: responseByDate.values.firstOrNull()
             ?: return DiaryDetail(
                 date = date,
-                note = "",
-                photos = emptyList(),
+                diaries = emptyList(),
             )
 
         return DiaryDetail(
             date = date,
-            note = "",
-            photos = dayResponse.diaries.flatMap { diary ->
-                val mealType = diary.timeType.toMealType()
-                val isProcessing = diary.analysisStatus.equals("processing", ignoreCase = true)
-                diary.photos.map { photo ->
-                    DiaryPhotoDetail(
-                        photoId = photo.photoId,
-                        imageUrl = photo.imageUrl,
-                        takenAt = photo.takenAt?.let(LocalDateTime::parse),
-                        location = null,
-                        restaurantName = diary.restaurantName,
-                        menuName = null,
-                        menuPrice = null,
-                        mapLink = diary.mapLink,
-                        isProcessing = isProcessing,
-                        mealType = mealType,
-                    )
-                }
-            }
+            diaries = dayResponse.diaries.map { diary ->
+                DiaryEntry(
+                    diaryId = diary.diaryId,
+                    mealType = diary.timeType.toMealType(),
+                    analysisStatus = diary.analysisStatus.toAnalysisStatus(),
+                    restaurantName = diary.restaurantName,
+                    category = diary.category,
+                    location = diary.location,
+                    tags = diary.tags,
+                    coverPhotoUrl = diary.coverPhotoUrl,
+                    mapLink = diary.mapLink,
+                    photoCount = diary.photoCount ?: diary.photos.size,
+                    photos = diary.photos.map { photo ->
+                        DiaryPhoto(
+                            photoId = photo.photoId,
+                            imageUrl = photo.imageUrl,
+                            takenAt = photo.takenAt?.let(LocalDateTime::parse),
+                        )
+                    },
+                )
+            },
         )
     }
 
@@ -52,6 +55,14 @@ class DiaryRepositoryImpl @Inject constructor(
             "lunch" -> MealType.LUNCH
             "dinner" -> MealType.DINNER
             else -> MealType.UNKNOWN
+        }
+    }
+
+    private fun String?.toAnalysisStatus(): AnalysisStatus {
+        return when (this?.lowercase()) {
+            "done" -> AnalysisStatus.DONE
+            "processing" -> AnalysisStatus.PROCESSING
+            else -> AnalysisStatus.UNKNOWN
         }
     }
 }
