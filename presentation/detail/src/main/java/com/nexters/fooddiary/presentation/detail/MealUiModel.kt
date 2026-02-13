@@ -1,15 +1,68 @@
 package com.nexters.fooddiary.presentation.detail
 
-data class MealUiModel(
+import java.time.LocalDate
+
+enum class MealSlot {
+    BREAKFAST,
+    LUNCH,
+    DINNER,
+}
+
+enum class MealCardStatus {
+    EMPTY,
+    PENDING,
+    READY,
+}
+
+data class MealCardUiModel(
     val id: String,
-    val dateString: String,    // ISO-8601: "2026-01-16"
-    val mealType: String,      // "아침", "점심", "저녁"
-    val time: String,          // "07:00"
-    val location: String,      // "마포구"
-    val place: String,         // "호진이네"
-    val keywords: List<String>, // ["#양장피", "#어향동고"]
-    val mapLink: String,       // 복사용 지도 링크
-    val imageUrls: List<String>, // 여러 이미지 URL 목록
-    val isEmpty: Boolean,       // Empty 상태 플래그
-    val isPending: Boolean,     // Pending 상태 플래그 (AI 분석 중)
-)
+    val date: LocalDate,
+    val slot: MealSlot,
+    val time: String,
+    val location: String,
+    val place: String,
+    val keywords: List<String>,
+    val mapLink: String,
+    val imageUrls: List<String>,
+    val status: MealCardStatus,
+) {
+    val isEmpty: Boolean get() = status == MealCardStatus.EMPTY
+    val isPending: Boolean get() = status == MealCardStatus.PENDING
+
+    companion object {
+        fun empty(date: LocalDate, slot: MealSlot): MealCardUiModel {
+            return MealCardUiModel(
+                id = "${date}_${slot.name.lowercase()}",
+                date = date,
+                slot = slot,
+                time = "",
+                location = "",
+                place = "",
+                keywords = emptyList(),
+                mapLink = "",
+                imageUrls = emptyList(),
+                status = MealCardStatus.EMPTY,
+            )
+        }
+    }
+}
+
+data class DailyMeals(
+    val breakfast: MealCardUiModel,
+    val lunch: MealCardUiModel,
+    val dinner: MealCardUiModel,
+) {
+    fun asOrderedList(): List<MealCardUiModel> {
+        return listOf(breakfast, lunch, dinner)
+    }
+
+    companion object {
+        fun empty(date: LocalDate): DailyMeals {
+            return DailyMeals(
+                breakfast = MealCardUiModel.empty(date, MealSlot.BREAKFAST),
+                lunch = MealCardUiModel.empty(date, MealSlot.LUNCH),
+                dinner = MealCardUiModel.empty(date, MealSlot.DINNER),
+            )
+        }
+    }
+}

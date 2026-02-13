@@ -91,13 +91,13 @@ internal fun DetailScreen(
         viewModel.syncSelectedDate(initialDateString)
     }
 
-    LaunchedEffect(state.selectedDateString) {
-        viewModel.loadMealsForDate(state.selectedDateString)
+    LaunchedEffect(state.selectedDate) {
+        viewModel.loadMealsForDate(state.selectedDate)
     }
 
     DetailContent(
-        selectedDateString = state.selectedDateString,
-        dailyMeals = state.dailyMeals,
+        selectedDate = state.selectedDate,
+        mealsByDate = state.mealsByDate,
         onNavigateBack = onNavigateBack,
         onPreviousDay = viewModel::navigateToPreviousDay,
         onNextDay = viewModel::navigateToNextDay,
@@ -124,23 +124,19 @@ internal fun DetailScreen(
 
 @Composable
 private fun DetailContent(
-    selectedDateString: String,
-    dailyMeals: Map<String, List<MealUiModel>>,  // Key: ISO-8601 date string
+    selectedDate: LocalDate,
+    mealsByDate: Map<LocalDate, DailyMeals>,
     onNavigateBack: () -> Unit = {},
     onPreviousDay: () -> Unit = {},
     onNextDay: () -> Unit = {},
-    onMealCardClick: (String) -> Unit = {},
-    onEditClick: (String, String) -> Unit = { _, _ -> }, // (mealType, dateString)
+    onMealCardClick: (MealSlot, LocalDate) -> Unit = { _, _ -> },
+    onEditClick: (MealSlot, LocalDate) -> Unit = { _, _ -> },
     onCopyClick: (String) -> Unit = {},
     onShareClick: (String, String) -> Unit = { _, _ -> }, // (place, mapLink)
 ) {
     var isMoreMenuExpanded by remember { mutableStateOf(false) }
-    val breakfastLabel = stringResource(id = R.string.detail_meal_breakfast)
-    val lunchLabel = stringResource(id = R.string.detail_meal_lunch)
-    val dinnerLabel = stringResource(id = R.string.detail_meal_dinner)
-    val meals = dailyMeals[selectedDateString]
-        ?: createDefaultMeals(selectedDateString, breakfastLabel, lunchLabel, dinnerLabel)
-    val date = LocalDate.parse(selectedDateString)
+    val meals = mealsByDate[selectedDate] ?: DailyMeals.empty(selectedDate)
+    val mealCards = meals.asOrderedList()
     val hazeState = rememberHazeState()
     val density = LocalDensity.current
     val listState = rememberLazyListState()
@@ -163,7 +159,7 @@ private fun DetailContent(
             }
     }
 
-    LaunchedEffect(selectedDateString) {
+    LaunchedEffect(selectedDate) {
         isHeaderVisible = true
     }
 
@@ -231,7 +227,7 @@ private fun DetailContent(
                 Spacer(modifier = Modifier.height(32.dp))
             }
 
-            stickyHeader(key = selectedDateString) {
+            stickyHeader(key = selectedDate.toString()) {
                 val spacerHeight = with(density) { dailyHeaderHeightPx.toDp() }
                 AnimatedContent(
                     targetState = isHeaderVisible,
@@ -243,7 +239,7 @@ private fun DetailContent(
                 ) { visible ->
                     if (visible) {
                         DailyHeader(
-                            date = date,
+                            date = selectedDate,
                             onPreviousDay = onPreviousDay,
                             onNextDay = onNextDay,
                             hazeState = hazeState,
@@ -266,16 +262,17 @@ private fun DetailContent(
                 Spacer(modifier = Modifier.height(42.dp))
             }
 
-            itemsIndexed(meals, key = { _, meal -> meal.id }) { index, meal ->
+            itemsIndexed(mealCards, key = { _, meal -> meal.id }) { index, meal ->
                 MealSection(
                     meal = meal,
-                    onCardClick = { onMealCardClick(meal.id) },
-                    onEditClick = { onEditClick(meal.mealType, meal.dateString) },
+                    mealLabel = meal.slot.toLabel(),
+                    onCardClick = { onMealCardClick(meal.slot, meal.date) },
+                    onEditClick = { onEditClick(meal.slot, meal.date) },
                     onCopyClick = { onCopyClick(meal.mapLink) },
                     onShareClick = { onShareClick(meal.place, meal.mapLink) },
                 )
 
-                if (index != meals.lastIndex) {
+                if (index != mealCards.lastIndex) {
                     Spacer(modifier = Modifier.height(42.dp))
                 }
             }
@@ -286,7 +283,8 @@ private fun DetailContent(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun MealSection(
-    meal: MealUiModel,
+    meal: MealCardUiModel,
+    mealLabel: String,
     onCardClick: () -> Unit,
     onEditClick: () -> Unit,
     onCopyClick: () -> Unit,
@@ -304,7 +302,7 @@ private fun MealSection(
         ) {
             // 식사 라벨 (아침)
             Text(
-                text = meal.mealType,
+                text = mealLabel,
                 style = AppTypography.p18,
                 color = White,
                 fontFamily = PretendardFontFamily,
@@ -494,109 +492,62 @@ private fun shareText(context: Context, text: String, chooserTitle: String) {
     context.startActivity(chooserIntent)
 }
 
+@Composable
+private fun MealSlot.toLabel(): String {
+    return when (this) {
+        MealSlot.BREAKFAST -> stringResource(id = R.string.detail_meal_breakfast)
+        MealSlot.LUNCH -> stringResource(id = R.string.detail_meal_lunch)
+        MealSlot.DINNER -> stringResource(id = R.string.detail_meal_dinner)
+    }
+}
 
 @Preview(showBackground = true, backgroundColor = 0xFF191821)
 @Composable
 private fun DetailScreenPreview() {
     val today = LocalDate.now()
-    val breakfastLabel = stringResource(id = R.string.detail_meal_breakfast)
-    val lunchLabel = stringResource(id = R.string.detail_meal_lunch)
-    val dinnerLabel = stringResource(id = R.string.detail_meal_dinner)
     val mockMeals = mapOf(
-        today.toString() to listOf(
-            MealUiModel(
+        today to DailyMeals(
+            breakfast = MealCardUiModel(
                 id = "1",
-                dateString = today.toString(),
-                mealType = breakfastLabel,
+                date = today,
+                slot = MealSlot.BREAKFAST,
                 time = "07:00",
                 location = "마포구",
                 place = "호진이네",
                 keywords = listOf("#양장피", "#어향동고"),
                 mapLink = "https://map.naver.com/p/entry/place/123456",
                 imageUrls = listOf("https://picsum.photos/300"),
-                isEmpty = false,
-                isPending = false,
+                status = MealCardStatus.READY,
             ),
-            MealUiModel(
+            lunch = MealCardUiModel(
                 id = "2",
-                dateString = today.toString(),
-                mealType = lunchLabel,
+                date = today,
+                slot = MealSlot.LUNCH,
                 time = "12:30",
                 location = "강남구",
                 place = "",
                 keywords = emptyList(),
                 mapLink = "",
                 imageUrls = listOf("https://picsum.photos/300"),
-                isEmpty = false,
-                isPending = true,
+                status = MealCardStatus.PENDING,
             ),
-            MealUiModel(
+            dinner = MealCardUiModel(
                 id = "3",
-                dateString = today.toString(),
-                mealType = dinnerLabel,
+                date = today,
+                slot = MealSlot.DINNER,
                 time = "19:00",
                 location = "",
                 place = "",
                 keywords = emptyList(),
                 mapLink = "",
                 imageUrls = emptyList(),
-                isEmpty = true,
-                isPending = false,
+                status = MealCardStatus.EMPTY,
             ),
-        )
+        ),
     )
 
     DetailContent(
-        selectedDateString = today.toString(),
-        dailyMeals = mockMeals,
-    )
-}
-
-private fun createDefaultMeals(
-    dateString: String,
-    breakfastLabel: String,
-    lunchLabel: String,
-    dinnerLabel: String,
-): List<MealUiModel> {
-    return listOf(
-        MealUiModel(
-            id = "${dateString}_breakfast",
-            dateString = dateString,
-            mealType = breakfastLabel,
-            time = "",
-            location = "",
-            place = "",
-            keywords = emptyList(),
-            mapLink = "",
-            imageUrls = emptyList(),
-            isEmpty = true,
-            isPending = false,
-        ),
-        MealUiModel(
-            id = "${dateString}_lunch",
-            dateString = dateString,
-            mealType = lunchLabel,
-            time = "",
-            location = "",
-            place = "",
-            keywords = emptyList(),
-            mapLink = "",
-            imageUrls = emptyList(),
-            isEmpty = true,
-            isPending = false,
-        ),
-        MealUiModel(
-            id = "${dateString}_dinner",
-            dateString = dateString,
-            mealType = dinnerLabel,
-            time = "",
-            location = "",
-            place = "",
-            keywords = emptyList(),
-            mapLink = "",
-            imageUrls = emptyList(),
-            isEmpty = true,
-            isPending = false,
-        ),
+        selectedDate = today,
+        mealsByDate = mockMeals,
     )
 }

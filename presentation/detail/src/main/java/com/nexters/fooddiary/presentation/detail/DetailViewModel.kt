@@ -19,8 +19,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 data class DetailState(
-    val selectedDateString: String = LocalDate.now().toString(),  // ISO-8601: "2026-01-16"
-    val dailyMeals: Map<String, List<MealUiModel>> = emptyMap(),  // Key: ISO-8601 date string
+    val selectedDate: LocalDate = LocalDate.now(),
+    val mealsByDate: Map<LocalDate, DailyMeals> = emptyMap(),
     val loadMealsRequest: Async<Unit> = Uninitialized,  // 식사 데이터 로딩 상태
 ) : MavericksState
 
@@ -36,19 +36,19 @@ class DetailViewModel @AssistedInject constructor(
         updateState(result)
     }
 
-    fun loadMealsForDate(dateString: String) {
+    fun loadMealsForDate(date: LocalDate) {
         withState { state ->
-            if (state.dailyMeals.containsKey(dateString)) {
+            if (state.mealsByDate.containsKey(date)) {
                 return@withState
             }
         }
 
         executeAsync(
             action = {
-                val diary = getDiaryByDateUseCase(LocalDate.parse(dateString))
-                val meals = diary.toMealUiModels(dateString)
+                val diary = getDiaryByDateUseCase(date)
+                val meals = diary.toDailyMeals(date)
                 setState {
-                    copy(dailyMeals = dailyMeals + (dateString to meals))
+                    copy(mealsByDate = mealsByDate + (date to meals))
                 }
             },
             updateState = { copy(loadMealsRequest = it) }
@@ -56,41 +56,41 @@ class DetailViewModel @AssistedInject constructor(
     }
 
     fun syncSelectedDate(dateString: String) {
+        syncSelectedDate(LocalDate.parse(dateString))
+    }
+
+    fun syncSelectedDate(date: LocalDate) {
         withState { state ->
-            if (state.selectedDateString == dateString) return@withState
+            if (state.selectedDate == date) return@withState
         }
-        setState { copy(selectedDateString = dateString) }
+        setState { copy(selectedDate = date) }
     }
 
     fun navigateToPreviousDay() {
         setState {
-            val currentDate = LocalDate.parse(selectedDateString)
-            val previousDate = currentDate.minusDays(1)
-            copy(selectedDateString = previousDate.toString())
+            copy(selectedDate = selectedDate.minusDays(1))
         }
     }
 
     fun navigateToNextDay() {
         setState {
-            val currentDate = LocalDate.parse(selectedDateString)
-            val nextDate = currentDate.plusDays(1)
-            copy(selectedDateString = nextDate.toString())
+            copy(selectedDate = selectedDate.plusDays(1))
         }
     }
 
-    fun onMealCardClick(mealId: String) {
+    fun onMealCardClick(slot: MealSlot, date: LocalDate) {
         // TODO: Navigate to image picker or detail
     }
 
-    fun onEditClick(mealType: String, dateString: String) {
+    fun onEditClick(slot: MealSlot, date: LocalDate) {
         // TODO: Navigate to edit screen or show edit dialog
     }
 
-    fun onCopyClick(mealId: String) {
+    fun onCopyClick(slot: MealSlot, date: LocalDate) {
         // TODO: Implement copy functionality
     }
 
-    fun onShareClick(mealId: String) {
+    fun onShareClick(slot: MealSlot, date: LocalDate) {
         // TODO: Implement share functionality
     }
 
@@ -102,57 +102,39 @@ class DetailViewModel @AssistedInject constructor(
     companion object : MavericksViewModelFactory<DetailViewModel, DetailState> by hiltMavericksViewModelFactory()
 }
 
-private fun DiaryDetail.toMealUiModels(dateString: String): List<MealUiModel> {
+private fun DiaryDetail.toDailyMeals(date: LocalDate): DailyMeals {
     val diaryByMeal = diaries.associateBy { it.mealType }
-    return listOf(
-        MealType.BREAKFAST.toMealUiModel(dateString, diaryByMeal[MealType.BREAKFAST]),
-        MealType.LUNCH.toMealUiModel(dateString, diaryByMeal[MealType.LUNCH]),
-        MealType.DINNER.toMealUiModel(dateString, diaryByMeal[MealType.DINNER]),
+    return DailyMeals(
+        breakfast = MealSlot.BREAKFAST.toMealUiModel(date, diaryByMeal[MealType.BREAKFAST]),
+        lunch = MealSlot.LUNCH.toMealUiModel(date, diaryByMeal[MealType.LUNCH]),
+        dinner = MealSlot.DINNER.toMealUiModel(date, diaryByMeal[MealType.DINNER]),
     )
 }
 
-private fun MealType.toMealUiModel(
-    dateString: String,
+private fun MealSlot.toMealUiModel(
+    date: LocalDate,
     diary: DiaryEntry?,
-): MealUiModel {
+): MealCardUiModel {
     if (diary == null) {
-        return MealUiModel(
-            id = "${dateString}_${name.lowercase()}",
-            dateString = dateString,
-            mealType = displayName(),
-            time = "",
-            location = "",
-            place = "",
-            keywords = emptyList(),
-            mapLink = "",
-            imageUrls = emptyList(),
-            isEmpty = true,
-            isPending = false,
-        )
+        return MealCardUiModel.empty(date, this)
     }
 
     val firstPhoto = diary.photos.firstOrNull()
     val imageUrls = diary.photos.map { it.imageUrl }
-    return MealUiModel(
-        id = "${dateString}_${name.lowercase()}",
-        dateString = dateString,
-        mealType = displayName(),
+    return MealCardUiModel(
+        id = "${date}_${name.lowercase()}",
+        date = date,
+        slot = this,
         time = firstPhoto?.takenAt?.format(DateTimeFormatter.ofPattern("HH:mm")).orEmpty(),
         location = diary.location.orEmpty(),
         place = diary.restaurantName.orEmpty(),
         keywords = diary.tags,
         mapLink = diary.mapLink.orEmpty(),
         imageUrls = imageUrls,
-        isEmpty = false,
-        isPending = diary.analysisStatus == AnalysisStatus.PROCESSING,
+        status = if (diary.analysisStatus == AnalysisStatus.PROCESSING) {
+            MealCardStatus.PENDING
+        } else {
+            MealCardStatus.READY
+        },
     )
-}
-
-private fun MealType.displayName(): String {
-    return when (this) {
-        MealType.BREAKFAST -> "아침"
-        MealType.LUNCH -> "점심"
-        MealType.DINNER -> "저녁"
-        MealType.UNKNOWN -> "기타"
-    }
 }
