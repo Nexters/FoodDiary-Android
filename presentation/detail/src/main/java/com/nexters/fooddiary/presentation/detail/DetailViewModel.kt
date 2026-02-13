@@ -86,8 +86,8 @@ class DetailViewModel @AssistedInject constructor(
         // TODO: Navigate to edit screen or show edit dialog
     }
 
-    fun onSaveClick(mealId: String) {
-        // TODO: Implement save functionality
+    fun onCopyClick(mealId: String) {
+        // TODO: Implement copy functionality
     }
 
     fun onShareClick(mealId: String) {

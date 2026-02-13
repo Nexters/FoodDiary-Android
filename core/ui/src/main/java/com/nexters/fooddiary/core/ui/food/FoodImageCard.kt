@@ -251,7 +251,7 @@ private fun FoodImageFullPreview() {
             locationText = "마포구",
             placeText = "호진이네",
             keywords = listOf("#양장피", "#어향동고"),
-            onSaveClick = {},
+            onCopyClick = {},
             onShareClick = {},
         ),
         modifier = Modifier.size(300.dp)
