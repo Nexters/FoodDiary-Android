@@ -13,6 +13,7 @@ data class DetailRoute(
 
 fun NavGraphBuilder.detailScreen(
     onNavigateBack: () -> Unit,
+    onShowToast: (String) -> Unit,
 ) {
     composable<DetailRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<DetailRoute>()
@@ -20,6 +21,7 @@ fun NavGraphBuilder.detailScreen(
         DetailScreen(
             initialDateString = route.dateString,
             onNavigateBack = onNavigateBack,
+            onShowToast = onShowToast,
         )
     }
 }

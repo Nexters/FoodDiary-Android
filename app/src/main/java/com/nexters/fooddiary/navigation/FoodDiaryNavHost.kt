@@ -147,7 +147,8 @@ fun FoodDiaryNavHost(
         )
 
         detailScreen(
-            onNavigateBack = { navController.popBackStack() }
+            onNavigateBack = { navController.popBackStack() },
+            onShowToast = onShowToast,
         )
 
         calendarScreen()

@@ -3,7 +3,7 @@ package com.nexters.fooddiary.presentation.detail
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.widget.Toast
+import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -82,6 +82,7 @@ internal fun DetailScreen(
     initialDateString: String = LocalDate.now().toString(),
     viewModel: DetailViewModel = mavericksViewModel(),
     onNavigateBack: () -> Unit = {},
+    onShowToast: (String) -> Unit = {},
 ) {
     val state by viewModel.collectAsState()
     val context = LocalContext.current
@@ -106,7 +107,18 @@ internal fun DetailScreen(
             if (mapLink.isBlank()) return@DetailContent
             copyToClipboard(context, mapLink)
         },
-        onShareClick = viewModel::onShareClick,
+        onShareClick = { place, mapLink ->
+            if (mapLink.isBlank()) {
+                onShowToast(context.getString(R.string.detail_share_map_link_empty))
+                return@DetailContent
+            }
+            val placeText = place.ifBlank {
+                context.getString(R.string.detail_share_place_fallback)
+            }
+            val prefixText = context.getString(R.string.detail_share_prefix, placeText)
+            val shareMessage = "$prefixText\n$mapLink"
+            shareText(context, shareMessage, context.getString(R.string.detail_share))
+        },
     )
 }
 
@@ -120,7 +132,7 @@ private fun DetailContent(
     onMealCardClick: (String) -> Unit = {},
     onEditClick: (String, String) -> Unit = { _, _ -> }, // (mealType, dateString)
     onCopyClick: (String) -> Unit = {},
-    onShareClick: (String) -> Unit = {},
+    onShareClick: (String, String) -> Unit = { _, _ -> }, // (place, mapLink)
 ) {
     var isMoreMenuExpanded by remember { mutableStateOf(false) }
     val breakfastLabel = stringResource(id = R.string.detail_meal_breakfast)
@@ -260,7 +272,7 @@ private fun DetailContent(
                     onCardClick = { onMealCardClick(meal.id) },
                     onEditClick = { onEditClick(meal.mealType, meal.dateString) },
                     onCopyClick = { onCopyClick(meal.mapLink) },
-                    onShareClick = { onShareClick(meal.id) },
+                    onShareClick = { onShareClick(meal.place, meal.mapLink) },
                 )
 
                 if (index != meals.lastIndex) {
@@ -471,6 +483,15 @@ private fun MealInfoSection(
 private fun copyToClipboard(context: Context, text: String) {
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     clipboard.setPrimaryClip(ClipData.newPlainText("map_link", text))
+}
+
+private fun shareText(context: Context, text: String, chooserTitle: String) {
+    val sendIntent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_TEXT, text)
+    }
+    val chooserIntent = Intent.createChooser(sendIntent, chooserTitle)
+    context.startActivity(chooserIntent)
 }
 
 
