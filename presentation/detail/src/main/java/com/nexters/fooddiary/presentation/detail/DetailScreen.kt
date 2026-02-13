@@ -105,11 +105,6 @@ internal fun DetailScreen(
         onSaveClick = { mapLink ->
             if (mapLink.isBlank()) return@DetailContent
             copyToClipboard(context, mapLink)
-            Toast.makeText(
-                context,
-                context.getString(R.string.detail_copy_map_link_success),
-                Toast.LENGTH_SHORT
-            ).show()
         },
         onShareClick = viewModel::onShareClick,
     )

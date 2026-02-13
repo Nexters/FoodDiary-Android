@@ -4,7 +4,6 @@
     <string name="detail_more">더보기</string>
     <string name="detail_edit">수정</string>
     <string name="detail_copy">복사</string>
-    <string name="detail_copy_map_link_success">지도 링크를 복사했어요.</string>
     <string name="detail_share">공유</string>
     <string name="detail_menu_test">테스트</string>
     <string name="detail_meal_breakfast">아침</string>
