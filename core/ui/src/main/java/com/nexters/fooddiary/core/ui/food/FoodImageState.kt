@@ -7,7 +7,7 @@ sealed interface FoodImageState {
         val locationText: String,       // 마포구
         val placeText: String,          // 호진이네
         val keywords: List<String>,     // #양장피 #어향동고
-        val onSaveClick: () -> Unit,    // 저장 버튼
+        val onCopyClick: () -> Unit,    // 복사 버튼
         val onShareClick: () -> Unit,   // 공유 버튼
     ) : FoodImageState
 

@@ -102,7 +102,7 @@ internal fun DetailScreen(
         onNextDay = viewModel::navigateToNextDay,
         onMealCardClick = viewModel::onMealCardClick,
         onEditClick = viewModel::onEditClick,
-        onSaveClick = { mapLink ->
+        onCopyClick = { mapLink ->
             if (mapLink.isBlank()) return@DetailContent
             copyToClipboard(context, mapLink)
         },
@@ -119,7 +119,7 @@ private fun DetailContent(
     onNextDay: () -> Unit = {},
     onMealCardClick: (String) -> Unit = {},
     onEditClick: (String, String) -> Unit = { _, _ -> }, // (mealType, dateString)
-    onSaveClick: (String) -> Unit = {},
+    onCopyClick: (String) -> Unit = {},
     onShareClick: (String) -> Unit = {},
 ) {
     var isMoreMenuExpanded by remember { mutableStateOf(false) }
@@ -259,7 +259,7 @@ private fun DetailContent(
                     meal = meal,
                     onCardClick = { onMealCardClick(meal.id) },
                     onEditClick = { onEditClick(meal.mealType, meal.dateString) },
-                    onSaveClick = { onSaveClick(meal.mapLink) },
+                    onCopyClick = { onCopyClick(meal.mapLink) },
                     onShareClick = { onShareClick(meal.id) },
                 )
 
@@ -277,7 +277,7 @@ private fun MealSection(
     meal: MealUiModel,
     onCardClick: () -> Unit,
     onEditClick: () -> Unit,
-    onSaveClick: () -> Unit,
+    onCopyClick: () -> Unit,
     onShareClick: () -> Unit,
 ) {
     Column(
@@ -339,7 +339,7 @@ private fun MealSection(
                     locationText = meal.location,
                     placeText = meal.place,
                     keywords = meal.keywords,
-                    onSaveClick = onSaveClick,
+                    onCopyClick = onCopyClick,
                     onShareClick = onShareClick,
                 )
             }
@@ -365,7 +365,7 @@ private fun MealSection(
             MealInfoSection(
                 place = meal.place,
                 keywords = meal.keywords,
-                onSaveClick = onSaveClick,
+                onCopyClick = onCopyClick,
                 onShareClick = onShareClick,
             )
         }
@@ -377,7 +377,7 @@ private fun MealSection(
 private fun MealInfoSection(
     place: String,
     keywords: List<String>,
-    onSaveClick: () -> Unit,
+    onCopyClick: () -> Unit,
     onShareClick: () -> Unit,
 ) {
     Column(
@@ -406,7 +406,7 @@ private fun MealInfoSection(
             ) {
                 // 복사 버튼
                 Row(
-                    modifier = Modifier.clickable { onSaveClick() },
+                    modifier = Modifier.clickable { onCopyClick() },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp) // 아이콘과 텍스트 사이 간격
                 ) {
