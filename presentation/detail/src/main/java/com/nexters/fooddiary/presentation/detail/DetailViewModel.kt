@@ -15,6 +15,9 @@ import com.nexters.fooddiary.domain.usecase.GetDiaryByDateUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -24,10 +27,18 @@ data class DetailState(
     val loadMealsRequest: Async<Unit> = Uninitialized,  // 식사 데이터 로딩 상태
 ) : MavericksState
 
+sealed interface DetailEvent {
+    data class CopyMapLink(val mapLink: String) : DetailEvent
+    data class ShareMapLink(val place: String, val mapLink: String) : DetailEvent
+    data object ShareLinkEmpty : DetailEvent
+}
+
 class DetailViewModel @AssistedInject constructor(
     @Assisted initialState: DetailState,
     private val getDiaryByDateUseCase: GetDiaryByDateUseCase,
 ) : MavericksViewModel<DetailState>(initialState) {
+    private val _events = MutableSharedFlow<DetailEvent>(extraBufferCapacity = 1)
+    val events: SharedFlow<DetailEvent> = _events.asSharedFlow()
 
     private inline fun executeAsync(
         crossinline action: suspend () -> Unit,
@@ -83,15 +94,20 @@ class DetailViewModel @AssistedInject constructor(
     }
 
     fun onEditClick(slot: MealSlot, date: LocalDate) {
-        // TODO: Navigate to edit screen or show edit dialog
+        // TODO: 수정 화면으로 이동
     }
 
-    fun onCopyClick(slot: MealSlot, date: LocalDate) {
-        // TODO: Implement copy functionality
+    fun onCopyClick(mapLink: String) {
+        if (mapLink.isBlank()) return
+        _events.tryEmit(DetailEvent.CopyMapLink(mapLink))
     }
 
-    fun onShareClick(slot: MealSlot, date: LocalDate) {
-        // TODO: Implement share functionality
+    fun onShareClick(place: String, mapLink: String) {
+        if (mapLink.isBlank()) {
+            _events.tryEmit(DetailEvent.ShareLinkEmpty)
+            return
+        }
+        _events.tryEmit(DetailEvent.ShareMapLink(place = place, mapLink = mapLink))
     }
 
     @AssistedFactory

@@ -43,6 +43,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -86,6 +87,8 @@ internal fun DetailScreen(
 ) {
     val state by viewModel.collectAsState()
     val context = LocalContext.current
+    val currentContext by rememberUpdatedState(context)
+    val currentOnShowToast by rememberUpdatedState(onShowToast)
 
     LaunchedEffect(initialDateString) {
         viewModel.syncSelectedDate(initialDateString)
@@ -93,6 +96,27 @@ internal fun DetailScreen(
 
     LaunchedEffect(state.selectedDate) {
         viewModel.loadMealsForDate(state.selectedDate)
+    }
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collectLatest { event ->
+            when (event) {
+                is DetailEvent.CopyMapLink -> {
+                    copyToClipboard(currentContext, event.mapLink)
+                }
+                is DetailEvent.ShareMapLink -> {
+                    val placeText = event.place.ifBlank {
+                        currentContext.getString(R.string.detail_share_place_fallback)
+                    }
+                    val prefixText = currentContext.getString(R.string.detail_share_prefix, placeText)
+                    val shareMessage = "$prefixText\n${event.mapLink}"
+                    shareText(currentContext, shareMessage, currentContext.getString(R.string.detail_share))
+                }
+                DetailEvent.ShareLinkEmpty -> {
+                    currentOnShowToast(currentContext.getString(R.string.detail_share_map_link_empty))
+                }
+            }
+        }
     }
 
     DetailContent(
@@ -103,22 +127,8 @@ internal fun DetailScreen(
         onNextDay = viewModel::navigateToNextDay,
         onMealCardClick = viewModel::onMealCardClick,
         onEditClick = viewModel::onEditClick,
-        onCopyClick = { mapLink ->
-            if (mapLink.isBlank()) return@DetailContent
-            copyToClipboard(context, mapLink)
-        },
-        onShareClick = { place, mapLink ->
-            if (mapLink.isBlank()) {
-                onShowToast(context.getString(R.string.detail_share_map_link_empty))
-                return@DetailContent
-            }
-            val placeText = place.ifBlank {
-                context.getString(R.string.detail_share_place_fallback)
-            }
-            val prefixText = context.getString(R.string.detail_share_prefix, placeText)
-            val shareMessage = "$prefixText\n$mapLink"
-            shareText(context, shareMessage, context.getString(R.string.detail_share))
-        },
+        onCopyClick = viewModel::onCopyClick,
+        onShareClick = viewModel::onShareClick,
     )
 }
 
@@ -478,6 +488,15 @@ private fun MealInfoSection(
     }
 }
 
+@Composable
+private fun MealSlot.toLabel(): String {
+    return when (this) {
+        MealSlot.BREAKFAST -> stringResource(id = R.string.detail_meal_breakfast)
+        MealSlot.LUNCH -> stringResource(id = R.string.detail_meal_lunch)
+        MealSlot.DINNER -> stringResource(id = R.string.detail_meal_dinner)
+    }
+}
+
 private fun copyToClipboard(context: Context, text: String) {
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     clipboard.setPrimaryClip(ClipData.newPlainText("map_link", text))
@@ -490,15 +509,6 @@ private fun shareText(context: Context, text: String, chooserTitle: String) {
     }
     val chooserIntent = Intent.createChooser(sendIntent, chooserTitle)
     context.startActivity(chooserIntent)
-}
-
-@Composable
-private fun MealSlot.toLabel(): String {
-    return when (this) {
-        MealSlot.BREAKFAST -> stringResource(id = R.string.detail_meal_breakfast)
-        MealSlot.LUNCH -> stringResource(id = R.string.detail_meal_lunch)
-        MealSlot.DINNER -> stringResource(id = R.string.detail_meal_dinner)
-    }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF191821)
