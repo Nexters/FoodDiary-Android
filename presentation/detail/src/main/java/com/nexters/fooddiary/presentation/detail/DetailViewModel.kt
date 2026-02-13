@@ -49,21 +49,19 @@ class DetailViewModel @AssistedInject constructor(
 
     fun loadMealsForDate(date: LocalDate, forceRefresh: Boolean = false) {
         withState { state ->
-            if (!forceRefresh && state.mealsByDate.containsKey(date)) {
-                return@withState
-            }
-        }
+            if (!forceRefresh && state.mealsByDate.containsKey(date)) return@withState
 
-        executeAsync(
-            action = {
-                val diary = getDiaryByDateUseCase(date)
-                val meals = diary.toDailyMeals(date)
-                setState {
-                    copy(mealsByDate = mealsByDate + (date to meals))
-                }
-            },
-            updateState = { copy(loadMealsRequest = it) }
-        )
+            executeAsync(
+                action = {
+                    val diary = getDiaryByDateUseCase(date)
+                    val meals = diary.toDailyMeals(date)
+                    setState {
+                        copy(mealsByDate = mealsByDate + (date to meals))
+                    }
+                },
+                updateState = { copy(loadMealsRequest = it) }
+            )
+        }
     }
 
     fun invalidateMealsForDate(date: LocalDate) {
@@ -83,8 +81,8 @@ class DetailViewModel @AssistedInject constructor(
     fun syncSelectedDate(date: LocalDate) {
         withState { state ->
             if (state.selectedDate == date) return@withState
+            setState { copy(selectedDate = date) }
         }
-        setState { copy(selectedDate = date) }
     }
 
     fun navigateToPreviousDay() {
