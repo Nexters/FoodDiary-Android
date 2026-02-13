@@ -47,9 +47,9 @@ class DetailViewModel @AssistedInject constructor(
         updateState(result)
     }
 
-    fun loadMealsForDate(date: LocalDate) {
+    fun loadMealsForDate(date: LocalDate, forceRefresh: Boolean = false) {
         withState { state ->
-            if (state.mealsByDate.containsKey(date)) {
+            if (!forceRefresh && state.mealsByDate.containsKey(date)) {
                 return@withState
             }
         }
@@ -64,6 +64,16 @@ class DetailViewModel @AssistedInject constructor(
             },
             updateState = { copy(loadMealsRequest = it) }
         )
+    }
+
+    fun invalidateMealsForDate(date: LocalDate) {
+        setState {
+            copy(mealsByDate = mealsByDate - date)
+        }
+    }
+
+    fun refreshMealsForDate(date: LocalDate) {
+        loadMealsForDate(date = date, forceRefresh = true)
     }
 
     fun syncSelectedDate(dateString: String) {
