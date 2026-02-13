@@ -123,6 +123,7 @@ private fun MealType.toMealUiModel(
             location = "",
             place = "",
             keywords = emptyList(),
+            mapLink = "",
             imageUrls = emptyList(),
             isEmpty = true,
             isPending = false,
@@ -137,13 +138,14 @@ private fun MealType.toMealUiModel(
         id = "${dateString}_${name.lowercase()}",
         dateString = dateString,
         mealType = displayName(),
-        time = firstPhoto.takenAt.format(DateTimeFormatter.ofPattern("HH:mm")),
+        time = firstPhoto.takenAt?.format(DateTimeFormatter.ofPattern("HH:mm")).orEmpty(),
         location = firstPhoto.location.orEmpty(),
         place = firstPhoto.restaurantName.orEmpty(),
         keywords = listOfNotNull(menuKeyword),
+        mapLink = firstPhoto.mapLink.orEmpty(),
         imageUrls = imageUrls,
         isEmpty = false,
-        isPending = false,
+        isPending = photos.any { it.isProcessing },
     )
 }
 

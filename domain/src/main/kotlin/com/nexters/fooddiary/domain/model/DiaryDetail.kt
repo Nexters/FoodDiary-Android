@@ -12,11 +12,13 @@ data class DiaryDetail(
 data class DiaryPhotoDetail(
     val photoId: Long,
     val imageUrl: String,
-    val takenAt: LocalDateTime,
+    val takenAt: LocalDateTime?,
     val location: String?,
     val restaurantName: String?,
     val menuName: String?,
     val menuPrice: Int?,
+    val mapLink: String?,
+    val isProcessing: Boolean,
     val mealType: MealType,
 )
 

@@ -14,22 +14,35 @@ class DiaryRepositoryImpl @Inject constructor(
 ) : DiaryRepository {
 
     override suspend fun getDiary(date: LocalDate): DiaryDetail {
-        val response = diaryApi.getDiary(date.toString())
+        val responseByDate = diaryApi.getDiary(date.toString())
+        val dayResponse = responseByDate[date.toString()] ?: responseByDate.values.firstOrNull()
+            ?: return DiaryDetail(
+                date = date,
+                note = "",
+                photos = emptyList(),
+            )
+
         return DiaryDetail(
-            date = LocalDate.parse(response.date),
-            note = response.note,
-            photos = response.photos.map { photo ->
-                DiaryPhotoDetail(
-                    photoId = photo.photoId,
-                    imageUrl = photo.imageUrl,
-                    takenAt = LocalDateTime.parse(photo.takenAt),
-                    location = photo.location,
-                    restaurantName = photo.restaurantName,
-                    menuName = photo.menuName,
-                    menuPrice = photo.menuPrice,
-                    mealType = photo.timeType.toMealType(),
-                )
-            },
+            date = date,
+            note = "",
+            photos = dayResponse.diaries.flatMap { diary ->
+                val mealType = diary.timeType.toMealType()
+                val isProcessing = diary.analysisStatus.equals("processing", ignoreCase = true)
+                diary.photos.map { photo ->
+                    DiaryPhotoDetail(
+                        photoId = photo.photoId,
+                        imageUrl = photo.imageUrl,
+                        takenAt = photo.takenAt?.let(LocalDateTime::parse),
+                        location = null,
+                        restaurantName = diary.restaurantName,
+                        menuName = null,
+                        menuPrice = null,
+                        mapLink = diary.mapLink,
+                        isProcessing = isProcessing,
+                        mealType = mealType,
+                    )
+                }
+            }
         )
     }
 

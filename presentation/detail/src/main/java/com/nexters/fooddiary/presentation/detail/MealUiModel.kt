@@ -8,6 +8,7 @@ data class MealUiModel(
     val location: String,      // "마포구"
     val place: String,         // "호진이네"
     val keywords: List<String>, // ["#양장피", "#어향동고"]
+    val mapLink: String,       // 복사용 지도 링크
     val imageUrls: List<String>, // 여러 이미지 URL 목록
     val isEmpty: Boolean,       // Empty 상태 플래그
     val isPending: Boolean,     // Pending 상태 플래그 (AI 분석 중)

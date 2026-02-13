@@ -1,5 +1,9 @@
 package com.nexters.fooddiary.presentation.detail
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.res.painterResource
@@ -79,6 +84,7 @@ internal fun DetailScreen(
     onNavigateBack: () -> Unit = {},
 ) {
     val state by viewModel.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(initialDateString) {
         viewModel.syncSelectedDate(initialDateString)
@@ -96,7 +102,15 @@ internal fun DetailScreen(
         onNextDay = viewModel::navigateToNextDay,
         onMealCardClick = viewModel::onMealCardClick,
         onEditClick = viewModel::onEditClick,
-        onSaveClick = viewModel::onSaveClick,
+        onSaveClick = { mapLink ->
+            if (mapLink.isBlank()) return@DetailContent
+            copyToClipboard(context, mapLink)
+            Toast.makeText(
+                context,
+                context.getString(R.string.detail_copy_map_link_success),
+                Toast.LENGTH_SHORT
+            ).show()
+        },
         onShareClick = viewModel::onShareClick,
     )
 }
@@ -250,7 +264,7 @@ private fun DetailContent(
                     meal = meal,
                     onCardClick = { onMealCardClick(meal.id) },
                     onEditClick = { onEditClick(meal.mealType, meal.dateString) },
-                    onSaveClick = { onSaveClick(meal.id) },
+                    onSaveClick = { onSaveClick(meal.mapLink) },
                     onShareClick = { onShareClick(meal.id) },
                 )
 
@@ -459,6 +473,11 @@ private fun MealInfoSection(
     }
 }
 
+private fun copyToClipboard(context: Context, text: String) {
+    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    clipboard.setPrimaryClip(ClipData.newPlainText("map_link", text))
+}
+
 
 @Preview(showBackground = true, backgroundColor = 0xFF191821)
 @Composable
@@ -477,6 +496,7 @@ private fun DetailScreenPreview() {
                 location = "마포구",
                 place = "호진이네",
                 keywords = listOf("#양장피", "#어향동고"),
+                mapLink = "https://map.naver.com/p/entry/place/123456",
                 imageUrls = listOf("https://picsum.photos/300"),
                 isEmpty = false,
                 isPending = false,
@@ -489,6 +509,7 @@ private fun DetailScreenPreview() {
                 location = "강남구",
                 place = "",
                 keywords = emptyList(),
+                mapLink = "",
                 imageUrls = listOf("https://picsum.photos/300"),
                 isEmpty = false,
                 isPending = true,
@@ -501,6 +522,7 @@ private fun DetailScreenPreview() {
                 location = "",
                 place = "",
                 keywords = emptyList(),
+                mapLink = "",
                 imageUrls = emptyList(),
                 isEmpty = true,
                 isPending = false,
@@ -529,6 +551,7 @@ private fun createDefaultMeals(
             location = "",
             place = "",
             keywords = emptyList(),
+            mapLink = "",
             imageUrls = emptyList(),
             isEmpty = true,
             isPending = false,
@@ -541,6 +564,7 @@ private fun createDefaultMeals(
             location = "",
             place = "",
             keywords = emptyList(),
+            mapLink = "",
             imageUrls = emptyList(),
             isEmpty = true,
             isPending = false,
@@ -553,6 +577,7 @@ private fun createDefaultMeals(
             location = "",
             place = "",
             keywords = emptyList(),
+            mapLink = "",
             imageUrls = emptyList(),
             isEmpty = true,
             isPending = false,

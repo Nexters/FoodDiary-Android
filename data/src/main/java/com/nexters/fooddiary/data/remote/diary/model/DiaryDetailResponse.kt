@@ -4,11 +4,29 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class DiaryDetailResponse(
-    @SerialName("date")
-    val date: String,
-    @SerialName("note")
-    val note: String,
+data class DiaryDetailResponseByDate(
+    @SerialName("diaries")
+    val diaries: List<DiarySummaryResponse>,
+)
+
+@Serializable
+data class DiarySummaryResponse(
+    @SerialName("diary_id")
+    val diaryId: Long,
+    @SerialName("time_type")
+    val timeType: String?,
+    @SerialName("analysis_status")
+    val analysisStatus: String?,
+    @SerialName("restaurant_name")
+    val restaurantName: String?,
+    @SerialName("category")
+    val category: String?,
+    @SerialName("cover_photo_url")
+    val coverPhotoUrl: String?,
+    @SerialName("maplink")
+    val mapLink: String? = null,
+    @SerialName("photo_count")
+    val photoCount: Int?,
     @SerialName("photos")
-    val photos: List<DiaryPhoto>
+    val photos: List<DiaryPhoto>,
 )
