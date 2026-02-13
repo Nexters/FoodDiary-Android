@@ -8,6 +8,7 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -48,8 +49,8 @@ fun FoodDiaryNavHost(
 ) {
     val context = LocalContext.current
     var authUiState by remember { mutableStateOf<AuthUiState?>(null) }
-    var signOutRequestId by remember { mutableStateOf(0) }
-    var deleteAccountRequestId by remember { mutableStateOf(0) }
+    var signOutRequestId by remember { mutableIntStateOf(0) }
+    var deleteAccountRequestId by remember { mutableIntStateOf(0) }
     var hasNavigatedFromSplash by remember { mutableStateOf(false) }
     val startDestination = if (initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_IMAGE) {
         ImagePickerRoute
