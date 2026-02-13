@@ -5,7 +5,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.nexters.fooddiary.presentation.detail.DetailScreen
 import kotlinx.serialization.Serializable
-import java.time.LocalDate
 
 @Serializable
 data class DetailRoute(
@@ -19,6 +18,7 @@ fun NavGraphBuilder.detailScreen(
         val route = backStackEntry.toRoute<DetailRoute>()
 
         DetailScreen(
+            initialDateString = route.dateString,
             onNavigateBack = onNavigateBack,
         )
     }

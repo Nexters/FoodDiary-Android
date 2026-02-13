@@ -54,6 +54,13 @@ class DetailViewModel @AssistedInject constructor(
         )
     }
 
+    fun syncSelectedDate(dateString: String) {
+        withState { state ->
+            if (state.selectedDateString == dateString) return@withState
+        }
+        setState { copy(selectedDateString = dateString) }
+    }
+
     fun navigateToPreviousDay() {
         setState {
             val currentDate = LocalDate.parse(selectedDateString)

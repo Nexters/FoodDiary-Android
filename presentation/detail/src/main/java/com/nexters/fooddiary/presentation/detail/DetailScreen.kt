@@ -74,10 +74,15 @@ import java.time.LocalDate
 
 @Composable
 internal fun DetailScreen(
+    initialDateString: String = LocalDate.now().toString(),
     viewModel: DetailViewModel = mavericksViewModel(),
     onNavigateBack: () -> Unit = {},
 ) {
     val state by viewModel.collectAsState()
+
+    LaunchedEffect(initialDateString) {
+        viewModel.syncSelectedDate(initialDateString)
+    }
 
     LaunchedEffect(state.selectedDateString) {
         viewModel.loadMealsForDate(state.selectedDateString)
