@@ -1,14 +1,11 @@
 package com.nexters.fooddiary.presentation.image
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.net.Uri
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -26,7 +25,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -38,7 +39,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.compose.collectAsStateWithLifecycle
 import com.airbnb.mvrx.compose.mavericksViewModel
-import com.nexters.fooddiary.core.classification.FoodClassificationResult
+import com.nexters.fooddiary.core.common.toPercentageString
+import com.nexters.fooddiary.domain.model.ClassificationResult
 
 @Composable
 internal fun ImageClassificationScreen(
@@ -47,61 +49,65 @@ internal fun ImageClassificationScreen(
 ) {
     val context = LocalContext.current
     val state by viewModel.collectAsStateWithLifecycle()
-    
-    val mimeType = remember { context.getString(R.string.image_mime_type) }
-    
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let { viewModel.loadImageFromUri(it) }
-    }
+    var showImagePicker by remember { mutableStateOf(false) }
 
-    LaunchedEffect(state.classificationResult, state.errorMessage) {
-        state.classificationResult?.let { result ->
-            when (result) {
-                is ClassificationResult.Complete -> showClassificationResultToast(context, result.result)
-            }
-        }
-        
+    LaunchedEffect(state.errorMessage) {
         state.errorMessage?.let { message ->
             showToast(context, message, Toast.LENGTH_SHORT)
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        Column(
+    if (showImagePicker) {
+        ImagePickerScreen(
+            onImagesSelected = { uris ->
+                if (uris.isNotEmpty()) {
+                    viewModel.loadImagesFromUris(uris)
+                }
+                showImagePicker = false
+            },
+            onClose = { showImagePicker = false }
+        )
+    } else {
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .background(MaterialTheme.colorScheme.background)
         ) {
-            CloseButton(
-                onClick = onClose,
-                modifier = Modifier.align(Alignment.Start)
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CloseButton(
+                    onClick = onClose,
+                    modifier = Modifier.align(Alignment.Start)
+                )
 
-            state.selectedImage?.let { image ->
-                key(image) {
-                    ImageDisplaySection(
-                        image = image,
-                        state = state,
-                        context = context
-                    )
+                if (state.selectedItems.isNotEmpty()) {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        itemsIndexed(state.selectedItems) { index, item ->
+                            key(item.bitmap.hashCode(), index) {
+                                ImageDisplaySection(
+                                    item = item,
+                                    isClassifying = state.isLoading && item.classificationResult == null,
+                                    context = context
+                                )
+                            }
+                        }
+                    }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
 
-            AlbumSelectionButton(
-                hasSelectedImage = state.hasSelectedImage,
-                onClick = { imagePickerLauncher.launch(mimeType) }
-            )
+                AlbumSelectionButton(
+                    hasSelectedImage = state.hasSelectedImage,
+                    onClick = { showImagePicker = true }
+                )
 
-            if (!state.hasSelectedImage) {
-                SelectionHint()
+                if (!state.hasSelectedImage) {
+                    SelectionHint()
+                }
             }
         }
     }
@@ -137,13 +143,12 @@ private fun SelectionHint() {
 
 @Composable
 private fun ImageDisplaySection(
-    image: Bitmap,
-    state: ImageClassificationState,
+    item: ClassifiedImageItem,
+    isClassifying: Boolean,
     context: Context
 ) {
     val displayHeight = integerResource(R.integer.image_display_height_dp)
-    val imageBitmap = remember(image) { image.asImageBitmap() }
-    
+    val imageBitmap = remember(item.bitmap) { item.bitmap.asImageBitmap() }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -161,16 +166,12 @@ private fun ImageDisplaySection(
             modifier = Modifier.fillMaxSize()
         )
     }
-    
-    Spacer(modifier = Modifier.height(16.dp))
-    
+    Spacer(modifier = Modifier.height(8.dp))
     when {
-        state.isClassifying -> {
-            ClassifyingText()
-        }
-        state.classificationResult is ClassificationResult.Complete -> {
+        isClassifying -> ClassifyingText()
+        item.classificationResult != null -> {
             ClassificationResultText(
-                result = (state.classificationResult as ClassificationResult.Complete).result,
+                result = item.classificationResult,
                 context = context
             )
         }
@@ -189,19 +190,18 @@ private fun ClassifyingText() {
 
 @Composable
 private fun ClassificationResultText(
-    result: FoodClassificationResult,
+    result: ClassificationResult,
     context: Context
 ) {
     val foodMessage = remember { context.getString(R.string.image_classification_food) }
     val notFoodMessage = remember { context.getString(R.string.image_classification_not_food) }
     val message = remember(result, foodMessage, notFoodMessage) {
-        result.toDisplayMessage(foodMessage, notFoodMessage)
+        formatClassificationMessage(result, foodMessage, notFoodMessage)
     }
     val textColor = when {
         result.isFood -> MaterialTheme.colorScheme.primary
         else -> MaterialTheme.colorScheme.error
     }
-    
     Text(
         text = message,
         style = MaterialTheme.typography.bodyLarge,
@@ -235,14 +235,19 @@ private fun AlbumSelectionButton(
     }
 }
 
-private fun showClassificationResultToast(
-    context: Context,
-    result: FoodClassificationResult
-) {
-    val foodMessage = context.getString(R.string.image_classification_food)
-    val notFoodMessage = context.getString(R.string.image_classification_not_food)
-    val message = result.toDisplayMessage(foodMessage, notFoodMessage)
-    showToast(context, message, Toast.LENGTH_LONG)
+private fun formatClassificationMessage(
+    result: ClassificationResult,
+    foodMessage: String,
+    notFoodMessage: String
+): String {
+    val confidence = when {
+        result.isFood -> result.foodConfidence
+        else -> result.notFoodConfidence
+    }.toPercentageString(1)
+    return when {
+        result.isFood -> foodMessage.format(confidence)
+        else -> notFoodMessage.format(confidence)
+    }
 }
 
 private fun showToast(context: Context, message: String, duration: Int) {

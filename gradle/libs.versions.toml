@@ -11,7 +11,7 @@ espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.8.7"
 lifecycleViewmodelCompose = "2.8.7"
 activityCompose = "1.9.3"
-composeBom = "2025.12.01"
+composeBom = "2025.11.01"
 hilt = "2.58"
 hiltNavigationCompose = "1.3.0"
 retrofit = "3.0.0"
@@ -37,9 +37,16 @@ minSdk = "26"
 compileSdk = "36"
 targetSdk = "36"
 calendar = "2.6.2"
+uiToolingPreviewAndroid = "1.10.1"
+coil = "2.7.0"
+material3Android = "1.4.0"
+remoteCreationCore = "1.0.0-alpha02"
 mockk = "1.14.7"
 sentryGradle = "4.3.0"
 sentryAndroid = "7.5.0"
+appcompat = "1.7.1"
+material = "1.13.0"
+material3 = "1.4.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -96,6 +103,7 @@ kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version.ref = "material3AdaptiveNav3" }
 
 # Mavericks
+mavericks = { group = "com.airbnb.android", name = "mavericks", version.ref = "mavericks" }
 mavericks-compose = { group = "com.airbnb.android", name = "mavericks-compose", version.ref = "mavericks" }
 mavericks-hilt = { group = "com.airbnb.android", name = "mavericks-hilt", version.ref = "mavericks" }
 mavericks-testing = { group = "com.airbnb.android", name = "mavericks-testing", version.ref = "mavericks" }
@@ -136,6 +144,12 @@ androidx-datastore-preferences = { group = "androidx.datastore", name = "datasto
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
+androidx-ui-tooling-preview-android = { group = "androidx.compose.ui", name = "ui-tooling-preview-android", version.ref = "uiToolingPreviewAndroid" }
+
+# Coil
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
+androidx-remote-creation-core = { group = "androidx.compose.remote", name = "remote-creation-core", version.ref = "remoteCreationCore" }
 
 sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentryAndroid" }
 

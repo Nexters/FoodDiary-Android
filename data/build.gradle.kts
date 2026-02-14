@@ -23,11 +23,28 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+        val apiBaseUrl = localProperties.getProperty("api.base.url")
+            ?: "https://api.example.com/"
+
         buildConfigField(
             "String",
             "API_BASE_URL",
-            "\"${localProperties.getProperty("API_BASE_URL")}\""
+            "\"$apiBaseUrl\""
         )
+    }
+
+    buildTypes {
+        release {
+            val apiBaseUrl = localProperties.getProperty("api.base.url")
+
+            if (!apiBaseUrl.isNullOrBlank()) {
+                buildConfigField(
+                    "String",
+                    "API_BASE_URL",
+                    "\"$apiBaseUrl\""
+                )
+            }
+        }
     }
 
     buildFeatures {
@@ -44,9 +61,28 @@ android {
     }
 }
 
+// 릴리즈 빌드가 실제로 실행될 때만 API_BASE_URL을 체크
+afterEvaluate {
+    tasks.matching { 
+        it.name.contains("Release", ignoreCase = true) && 
+        (it.name.contains("assemble", ignoreCase = true) || it.name.contains("bundle", ignoreCase = true))
+    }.configureEach {
+        doFirst {
+            val apiBaseUrl = localProperties.getProperty("api.base.url")
+
+            if (apiBaseUrl.isNullOrBlank()) {
+                throw GradleException(
+                    "api.base.url must be set in local.properties for release builds"
+                )
+            }
+        }
+    }
+}
+
 dependencies {
     // Modules
     implementation(projects.core.common)
+    implementation(projects.core.classification)
     implementation(projects.domain)
 
     // Coroutines
@@ -80,6 +116,4 @@ dependencies {
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.okhttp.mockwebserver)
-    testImplementation(libs.mockk)
 }
