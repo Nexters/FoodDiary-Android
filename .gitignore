@@ -181,6 +181,14 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
+sentry.properties
+.sentryclirc
+**/sentry.properties
+
+node_modules/
+functions/node_modules/
+functions/lib/
+
 ### AndroidStudio Patch ###
 
 !/gradle/wrapper/gradle-wrapper.jar

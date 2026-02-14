@@ -59,6 +59,7 @@ import com.nexters.fooddiary.core.ui.theme.SdBase
 import com.nexters.fooddiary.core.ui.theme.White
 import com.nexters.fooddiary.core.ui.calendar.WeeklyCalendar
 import java.time.LocalDate
+import androidx.compose.material3.Button
 
 private val ToggleCalendarStrokeGradient = Brush.linearGradient(
     *arrayOf(
@@ -87,6 +88,7 @@ private fun Modifier.selectedTabGradientBorder(selected: Boolean) =
 internal fun HomeScreen(
     modifier: Modifier = Modifier,
     onNavigateToImagePicker: () -> Unit = {},
+    onNavigateToMyPage: () -> Unit = {},
     viewModel: HomeViewModel = mavericksViewModel(),
 ) {
     val state by viewModel.collectAsState()
@@ -98,6 +100,7 @@ internal fun HomeScreen(
         onDateSelected = viewModel::onDateSelected,
         onToggleCalendarView = viewModel::onToggleCalendarView,
         onNavigateToImagePicker = onNavigateToImagePicker,
+        onNavigateToMyPage = onNavigateToMyPage,
         modifier = modifier,
     )
 }
@@ -110,6 +113,7 @@ private fun HomeScreen(
     onDateSelected: (LocalDate) -> Unit = {},
     onToggleCalendarView: () -> Unit = {},
     onNavigateToImagePicker: () -> Unit = {},
+    onNavigateToMyPage: () -> Unit = {},
 ) {
     val weeklyCalendarState = rememberWeeklyCalendarState(selectedDate = state.selectedDate)
     val monthlyCalendarState = rememberMonthCalendarState(selectedDate = state.selectedDate)
@@ -143,7 +147,7 @@ private fun HomeScreen(
             ) {
                 Header(
                     modifier = Modifier.padding(vertical = 18.dp),
-                    onClickMyPage = { },
+                    onClickMyPage = onNavigateToMyPage,
                 )
                 Text(
                     text = homeDescriptionText(photoCountByDate),
@@ -177,6 +181,13 @@ private fun HomeScreen(
                             .weight(1f),
                         onAddPhoto = onNavigateToImagePicker,
                     )
+                }
+
+                Button(
+                    onClick = { throw RuntimeException("Sentry/Discord 알림 테스트용 크래시") },
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    Text("Sentry 테스트 (크래시)")
                 }
             }
         }
