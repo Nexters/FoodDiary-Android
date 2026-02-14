@@ -2,16 +2,7 @@ package com.nexters.fooddiary.core.ui.food
 
 sealed interface FoodImageState {
 
-    data class FullUI(
-        val timeText: String,           // 07:00
-        val locationText: String,       // 마포구
-        val placeText: String,          // 호진이네
-        val keywords: List<String>,     // #양장피 #어향동고
-        val onCopyClick: () -> Unit,    // 복사 버튼
-        val onShareClick: () -> Unit,   // 공유 버튼
-    ) : FoodImageState
-
-    data class Summary(
+    data class Ready(
         val timeText: String,           // 07:00
         val locationText: String,       // 마포구
     ) : FoodImageState

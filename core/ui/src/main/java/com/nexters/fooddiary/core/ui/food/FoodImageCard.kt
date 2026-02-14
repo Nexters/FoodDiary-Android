@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
@@ -94,14 +93,7 @@ fun FoodImageCard(
             .then(borderModifier)
     ) {
         when (state) {
-            is FoodImageState.FullUI -> {
-                FoodImage(
-                    imageUrl = imageUrl,
-                    timeText = state.timeText,
-                    locationText = state.locationText,
-                )
-            }
-            is FoodImageState.Summary -> {
+            is FoodImageState.Ready -> {
                 FoodImage(
                     imageUrl = imageUrl,
                     timeText = state.timeText,
@@ -227,36 +219,15 @@ private fun previewPlaceholder() = if (LocalInspectionMode.current) {
 }
 
 @Preview(
-    name = "FullUI State",
+    name = "Ready State",
     showBackground = true,
     backgroundColor = 0xFF191821
 )
 @Composable
-private fun FoodImageFullPreview() {
+private fun FoodImageReadyPreview() {
     FoodImageCard(
         imageUrl = "https://picsum.photos/300",
-        state = FoodImageState.FullUI(
-            timeText = "07:00",
-            locationText = "마포구",
-            placeText = "호진이네",
-            keywords = listOf("#양장피", "#어향동고"),
-            onCopyClick = {},
-            onShareClick = {},
-        ),
-        modifier = Modifier.size(300.dp)
-    )
-}
-
-@Preview(
-    name = "Summary State",
-    showBackground = true,
-    backgroundColor = 0xFF191821
-)
-@Composable
-private fun FoodImageSummaryPreview() {
-    FoodImageCard(
-        imageUrl = "https://picsum.photos/300",
-        state = FoodImageState.Summary(
+        state = FoodImageState.Ready(
             timeText = "07:00",
             locationText = "마포구",
         ),

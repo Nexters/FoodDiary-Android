@@ -28,6 +28,7 @@ data class MealCardUiModel(
 ) {
     val isEmpty: Boolean get() = status == MealCardStatus.EMPTY
     val isPending: Boolean get() = status == MealCardStatus.PENDING
+    val isReady: Boolean get() = status == MealCardStatus.READY
 
     companion object {
         fun empty(date: LocalDate, slot: MealSlot): MealCardUiModel {

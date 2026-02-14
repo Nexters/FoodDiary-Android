@@ -328,7 +328,7 @@ private fun MealSection(
                 fontFamily = PretendardFontFamily,
             )
 
-            // FullUI 상태일 때만 수정 버튼 표시
+            // Ready 상태일 때만 수정 버튼 표시
             if (!meal.isEmpty && !meal.isPending) {
                 Text(
                     text = stringResource(id = R.string.detail_edit),
@@ -360,18 +360,15 @@ private fun MealSection(
                 )
             }
         } else {
-            // Pending 또는 FullUI 상태: HorizontalPager로 FoodImageCard 표시
+            // Pending 또는 Ready 상태: HorizontalPager로 FoodImageCard 표시
             val pagerState = rememberPagerState(pageCount = { meal.imageUrls.size })
             val state = when {
                 meal.isPending -> FoodImageState.Pending
-                else -> FoodImageState.FullUI(
+                meal.isReady -> FoodImageState.Ready(
                     timeText = meal.time,
                     locationText = meal.location,
-                    placeText = meal.place,
-                    keywords = meal.keywords,
-                    onCopyClick = onCopyClick,
-                    onShareClick = onShareClick,
                 )
+                else -> FoodImageState.Pending
             }
 
             HorizontalPager(
@@ -390,7 +387,7 @@ private fun MealSection(
             }
         }
 
-        // FullUI 상태일 때만 카드 밑에 설명란 표시
+        // Ready 상태일 때만 카드 밑에 설명란 표시
         if (!meal.isEmpty && !meal.isPending) {
             MealInfoSection(
                 place = meal.place,
