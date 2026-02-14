@@ -149,6 +149,7 @@ fun FoodDiaryNavHost(
                 }
             }
         )
+
         myPageScreen(
             navigateToWebView = { page ->
                 val url = when (page) {
@@ -157,6 +158,7 @@ fun FoodDiaryNavHost(
                 }
                 navController.navigate(WebViewRoute(url = url))
             },
+            onShowDialog = onShowDialog,
             onBack = { navController.popBackStack() },
             onSignOut = {
                 signOutRequestId++
