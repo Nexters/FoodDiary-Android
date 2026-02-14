@@ -28,6 +28,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +61,8 @@ import com.nexters.fooddiary.core.ui.theme.White
 import com.nexters.fooddiary.core.ui.calendar.WeeklyCalendar
 import java.time.LocalDate
 import androidx.compose.material3.Button
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 
 private val ToggleCalendarStrokeGradient = Brush.linearGradient(
     *arrayOf(
@@ -117,79 +120,94 @@ private fun HomeScreen(
 ) {
     val weeklyCalendarState = rememberWeeklyCalendarState(selectedDate = state.selectedDate)
     val monthlyCalendarState = rememberMonthCalendarState(selectedDate = state.selectedDate)
+    val hazeState = rememberHazeState()
     var selectedTab by remember { mutableStateOf(HomeTab.HOME) }
+    var showHomeCoachmark by rememberSaveable { mutableStateOf(true) }
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(SdBase)
     ) {
-        Scaffold(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp),
-            containerColor = SdBase,
-            contentColor = SdBase,
-            bottomBar = {
-                HomeBottomBar(
-                    currentRoute = selectedTab,
-                    isMonthlyCalendarView = state.isMonthlyCalendarView,
-                    onHomeClick = { selectedTab = HomeTab.HOME },
-                    onInsightClick = { selectedTab = HomeTab.INSIGHT },
-                    onCalendarViewToggle = onToggleCalendarView,
-                )
-            },
-        ) { innerPadding ->
-            Column(
+                .hazeSource(hazeState),
+        ) {
+            Scaffold(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding),
-            ) {
-                Header(
-                    modifier = Modifier.padding(vertical = 18.dp),
-                    onClickMyPage = onNavigateToMyPage,
-                )
-                Text(
-                    text = homeDescriptionText(photoCountByDate),
-                    style = AppTypography.p12,
-                    color = Gray050,
-                )
-                Text(
-                    modifier = Modifier.padding(top = 12.dp, bottom = 36.dp),
-                    text = stringResource(string.home_sub_description),
-                    style = AppTypography.hd24,
-                    color = Gray050,
-                )
-                if (state.isMonthlyCalendarView) {
-                    MonthlyCalendar(
-                        calendarState = monthlyCalendarState,
-                        selectedDate = state.selectedDate,
-                        onDateSelected = onDateSelected,
-                        photoCountByDate = photoCountByDate,
+                    .padding(20.dp),
+                containerColor = SdBase,
+                contentColor = SdBase,
+                bottomBar = {
+                    HomeBottomBar(
+                        currentRoute = selectedTab,
+                        isMonthlyCalendarView = state.isMonthlyCalendarView,
+                        onHomeClick = { selectedTab = HomeTab.HOME },
+                        onInsightClick = { selectedTab = HomeTab.INSIGHT },
+                        onCalendarViewToggle = onToggleCalendarView,
                     )
-                } else {
-                    WeeklyCalendar(
-                        calendarState = weeklyCalendarState,
-                        selectedDate = state.selectedDate,
-                        onDateSelected = onDateSelected,
-                        photoCountByDate = photoCountByDate,
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    AddPhotoBox(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        onAddPhoto = onNavigateToImagePicker,
-                    )
-                }
-
-                Button(
-                    onClick = { throw RuntimeException("Sentry/Discord 알림 테스트용 크래시") },
-                    modifier = Modifier.padding(top = 8.dp)
+                },
+            ) { innerPadding ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
                 ) {
-                    Text("Sentry 테스트 (크래시)")
+                    Header(
+                        modifier = Modifier.padding(vertical = 18.dp),
+                        onClickMyPage = onNavigateToMyPage,
+                    )
+                    Text(
+                        text = homeDescriptionText(photoCountByDate),
+                        style = AppTypography.p12,
+                        color = Gray050,
+                    )
+                    Text(
+                        modifier = Modifier.padding(top = 12.dp, bottom = 36.dp),
+                        text = stringResource(string.home_sub_description),
+                        style = AppTypography.hd24,
+                        color = Gray050,
+                    )
+                    if (state.isMonthlyCalendarView) {
+                        MonthlyCalendar(
+                            calendarState = monthlyCalendarState,
+                            selectedDate = state.selectedDate,
+                            onDateSelected = onDateSelected,
+                            photoCountByDate = photoCountByDate,
+                        )
+                    } else {
+                        WeeklyCalendar(
+                            calendarState = weeklyCalendarState,
+                            selectedDate = state.selectedDate,
+                            onDateSelected = onDateSelected,
+                            photoCountByDate = photoCountByDate,
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        AddPhotoBox(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            onAddPhoto = onNavigateToImagePicker,
+                        )
+                    }
+
+                    Button(
+                        onClick = { throw RuntimeException("Sentry/Discord 알림 테스트용 크래시") },
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        Text("Sentry 테스트 (크래시)")
+                    }
                 }
             }
+        }
+
+        if (!state.isMonthlyCalendarView && showHomeCoachmark) {
+            HomeCoachmarkOverlay(
+                onDismiss = { showHomeCoachmark = false },
+                hazeState = hazeState,
+            )
         }
     }
 }
@@ -232,7 +250,8 @@ private fun HomeBottomBar(
             onInsightClick = onInsightClick,
         )
         IconButton(
-            modifier = Modifier.size(60.dp)
+            modifier = Modifier
+                .size(60.dp)
                 .gradientBorder(1.dp, ToggleCalendarStrokeGradient, CircleShape),
             onClick = onCalendarViewToggle,
             shape = CircleShape,
