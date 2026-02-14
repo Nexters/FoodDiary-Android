@@ -51,6 +51,7 @@ fun FoodDiaryNavHost(
     var signOutRequestId by remember { mutableStateOf(0) }
     var deleteAccountRequestId by remember { mutableStateOf(0) }
     var hasNavigatedFromSplash by remember { mutableStateOf(false) }
+    var showHomeCoachmarkOnEntry by remember { mutableStateOf(false) }
     val startDestination = if (initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_IMAGE) {
         ImagePickerRoute
     } else {
@@ -84,14 +85,17 @@ fun FoodDiaryNavHost(
                 }
             } else if (signOutRequestId == 0 && deleteAccountRequestId == 0) {
                 // 로그인 → isFirst 체크해서 Onboarding 또는 Home으로 이동 (단, 로그아웃/회원탈퇴 중이 아닐 때만)
-                val destination = if (authUiState?.isFirst == true) {
-                    OnboardingRoute
+                if (authUiState?.isFirst == true) {
+                    navController.navigate(OnboardingRoute) {
+                        popUpTo(0) { inclusive = false }
+                        launchSingleTop = true
+                    }
                 } else {
-                    HomeRoute
-                }
-                navController.navigate(destination) {
-                    popUpTo(0) { inclusive = false }
-                    launchSingleTop = true
+                    showHomeCoachmarkOnEntry = false
+                    navController.navigate(HomeRoute) {
+                        popUpTo(0) { inclusive = false }
+                        launchSingleTop = true
+                    }
                 }
             }
         }
@@ -108,6 +112,7 @@ fun FoodDiaryNavHost(
         splashScreen(
             onNavigateToHome = {
                 hasNavigatedFromSplash = true
+                showHomeCoachmarkOnEntry = false
                 navController.navigate(HomeRoute) {
                     popUpTo(SplashRoute) { inclusive = true }
                 }
@@ -130,6 +135,7 @@ fun FoodDiaryNavHost(
 
         onboardingScreen(
             onComplete = {
+                showHomeCoachmarkOnEntry = true
                 navController.navigate(HomeRoute) {
                     popUpTo(OnboardingRoute) { inclusive = true }
                     launchSingleTop = true
@@ -139,7 +145,9 @@ fun FoodDiaryNavHost(
 
         homeScreen(
             onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
-            onNavigateToMyPage = { navController.navigate(MyPageRoute)}
+            onNavigateToMyPage = { navController.navigate(MyPageRoute)},
+            showCoachmarkOnEntry = { showHomeCoachmarkOnEntry },
+            onCoachmarkFlagConsumed = { showHomeCoachmarkOnEntry = false },
         )
         calendarScreen()
         imageScreen(

@@ -24,6 +24,7 @@ import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -93,6 +94,8 @@ internal fun HomeScreen(
     modifier: Modifier = Modifier,
     onNavigateToImagePicker: () -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
+    showCoachmarkOnEntry: Boolean = false,
+    onCoachmarkFlagConsumed: () -> Unit = {},
     viewModel: HomeViewModel = mavericksViewModel(),
 ) {
     val state by viewModel.collectAsState()
@@ -105,6 +108,8 @@ internal fun HomeScreen(
         onToggleCalendarView = viewModel::onToggleCalendarView,
         onNavigateToImagePicker = onNavigateToImagePicker,
         onNavigateToMyPage = onNavigateToMyPage,
+        showCoachmarkOnEntry = showCoachmarkOnEntry,
+        onCoachmarkFlagConsumed = onCoachmarkFlagConsumed,
         modifier = modifier,
     )
 }
@@ -118,13 +123,22 @@ private fun HomeScreen(
     onToggleCalendarView: () -> Unit = {},
     onNavigateToImagePicker: () -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
+    showCoachmarkOnEntry: Boolean = false,
+    onCoachmarkFlagConsumed: () -> Unit = {},
 ) {
     val weeklyCalendarState = rememberWeeklyCalendarState(selectedDate = state.selectedDate)
     val monthlyCalendarState = rememberMonthCalendarState(selectedDate = state.selectedDate)
     val hazeState = rememberHazeState()
     var weeklyHeaderBounds by remember { mutableStateOf<Rect?>(null) }
     var selectedTab by remember { mutableStateOf(HomeTab.HOME) }
-    var showHomeCoachmark by rememberSaveable { mutableStateOf(true) }
+    var showHomeCoachmark by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(showCoachmarkOnEntry) {
+        if (showCoachmarkOnEntry) {
+            showHomeCoachmark = true
+            onCoachmarkFlagConsumed()
+        }
+    }
 
     Box(
         modifier = modifier
