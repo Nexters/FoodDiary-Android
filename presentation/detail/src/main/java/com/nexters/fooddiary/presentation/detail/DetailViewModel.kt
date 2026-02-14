@@ -7,10 +7,6 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
-import com.nexters.fooddiary.domain.model.AnalysisStatus
-import com.nexters.fooddiary.domain.model.DiaryDetail
-import com.nexters.fooddiary.domain.model.DiaryEntry
-import com.nexters.fooddiary.domain.model.MealType
 import com.nexters.fooddiary.domain.usecase.GetDiaryByDateUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -19,7 +15,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 data class DetailState(
     val selectedDate: LocalDate = LocalDate.now(),
