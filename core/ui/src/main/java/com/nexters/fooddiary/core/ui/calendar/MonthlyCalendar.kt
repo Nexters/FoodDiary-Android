@@ -318,8 +318,16 @@ private fun MonthPickerContent(
     val pickerHeight = (ITEM_HEIGHT_DP * VISIBLE_ITEMS).dp
     val contentPadding = PaddingValues(vertical = (ITEM_HEIGHT_DP * (VISIBLE_ITEMS - 1) / 2).dp)
 
-    val centeredYearIndex = yearListState.layoutInfo.centeredItemIndex((selectedYear - startYear).coerceIn(0, years.lastIndex))
-    val centeredMonthIndex = monthListState.layoutInfo.centeredItemIndex((selectedMonth - 1).coerceIn(0, 11))
+    val centeredYearIndex by remember {
+        derivedStateOf {
+            yearListState.layoutInfo.centeredItemIndex((selectedYear - startYear).coerceIn(0, years.lastIndex))
+        }
+    }
+    val centeredMonthIndex by remember {
+        derivedStateOf {
+            monthListState.layoutInfo.centeredItemIndex((selectedMonth - 1).coerceIn(0, 11))
+        }
+    }
 
     Box(modifier = modifier.fillMaxWidth()) {
         SelectionBand()
@@ -346,7 +354,6 @@ private fun MonthPickerContent(
                 onClick = { onMonthClick(it + 1) },
             )
         }
-        PickerFadeOverlay()
     }
 
     Spacer(modifier = Modifier.height(24.dp))
@@ -362,29 +369,6 @@ private fun BoxScope.SelectionBand(modifier: Modifier = Modifier) {
             .align(Alignment.Center)
             .height(ITEM_HEIGHT_DP.dp)
             .background(Sd800, RoundedCornerShape(10.dp))
-    )
-}
-
-@Composable
-private fun BoxScope.PickerFadeOverlay(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .matchParentSize()
-            .background(
-                Brush.linearGradient(
-                    colorStops = arrayOf(
-                        0f to Sd900,
-                        0.35f to Sd900,
-                        0.4f to Transparent,
-                        0.6f to Transparent,
-                        0.65f to Sd900,
-                        1f to Sd900,
-                    ),
-                    start = Offset(0f, 0f),
-                    end = Offset(0f, Float.POSITIVE_INFINITY),
-                )
-            )
     )
 }
 
@@ -439,7 +423,6 @@ private fun SelectButton(
         shape = CircleShape
     ) {
         Text(
-            modifier = Modifier.padding(14.dp),
             text = stringResource(string.home_button_select),
             style = hd16,
         )
