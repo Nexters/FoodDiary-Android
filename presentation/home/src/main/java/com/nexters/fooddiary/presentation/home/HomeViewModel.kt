@@ -1,12 +1,13 @@
 package com.nexters.fooddiary.presentation.home
 
 import android.content.Context
-import androidx.lifecycle.ViewModel
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import com.nexters.fooddiary.core.common.permission.PermissionUtil
+import com.nexters.fooddiary.domain.usecase.GetDiaryByMonthUseCase
+import com.nexters.fooddiary.domain.usecase.GetFoodPhotoCountByWeekUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -16,17 +17,21 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
-import java.util.Collections.emptyMap
+import java.time.YearMonth
 
 sealed interface HomeEvent {
     data class NavigateToDetail(val date: LocalDate) : HomeEvent
 }
 
 class HomeViewModel @AssistedInject constructor(
-    @ApplicationContext context: Context,
+    @ApplicationContext private val context: Context,
     @Assisted initialState: HomeScreenState,
+    private val getFoodPhotoCountByWeekUseCase: GetFoodPhotoCountByWeekUseCase,
+    private val getDiaryByMonthUseCase: GetDiaryByMonthUseCase,
 ) : MavericksViewModel<HomeScreenState>(initialState) {
     private val _photoCountByDate = MutableStateFlow<Map<LocalDate, Int>>(emptyMap())
     val photoCountByDate: StateFlow<Map<LocalDate, Int>> = _photoCountByDate.asStateFlow()
@@ -34,7 +39,28 @@ class HomeViewModel @AssistedInject constructor(
     val events: SharedFlow<HomeEvent> = _events.asSharedFlow()
 
     init {
-        if (PermissionUtil.hasMediaPermission(context)) { }
+        loadDiaryForMonth(YearMonth.from(initialState.selectedDate))
+        if (PermissionUtil.hasMediaPermission(context)) {
+            loadThisWeekPhotoCount()
+        }
+    }
+
+    fun loadPhotosForMonth(yearMonth: YearMonth) = loadDiaryForMonth(yearMonth)
+
+    private fun loadDiaryForMonth(yearMonth: YearMonth) {
+        suspend {
+            withContext(Dispatchers.Default) { getDiaryByMonthUseCase(yearMonth) }
+        }.execute { async ->
+            copy(diaryCountByDate = async.invoke()?.let { toDotCountByDate(it) } ?: emptyMap())
+        }
+    }
+
+    private fun toDotCountByDate(diariesByDate: Map<LocalDate, *>) = diariesByDate.keys.associateWith { 1 }
+
+    private fun loadThisWeekPhotoCount() {
+        suspend { withContext(Dispatchers.Default) { getFoodPhotoCountByWeekUseCase() } }.execute { async ->
+            copy(diaryCountByWeek = async.invoke() ?: 0)
+        }
     }
 
     fun onDateSelected(date: LocalDate) {
@@ -52,5 +78,4 @@ class HomeViewModel @AssistedInject constructor(
     }
 
     companion object : MavericksViewModelFactory<HomeViewModel, HomeScreenState> by hiltMavericksViewModelFactory()
-
 }

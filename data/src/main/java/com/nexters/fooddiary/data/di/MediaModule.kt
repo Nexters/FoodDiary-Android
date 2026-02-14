@@ -3,8 +3,10 @@ package com.nexters.fooddiary.data.di
 import android.content.ContentResolver
 import android.content.Context
 import com.nexters.fooddiary.data.repository.ClassificationRepositoryImpl
+import com.nexters.fooddiary.data.repository.DiaryRepositoryImpl
 import com.nexters.fooddiary.data.repository.MediaRepositoryImpl
 import com.nexters.fooddiary.domain.repository.ClassificationRepository
+import com.nexters.fooddiary.domain.repository.DiaryRepository
 import com.nexters.fooddiary.domain.repository.MediaRepository
 import dagger.Binds
 import dagger.Module
@@ -40,4 +42,10 @@ abstract class MediaRepositoryModule {
     internal abstract fun bindClassificationRepository(
         classificationRepositoryImpl: ClassificationRepositoryImpl
     ): ClassificationRepository
+
+    @Binds
+    @Singleton
+    internal abstract fun bindDiaryRepository(
+        diaryRepositoryImpl: DiaryRepositoryImpl
+    ): DiaryRepository
 }

@@ -7,13 +7,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.RoundRect
@@ -23,6 +27,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.nexters.fooddiary.core.common.R.string
 import com.nexters.fooddiary.core.ui.R.drawable
@@ -37,8 +42,9 @@ fun AddPhotoBox(
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(color = White.copy(alpha = 0.02f))
+            .heightIn(min = 200.dp)
+            .background(color = White.copy(alpha = 0.02f), shape = RoundedCornerShape(16.dp))
+            .graphicsLayer { clip = false }
             .drawBehind {
                 val path = Path().apply {
                     addRoundRect(
@@ -67,18 +73,23 @@ fun AddPhotoBox(
         contentAlignment = Alignment.Center,
     ) {
         Column(
+            modifier = modifier.padding(40.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
             Image(
+                modifier = modifier.size(180.dp),
                 painter = painterResource(drawable.ic_add_diary),
                 contentDescription = null,
             )
-            Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = stringResource(string.home_add_food_photo),
                 style = AppTypography.p12,
                 color = White,
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                textAlign = TextAlign.Center
             )
         }
     }

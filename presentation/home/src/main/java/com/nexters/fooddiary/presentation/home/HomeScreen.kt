@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -44,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.time.YearMonth
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.common.R.string
@@ -109,8 +112,8 @@ internal fun HomeScreen(
 
     HomeScreen(
         state = state,
-        photoCountByDate = photoCountByDate,
         onDateSelected = viewModel::onDateSelected,
+        onMonthChanged = viewModel::loadPhotosForMonth,
         onToggleCalendarView = viewModel::onToggleCalendarView,
         onNavigateToImagePicker = onNavigateToImagePicker,
         onNavigateToMyPage = onNavigateToMyPage,
@@ -122,8 +125,8 @@ internal fun HomeScreen(
 private fun HomeScreen(
     modifier: Modifier = Modifier,
     state: HomeScreenState = HomeScreenState(),
-    photoCountByDate: Map<LocalDate, Int> = emptyMap(),
     onDateSelected: (LocalDate) -> Unit = {},
+    onMonthChanged: (YearMonth) -> Unit = {},
     onToggleCalendarView: () -> Unit = {},
     onNavigateToImagePicker: () -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
@@ -156,14 +159,15 @@ private fun HomeScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding),
+                    .padding(innerPadding)
+                    .verticalScroll(rememberScrollState()),
             ) {
                 Header(
                     modifier = Modifier.padding(vertical = 18.dp),
                     onClickMyPage = onNavigateToMyPage,
                 )
                 Text(
-                    text = homeDescriptionText(photoCountByDate),
+                    text = homeDescriptionText(state.diaryCountByWeek),
                     style = AppTypography.p12,
                     color = Gray050,
                 )
@@ -178,20 +182,20 @@ private fun HomeScreen(
                         calendarState = monthlyCalendarState,
                         selectedDate = state.selectedDate,
                         onDateSelected = onDateSelected,
-                        photoCountByDate = photoCountByDate,
+                        onMonthChanged = onMonthChanged,
+                        photoCountByDate = state.diaryCountByDate,
                     )
                 } else {
                     WeeklyCalendar(
                         calendarState = weeklyCalendarState,
                         selectedDate = state.selectedDate,
                         onDateSelected = onDateSelected,
-                        photoCountByDate = photoCountByDate,
+                        photoCountByDate = state.diaryCountByDate,
+                        today = LocalDate.now(),
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                     AddPhotoBox(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
+                        modifier = Modifier.fillMaxWidth(),
                         onAddPhoto = onNavigateToImagePicker,
                     )
                 }
@@ -208,10 +212,10 @@ private fun HomeScreen(
 }
 
 @Composable
-private fun homeDescriptionText(photoCountByDate: Map<LocalDate, Int>): String {
-    return when (val total = photoCountByDate.values.sum()) {
+private fun homeDescriptionText(photoCountByWeek: Int): String {
+    return when (photoCountByWeek) {
         0 -> stringResource(string.home_description_empty)
-        in 1..998 -> stringResource(string.home_description_with_count, total.toString())
+        in 1..998 -> stringResource(string.home_description_with_count, photoCountByWeek.toString())
         else -> stringResource(string.home_description_with_count, "999+")
     }
 }
@@ -279,22 +283,20 @@ private fun HomeInsightToggle(
 
     Row(
         modifier = modifier
-.height(60.dp)
-.clip(CircleShape)
-.background(
-    color =  Gray750.copy(alpha = 0.3f),
-).gradientBorder(1.dp, ToggleCalendarStrokeGradient, CircleShape)
+            .height(60.dp)
+            .clip(CircleShape)
+            .background(Gray750.copy(alpha = 0.3f))
+            .gradientBorder(1.dp, ToggleCalendarStrokeGradient, CircleShape)
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        // 홈
-            Row(
+        Row(
                 modifier = Modifier
                     .height(44.dp)
                     .width(75.dp)
                     .clip(CircleShape)
-                    .background( if (isHomeSelected) PrimBase else Transparent)
+                    .background(if (isHomeSelected) PrimBase else Transparent)
                     .selectedTabGradientBorder(selected = isHomeSelected)
                     .clickable(
                         indication = null,
@@ -319,13 +321,12 @@ private fun HomeInsightToggle(
                     color = if (isHomeSelected) White else Gray050,
                 )
             }
-            // 인사이트
-            Row(
+        Row(
                 modifier = Modifier
                     .height(44.dp)
                     .width(105.dp)
                     .clip(CircleShape)
-                    .background( if (isInsightSelected) PrimBase else Transparent)
+                    .background(if (isInsightSelected) PrimBase else Transparent)
                     .selectedTabGradientBorder(selected = isInsightSelected)
                     .clickable(
                         indication = null,
@@ -339,7 +340,7 @@ private fun HomeInsightToggle(
                 Icon(
                     painter = painterResource(drawable.ic_insights),
                     contentDescription = stringResource(string.home_nav_insight),
-                    tint =  if (isInsightSelected) White else Gray050,
+                    tint = if (isInsightSelected) White else Gray050,
                     modifier = Modifier.size(20.dp),
                 )
                 Text(
