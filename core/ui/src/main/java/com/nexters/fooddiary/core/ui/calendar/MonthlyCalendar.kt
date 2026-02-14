@@ -1,36 +1,46 @@
 package com.nexters.fooddiary.core.ui.calendar
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListItemInfo
+import androidx.compose.foundation.lazy.LazyListLayoutInfo
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Icon
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.key
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -42,14 +52,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kizitonwose.calendar.compose.CalendarState
@@ -57,11 +72,18 @@ import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.daysOfWeek
+import com.nexters.fooddiary.core.common.R.string
+import com.nexters.fooddiary.core.ui.R.drawable
 import com.nexters.fooddiary.core.ui.calendar.theme.CalendarColors
 import com.nexters.fooddiary.core.ui.calendar.theme.calendarColors
+import com.nexters.fooddiary.core.ui.theme.AppTypography.hd16
 import com.nexters.fooddiary.core.ui.theme.Gray600
+import com.nexters.fooddiary.core.ui.theme.Gray700
 import com.nexters.fooddiary.core.ui.theme.Gray900
+import com.nexters.fooddiary.core.ui.theme.PrimBase
+import com.nexters.fooddiary.core.ui.theme.Sd800
 import com.nexters.fooddiary.core.ui.theme.Sd900
+import com.nexters.fooddiary.core.ui.theme.White
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
@@ -107,7 +129,6 @@ fun MonthlyCalendar(
     Column(modifier = modifier) {
         MonthCalendarHeader(
             yearMonth = visibleMonth.value,
-            locale = locale,
             colors = colors,
             onClick = { monthBottomSheetVisible = true },
         )
@@ -177,7 +198,6 @@ fun MonthlyCalendar(
 @Composable
 private fun MonthCalendarHeader(
     yearMonth: YearMonth,
-    locale: Locale,
     colors: CalendarColors,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -203,6 +223,31 @@ private fun MonthCalendarHeader(
     }
 }
 
+private const val ITEM_HEIGHT_DP = 35
+private const val VISIBLE_ITEMS = 5
+private const val YEAR_RANGE = 10
+
+private fun LazyListLayoutInfo.centeredItemIndex(fallback: Int): Int =
+    visibleItemsInfo.firstOrNull { it.covers(viewportCenterY) }?.index ?: fallback
+
+private val LazyListLayoutInfo.viewportCenterY: Int
+    get() = (viewportStartOffset + viewportEndOffset) / 2
+
+private fun LazyListItemInfo.covers(y: Int): Boolean = y in offset until offset + size
+
+private fun centeredYearMonth(
+    years: List<Int>,
+    startYear: Int,
+    yearState: LazyListState,
+    monthState: LazyListState,
+    fallbackYear: Int,
+    fallbackMonth: Int
+): YearMonth {
+    val y = years.getOrNull(yearState.layoutInfo.centeredItemIndex((fallbackYear - startYear).coerceIn(0, years.lastIndex))) ?: fallbackYear
+    val m = (monthState.layoutInfo.centeredItemIndex((fallbackMonth - 1).coerceIn(0, 11)) + 1).coerceIn(1, 12)
+    return YearMonth.of(y, m)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MonthSelectBottomSheet(
@@ -214,36 +259,204 @@ private fun MonthSelectBottomSheet(
     onMonthSelected: (YearMonth) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val startYear = YearMonth.now().year - YEAR_RANGE
+    val years = remember(startYear) { (startYear..startYear + YEAR_RANGE * 2).toList() }
+
+    var selectedYear by remember(currentYearMonth) { mutableStateOf(currentYearMonth.year) }
+    var selectedMonth by remember(currentYearMonth) { mutableStateOf(currentYearMonth.monthValue) }
+
+    val yearListState = rememberLazyListState()
+    val monthListState = rememberLazyListState()
+
+    LaunchedEffect(currentYearMonth) {
+        yearListState.animateScrollToItem((currentYearMonth.year - startYear).coerceIn(0, years.lastIndex))
+        monthListState.animateScrollToItem(currentYearMonth.monthValue - 1)
+    }
+
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
         containerColor = Sd900,
+        dragHandle = null,
         modifier = modifier,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(max = 320.dp)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+                .padding(18.dp),
         ) {
-            (1..12).forEach { monthValue ->
-                key(monthValue) {
-                    val yearMonth = YearMonth.of(currentYearMonth.year, monthValue)
-                    Text(
-                        text = "${monthValue}월",
-                        color = colors.headerText,
-                        fontSize = 16.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onMonthSelected(yearMonth) }
-                            .padding(vertical = 12.dp),
-                    )
-                }
+            CloseButton(modifier = Modifier.align(Alignment.End), onClick = onDismissRequest)
+
+            MonthPickerContent(
+                years = years,
+                startYear = startYear,
+                selectedYear = selectedYear,
+                selectedMonth = selectedMonth,
+                onYearClick = { selectedYear = it },
+                onMonthClick = { selectedMonth = it },
+                yearListState = yearListState,
+                monthListState = monthListState,
+                onConfirm = { onMonthSelected(centeredYearMonth(years, startYear, yearListState, monthListState, selectedYear, selectedMonth)) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun MonthPickerContent(
+    years: List<Int>,
+    startYear: Int,
+    selectedYear: Int,
+    selectedMonth: Int,
+    onYearClick: (Int) -> Unit,
+    onMonthClick: (Int) -> Unit,
+    yearListState: LazyListState,
+    monthListState: LazyListState,
+    onConfirm: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val pickerHeight = (ITEM_HEIGHT_DP * VISIBLE_ITEMS).dp
+    val contentPadding = PaddingValues(vertical = (ITEM_HEIGHT_DP * (VISIBLE_ITEMS - 1) / 2).dp)
+
+    val centeredYearIndex = yearListState.layoutInfo.centeredItemIndex((selectedYear - startYear).coerceIn(0, years.lastIndex))
+    val centeredMonthIndex = monthListState.layoutInfo.centeredItemIndex((selectedMonth - 1).coerceIn(0, 11))
+
+    Box(modifier = modifier.fillMaxWidth()) {
+        SelectionBand()
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            PickerColumn(
+                itemCount = years.size,
+                pickerHeight = pickerHeight,
+                contentPadding = contentPadding,
+                listState = yearListState,
+                centeredIndex = centeredYearIndex,
+                label = { "${years[it]}년" },
+                onClick = { onYearClick(years[it]) },
+            )
+            PickerColumn(
+                itemCount = 12,
+                pickerHeight = pickerHeight,
+                contentPadding = contentPadding,
+                listState = monthListState,
+                centeredIndex = centeredMonthIndex,
+                label = { "${it + 1}월" },
+                onClick = { onMonthClick(it + 1) },
+            )
+        }
+        PickerFadeOverlay()
+    }
+
+    Spacer(modifier = Modifier.height(24.dp))
+
+    SelectButton(onClick = onConfirm)
+}
+
+@Composable
+private fun BoxScope.SelectionBand(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .align(Alignment.Center)
+            .height(ITEM_HEIGHT_DP.dp)
+            .background(Sd800, RoundedCornerShape(10.dp))
+    )
+}
+
+@Composable
+private fun BoxScope.PickerFadeOverlay(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .matchParentSize()
+            .background(
+                Brush.linearGradient(
+                    colorStops = arrayOf(
+                        0f to Sd900,
+                        0.35f to Sd900,
+                        0.4f to Transparent,
+                        0.6f to Transparent,
+                        0.65f to Sd900,
+                        1f to Sd900,
+                    ),
+                    start = Offset(0f, 0f),
+                    end = Offset(0f, Float.POSITIVE_INFINITY),
+                )
+            )
+    )
+}
+
+@Composable
+private fun RowScope.PickerColumn(
+    itemCount: Int,
+    pickerHeight: Dp,
+    contentPadding: PaddingValues,
+    listState: LazyListState,
+    centeredIndex: Int,
+    label: (Int) -> String,
+    onClick: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier
+            .weight(1f)
+            .height(pickerHeight),
+        state = listState,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        contentPadding = contentPadding,
+        verticalArrangement = Arrangement.spacedBy(0.dp),
+    ) {
+        items(itemCount) { index ->
+            val isInSelectionBand = index == centeredIndex
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(ITEM_HEIGHT_DP.dp)
+                    .clickable { onClick(index) },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = label(index),
+                    color = if (isInSelectionBand) White else Gray700,
+                    fontSize = 18.sp,
+                )
             }
         }
     }
+}
+
+@Composable
+private fun SelectButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(containerColor = PrimBase),
+        shape = CircleShape
+    ) {
+        Text(
+            modifier = Modifier.padding(14.dp),
+            text = stringResource(string.home_button_select),
+            style = hd16,
+        )
+    }
+}
+
+@Composable
+private fun CloseButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
+    Image(
+        modifier = modifier
+            .clickable { onClick() },
+        painter = painterResource(drawable.ic_close),
+        contentDescription = ""
+    )
 }
 
 @Composable
@@ -291,7 +504,7 @@ private fun MonthDayCell(
             modifier = Modifier,
             topText = day.date.dayOfMonth.toString(),
             isSelected = isSelected,
-            showDot = false,
+            showDot = photoCount > 0,
             content = {
                 val dashedBorderColor = if (isSelected) Gray900 else colors.weekdayText
                 Box(
@@ -333,6 +546,20 @@ private fun MonthDayCell(
             }
         )
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true, backgroundColor = 0xFF1E1D25)
+@Composable
+private fun MonthSelectBottomSheetPreview() {
+    MonthSelectBottomSheet(
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        onDismissRequest = {},
+        currentYearMonth = YearMonth.now(),
+        locale = Locale.getDefault(),
+        colors = calendarColors(),
+        onMonthSelected = {}
+    )
 }
 
 @Preview
