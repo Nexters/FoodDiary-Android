@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.ActivityNotFoundException
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -512,7 +513,11 @@ private fun shareText(context: Context, text: String, chooserTitle: String) {
         putExtra(Intent.EXTRA_TEXT, text)
     }
     val chooserIntent = Intent.createChooser(sendIntent, chooserTitle)
-    context.startActivity(chooserIntent)
+    try {
+        context.startActivity(chooserIntent)
+    } catch (_: ActivityNotFoundException) {
+        // 공유 가능한 앱이 없는 환경에서는 크래시 없이 무시
+    }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF191821)

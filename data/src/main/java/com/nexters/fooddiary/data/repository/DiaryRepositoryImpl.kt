@@ -41,7 +41,9 @@ class DiaryRepositoryImpl @Inject constructor(
                         DiaryPhoto(
                             photoId = photo.photoId,
                             imageUrl = photo.imageUrl,
-                            takenAt = photo.takenAt?.let(LocalDateTime::parse),
+                            takenAt = photo.takenAt?.let { timestamp ->
+                                runCatching { LocalDateTime.parse(timestamp) }.getOrNull()
+                            },
                         )
                     },
                 )
