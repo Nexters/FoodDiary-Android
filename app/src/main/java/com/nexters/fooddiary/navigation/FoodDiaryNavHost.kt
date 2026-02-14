@@ -148,6 +148,7 @@ fun FoodDiaryNavHost(
 
         detailScreen(
             onNavigateBack = { navController.popBackStack() },
+            onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
             onShowToast = onShowToast,
         )
 

@@ -31,6 +31,7 @@ sealed interface DetailEvent {
     data class CopyMapLink(val mapLink: String) : DetailEvent
     data class ShareMapLink(val place: String, val mapLink: String) : DetailEvent
     data object ShareLinkEmpty : DetailEvent
+    data object NavigateToImagePicker : DetailEvent
 }
 
 class DetailViewModel @AssistedInject constructor(
@@ -98,7 +99,7 @@ class DetailViewModel @AssistedInject constructor(
     }
 
     fun onAddPhoto(slot: MealSlot, date: LocalDate) {
-        // TODO: 이미지 피커 화면으로 이동
+        _events.tryEmit(DetailEvent.NavigateToImagePicker)
     }
 
     fun onEditClick(slot: MealSlot, date: LocalDate) {
