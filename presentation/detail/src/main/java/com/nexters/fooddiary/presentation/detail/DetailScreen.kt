@@ -69,7 +69,6 @@ import com.nexters.fooddiary.core.ui.component.DetailScreenHeader
 import com.nexters.fooddiary.core.ui.food.FoodImageCard
 import com.nexters.fooddiary.core.ui.food.FoodImageState
 import com.nexters.fooddiary.core.ui.theme.AppTypography
-import com.nexters.fooddiary.core.ui.theme.PretendardFontFamily
 import com.nexters.fooddiary.core.ui.theme.SdBase
 import com.nexters.fooddiary.core.ui.theme.White
 import dev.chrisbanes.haze.hazeSource
@@ -206,7 +205,6 @@ private fun DetailContent(
                             text = stringResource(id = R.string.detail_title),
                             style = AppTypography.hd18,
                             color = White,
-                            fontFamily = PretendardFontFamily,
                             modifier = Modifier.padding(start = 4.dp)
                         )
                         Box(
@@ -325,7 +323,6 @@ private fun MealSection(
                 text = mealLabel,
                 style = AppTypography.p18,
                 color = White,
-                fontFamily = PretendardFontFamily,
             )
 
             // Ready 상태일 때만 수정 버튼 표시
@@ -336,7 +333,6 @@ private fun MealSection(
                         textDecoration = TextDecoration.Underline
                     ),
                     color = White,
-                    fontFamily = PretendardFontFamily,
                     modifier = Modifier.clickable { onEditClick() }
                 )
             }
@@ -423,7 +419,6 @@ private fun MealInfoSection(
                 style = AppTypography.hd16,
                 fontWeight = FontWeight.Bold,
                 color = White,
-                fontFamily = PretendardFontFamily,
             )
 
             // 복사/공유 버튼
@@ -448,7 +443,6 @@ private fun MealInfoSection(
                         color = White,
                         style = AppTypography.p12,
                         fontWeight = FontWeight.Medium,
-                        fontFamily = PretendardFontFamily,
                     )
                 }
 
@@ -469,7 +463,6 @@ private fun MealInfoSection(
                         color = White,
                         style = AppTypography.p12,
                         fontWeight = FontWeight.Medium,
-                        fontFamily = PretendardFontFamily,
                     )
                 }
             }
@@ -487,7 +480,6 @@ private fun MealInfoSection(
                         color = White,
                         style = AppTypography.p12,
                         fontWeight = FontWeight.Medium,
-                        fontFamily = PretendardFontFamily,
                     )
                 }
             }

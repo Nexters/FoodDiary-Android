@@ -35,7 +35,6 @@ import com.nexters.fooddiary.core.common.R.string
 import com.nexters.fooddiary.core.ui.R.drawable
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.Gray900
-import com.nexters.fooddiary.core.ui.theme.PretendardFontFamily
 import com.nexters.fooddiary.core.ui.theme.TimeLocationBg
 import com.nexters.fooddiary.core.ui.theme.White
 
@@ -131,7 +130,6 @@ private fun TagChip(
             color = textColor,
             style = AppTypography.p12,
             fontWeight = FontWeight.Medium,
-            fontFamily = PretendardFontFamily,
         )
     }
 }

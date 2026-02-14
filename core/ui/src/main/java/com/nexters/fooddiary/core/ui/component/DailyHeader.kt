@@ -16,7 +16,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nexters.fooddiary.core.ui.R
 import com.nexters.fooddiary.core.ui.theme.AppTypography
-import com.nexters.fooddiary.core.ui.theme.PretendardFontFamily
 import com.nexters.fooddiary.core.ui.theme.White
 import com.nexters.fooddiary.core.ui.theme.glassmorphism
 import dev.chrisbanes.haze.HazeState
@@ -58,7 +57,6 @@ fun DailyHeader(
             text = formatDateHeader(date),
             style = AppTypography.hd18,
             fontWeight = FontWeight.Bold,
-            fontFamily = PretendardFontFamily,
             color = White,
             textAlign = TextAlign.Center,
             modifier = Modifier.weight(1f)
