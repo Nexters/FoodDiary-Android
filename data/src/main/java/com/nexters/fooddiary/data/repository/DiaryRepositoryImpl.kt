@@ -17,7 +17,7 @@ class DiaryRepositoryImpl @Inject constructor(
 
     override suspend fun getDiary(date: LocalDate): DiaryDetail {
         val responseByDate = diaryApi.getDiary(date.toString())
-        val dayResponse = responseByDate[date.toString()] ?: responseByDate.values.firstOrNull()
+        val dayResponse = responseByDate[date.toString()]
             ?: return DiaryDetail(
                 date = date,
                 diaries = emptyList(),

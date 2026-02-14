@@ -1,5 +1,5 @@
 {
-  "2026-01-19": {
+  "2026-02-15": {
     "diaries": [
       {
         "diary_id": 12,
@@ -40,12 +40,12 @@
           {
             "photo_id": 201,
             "image_url": "https://mumuk.ai.kr/static/images/test.jpeg",
-            "taken_at": "2026-01-19T18:30:00"
+            "taken_at": "2026-02-15T18:30:00"
           },
           {
             "photo_id": 202,
             "image_url": "https://mumuk.ai.kr/static/images/test.jpeg",
-            "taken_at": "2026-01-19T18:35:00"
+            "taken_at": "2026-02-15T18:35:00"
           }
         ]
       }
