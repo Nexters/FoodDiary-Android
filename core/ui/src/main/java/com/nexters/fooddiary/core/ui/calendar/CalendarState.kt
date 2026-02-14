@@ -13,7 +13,7 @@ import java.time.YearMonth
 @Composable
 fun rememberMonthCalendarState(
     selectedDate: LocalDate = LocalDate.now(),
-    adjacentMonths: Long = 500,
+    adjacentMonths: Long = 24,
     firstDayOfWeek: DayOfWeek = DayOfWeek.SUNDAY,
 ): CalendarState {
     val currentMonth = remember { YearMonth.now() }
