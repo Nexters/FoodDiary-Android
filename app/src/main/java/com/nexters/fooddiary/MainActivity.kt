@@ -1,22 +1,18 @@
 package com.nexters.fooddiary
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.nexters.fooddiary.core.ui.alert.DialogData
@@ -25,8 +21,10 @@ import com.nexters.fooddiary.core.ui.component.FoodDiaryDialog
 import com.nexters.fooddiary.core.ui.component.FoodDiarySnackBar
 import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
 import com.nexters.fooddiary.navigation.FoodDiaryNavHost
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -35,51 +33,55 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val context = LocalContext.current
-            val snackbarHostState = remember { SnackbarHostState() }
-            val scope = rememberCoroutineScope()
+            val hazeState = rememberHazeState()
             var customSnackBarData by remember { mutableStateOf<SnackBarData?>(null) }
+            var snackBarRequestId by remember { mutableStateOf(0) }
             var dialogData by remember { mutableStateOf<DialogData?>(null) }
 
-            @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+            LaunchedEffect(snackBarRequestId) {
+                if (snackBarRequestId == 0) return@LaunchedEffect
+                delay(2_000)
+                customSnackBarData = null
+            }
+
             FoodDiaryTheme {
-                Scaffold(
+                Box(
                     modifier = Modifier.fillMaxSize(),
-                    snackbarHost = {
-                        SnackbarHost(hostState = snackbarHostState) { data ->
-                            FoodDiarySnackBar(
-                                message = data.visuals.message,
-                                iconRes = customSnackBarData?.iconRes
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .hazeSource(hazeState)
+                    ) {
+                        FoodDiaryNavHost(
+                            initialDeepLink = intent?.data,
+                            onFinish = { finish() },
+                            onShowDialog = { data ->
+                                dialogData = data
+                            },
+                            onShowSnackBar = { snackBarData ->
+                                customSnackBarData = snackBarData
+                                snackBarRequestId += 1
+                            },
+                            onShowToast = { message ->
+                                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                            }
+                        )
+
+                        dialogData?.let { data ->
+                            FoodDiaryDialog(
+                                dialogData = data,
+                                onDismissRequest = { dialogData = null }
                             )
                         }
                     }
-                ) { innerPadding ->
-                    FoodDiaryNavHost(
-                        initialDeepLink = intent?.data,
-                        onFinish = { finish() },
-                        onShowDialog = { data ->
-                            dialogData = data
-                        },
-                        onShowSnackBar = { snackBarData ->
-                            scope.launch {
-                                val result = snackbarHostState.showSnackbar(
-                                    message = snackBarData.message,
-                                    actionLabel = snackBarData.actionLabel,
-                                    duration = SnackbarDuration.Short
-                                )
-                                if (result == SnackbarResult.ActionPerformed) {
-                                    snackBarData.onAction?.invoke()
-                                }
-                            }
-                        },
-                        onShowToast = { message ->
-                            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-                        }
-                    )
 
-                    dialogData?.let { data ->
-                        FoodDiaryDialog(
-                            dialogData = data,
-                            onDismissRequest = { dialogData = null }
+                    customSnackBarData?.let { snackBarData ->
+                        FoodDiarySnackBar(
+                            message = snackBarData.message,
+                            iconRes = snackBarData.iconRes,
+                            hazeState = hazeState,
+                            modifier = Modifier.align(Alignment.BottomCenter)
                         )
                     }
                 }
