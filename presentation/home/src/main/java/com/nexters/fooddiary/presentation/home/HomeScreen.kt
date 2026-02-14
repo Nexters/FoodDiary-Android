@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.res.painterResource
@@ -121,6 +122,7 @@ private fun HomeScreen(
     val weeklyCalendarState = rememberWeeklyCalendarState(selectedDate = state.selectedDate)
     val monthlyCalendarState = rememberMonthCalendarState(selectedDate = state.selectedDate)
     val hazeState = rememberHazeState()
+    var weeklyHeaderBounds by remember { mutableStateOf<Rect?>(null) }
     var selectedTab by remember { mutableStateOf(HomeTab.HOME) }
     var showHomeCoachmark by rememberSaveable { mutableStateOf(true) }
 
@@ -183,6 +185,9 @@ private fun HomeScreen(
                             selectedDate = state.selectedDate,
                             onDateSelected = onDateSelected,
                             photoCountByDate = photoCountByDate,
+                            onHeaderBoundsChanged = { bounds ->
+                                weeklyHeaderBounds = bounds
+                            },
                         )
                         Spacer(modifier = Modifier.height(24.dp))
                         AddPhotoBox(
@@ -207,6 +212,7 @@ private fun HomeScreen(
             HomeCoachmarkOverlay(
                 onDismiss = { showHomeCoachmark = false },
                 hazeState = hazeState,
+                weeklyHeaderBounds = weeklyHeaderBounds,
             )
         }
     }

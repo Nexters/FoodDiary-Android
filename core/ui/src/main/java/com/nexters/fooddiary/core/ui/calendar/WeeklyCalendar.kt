@@ -22,9 +22,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -66,6 +69,7 @@ fun WeeklyCalendar(
     locale: Locale = Locale.getDefault(),
     colors: CalendarColors = calendarColors(),
     photoCountByDate: Map<LocalDate, Int> = emptyMap(),
+    onHeaderBoundsChanged: (Rect) -> Unit = {},
 ) {
     val coroutineScope = rememberCoroutineScope()
     val visibleMonth = remember {
@@ -75,6 +79,9 @@ fun WeeklyCalendar(
     }
     Column(modifier = modifier) {
         CalendarHeader(
+            modifier = Modifier.onGloballyPositioned { coordinates ->
+                onHeaderBoundsChanged(coordinates.boundsInRoot())
+            },
             yearMonth = visibleMonth.value,
             locale = locale,
             colors = colors,

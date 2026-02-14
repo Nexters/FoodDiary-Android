@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -35,6 +36,7 @@ import com.nexters.fooddiary.core.ui.theme.GlassmorphismStyle
 import com.nexters.fooddiary.core.ui.theme.White
 import com.nexters.fooddiary.core.ui.theme.glassmorphism
 import dev.chrisbanes.haze.HazeState
+import androidx.compose.ui.platform.LocalDensity
 import com.nexters.fooddiary.core.ui.R as CoreUiR
 import com.nexters.fooddiary.presentation.home.R as HomeR
 
@@ -47,27 +49,34 @@ private val CalendarMarkGlassStyle = GlassmorphismStyle(
 private val CalendarCoachmarkIconSize = 60.dp
 private val CalendarCoachmarkIconGap = 12.dp
 private val CalendarCoachmarkTextOffsetY = (-98).dp
+private val WeeklyCoachmarkTopAdjustment = 10.dp
 
 @Composable
 internal fun HomeCoachmarkOverlay(
     onDismiss: () -> Unit,
     hazeState: HazeState?,
+    weeklyHeaderBounds: Rect?,
     modifier: Modifier = Modifier,
 ) {
     BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.62f))
+            .background(Color.Black.copy(alpha = 0.70f))
             .clickable(
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() },
                 onClick = onDismiss,
             ),
     ) {
+        val density = LocalDensity.current
+        val weeklyCoachmarkTop = weeklyHeaderBounds?.let { bounds ->
+            with(density) { bounds.top.toDp() }
+        } ?: (maxHeight * 0.269f)
+
         WeeklyMoveCoachmark(
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .padding(top = maxHeight * 0.28f),
+                .padding(top = (weeklyCoachmarkTop + WeeklyCoachmarkTopAdjustment).coerceAtLeast(0.dp)),
         )
         CalendarToggleCoachmark(
             hazeState = hazeState,
@@ -85,7 +94,7 @@ private fun WeeklyMoveCoachmark(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = 29.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Row(
