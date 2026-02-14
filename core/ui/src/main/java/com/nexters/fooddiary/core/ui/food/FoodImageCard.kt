@@ -7,10 +7,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -201,19 +199,21 @@ private fun FoodImagePending(
             .background(color = White.copy(alpha = 0.02f)),
         contentAlignment = Alignment.Center,
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+        Box(
+            contentAlignment = Alignment.Center,
         ) {
             Image(
-                painter = painterResource(drawable.ic_analyze_food),
+                painter = painterResource(drawable.img_analyze_food),
                 contentDescription = null,
+                modifier = Modifier.size(208.dp),
             )
-            Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = stringResource(string.detail_food_analyze),
                 style = AppTypography.p12,
                 color = White,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 30.dp),
             )
         }
     }
