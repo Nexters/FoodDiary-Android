@@ -42,6 +42,8 @@ coil = "2.7.0"
 material3Android = "1.4.0"
 remoteCreationCore = "1.0.0-alpha02"
 mockk = "1.14.7"
+sentryGradle = "4.3.0"
+sentryAndroid = "7.5.0"
 appcompat = "1.7.1"
 material = "1.13.0"
 material3 = "1.4.0"
@@ -149,8 +151,11 @@ coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coi
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
 androidx-remote-creation-core = { group = "androidx.compose.remote", name = "remote-creation-core", version.ref = "remoteCreationCore" }
 
+sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentryAndroid" }
+
 [plugins]
 google-gms-services = { id = "com.google.gms.google-services", version = "4.4.4" }
+sentry-android-gradle = { id = "io.sentry.android.gradle", version.ref = "sentryGradle" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
