@@ -130,6 +130,7 @@ internal fun DetailScreen(
         onNavigateBack = onNavigateBack,
         onPreviousDay = viewModel::navigateToPreviousDay,
         onNextDay = viewModel::navigateToNextDay,
+        onDeleteClick = viewModel::onDeleteClick,
         onAddPhoto = viewModel::onAddPhoto,
         onEditClick = viewModel::onEditClick,
         onCopyClick = viewModel::onCopyClick,
@@ -144,6 +145,7 @@ private fun DetailContent(
     onNavigateBack: () -> Unit = {},
     onPreviousDay: () -> Unit = {},
     onNextDay: () -> Unit = {},
+    onDeleteClick: () -> Unit = {},
     onAddPhoto: (MealSlot, LocalDate) -> Unit = { _, _ -> },
     onEditClick: (MealSlot, LocalDate) -> Unit = { _, _ -> },
     onCopyClick: (String) -> Unit = {},
@@ -225,11 +227,14 @@ private fun DetailContent(
                                 DropdownMenuItem(
                                     text = {
                                         Text(
-                                            text = stringResource(id = R.string.detail_menu_test),
+                                            text = stringResource(id = R.string.detail_menu_delete),
                                             color = Color.Black
                                         )
                                     },
-                                    onClick = { isMoreMenuExpanded = false },
+                                    onClick = {
+                                        isMoreMenuExpanded = false
+                                        onDeleteClick()
+                                    },
                                 )
                             }
                         }

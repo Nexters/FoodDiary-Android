@@ -101,6 +101,10 @@ class DetailViewModel @AssistedInject constructor(
         // TODO: 수정 화면으로 이동
     }
 
+    fun onDeleteClick() {
+        // TODO: 삭제 확인/삭제 API 연동
+    }
+
     fun onCopyClick(mapLink: String) {
         if (mapLink.isBlank()) return
         _events.tryEmit(DetailEvent.CopyMapLink(mapLink))

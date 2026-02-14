@@ -8,7 +8,7 @@
     <string name="detail_share_map_link_empty">공유할 링크가 없어요.</string>
     <string name="detail_share_place_fallback">이곳</string>
     <string name="detail_share_prefix">%1$s 맛을 기억하시나요?\n뭐먹었지에서 확인해보세요.</string>
-    <string name="detail_menu_test">테스트</string>
+    <string name="detail_menu_delete">삭제하기</string>
     <string name="detail_meal_breakfast">아침</string>
     <string name="detail_meal_lunch">점심</string>
     <string name="detail_meal_dinner">저녁</string>
