@@ -19,7 +19,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -29,18 +31,29 @@ sealed interface HomeEvent {
 
 class HomeViewModel @AssistedInject constructor(
     @ApplicationContext private val context: Context,
-    @Assisted initialState: HomeScreenState,
+    @Assisted startState: HomeScreenState,
     private val getFoodPhotoCountByWeekUseCase: GetFoodPhotoCountByWeekUseCase,
     private val getDiaryByMonthUseCase: GetDiaryByMonthUseCase,
-) : MavericksViewModel<HomeScreenState>(initialState) {
+) : MavericksViewModel<HomeScreenState>(startState) {
     private val _photoCountByDate = MutableStateFlow<Map<LocalDate, Int>>(emptyMap())
     val photoCountByDate: StateFlow<Map<LocalDate, Int>> = _photoCountByDate.asStateFlow()
     private val _events = MutableSharedFlow<HomeEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<HomeEvent> = _events.asSharedFlow()
 
-    init {
-        loadDiaryForMonth(YearMonth.from(initialState.selectedDate))
+    private val initialSelectedDate: LocalDate = startState.selectedDate
+
+    /** 첫 화면 그린 뒤 호출. 다이어리 즉시, 이번 주 개수(ML)는 yield 후 요청. */
+    fun loadInitialData() {
+        loadDiaryForMonth(YearMonth.from(initialSelectedDate))
         if (PermissionUtil.hasMediaPermission(context)) {
+            scheduleWeekCountLoadAfterYield()
+        }
+    }
+
+    /** yield 후 이번 주 개수 로딩 (메인 스레드 경쟁 완화) */
+    private fun scheduleWeekCountLoadAfterYield() {
+        viewModelScope.launch {
+            yield()
             loadThisWeekPhotoCount()
         }
     }
@@ -49,16 +62,19 @@ class HomeViewModel @AssistedInject constructor(
 
     private fun loadDiaryForMonth(yearMonth: YearMonth) {
         suspend {
-            withContext(Dispatchers.Default) { getDiaryByMonthUseCase(yearMonth) }
+            withContext(Dispatchers.IO) {
+                val diaries = getDiaryByMonthUseCase(yearMonth)
+                diaries.keys.associateWith { 1 }
+            }
         }.execute { async ->
-            copy(diaryCountByDate = async.invoke()?.let { toDotCountByDate(it) } ?: emptyMap())
+            copy(diaryCountByDate = async.invoke() ?: emptyMap())
         }
     }
 
-    private fun toDotCountByDate(diariesByDate: Map<LocalDate, *>) = diariesByDate.keys.associateWith { 1 }
-
     private fun loadThisWeekPhotoCount() {
-        suspend { withContext(Dispatchers.Default) { getFoodPhotoCountByWeekUseCase() } }.execute { async ->
+        suspend {
+            withContext(Dispatchers.Default) { getFoodPhotoCountByWeekUseCase() }
+        }.execute { async ->
             copy(diaryCountByWeek = async.invoke() ?: 0)
         }
     }
