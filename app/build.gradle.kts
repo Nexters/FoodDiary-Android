@@ -134,6 +134,10 @@ dependencies {
     // Mavericks
     implementation(libs.mavericks.compose)
 
+    // Firebase Cloud Messaging
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
+
     implementation(libs.sentry.android)
 
     // Testing
