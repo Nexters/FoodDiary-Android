@@ -2,7 +2,11 @@ package com.nexters.fooddiary.data.repository
 
 import android.content.Context
 import android.net.Uri
+import com.nexters.fooddiary.data.local.upload.PhotoUploadDao
+import com.nexters.fooddiary.data.local.upload.PhotoUploadEntity
+import com.nexters.fooddiary.data.local.upload.UploadStatus
 import com.nexters.fooddiary.data.remote.photo.PhotoApi
+import com.nexters.fooddiary.data.remote.photo.model.response.BatchUploadResultItem
 import com.nexters.fooddiary.domain.repository.PhotoRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -17,6 +21,7 @@ import javax.inject.Inject
 
 internal class PhotoRepositoryImpl @Inject constructor(
     private val photoApi: PhotoApi,
+    private val photoUploadDao: PhotoUploadDao,
     @ApplicationContext private val context: Context
 ) : PhotoRepository {
 
@@ -24,44 +29,88 @@ internal class PhotoRepositoryImpl @Inject constructor(
         date: LocalDate,
         photoUriStrings: List<String>
     ): Result<Unit> = withContext(Dispatchers.IO) {
-        if (photoUriStrings.isEmpty()) {
-            return@withContext Result.failure(IllegalArgumentException("No photos to upload"))
-        }
-        try {
-            val datePart = date.format(DateTimeFormatter.ISO_LOCAL_DATE)
-                .toRequestBody("text/plain".toMediaTypeOrNull())
-            val resolver = context.contentResolver
-            val photoParts = photoUriStrings.mapIndexed { index, uriString ->
-                uriToPart(resolver, Uri.parse(uriString), index)
+        val uploadDateStr = date.toIsoDateString()
+        when (val partsResult = buildMultipartParts(photoUriStrings)) {
+            is PartsResult.Failure -> return@withContext Result.failure(partsResult.error)
+            is PartsResult.Success -> {
+                try {
+                    val response = photoApi.batchUpload(uploadDateStr.toDatePart(), partsResult.parts)
+                    recordPendingUploads(response.results, uploadDateStr)
+                    Result.success(Unit)
+                } catch (e: Exception) {
+                    recordUploadFailure(uploadDateStr, e)
+                    Result.failure(e)
+                }
             }
-            val validParts = photoParts.filterNotNull()
-            if (validParts.size != photoUriStrings.size) {
-                return@withContext Result.failure(IllegalArgumentException("Failed to read some image files"))
-            }
-            photoApi.batchUpload(datePart, validParts)
-            Result.success(Unit)
-        } catch (e: HttpException) {
-            Result.failure(e)
-        } catch (e: Exception) {
-            Result.failure(e)
         }
     }
 
-    private fun uriToPart(
+    private fun buildMultipartParts(photoUriStrings: List<String>): PartsResult {
+        if (photoUriStrings.isEmpty()) {
+            return PartsResult.Failure(IllegalArgumentException("No photos to upload"))
+        }
+        val resolver = context.contentResolver
+        val parts = photoUriStrings.mapIndexed { index, uriString ->
+            uriToMultipartPart(resolver, Uri.parse(uriString), index)
+        }
+        val validParts = parts.filterNotNull()
+        if (validParts.size != photoUriStrings.size) {
+            return PartsResult.Failure(IllegalArgumentException("Failed to read some image files"))
+        }
+        return PartsResult.Success(validParts)
+    }
+
+    private fun recordPendingUploads(results: List<BatchUploadResultItem>, uploadDateStr: String) {
+        val entities = results.map { item ->
+            PhotoUploadEntity(
+                photoId = item.photoId,
+                diaryId = item.diaryId,
+                imageUrl = item.imageUrl,
+                timeType = item.timeType,
+                uploadDate = uploadDateStr,
+                status = UploadStatus.PENDING
+            )
+        }
+        photoUploadDao.insertAll(entities)
+    }
+
+    private fun recordUploadFailure(uploadDateStr: String, error: Exception) {
+        val message = when (error) {
+            is HttpException -> error.message ?: "HTTP ${error.code()}"
+            else -> error.message
+        }
+        photoUploadDao.insert(
+            PhotoUploadEntity(
+                uploadDate = uploadDateStr,
+                status = UploadStatus.FAILURE,
+                errorMessage = message
+            )
+        )
+    }
+
+    private fun uriToMultipartPart(
         resolver: android.content.ContentResolver,
         uri: Uri,
         index: Int
-    ): MultipartBody.Part? {
-        return try {
-            resolver.openInputStream(uri)?.use { inputStream ->
-                val bytes = inputStream.readBytes()
-                val contentType = resolver.getType(uri) ?: "image/jpeg"
-                val body = bytes.toRequestBody(contentType.toMediaTypeOrNull(), 0, bytes.size)
-                val fileName = "photo_$index.jpg"
-                MultipartBody.Part.createFormData("photos", fileName, body)
-            }
-        } catch (e: Exception) {
-            null
+    ): MultipartBody.Part? = try {
+        resolver.openInputStream(uri)?.use { inputStream ->
+            val bytes = inputStream.readBytes()
+            val contentType = resolver.getType(uri) ?: "image/jpeg"
+            val body = bytes.toRequestBody(contentType.toMediaTypeOrNull(), 0, bytes.size)
+            MultipartBody.Part.createFormData("photos", "photo_$index.jpg", body)
         }
+    } catch (e: Exception) {
+        null
+    }
+
+    private sealed class PartsResult {
+        data class Success(val parts: List<MultipartBody.Part>) : PartsResult()
+        data class Failure(val error: Exception) : PartsResult()
     }
 }
+
+private fun LocalDate.toIsoDateString(): String =
+    format(DateTimeFormatter.ISO_LOCAL_DATE)
+
+private fun String.toDatePart(): okhttp3.RequestBody =
+    toRequestBody("text/plain".toMediaTypeOrNull())

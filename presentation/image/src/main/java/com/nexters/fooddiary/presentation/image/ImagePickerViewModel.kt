@@ -14,6 +14,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 class ImagePickerViewModel @AssistedInject constructor(
     @Assisted initialState: ImagePickerState,
@@ -23,16 +24,7 @@ class ImagePickerViewModel @AssistedInject constructor(
 ) : MavericksViewModel<ImagePickerState>(initialState) {
 
     init {
-        checkPermission()
-    }
-
-    private fun checkPermission() {
-        val hasPermission = PermissionUtil.hasMediaPermission(context)
-        setState { copy(hasPermission = hasPermission) }
-        
-        if (hasPermission) {
-            loadTodayFoodImages()
-        }
+        syncPermissionAndLoadIfGranted()
     }
 
     fun onPermissionGranted() {
@@ -40,61 +32,22 @@ class ImagePickerViewModel @AssistedInject constructor(
         loadTodayFoodImages()
     }
 
-    private fun loadTodayFoodImages() {
-        viewModelScope.launch {
-            setState { copy(isLoading = true) }
-            try {
-                val result = getTodayFoodPhotosUseCase()
-                setState {
-                    copy(
-                        foodImageUris = result.foodUris.map { Uri.parse(it) },
-                        allImageUris = result.allUris.map { Uri.parse(it) },
-                        isLoading = false
-                    )
-                }
-            } catch (e: Exception) {
-                setState {
-                    copy(
-                        foodImageUris = emptyList(),
-                        allImageUris = emptyList(),
-                        isLoading = false
-                    )
-                }
-            }
-        }
-    }
-
     fun toggleImageSelection(uri: Uri) {
-        setState {
-            val newSet = if (selectedUris.contains(uri)) {
-                selectedUris - uri
-            } else {
-                if (selectedUris.size < MAX_SELECTION_COUNT) selectedUris + uri else selectedUris
-            }
-            copy(selectedUris = newSet)
-        }
+        setState { copy(selectedUris = nextSelectionAfterToggle(selectedUris, uri)) }
     }
 
     fun clearSelection() {
         setState { copy(selectedUris = emptySet()) }
     }
 
-    fun uploadImage(
-        onUploadSuccess: () -> Unit,
-        onUploadFailure: () -> Unit
-    ) {
+    fun uploadImage(onUploadSuccess: () -> Unit, onUploadFailure: () -> Unit) {
         viewModelScope.launch {
-            val urisToUpload = awaitState().selectedUris.map { it.toString() }
+            val urisToUpload = selectedUrisAsStrings()
             if (urisToUpload.isEmpty()) {
                 onUploadFailure()
                 return@launch
             }
-            batchUploadPhotosUseCase(
-                date = java.time.LocalDate.now(),
-                photoUriStrings = urisToUpload
-            )
-                .onSuccess { onUploadSuccess() }
-                .onFailure { onUploadFailure() }
+            performUpload(urisToUpload, onUploadSuccess, onUploadFailure)
         }
     }
 
@@ -105,5 +58,51 @@ class ImagePickerViewModel @AssistedInject constructor(
 
     companion object : MavericksViewModelFactory<ImagePickerViewModel, ImagePickerState> by hiltMavericksViewModelFactory() {
         const val MAX_SELECTION_COUNT = 10
+    }
+
+    private fun syncPermissionAndLoadIfGranted() {
+        val hasPermission = PermissionUtil.hasMediaPermission(context)
+        setState { copy(hasPermission = hasPermission) }
+        if (hasPermission) loadTodayFoodImages()
+    }
+
+    private fun loadTodayFoodImages() {
+        viewModelScope.launch {
+            setState { copy(isLoading = true) }
+            try {
+                val result = getTodayFoodPhotosUseCase()
+                applyLoadedImages(result.foodUris, result.allUris)
+            } catch (e: Exception) {
+                applyLoadedImages(emptyList(), emptyList())
+            }
+        }
+    }
+
+    private fun applyLoadedImages(foodUris: List<String>, allUris: List<String>) {
+        setState {
+            copy(
+                foodImageUris = foodUris.map { Uri.parse(it) },
+                allImageUris = allUris.map { Uri.parse(it) },
+                isLoading = false
+            )
+        }
+    }
+
+    private fun nextSelectionAfterToggle(current: Set<Uri>, uri: Uri): Set<Uri> =
+        if (current.contains(uri)) current - uri
+        else if (current.size < MAX_SELECTION_COUNT) current + uri
+        else current
+
+    private suspend fun selectedUrisAsStrings(): List<String> =
+        awaitState().selectedUris.map { it.toString() }
+
+    private suspend fun performUpload(
+        urisToUpload: List<String>,
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ) {
+        batchUploadPhotosUseCase(LocalDate.now(), urisToUpload)
+            .onSuccess { onSuccess() }
+            .onFailure { onFailure() }
     }
 }
