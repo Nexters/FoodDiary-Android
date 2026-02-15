@@ -35,7 +35,15 @@ class AuthApiTest : BaseMockServerTest() {
     @Test
     fun `로그인_요청이_성공해야_한다`() = runTest {
         // Given
-        val request = LoginRequest(provider = "google", idToken = "token_123")
+        val request = LoginRequest(
+            appVersion = "1.0.0",
+            deviceId = "A1B2C3D4-E5F6-7890-ABCD-EF1234567890",
+            deviceToken = "fcm_token_abc123",
+            idToken = "token_123",
+            isActive = true,
+            osVersion = "18.2",
+            provider = "google"
+        )
         
         // When
         val response = authApi.login(request)
@@ -49,6 +57,9 @@ class AuthApiTest : BaseMockServerTest() {
         assertEquals("POST", recordedRequest.method)
         assertEquals(MockUrlConfig.PATH_LOGIN, recordedRequest.path)
         val requestBody = recordedRequest.body.readUtf8()
-        assertEquals("""{"provider":"google","id_token":"token_123"}""", requestBody)
+        assertEquals(
+            """{"app_version":"1.0.0","device_id":"A1B2C3D4-E5F6-7890-ABCD-EF1234567890","device_token":"fcm_token_abc123","id_token":"token_123","is_active":true,"os_version":"18.2","provider":"google"}""",
+            requestBody
+        )
     }
 }

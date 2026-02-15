@@ -5,6 +5,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.nexters.fooddiary.core.common.auth.GoogleSignInIntentProvider
 import com.nexters.fooddiary.core.common.auth.getWebClientId
+import com.nexters.fooddiary.data.firebase.LoginDeviceInfoProvider
 import com.nexters.fooddiary.data.local.TokenStore
 import com.nexters.fooddiary.data.mapper.UserMapper
 import com.nexters.fooddiary.data.remote.auth.AuthApi
@@ -27,6 +28,7 @@ class AuthRepositoryImpl @Inject constructor(
     private val tokenStore: TokenStore,
     private val userMapper: UserMapper,
     private val encryptionKeyManager: EncryptionKeyManager,
+    private val loginDeviceInfoProvider: LoginDeviceInfoProvider,
     private val googleSignInIntentProvider: GoogleSignInIntentProvider,
     @ApplicationContext private val context: Context
 ) : AuthRepository {
@@ -40,7 +42,18 @@ class AuthRepositoryImpl @Inject constructor(
             val firebaseAuthToken = firebaseUser.getIdToken(true).await()?.token
                 ?: throw Exception("Failed to get Firebase ID Token")
 
-            val loginResponse = authApi.login(LoginRequest("google", firebaseAuthToken))
+            val deviceInfo = loginDeviceInfoProvider.getLoginDeviceInfo()
+            val loginResponse = authApi.login(
+                LoginRequest(
+                    appVersion = deviceInfo.appVersion,
+                    deviceId = deviceInfo.deviceId,
+                    deviceToken = deviceInfo.deviceToken,
+                    idToken = firebaseAuthToken,
+                    isActive = deviceInfo.isActive,
+                    osVersion = deviceInfo.osVersion,
+                    provider = "google"
+                )
+            )
             tokenStore.saveToken(loginResponse.accessToken)
 
             userMapper.toDomainUser(firebaseUser, loginResponse.isFirst)
