@@ -3,7 +3,6 @@ package com.nexters.fooddiary.presentation.image.di
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.MavericksViewModelComponent
 import com.airbnb.mvrx.hilt.ViewModelKey
-import com.nexters.fooddiary.presentation.image.ImageClassificationViewModel
 import com.nexters.fooddiary.presentation.image.ImagePickerViewModel
 import dagger.Binds
 import dagger.Module

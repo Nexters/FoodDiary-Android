@@ -10,11 +10,16 @@ import java.time.LocalDate
 import java.time.YearMonth
 import javax.inject.Inject
 
+data class TodayPhotosResult(
+    val foodUris: List<String>,
+    val allUris: List<String>
+)
+
 class GetTodayFoodPhotosUseCase @Inject constructor(
     private val mediaRepository: MediaRepository,
     private val classificationRepository: ClassificationRepository
 ) {
-    suspend operator fun invoke(): List<String> = coroutineScope {
+    suspend operator fun invoke(): TodayPhotosResult = coroutineScope {
         val today = LocalDate.now()
         val currentMonth = YearMonth.now()
 
@@ -22,7 +27,7 @@ class GetTodayFoodPhotosUseCase @Inject constructor(
         val todayPhotos = photosByMonth[today] ?: emptyList()
 
         if (todayPhotos.isEmpty()) {
-            return@coroutineScope emptyList()
+            return@coroutineScope TodayPhotosResult(foodUris = emptyList(), allUris = emptyList())
         }
 
         val withResult = todayPhotos
@@ -35,15 +40,13 @@ class GetTodayFoodPhotosUseCase @Inject constructor(
             }
             .awaitAll()
 
-        val foodFirst = withResult
+        val allUris = withResult.map { it.uriString }
+        val foodUris = withResult
             .filter { (_, result) -> result != null && result.isFood }
             .sortedByDescending { (_, result) -> result?.foodConfidence ?: 0f }
             .map { it.uriString }
-        val rest = withResult
-            .filter { (_, result) -> result == null || !result.isFood }
-            .map { it.uriString }
 
-        foodFirst + rest
+        TodayPhotosResult(foodUris = foodUris, allUris = allUris)
     }
 
     private data class PhotoWithClassification(
