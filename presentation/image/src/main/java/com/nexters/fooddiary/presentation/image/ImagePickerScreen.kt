@@ -58,7 +58,6 @@ import com.nexters.fooddiary.core.ui.theme.PrimBase
 import com.nexters.fooddiary.core.ui.theme.SdBase
 
 private const val PREVIEW_IMAGE_URL = "https://picsum.photos/200/200?random="
-private const val MAX_SELECTION_COUNT = 10
 
 private object ImagePickerDimens {
     val screenPaddingHorizontal: Dp = 16.dp
@@ -81,6 +80,11 @@ private object ImagePickerDimens {
     val doneButtonApproxHeight: Dp = 52.dp
     val permissionButtonTopPadding: Dp = 16.dp
     val dimHeight: Dp = 186.dp
+
+    val bottomFloatingAreaHeight: Dp =
+        doneButtonTopPadding + doneButtonApproxHeight + doneButtonPaddingVertical * 2
+
+    val gridColumnCount: Int = 3
 }
 
 @Composable
@@ -110,10 +114,12 @@ fun ImagePickerScreen(
         onImageClick = { uri -> viewModel.toggleImageSelection(uri) },
         onDeselectAll = { viewModel.clearSelection() },
         onDone = {
-            viewModel.uploadImage(
-                onUploadSuccess = onClose,
-                onUploadFailure = { }
-            )
+            viewModel.uploadImage { result ->
+                when (result) {
+                    is UploadResult.Success -> onClose()
+                    is UploadResult.Failure -> { /* 실패 시 처리 없음 */ }
+                }
+            }
         },
         onClose = onClose,
         onRequestPermission = { permissionLauncher.launch(requiredPermission) }
@@ -182,7 +188,7 @@ fun ImagePickerContent(
                 }
             }
 
-            Spacer(modifier = Modifier.height(ImagePickerDimens.doneButtonTopPadding + ImagePickerDimens.doneButtonApproxHeight + ImagePickerDimens.doneButtonPaddingVertical * 2))
+            Spacer(modifier = Modifier.height(ImagePickerDimens.bottomFloatingAreaHeight))
         }
 
         ImagePickerDoneButton(
@@ -306,12 +312,12 @@ private fun ImageGrid(
     selectedUris: Set<Uri>,
     onImageClick: (Uri) -> Unit
 ) {
-    val columnCount = 3
+    val columnCount = ImagePickerDimens.gridColumnCount
     val rows = imageUris.chunked(columnCount)
     Column(
         verticalArrangement = Arrangement.spacedBy(ImagePickerDimens.gridGap)
     ) {
-            rows.forEach { rowUris ->
+        rows.forEach { rowUris ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(ImagePickerDimens.gridGap)
@@ -433,6 +439,17 @@ private fun ImageGridItem(
     }
 }
 
+private fun Modifier.doneButtonSurface(): Modifier = this
+    .fillMaxWidth()
+    .padding(horizontal = ImagePickerDimens.doneButtonHorizontalMargin)
+    .padding(bottom = ImagePickerDimens.doneButtonTopPadding)
+    .navigationBarsPadding()
+    .shadow(
+        elevation = ImagePickerDimens.doneButtonElevation,
+        shape = RoundedCornerShape(999.dp),
+        spotColor = Color.Black.copy(alpha = 0.2f)
+    )
+
 @Composable
 private fun ImagePickerDoneButton(
     selectedCount: Int,
@@ -440,16 +457,7 @@ private fun ImagePickerDoneButton(
     modifier: Modifier = Modifier
 ) {
     Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = ImagePickerDimens.doneButtonHorizontalMargin)
-            .padding(bottom = ImagePickerDimens.doneButtonTopPadding)
-            .navigationBarsPadding()
-            .shadow(
-                elevation = ImagePickerDimens.doneButtonElevation,
-                shape = RoundedCornerShape(999.dp),
-                spotColor = Color.Black.copy(alpha = 0.2f)
-            ),
+        modifier = modifier.doneButtonSurface(),
         shape = RoundedCornerShape(999.dp),
         color = PrimBase
     ) {
@@ -487,11 +495,11 @@ fun ImagePickerPreview() {
         allImageUris = allUris,
         selectedUris = selectedUris,
         onImageClick = { uri ->
-            selectedUris = if (selectedUris.contains(uri)) {
-                selectedUris - uri
-            } else {
-                if (selectedUris.size < MAX_SELECTION_COUNT) selectedUris + uri else selectedUris
-            }
+            selectedUris = nextSelectionAfterToggle(
+                selectedUris,
+                uri,
+                ImagePickerViewModel.MAX_SELECTION_COUNT
+            )
         },
         onDeselectAll = { selectedUris = emptySet() },
         onDone = {}

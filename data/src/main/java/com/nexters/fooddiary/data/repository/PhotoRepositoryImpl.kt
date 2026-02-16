@@ -36,16 +36,18 @@ internal class PhotoRepositoryImpl @Inject constructor(
         val uploadDateStr = date.toIsoDateString()
         when (val partsResult = buildMultipartParts(photoUriStrings)) {
             is PartsResult.Failure -> return@withContext Result.failure(partsResult.error)
-            is PartsResult.Success -> {
-                try {
-                    val response = photoApi.batchUpload(uploadDateStr.toDatePart(), partsResult.parts)
-                    recordPendingUploads(response.results, uploadDateStr)
-                    Result.success(Unit)
-                } catch (e: Exception) {
-                    recordUploadFailure(uploadDateStr, e)
-                    Result.failure(e)
-                }
-            }
+            is PartsResult.Success -> return@withContext uploadAndRecord(partsResult.parts, uploadDateStr)
+        }
+    }
+
+    private suspend fun uploadAndRecord(parts: List<MultipartBody.Part>, uploadDateStr: String): Result<Unit> {
+        return try {
+            val response = photoApi.batchUpload(uploadDateStr.toDatePart(), parts)
+            recordPendingUploads(response.results, uploadDateStr)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            recordUploadFailure(uploadDateStr, e)
+            Result.failure(e)
         }
     }
 
@@ -57,11 +59,15 @@ internal class PhotoRepositoryImpl @Inject constructor(
         val parts = photoUriStrings.mapIndexed { index, uriString ->
             uriToMultipartPart(resolver, uriString.toUri(), index)
         }
-        val validParts = parts.filterNotNull()
-        if (validParts.size != photoUriStrings.size) {
-            return PartsResult.Failure(IllegalArgumentException("Failed to read some image files"))
+        val failedUris = parts.mapIndexed { index, part ->
+            if (part == null) photoUriStrings[index] else null
+        }.filterNotNull()
+        if (failedUris.isNotEmpty()) {
+            return PartsResult.Failure(
+                IllegalArgumentException("Failed to read image files: ${failedUris.joinToString()}")
+            )
         }
-        return PartsResult.Success(validParts)
+        return PartsResult.Success(parts.filterNotNull())
     }
 
     private suspend fun recordPendingUploads(results: List<BatchUploadResultItem>, uploadDateStr: String) {

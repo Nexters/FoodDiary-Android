@@ -16,6 +16,16 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
+sealed class UploadResult {
+    data object Success : UploadResult()
+    data class Failure(val error: Throwable? = null) : UploadResult()
+}
+
+internal fun nextSelectionAfterToggle(current: Set<Uri>, uri: Uri, maxCount: Int): Set<Uri> =
+    if (current.contains(uri)) current - uri
+    else if (current.size < maxCount) current + uri
+    else current
+
 class ImagePickerViewModel @AssistedInject constructor(
     @Assisted initialState: ImagePickerState,
     @ApplicationContext private val context: Context,
@@ -33,21 +43,21 @@ class ImagePickerViewModel @AssistedInject constructor(
     }
 
     fun toggleImageSelection(uri: Uri) {
-        setState { copy(selectedUris = nextSelectionAfterToggle(selectedUris, uri)) }
+        setState { copy(selectedUris = nextSelectionAfterToggle(selectedUris, uri, MAX_SELECTION_COUNT)) }
     }
 
     fun clearSelection() {
         setState { copy(selectedUris = emptySet()) }
     }
 
-    fun uploadImage(onUploadSuccess: () -> Unit, onUploadFailure: () -> Unit) {
+    fun uploadImage(onResult: (UploadResult) -> Unit) {
         viewModelScope.launch {
             val urisToUpload = selectedUrisAsStrings()
             if (urisToUpload.isEmpty()) {
-                onUploadFailure()
+                onResult(UploadResult.Failure())
                 return@launch
             }
-            performUpload(urisToUpload, onUploadSuccess, onUploadFailure)
+            performUpload(urisToUpload, onResult)
         }
     }
 
@@ -73,8 +83,18 @@ class ImagePickerViewModel @AssistedInject constructor(
                 val result = getTodayFoodPhotosUseCase()
                 applyLoadedImages(result.foodUris, result.allUris)
             } catch (e: Exception) {
-                applyLoadedImages(emptyList(), emptyList())
+                applyEmptyResult()
             }
+        }
+    }
+
+    private fun applyEmptyResult() {
+        setState {
+            copy(
+                foodImageUris = emptyList(),
+                allImageUris = emptyList(),
+                isLoading = false
+            )
         }
     }
 
@@ -88,21 +108,15 @@ class ImagePickerViewModel @AssistedInject constructor(
         }
     }
 
-    private fun nextSelectionAfterToggle(current: Set<Uri>, uri: Uri): Set<Uri> =
-        if (current.contains(uri)) current - uri
-        else if (current.size < MAX_SELECTION_COUNT) current + uri
-        else current
-
     private suspend fun selectedUrisAsStrings(): List<String> =
         awaitState().selectedUris.map { it.toString() }
 
     private suspend fun performUpload(
         urisToUpload: List<String>,
-        onSuccess: () -> Unit,
-        onFailure: () -> Unit
+        onResult: (UploadResult) -> Unit
     ) {
         batchUploadPhotosUseCase(LocalDate.now(), urisToUpload)
-            .onSuccess { onSuccess() }
-            .onFailure { onFailure() }
+            .onSuccess { onResult(UploadResult.Success) }
+            .onFailure { e -> onResult(UploadResult.Failure(e)) }
     }
 }
