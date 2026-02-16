@@ -3,7 +3,7 @@ agp = "8.7.3"
 dagger = "2.58"
 javaxInject = "1"
 firebaseBom = "34.8.0"
-kotlin = "2.1.0"
+kotlin = "2.2.21"
 coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
@@ -19,35 +19,31 @@ okhttp = "5.3.2"
 kotlinxSerialization = "1.9.0"
 coroutines = "1.10.2"
 mavericks = "3.0.12"
-ksp = "2.1.0-1.0.29"
+ksp = "2.2.21-2.0.5"
 nav3Core = "1.0.0-alpha01"
 lifecycleViewmodelNav3 = "2.8.7"
 kotlinxSerializationCore = "1.9.0"
 material3AdaptiveNav3 = "1.0.0-alpha05"
-navigationCompose = "2.8.5"
+navigationCompose = "2.9.7"
 glance = "1.1.1"
-camerax = "1.3.4"
 navigationCommonAndroid = "2.9.6"
-playServicesAuth = "21.2.0"
-credential = "1.3.0"
-datastore = "1.1.1"
-room = "2.6.1"
-litert = "2.1.0"
-exifinterface = "1.3.7"
+playServicesAuth = "21.5.0"
+credential = "1.5.0"
+datastore = "1.2.0"
+room = "2.8.4"
+litert = "2.1.1"
+exifinterface = "1.4.2"
 minSdk = "26"
 compileSdk = "36"
 targetSdk = "36"
-calendar = "2.6.2"
-uiToolingPreviewAndroid = "1.10.1"
+calendar = "2.10.0"
+uiToolingPreviewAndroid = "1.10.3"
 coil = "2.7.0"
 material3Android = "1.4.0"
-remoteCreationCore = "1.0.0-alpha02"
-mockk = "1.14.7"
-sentryGradle = "4.3.0"
-sentryAndroid = "7.5.0"
-appcompat = "1.7.1"
-material = "1.13.0"
-material3 = "1.4.0"
+remoteCreationCore = "1.0.0-alpha04"
+mockk = "1.14.9"
+sentryGradle = "6.0.0"
+sentryAndroid = "8.32.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -97,9 +93,6 @@ kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
 # Navigation 3
-androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "nav3Core" }
-androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "nav3Core" }
-androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleViewmodelNav3" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerializationCore" }
 androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version.ref = "material3AdaptiveNav3" }
 
@@ -115,13 +108,6 @@ mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 # Glance (Widget)
 androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
 androidx-glance-material3 = { group = "androidx.glance", name = "glance-material3", version.ref = "glance" }
-
-# CameraX
-androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "camerax" }
-androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }
-androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
-androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
-androidx-navigation-common-android = { group = "androidx.navigation", name = "navigation-common-android", version.ref = "navigationCommonAndroid" }
 
 # Calendar
 calendar-compose = { group = "com.kizitonwose.calendar", name = "compose", version.ref = "calendar" }
@@ -170,4 +156,3 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-
