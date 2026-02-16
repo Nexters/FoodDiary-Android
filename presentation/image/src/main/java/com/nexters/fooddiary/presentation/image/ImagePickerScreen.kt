@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,6 +37,7 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -66,15 +68,17 @@ private object ImagePickerDimens {
     val contentTopPadding: Dp = 24.dp
     val sectionGap: Dp = 32.dp
     val sectionTitleBottomPadding: Dp = 16.dp
-    val gridMinCellSize: Dp = 104.dp
     val gridGap: Dp = 8.dp
     val gridItemPadding: Dp = 4.dp
-    val gridItemCornerRadius: Dp = 8.dp
-    val checkIconPadding: Dp = 6.dp
-    val checkIconSize: Dp = 24.dp
+    val gridItemCornerRadius: Dp = 16.dp
+    val checkIconPadding: Dp = 8.dp
+    val checkIconSize: Dp = 20.dp
     val doneButtonPaddingVertical: Dp = 14.dp
     val doneButtonPaddingHorizontal: Dp = 24.dp
     val doneButtonTopPadding: Dp = 12.dp
+    val doneButtonHorizontalMargin: Dp = 16.dp
+    val doneButtonElevation: Dp = 8.dp
+    val doneButtonApproxHeight: Dp = 52.dp
     val permissionButtonTopPadding: Dp = 16.dp
     val dimHeight: Dp = 186.dp
 }
@@ -130,53 +134,61 @@ fun ImagePickerContent(
     onClose: () -> Unit = {},
     onRequestPermission: () -> Unit = {}
 ) {
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(SdBase)
-            .padding(horizontal = ImagePickerDimens.screenPaddingHorizontal)
     ) {
-        ImagePickerHeader(
-            onClose = onClose,
-            onDeselectAll = onDeselectAll
-        )
-
-        Text(
-            text = stringResource(R.string.image_picker_hint_max),
-            style = AppTypography.p12.copy(
-                lineHeight = (12 * 1.3f).sp
-            ),
-            color = Gray400,
-            modifier = Modifier.padding(top = ImagePickerDimens.hintTopPadding)
-        )
-
-        Box(
+        Column(
             modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
+                .fillMaxSize()
+                .padding(horizontal = ImagePickerDimens.screenPaddingHorizontal)
         ) {
-            ImagePickerContentArea(
-                foodImageUris = foodImageUris,
-                allImageUris = allImageUris,
-                isLoading = isLoading,
-                hasPermission = hasPermission,
-                selectedUris = selectedUris,
-                onImageClick = onImageClick,
-                onRequestPermission = onRequestPermission
+            ImagePickerHeader(
+                onClose = onClose,
+                onDeselectAll = onDeselectAll
             )
-            if (hasPermission && allImageUris.isNotEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .height(ImagePickerDimens.dimHeight)
+
+            Text(
+                text = stringResource(R.string.image_picker_hint_max),
+                style = AppTypography.p12.copy(
+                    lineHeight = (12 * 1.3f).sp
+                ),
+                color = Gray400,
+                modifier = Modifier.padding(top = ImagePickerDimens.hintTopPadding)
+            )
+
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                ImagePickerContentArea(
+                    foodImageUris = foodImageUris,
+                    allImageUris = allImageUris,
+                    isLoading = isLoading,
+                    hasPermission = hasPermission,
+                    selectedUris = selectedUris,
+                    onImageClick = onImageClick,
+                    onRequestPermission = onRequestPermission
                 )
+                if (hasPermission && allImageUris.isNotEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .height(ImagePickerDimens.dimHeight)
+                    )
+                }
             }
+
+            Spacer(modifier = Modifier.height(ImagePickerDimens.doneButtonTopPadding + ImagePickerDimens.doneButtonApproxHeight + ImagePickerDimens.doneButtonPaddingVertical * 2))
         }
 
         ImagePickerDoneButton(
             selectedCount = selectedUris.size,
-            onClick = onDone
+            onClick = onDone,
+            modifier = Modifier.align(Alignment.BottomCenter)
         )
     }
 }
@@ -414,7 +426,7 @@ private fun ImageGridItem(
             ),
             contentDescription = if (isSelected) selectedDesc else unselectedDesc,
             modifier = Modifier
-                .align(Alignment.TopEnd)
+                .align(Alignment.TopStart)
                 .padding(ImagePickerDimens.checkIconPadding)
                 .size(ImagePickerDimens.checkIconSize)
         )
@@ -424,26 +436,40 @@ private fun ImageGridItem(
 @Composable
 private fun ImagePickerDoneButton(
     selectedCount: Int,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier
+    Surface(
+        modifier = modifier
             .fillMaxWidth()
-            .padding(top = ImagePickerDimens.doneButtonTopPadding)
-            .navigationBarsPadding(),
+            .padding(horizontal = ImagePickerDimens.doneButtonHorizontalMargin)
+            .padding(bottom = ImagePickerDimens.doneButtonTopPadding)
+            .navigationBarsPadding()
+            .shadow(
+                elevation = ImagePickerDimens.doneButtonElevation,
+                shape = RoundedCornerShape(999.dp),
+                spotColor = Color.Black.copy(alpha = 0.2f)
+            ),
         shape = RoundedCornerShape(999.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = PrimBase),
-        contentPadding = PaddingValues(
-            vertical = ImagePickerDimens.doneButtonPaddingVertical,
-            horizontal = ImagePickerDimens.doneButtonPaddingHorizontal
-        )
+        color = PrimBase
     ) {
-        Text(
-            text = stringResource(R.string.image_picker_select_count, selectedCount),
-            style = AppTypography.p15.copy(fontWeight = FontWeight.SemiBold),
-            color = Gray050
-        )
+        Button(
+            onClick = onClick,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(999.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+            contentPadding = PaddingValues(
+                vertical = ImagePickerDimens.doneButtonPaddingVertical,
+                horizontal = ImagePickerDimens.doneButtonPaddingHorizontal
+            ),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp, pressedElevation = 0.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.image_picker_select_count, selectedCount),
+                style = AppTypography.p15.copy(fontWeight = FontWeight.SemiBold),
+                color = Gray050
+            )
+        }
     }
 }
 
