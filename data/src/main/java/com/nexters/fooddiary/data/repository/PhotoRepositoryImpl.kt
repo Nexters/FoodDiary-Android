@@ -6,6 +6,7 @@ import com.nexters.fooddiary.data.local.upload.PhotoUploadDao
 import com.nexters.fooddiary.data.local.upload.PhotoUploadEntity
 import com.nexters.fooddiary.data.local.upload.UploadStatus
 import com.nexters.fooddiary.data.remote.photo.PhotoApi
+import com.nexters.fooddiary.core.common.network.defaultMessage
 import com.nexters.fooddiary.core.common.resource.ResourceProvider
 import com.nexters.fooddiary.data.network.toNetworkError
 import com.nexters.fooddiary.data.remote.photo.model.response.BatchUploadResultItem

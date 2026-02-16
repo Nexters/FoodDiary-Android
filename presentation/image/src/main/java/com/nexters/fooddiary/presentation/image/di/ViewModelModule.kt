@@ -14,11 +14,6 @@ import dagger.multibindings.IntoMap
 interface ViewModelModule {
     @Binds
     @IntoMap
-    @ViewModelKey(ImageClassificationViewModel::class)
-    fun imageClassificationViewModelFactory(factory: ImageClassificationViewModel.Factory): AssistedViewModelFactory<*, *>
-    
-    @Binds
-    @IntoMap
     @ViewModelKey(ImagePickerViewModel::class)
     fun imagePickerViewModelFactory(factory: ImagePickerViewModel.Factory): AssistedViewModelFactory<*, *>
 }
