@@ -6,6 +6,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -25,6 +27,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -33,6 +36,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color.Companion.Transparent
@@ -111,15 +115,36 @@ private fun HomeScreen(
     val monthlyCalendarState = rememberMonthCalendarState(selectedDate = state.selectedDate)
     var selectedTab by remember { mutableStateOf(HomeTab.HOME) }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-    ) {
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        containerColor = SdBase,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        bottomBar = {
+            HomeBottomBar(
+                currentRoute = selectedTab,
+                isMonthlyCalendarView = state.isMonthlyCalendarView,
+                onHomeClick = { selectedTab = HomeTab.HOME },
+                onInsightClick = { selectedTab = HomeTab.INSIGHT },
+                onCalendarViewToggle = onToggleCalendarView,
+                hazeState = screenHazeState,
+                modifier = Modifier
+                    .windowInsetsPadding(WindowInsets.navigationBars)
+                    .padding(start = 20.dp, end = 20.dp, bottom = 24.dp)
+            )
+        },
+    ) { innerPadding ->
+        val layoutDirection = LocalLayoutDirection.current
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .hazeSource(screenHazeState)
                 .background(SdBase)
+                .padding(
+                    start = innerPadding.calculateStartPadding(layoutDirection),
+                    top = innerPadding.calculateTopPadding(),
+                    end = innerPadding.calculateEndPadding(layoutDirection),
+                    bottom = 0.dp,
+                )
         ) {
             Column(
                 modifier = Modifier
@@ -127,78 +152,65 @@ private fun HomeScreen(
                     .verticalScroll(scrollState)
                     .padding(20.dp),
             ) {
-            Header(
-                modifier = Modifier.padding(vertical = 18.dp),
-                onClickMyPage = onNavigateToMyPage,
-            )
-            Text(
-                text = homeDescriptionText(photoCountByDate),
-                style = AppTypography.p12,
-                color = Gray050,
-            )
-            Text(
-                modifier = Modifier.padding(top = 12.dp, bottom = 36.dp),
-                text = stringResource(string.home_sub_description),
-                style = AppTypography.hd24,
-                color = Gray050,
-            )
-            if (state.isMonthlyCalendarView) {
-                MonthlyCalendar(
-                    calendarState = monthlyCalendarState,
-                    selectedDate = state.selectedDate,
-                    onDateSelected = onDateSelected,
-                    photoCountByDate = photoCountByDate,
+                Header(
+                    modifier = Modifier.padding(vertical = 18.dp),
+                    onClickMyPage = onNavigateToMyPage,
                 )
-            } else {
-                WeeklyCalendar(
-                    calendarState = weeklyCalendarState,
-                    selectedDate = state.selectedDate,
-                    onDateSelected = onDateSelected,
-                    photoCountByDate = photoCountByDate,
+                Text(
+                    text = homeDescriptionText(photoCountByDate),
+                    style = AppTypography.p12,
+                    color = Gray050,
                 )
-                Spacer(modifier = Modifier.height(24.dp))
-                AddPhotoBox(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f),
-                    onAddPhoto = onNavigateToImagePicker,
+                Text(
+                    modifier = Modifier.padding(top = 12.dp, bottom = 36.dp),
+                    text = stringResource(string.home_sub_description),
+                    style = AppTypography.hd24,
+                    color = Gray050,
                 )
-            }
-            Button(
-                onClick = { throw RuntimeException("Sentry/Discord 알림 테스트용 크래시") },
-                modifier = Modifier.padding(top = 8.dp)
-            ) {
-                Text("Sentry 테스트 (크래시)")
-            }
-            Button(
-                onClick = {
-                    onShowSnackBar(
-                        SnackBarData(
-                            message = "리퀴드 글래스 스낵바 테스트",
-                            iconRes = drawable.ic_check_circle,
-                        )
+                if (state.isMonthlyCalendarView) {
+                    MonthlyCalendar(
+                        calendarState = monthlyCalendarState,
+                        selectedDate = state.selectedDate,
+                        onDateSelected = onDateSelected,
+                        photoCountByDate = photoCountByDate,
                     )
-                },
-                modifier = Modifier.padding(top = 8.dp)
-            ) {
-                Text("스낵바 테스트")
-            }
-            Spacer(modifier = Modifier.height(144.dp))
+                } else {
+                    WeeklyCalendar(
+                        calendarState = weeklyCalendarState,
+                        selectedDate = state.selectedDate,
+                        onDateSelected = onDateSelected,
+                        photoCountByDate = photoCountByDate,
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    AddPhotoBox(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f),
+                        onAddPhoto = onNavigateToImagePicker,
+                    )
+                }
+                Button(
+                    onClick = { throw RuntimeException("Sentry/Discord 알림 테스트용 크래시") },
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    Text("Sentry 테스트 (크래시)")
+                }
+                Button(
+                    onClick = {
+                        onShowSnackBar(
+                            SnackBarData(
+                                message = "리퀴드 글래스 스낵바 테스트",
+                                iconRes = drawable.ic_check_circle,
+                            )
+                        )
+                    },
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    Text("스낵바 테스트")
+                }
+                Spacer(modifier = Modifier.height(144.dp))
             }
         }
-
-        HomeBottomBar(
-            currentRoute = selectedTab,
-            isMonthlyCalendarView = state.isMonthlyCalendarView,
-            onHomeClick = { selectedTab = HomeTab.HOME },
-            onInsightClick = { selectedTab = HomeTab.INSIGHT },
-            onCalendarViewToggle = onToggleCalendarView,
-            hazeState = screenHazeState,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(start = 20.dp, end = 20.dp, bottom = 24.dp)
-        )
     }
 }
 
