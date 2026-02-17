@@ -17,6 +17,8 @@ class FoodDiaryFirebaseMessagingService : FirebaseMessagingService() {
         }
 
         val notification = message.notification
+
+        //TODO FCM 메세지 확인 이후 제거 필수
         Log.i(
             TAG,
             """
