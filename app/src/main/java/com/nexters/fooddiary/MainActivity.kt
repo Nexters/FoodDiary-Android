@@ -40,7 +40,8 @@ class MainActivity : ComponentActivity() {
 
             LaunchedEffect(snackBarRequestId) {
                 if (snackBarRequestId == 0) return@LaunchedEffect
-                delay(2_000)
+                val delayMillis = customSnackBarData?.delayMillis ?: 2_000L
+                delay(delayMillis)
                 customSnackBarData = null
             }
 
