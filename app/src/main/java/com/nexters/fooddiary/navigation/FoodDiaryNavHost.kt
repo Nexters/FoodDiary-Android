@@ -139,7 +139,8 @@ fun FoodDiaryNavHost(
 
         homeScreen(
             onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
-            onNavigateToMyPage = { navController.navigate(MyPageRoute)}
+            onNavigateToMyPage = { navController.navigate(MyPageRoute) },
+            onShowSnackBar = onShowSnackBar,
         )
         calendarScreen()
         imageScreen(

@@ -45,6 +45,7 @@ fun Modifier.glassmorphism(
         .then(
             if (hazeState != null) {
                 Modifier.hazeEffect(state = hazeState) {
+                    blurEnabled = true
                     backgroundColor = Color.Transparent
                     blurRadius = style.blurRadius
                 }
