@@ -65,7 +65,8 @@ class MainActivity : ComponentActivity() {
                                 snackBarRequestId += 1
                             },
                             onShowToast = { message ->
-                                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                                customSnackBarData = SnackBarData(message = message)
+                                snackBarRequestId += 1
                             }
                         )
 
