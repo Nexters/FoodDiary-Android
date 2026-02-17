@@ -17,6 +17,7 @@ enum class WebViewPage {
 fun NavGraphBuilder.myPageScreen(
     navigateToWebView: (WebViewPage) -> Unit = {},
     onShowDialog: (DialogData) -> Unit = {},
+    onShowToast: (String) -> Unit = {},
     onSignOut: () -> Unit = {},
     onRequireReAuthForDeleteAccount: () -> Unit = {},
     onNavigateToAlarmSettings: () -> Unit = {},
@@ -26,6 +27,7 @@ fun NavGraphBuilder.myPageScreen(
         MyPageScreen(
             navigateToWebView = navigateToWebView,
             onShowDialog = onShowDialog,
+            onShowToast = onShowToast,
             onSignOut = onSignOut,
             onRequireReAuthForDeleteAccount = onRequireReAuthForDeleteAccount,
             onNavigateToAlarmSettings = onNavigateToAlarmSettings,
