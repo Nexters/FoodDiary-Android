@@ -25,10 +25,12 @@ import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,6 +61,7 @@ import com.nexters.fooddiary.core.ui.theme.PrimBase
 import com.nexters.fooddiary.core.ui.theme.SdBase
 import com.nexters.fooddiary.core.ui.theme.White
 import com.nexters.fooddiary.core.ui.calendar.WeeklyCalendar
+import kotlinx.coroutines.flow.collectLatest
 import java.time.LocalDate
 
 private val ToggleCalendarStrokeGradient = Brush.linearGradient(
@@ -94,14 +97,20 @@ internal fun HomeScreen(
 ) {
     val state by viewModel.collectAsState()
     val photoCountByDate by viewModel.photoCountByDate.collectAsState(initial = emptyMap())
+    val currentOnNavigateToDetail by rememberUpdatedState(onNavigateToDetail)
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collectLatest { event ->
+            when (event) {
+                is HomeEvent.NavigateToDetail -> currentOnNavigateToDetail(event.date)
+            }
+        }
+    }
 
     HomeScreen(
         state = state,
         photoCountByDate = photoCountByDate,
-        onDateSelected = { date ->
-            viewModel.onDateSelected(date)
-            onNavigateToDetail(date)
-        },
+        onDateSelected = viewModel::onDateSelected,
         onToggleCalendarView = viewModel::onToggleCalendarView,
         onNavigateToImagePicker = onNavigateToImagePicker,
         onNavigateToMyPage = onNavigateToMyPage,
