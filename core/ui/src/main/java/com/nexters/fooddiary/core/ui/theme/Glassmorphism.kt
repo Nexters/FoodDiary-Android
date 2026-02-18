@@ -1,5 +1,6 @@
 package com.nexters.fooddiary.core.ui.theme
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -11,8 +12,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.Composable
+import dev.chrisbanes.haze.ExperimentalHazeApi
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
+import dev.chrisbanes.haze.materials.HazeMaterials
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
@@ -34,11 +39,14 @@ object GlassmorphismDefaults {
     val Default = GlassmorphismStyle()
 }
 
+@OptIn(ExperimentalHazeApi::class, ExperimentalHazeMaterialsApi::class)
+@Composable
 fun Modifier.glassmorphism(
     hazeState: HazeState?,
     style: GlassmorphismStyle = GlassmorphismDefaults.Default,
 ): Modifier {
-    val shape = androidx.compose.foundation.shape.RoundedCornerShape(style.cornerRadius)
+    val hazeMaterialStyle = HazeMaterials.ultraThin(containerColor = SdBase)
+    val shape = RoundedCornerShape(style.cornerRadius)
     return this
         .clip(shape)
         .drawBehind {
@@ -66,8 +74,7 @@ fun Modifier.glassmorphism(
         .then(
             if (hazeState != null) {
                 Modifier.hazeEffect(state = hazeState) {
-                    backgroundColor = Color.Transparent
-                    blurRadius = style.blurRadius
+                    this.style = hazeMaterialStyle
                 }
             } else {
                 Modifier
