@@ -18,8 +18,8 @@ import com.nexters.fooddiary.core.ui.R
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.White
 import com.nexters.fooddiary.core.ui.theme.glassmorphism
+import com.nexters.fooddiary.core.ui.util.toDailyHeaderText
 import dev.chrisbanes.haze.HazeState
-import java.time.DayOfWeek
 import java.time.LocalDate
 
 @Composable
@@ -54,7 +54,7 @@ fun DailyHeader(
 
         // 중앙 날짜 텍스트
         Text(
-            text = formatDateHeader(date),
+            text = date.toDailyHeaderText(),
             style = AppTypography.hd18,
             fontWeight = FontWeight.Bold,
             color = White,
@@ -71,19 +71,6 @@ fun DailyHeader(
             )
         }
     }
-}
-
-private fun formatDateHeader(date: LocalDate): String {
-    val dayOfWeek = when (date.dayOfWeek) {
-        DayOfWeek.MONDAY -> "월"
-        DayOfWeek.TUESDAY -> "화"
-        DayOfWeek.WEDNESDAY -> "수"
-        DayOfWeek.THURSDAY -> "목"
-        DayOfWeek.FRIDAY -> "금"
-        DayOfWeek.SATURDAY -> "토"
-        DayOfWeek.SUNDAY -> "일"
-    }
-    return "${date.year}년 ${date.monthValue}월 ${date.dayOfMonth}일 ($dayOfWeek)"
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFF191821)
