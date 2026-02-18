@@ -1,0 +1,2 @@
+json_key_file("") # Not needed for CI token authentication
+package_name("com.nexters.fooddiary.dev") # Debug package

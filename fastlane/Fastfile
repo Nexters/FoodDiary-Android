@@ -1,0 +1,296 @@
+# Fastfile for FoodDiary Android App Distribution
+
+default_platform(:android)
+
+platform :android do
+  # ============================================================================
+  # Helper Methods
+  # ============================================================================
+
+  # Extract release notes from recent merge commits (PR titles only)
+  def extract_release_notes
+    begin
+      # Get PR titles from merge commits
+      # %b = commit body (contains PR title for GitHub merge commits)
+      pr_titles = sh(
+        "git log --first-parent origin/develop --merges --pretty=format:'%b' -10 2>/dev/null | grep -v '^$' | head -5",
+        log: false
+      ).strip
+
+      return pr_titles.empty? ?
+        "최근 업데이트가 포함된 릴리즈입니다." :
+        pr_titles.split("\n").map { |line| "• #{line.strip}" }.join("\n")
+    rescue => e
+      UI.error("Failed to extract release notes: #{e.message}")
+      return "최근 업데이트가 포함된 릴리즈입니다."
+    end
+  end
+
+  # Send Discord notification
+  def send_discord_notification(success:, version_code:, firebase_link: nil, release_notes: nil, error_message: nil)
+    webhook_url = ENV['DISCORD_WEBHOOK_URL']
+    github_run_url = ENV['GITHUB_RUN_URL']
+
+    unless webhook_url
+      UI.important("DISCORD_WEBHOOK_URL not set, skipping Discord notification")
+      return
+    end
+
+    begin
+      if success
+        # Success notification
+        embed = {
+          title: "🚀 FoodDiary Debug Build ##{version_code}",
+          description: "새로운 Debug 빌드가 Firebase App Distribution에 배포되었습니다.",
+          color: 5763719, # Green
+          fields: [
+            {
+              name: "📱 Version Code",
+              value: version_code.to_s,
+              inline: true
+            },
+            {
+              name: "🏗️ Build Type",
+              value: "Debug",
+              inline: true
+            }
+          ],
+          timestamp: Time.now.utc.iso8601
+        }
+
+        # Add Firebase link if available
+        if firebase_link
+          embed[:fields] << {
+            name: "📥 다운로드",
+            value: "[Firebase App Distribution에서 다운로드](#{firebase_link})",
+            inline: false
+          }
+        end
+
+        # Add release notes if available
+        if release_notes && !release_notes.empty?
+          # Limit release notes length for Discord embed
+          truncated_notes = release_notes.length > 1000 ?
+            "#{release_notes[0...997]}..." :
+            release_notes
+
+          embed[:fields] << {
+            name: "📝 Release Notes",
+            value: truncated_notes,
+            inline: false
+          }
+        end
+
+        # Add GitHub Actions link
+        if github_run_url
+          embed[:fields] << {
+            name: "🔗 GitHub Actions",
+            value: "[워크플로우 실행 보기](#{github_run_url})",
+            inline: false
+          }
+        end
+
+        payload = {
+          username: "FoodDiary CI",
+          embeds: [embed]
+        }
+      else
+        # Failure notification
+        embed = {
+          title: "❌ FoodDiary Build Failed",
+          description: "빌드 또는 배포 중 오류가 발생했습니다.",
+          color: 15548997, # Red
+          fields: [],
+          timestamp: Time.now.utc.iso8601
+        }
+
+        if error_message
+          embed[:fields] << {
+            name: "❗ Error",
+            value: "```#{error_message[0...500]}```",
+            inline: false
+          }
+        end
+
+        if github_run_url
+          embed[:fields] << {
+            name: "🔗 GitHub Actions",
+            value: "[워크플로우 실행 보기](#{github_run_url})",
+            inline: false
+          }
+        end
+
+        payload = {
+          username: "FoodDiary CI",
+          embeds: [embed]
+        }
+      end
+
+      # Send webhook request
+      require 'net/http'
+      require 'json'
+      require 'uri'
+
+      uri = URI.parse(webhook_url)
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+
+      request = Net::HTTP::Post.new(uri.path, {'Content-Type' => 'application/json'})
+      request.body = payload.to_json
+
+      response = http.request(request)
+
+      if response.code.to_i >= 200 && response.code.to_i < 300
+        UI.success("Discord notification sent successfully")
+      else
+        UI.error("Discord notification failed: #{response.code} - #{response.body}")
+      end
+    rescue => e
+      UI.error("Failed to send Discord notification: #{e.message}")
+    end
+  end
+
+  # ============================================================================
+  # Main Lanes
+  # ============================================================================
+
+  desc "Build debug APK with version code injection"
+  lane :build do
+    # Get version code from environment (set by CI)
+    version_code = ENV['VERSION_CODE']
+
+    unless version_code
+      UI.user_error!("VERSION_CODE environment variable is not set")
+    end
+
+    UI.message("Building debug APK with version code: #{version_code}")
+
+    # Build debug APK with version code
+    gradle(
+      task: "assembleDebug",
+      properties: {
+        "versionCode" => version_code
+      }
+    )
+
+    UI.success("Debug APK built successfully with version code: #{version_code}")
+  end
+
+  desc "Deploy to Firebase App Distribution"
+  lane :deploy do
+    # Get required environment variables
+    app_id = ENV['FIREBASE_APP_ID']
+    firebase_token = ENV['FIREBASE_TOKEN']
+    version_code = ENV['VERSION_CODE']
+
+    unless app_id
+      UI.user_error!("FIREBASE_APP_ID environment variable is not set")
+    end
+
+    unless firebase_token
+      UI.user_error!("FIREBASE_TOKEN environment variable is not set")
+    end
+
+    unless version_code
+      UI.user_error!("VERSION_CODE environment variable is not set")
+    end
+
+    # Extract release notes
+    release_notes = extract_release_notes
+    UI.message("Release notes:\n#{release_notes}")
+
+    # Debug: Print Firebase config (without sensitive data)
+    UI.important("Firebase Config Debug:")
+    UI.message("  App ID: #{app_id[0..20]}... (truncated)")
+    UI.message("  Token: #{firebase_token ? 'SET' : 'NOT SET'}")
+    UI.message("  Version Code: #{version_code}")
+    UI.message("  APK Path: app/build/outputs/apk/debug/app-debug.apk")
+    UI.message("  Groups: internal-testers")
+
+    # Upload to Firebase App Distribution
+    firebase_app_distribution(
+      app: app_id,
+      firebase_cli_token: firebase_token,
+      apk_path: "app/build/outputs/apk/debug/app-debug.apk",
+      # groups: "internal-testers",  # TODO: 그룹 생성 후 활성화
+      release_notes: release_notes
+    )
+
+    UI.success("Successfully deployed to Firebase App Distribution")
+  end
+
+  desc "Complete distribution workflow: build, deploy, and notify"
+  lane :distribute do
+    version_code = ENV['VERSION_CODE']
+    github_run_url = ENV['GITHUB_RUN_URL']
+
+    unless version_code
+      UI.user_error!("VERSION_CODE environment variable is not set")
+    end
+
+    begin
+      # Build APK
+      build
+
+      # Extract release notes before deployment
+      release_notes = extract_release_notes
+
+      # Deploy to Firebase
+      deploy
+
+      # Generate Firebase link (approximate URL pattern)
+      # Note: The actual download link is sent via Firebase's email notification
+      # This is a link to the releases page
+      firebase_link = "https://appdistribution.firebase.google.com/testerapps"
+
+      # Send success notification
+      send_discord_notification(
+        success: true,
+        version_code: version_code,
+        firebase_link: firebase_link,
+        release_notes: release_notes
+      )
+
+      UI.success("✅ Distribution completed successfully!")
+    rescue => e
+      UI.error("Distribution failed: #{e.message}")
+
+      # Send failure notification
+      send_discord_notification(
+        success: false,
+        version_code: version_code,
+        error_message: e.message
+      )
+
+      # Re-raise the error to fail the CI
+      raise e
+    end
+  end
+
+  # ============================================================================
+  # Utility Lanes
+  # ============================================================================
+
+  desc "Test Discord notification"
+  lane :test_discord do
+    version_code = ENV['VERSION_CODE'] || "999"
+
+    UI.message("Testing Discord notification with version code: #{version_code}")
+
+    # Test success notification
+    send_discord_notification(
+      success: true,
+      version_code: version_code,
+      firebase_link: "https://appdistribution.firebase.google.com/testerapps",
+      release_notes: "• 테스트 PR 제목 1\n• 테스트 PR 제목 2\n• 테스트 PR 제목 3"
+    )
+
+    UI.success("Test notification sent!")
+  end
+
+  desc "Clean build artifacts"
+  lane :clean do
+    gradle(task: "clean")
+    UI.success("Build artifacts cleaned")
+  end
+end
