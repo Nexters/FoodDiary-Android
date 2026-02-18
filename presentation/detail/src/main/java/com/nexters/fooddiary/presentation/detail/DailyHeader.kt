@@ -1,4 +1,4 @@
-package com.nexters.fooddiary.core.ui.component
+package com.nexters.fooddiary.presentation.detail
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -14,16 +14,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.nexters.fooddiary.core.ui.R
+import com.nexters.fooddiary.core.ui.R as CoreUiR
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.White
 import com.nexters.fooddiary.core.ui.theme.glassmorphism
-import com.nexters.fooddiary.core.ui.util.toDailyHeaderText
+import com.nexters.fooddiary.presentation.detail.util.toDailyHeaderText
 import dev.chrisbanes.haze.HazeState
 import java.time.LocalDate
 
 @Composable
-fun DailyHeader(
+internal fun DailyHeader(
     date: LocalDate,
     onPreviousDay: () -> Unit,
     onNextDay: () -> Unit,
@@ -43,16 +43,14 @@ fun DailyHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 좌측 화살표 버튼 (이전 날짜)
         IconButton(onClick = onPreviousDay) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_back),
+                painter = painterResource(id = CoreUiR.drawable.ic_back),
                 contentDescription = "이전 날짜",
                 tint = White
             )
         }
 
-        // 중앙 날짜 텍스트
         Text(
             text = date.toDailyHeaderText(),
             style = AppTypography.hd18,
@@ -62,10 +60,9 @@ fun DailyHeader(
             modifier = Modifier.weight(1f)
         )
 
-        // 우측 화살표 버튼 (다음 날짜)
         IconButton(onClick = onNextDay) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_next),
+                painter = painterResource(id = CoreUiR.drawable.ic_next),
                 contentDescription = "다음 날짜",
                 tint = White
             )

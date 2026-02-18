@@ -9,6 +9,7 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import com.nexters.fooddiary.domain.usecase.GetDiaryByDateUseCase
+import com.nexters.fooddiary.presentation.detail.util.toDailyMeals
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject

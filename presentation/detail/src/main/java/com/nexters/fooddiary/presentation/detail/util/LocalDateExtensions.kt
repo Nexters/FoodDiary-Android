@@ -1,9 +1,9 @@
-package com.nexters.fooddiary.core.ui.util
+package com.nexters.fooddiary.presentation.detail.util
 
 import java.time.DayOfWeek
 import java.time.LocalDate
 
-fun LocalDate.toDailyHeaderText(): String {
+internal fun LocalDate.toDailyHeaderText(): String {
     val dayOfWeek = when (dayOfWeek) {
         DayOfWeek.MONDAY -> "월"
         DayOfWeek.TUESDAY -> "화"

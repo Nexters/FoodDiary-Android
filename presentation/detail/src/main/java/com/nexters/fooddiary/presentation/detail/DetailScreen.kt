@@ -64,7 +64,6 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.ui.R as CoreUiR
 import com.nexters.fooddiary.core.ui.component.AddPhotoBox
-import com.nexters.fooddiary.core.ui.component.DailyHeader
 import com.nexters.fooddiary.core.ui.component.DetailScreenHeader
 import com.nexters.fooddiary.core.ui.food.FoodImageCard
 import com.nexters.fooddiary.core.ui.food.FoodImageState
