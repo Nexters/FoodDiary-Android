@@ -4,6 +4,7 @@ import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
+import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
@@ -19,7 +20,7 @@ import java.time.LocalDate
 data class DetailState(
     val selectedDate: LocalDate = LocalDate.now(),
     val mealsByDate: Map<LocalDate, DailyMeals> = emptyMap(),
-    val loadMealsRequest: Async<Unit> = Uninitialized,  // 식사 데이터 로딩 상태
+    val loadMealsRequest: Async<DailyMeals> = Uninitialized,  // 식사 데이터 로딩 상태
 ) : MavericksState
 
 sealed interface DetailEvent {
@@ -36,27 +37,24 @@ class DetailViewModel @AssistedInject constructor(
     private val _events = MutableSharedFlow<DetailEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<DetailEvent> = _events.asSharedFlow()
 
-    private inline fun executeAsync(
-        crossinline action: suspend () -> Unit,
-        crossinline updateState: DetailState.(Async<Unit>) -> DetailState
-    ) = suspend { action() }.execute { result ->
-        updateState(result)
-    }
-
     fun loadMealsForDate(date: LocalDate, forceRefresh: Boolean = false) {
         withState { state ->
             if (!forceRefresh && state.mealsByDate.containsKey(date)) return@withState
 
-            executeAsync(
-                action = {
-                    val diary = getDiaryByDateUseCase(date)
-                    val meals = diary.toDailyMeals(date)
-                    setState {
-                        copy(mealsByDate = mealsByDate + (date to meals))
+            suspend {
+                val diary = getDiaryByDateUseCase(date)
+                diary.toDailyMeals(date)
+            }.execute { result ->
+                when (result) {
+                    is Success -> {
+                        copy(
+                            mealsByDate = putAndTrim(mealsByDate, date, result()),
+                            loadMealsRequest = result,
+                        )
                     }
-                },
-                updateState = { copy(loadMealsRequest = it) }
-            )
+                    else -> copy(loadMealsRequest = result)
+                }
+            }
         }
     }
 
@@ -118,10 +116,29 @@ class DetailViewModel @AssistedInject constructor(
         _events.tryEmit(DetailEvent.ShareMapLink(place = place, mapLink = mapLink))
     }
 
+    private fun putAndTrim(
+        currentMealsByDate: Map<LocalDate, DailyMeals>,
+        date: LocalDate,
+        meals: DailyMeals,
+    ): Map<LocalDate, DailyMeals> {
+        val updated = LinkedHashMap(currentMealsByDate)
+        updated.remove(date)
+        updated[date] = meals
+
+        while (updated.size > MAX_MEALS_CACHE_SIZE) {
+            val oldestDate = updated.entries.first().key
+            updated.remove(oldestDate)
+        }
+
+        return updated
+    }
+
     @AssistedFactory
     interface Factory : AssistedViewModelFactory<DetailViewModel, DetailState> {
         override fun create(state: DetailState): DetailViewModel
     }
 
-    companion object : MavericksViewModelFactory<DetailViewModel, DetailState> by hiltMavericksViewModelFactory()
+    companion object : MavericksViewModelFactory<DetailViewModel, DetailState> by hiltMavericksViewModelFactory() {
+        private const val MAX_MEALS_CACHE_SIZE = 14
+    }
 }
