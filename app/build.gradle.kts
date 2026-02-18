@@ -33,17 +33,15 @@ android {
         buildConfigField("boolean", "USE_MOCK_API", "true")
 
         val webClientId = localProperties.getProperty("web.client.id", "")
-            .takeIf { it.isNotEmpty() && it != "YOUR_WEB_CLIENT_ID_HERE" }
-            ?: ""
+            .ifEmpty { System.getenv("WEB_CLIENT_ID").orEmpty() }
 
         if (webClientId.isNotEmpty()) {
             resValue("string", "custom_web_client_id", webClientId)
-            println("Web Client ID set from local.properties: ${webClientId.take(30)}...")
-        } else {
-            println("Warning: web.client.id not found in local.properties")
         }
 
-        val sentryDsn = localProperties.getProperty("sentry.dsn", "").trim()
+        val sentryDsn = localProperties.getProperty("sentry.dsn", "")
+            .ifEmpty { System.getenv("SENTRY_DSN").orEmpty() }
+            .trim()
         buildConfigField("String", "SENTRY_DSN", "\"$sentryDsn\"")
         manifestPlaceholders["sentryDsn"] = sentryDsn
     }
@@ -88,7 +86,7 @@ android {
 sentry {
     org.set(localProperties.getProperty("sentry.org", ""))
     projectName.set(localProperties.getProperty("sentry.project", ""))
-    authToken.set(System.getenv("SENTRY_AUTH_TOKEN") ?: localProperties.getProperty("sentry.auth.token", ""))
+    authToken.set(localProperties.getProperty("sentry.auth.token", ""))
     includeSourceContext.set(true)
     autoInstallation {
         enabled.set(true)

@@ -10,6 +10,9 @@ jobs:
   deploy:
     name: Build and Deploy to Firebase
     runs-on: ubuntu-latest
+    env:
+      WEB_CLIENT_ID: ${{ secrets.WEB_CLIENT_ID }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
     steps:
       - name: Checkout repository
