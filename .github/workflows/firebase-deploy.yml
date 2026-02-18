@@ -11,6 +11,7 @@ jobs:
     name: Build and Deploy to Firebase
     runs-on: ubuntu-latest
     env:
+      # CI에서 local.properties 없이 주입 
       WEB_CLIENT_ID: ${{ secrets.WEB_CLIENT_ID }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
