@@ -30,8 +30,8 @@ class DiaryRepositoryImpl @Inject constructor(
             diaries = dayResponse.diaries.map { diary ->
                 DiaryEntry(
                     diaryId = diary.diaryId,
-                    mealType = diary.timeType.toDomain(),
-                    analysisStatus = diary.analysisStatus.toDomain(),
+                    mealType = diary.timeType.toDomainOrThrow(diary.diaryId),
+                    analysisStatus = diary.analysisStatus.toDomainOrThrow(diary.diaryId),
                     restaurantName = diary.restaurantName,
                     category = diary.category,
                     location = diary.location,
@@ -53,20 +53,20 @@ class DiaryRepositoryImpl @Inject constructor(
         )
     }
 
-    private fun DiaryMealTypeResponse.toDomain(): MealType {
+    private fun DiaryMealTypeResponse?.toDomainOrThrow(diaryId: Long): MealType {
         return when (this) {
             DiaryMealTypeResponse.BREAKFAST -> MealType.BREAKFAST
             DiaryMealTypeResponse.LUNCH -> MealType.LUNCH
             DiaryMealTypeResponse.DINNER -> MealType.DINNER
-            DiaryMealTypeResponse.UNKNOWN -> MealType.UNKNOWN
+            null -> error("Invalid time_type for diaryId=$diaryId")
         }
     }
 
-    private fun DiaryAnalysisStatusResponse.toDomain(): AnalysisStatus {
+    private fun DiaryAnalysisStatusResponse?.toDomainOrThrow(diaryId: Long): AnalysisStatus {
         return when (this) {
             DiaryAnalysisStatusResponse.DONE -> AnalysisStatus.DONE
             DiaryAnalysisStatusResponse.PROCESSING -> AnalysisStatus.PROCESSING
-            DiaryAnalysisStatusResponse.UNKNOWN -> AnalysisStatus.UNKNOWN
+            null -> error("Invalid analysis_status for diaryId=$diaryId")
         }
     }
 }
