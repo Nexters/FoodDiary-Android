@@ -181,8 +181,46 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
+sentry.properties
+.sentryclirc
+**/sentry.properties
+
+node_modules/
+functions/node_modules/
+functions/lib/
+
 ### AndroidStudio Patch ###
 
 !/gradle/wrapper/gradle-wrapper.jar
 
 # End of https://www.toptal.com/developers/gitignore/api/android,androidstudio,kotlin
+
+### Fastlane ###
+# fastlane specific
+fastlane/report.xml
+
+# fastlane screenshots
+fastlane/screenshots
+
+# fastlane test output
+fastlane/test_output
+
+# fastlane temporary files
+fastlane/Preview.html
+
+# deliver temporary files
+fastlane/Deliverfile
+
+# snapshot generated screenshots
+fastlane/screenshots
+
+# scan temporary files
+fastlane/test_output
+
+### Ruby/Bundler ###
+# Ignore bundler cache
+.bundle
+vendor/bundle
+
+# Ignore Gemfile.lock (optional - some prefer to commit it)
+# Gemfile.lock

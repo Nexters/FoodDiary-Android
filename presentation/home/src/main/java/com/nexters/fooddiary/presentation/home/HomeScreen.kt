@@ -185,6 +185,13 @@ private fun HomeScreen(
                         onAddPhoto = onNavigateToImagePicker,
                     )
                 }
+
+                Button(
+                    onClick = { throw RuntimeException("Sentry/Discord 알림 테스트용 크래시") },
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    Text("Sentry 테스트 (크래시)")
+                }
             }
         }
     }

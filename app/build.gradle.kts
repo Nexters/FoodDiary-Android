@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.google.gms.services)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.sentry.android.gradle)
 }
 
 val localProperties = Properties()
@@ -24,7 +25,7 @@ android {
         applicationId = "com.nexters.fooddiary"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 1
+        versionCode = project.findProperty("versionCode")?.toString()?.toInt() ?: 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -41,6 +42,10 @@ android {
         } else {
             println("Warning: web.client.id not found in local.properties")
         }
+
+        val sentryDsn = localProperties.getProperty("sentry.dsn", "").trim()
+        buildConfigField("String", "SENTRY_DSN", "\"$sentryDsn\"")
+        manifestPlaceholders["sentryDsn"] = sentryDsn
     }
 
     buildFeatures {
@@ -77,6 +82,17 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
             excludes += "/META-INF/versions/9/OSGI-INF/MANIFEST.MF"
         }
+    }
+}
+
+sentry {
+    org.set(localProperties.getProperty("sentry.org", ""))
+    projectName.set(localProperties.getProperty("sentry.project", ""))
+    authToken.set(System.getenv("SENTRY_AUTH_TOKEN") ?: localProperties.getProperty("sentry.auth.token", ""))
+    includeSourceContext.set(true)
+    autoInstallation {
+        enabled.set(true)
+        sentryVersion.set(libs.versions.sentryAndroid.get())
     }
 }
 
@@ -118,6 +134,12 @@ dependencies {
 
     // Mavericks
     implementation(libs.mavericks.compose)
+
+    // Firebase Cloud Messaging
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
+
+    implementation(libs.sentry.android)
 
     // Testing
     testImplementation(libs.junit)

@@ -43,6 +43,8 @@ remoteCreationCore = "1.0.0-alpha02"
 mockk = "1.14.7"
 coil = "3.3.0"
 haze = "1.6.10"
+sentryGradle = "4.3.0"
+sentryAndroid = "7.5.0"
 appcompat = "1.7.1"
 material = "1.13.0"
 material3 = "1.4.0"
@@ -89,6 +91,7 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 # Coroutines
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 
 # Navigation Compose
@@ -143,6 +146,8 @@ androidx-datastore-preferences = { group = "androidx.datastore", name = "datasto
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
+firebase-installations = { group = "com.google.firebase", name = "firebase-installations" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 androidx-ui-tooling-preview-android = { group = "androidx.compose.ui", name = "ui-tooling-preview-android", version.ref = "uiToolingPreviewAndroid" }
 
 # Coil
@@ -155,8 +160,11 @@ androidx-remote-creation-core = { group = "androidx.compose.remote", name = "rem
 haze = { group = "dev.chrisbanes.haze", name = "haze", version.ref = "haze" }
 haze-materials = { group = "dev.chrisbanes.haze", name = "haze-materials", version.ref = "haze" }
 
+sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentryAndroid" }
+
 [plugins]
 google-gms-services = { id = "com.google.gms.google-services", version = "4.4.4" }
+sentry-android-gradle = { id = "io.sentry.android.gradle", version.ref = "sentryGradle" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
@@ -165,4 +173,3 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-
