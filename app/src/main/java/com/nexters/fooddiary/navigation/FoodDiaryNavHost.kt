@@ -30,6 +30,7 @@ import com.nexters.fooddiary.presentation.onboarding.navigation.onboardingScreen
 import com.nexters.fooddiary.presentation.mypage.navigation.MyPageRoute
 import com.nexters.fooddiary.presentation.mypage.navigation.WebViewPage
 import com.nexters.fooddiary.presentation.mypage.navigation.myPageScreen
+import com.nexters.fooddiary.presentation.search.navigation.searchScreen
 import com.nexters.fooddiary.presentation.webview.navigation.WebViewRoute
 import com.nexters.fooddiary.presentation.webview.navigation.webViewScreen
 import com.nexters.fooddiary.presentation.splash.navigation.SplashRoute
@@ -145,6 +146,16 @@ fun FoodDiaryNavHost(
                 if (!navController.popBackStack()) {
                     onFinish()
                 }
+            }
+        )
+        searchScreen(
+            onClose = {
+                if (!navController.popBackStack()) {
+                    onFinish()
+                }
+            },
+            onSelectRestaurant = { restaurantItem ->
+                navController.popBackStack()
             }
         )
         myPageScreen(
