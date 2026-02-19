@@ -10,6 +10,7 @@ import com.nexters.fooddiary.domain.usecase.SearchRestaurantsUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -95,23 +96,35 @@ class SearchViewModel @AssistedInject constructor(
     ) {
         setState { copy(isLoading = true, errorMessage = null) }
 
-        val result =
+        runCatching {
             searchRestaurantsUseCase(
                 diaryId = diaryId,
                 keyword = keyword,
                 page = DefaultPage,
                 size = DefaultSize,
             )
-        setState {
-            copy(
-                restaurants = result.restaurants,
-                totalCount = result.totalCount,
-                page = result.page,
-                size = result.size,
-                isEnd = result.isEnd,
-                isLoading = false,
-                errorMessage = null,
-            )
+        }.onSuccess { result ->
+            setState {
+                copy(
+                    restaurants = result.restaurants,
+                    totalCount = result.totalCount,
+                    page = result.page,
+                    size = result.size,
+                    isEnd = result.isEnd,
+                    isLoading = false,
+                    errorMessage = null,
+                )
+            }
+        }.onFailure { throwable ->
+            if (throwable is CancellationException) throw throwable
+            setState {
+                copy(
+                    restaurants = emptyList(),
+                    totalCount = 0,
+                    isLoading = false,
+                    errorMessage = throwable.message ?: "search_failed",
+                )
+            }
         }
     }
 
