@@ -11,11 +11,32 @@ plugins {
     alias(libs.plugins.sentry.android.gradle)
 }
 
-val localProperties = Properties()
-val localPropertiesFile = rootProject.file("local.properties")
-if (localPropertiesFile.exists()) {
-    localPropertiesFile.inputStream().use { localProperties.load(it) }
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { load(it) }
+    }
 }
+
+fun localOrEnv(localKeys: List<String>, envKey: String): String {
+    val localValue = localKeys
+        .asSequence()
+        .map { key -> localProperties.getProperty(key, "").trim() }
+        .firstOrNull { it.isNotEmpty() }
+        .orEmpty()
+
+    return localValue.ifEmpty { System.getenv(envKey).orEmpty().trim() }
+}
+
+val devStoreFile = localOrEnv(listOf("dev.store.file"), "DEV_KEYSTORE_PATH")
+val devStorePassword = localOrEnv(listOf("dev.store.password"), "DEV_KEYSTORE_PASSWORD")
+val devKeyAlias = localOrEnv(listOf("dev.key.alias"), "DEV_KEY_ALIAS")
+val devKeyPassword = localOrEnv(listOf("dev.key.password"), "DEV_KEY_PASSWORD")
+
+val releaseStoreFile = localOrEnv(listOf("store.file"), "RELEASE_STORE_FILE")
+val releaseStorePassword = localOrEnv(listOf("store.password"), "RELEASE_STORE_PASSWORD")
+val releaseKeyAlias = localOrEnv(listOf("key.alias"), "RELEASE_KEY_ALIAS")
+val releaseKeyPassword = localOrEnv(listOf("key.password"), "RELEASE_KEY_PASSWORD")
 
 android {
     namespace = "com.nexters.fooddiary"
@@ -29,8 +50,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        buildConfigField("boolean", "USE_MOCK_API", "true")
 
         val webClientId = localProperties.getProperty("web.client.id", "")
             .ifEmpty { System.getenv("WEB_CLIENT_ID").orEmpty() }
@@ -46,8 +65,19 @@ android {
         manifestPlaceholders["sentryDsn"] = sentryDsn
     }
 
-    buildFeatures {
-        buildConfig = true
+    signingConfigs {
+        create("dev") {
+            storeFile = rootProject.file(devStoreFile)
+            storePassword = devStorePassword
+            keyAlias = devKeyAlias
+            keyPassword = devKeyPassword
+        }
+        create("release") {
+            storeFile = rootProject.file(releaseStoreFile)
+            storePassword = releaseStorePassword
+            keyAlias = releaseKeyAlias
+            keyPassword = releaseKeyPassword
+        }
     }
 
     buildTypes {
@@ -58,10 +88,18 @@ android {
                 "proguard-rules.pro"
             )
             buildConfigField("boolean", "USE_MOCK_API", "false")
+            signingConfig = signingConfigs.findByName("release")
+        }
+        create("debugRelease") {
+            initWith(getByName("debug"))
+            matchingFallbacks += listOf("debug")
+            signingConfig = signingConfigs.findByName("dev")
+            buildConfigField("boolean", "USE_MOCK_API", "false")
         }
         debug {
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
+            buildConfigField("boolean", "USE_MOCK_API", "true")
         }
     }
     compileOptions {
@@ -72,6 +110,7 @@ android {
         jvmTarget = "17"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 
