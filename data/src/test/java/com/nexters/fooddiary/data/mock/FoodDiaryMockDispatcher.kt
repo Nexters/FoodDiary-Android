@@ -6,7 +6,7 @@ import okhttp3.mockwebserver.RecordedRequest
 
 class FoodDiaryMockDispatcher : Dispatcher() {
     override fun dispatch(request: RecordedRequest): MockResponse {
-        val path = request.path ?: return MockResponse().setResponseCode(404)
+        val path = request.requestUrl?.encodedPath ?: request.path ?: return MockResponse().setResponseCode(404)
         val method = request.method
 
         return try {
@@ -41,8 +41,13 @@ class FoodDiaryMockDispatcher : Dispatcher() {
                 path.matches(Regex(MockUrlConfig.REGEX_PHOTO_CONFIRM)) && method == "POST" -> {
                     success(MockUrlConfig.MOCK_CONFIRM_PHOTO_SUCCESS)
                 }
-                 path.matches(Regex(MockUrlConfig.REGEX_PHOTO_FINAL)) && method == "GET" -> {
+                path.matches(Regex(MockUrlConfig.REGEX_PHOTO_FINAL)) && method == "GET" -> {
                     success(MockUrlConfig.MOCK_GET_FINAL_RECORD)
+                }
+
+                // Restaurant
+                path == MockUrlConfig.PATH_RESTAURANT_SEARCH && method == "GET" -> {
+                    success(MockUrlConfig.MOCK_GET_RESTAURANT_SEARCH)
                 }
 
                 else -> MockResponse().setResponseCode(404)
