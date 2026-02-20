@@ -3,7 +3,6 @@ package com.nexters.fooddiary.presentation.home
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,7 +39,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color.Companion.Transparent
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -206,26 +204,18 @@ private fun HomeScreen(
                     )
                     Spacer(modifier = Modifier.height(43.dp))
                     if (selectedDateImageUrls.isNotEmpty()) {
-                        Box(
+                        FoodImageStackView(
+                            imageUrls = selectedDateImageUrls,
+                            state = FoodImageState.Ready(
+                                timeText = "시간",
+                                locationText = "위치",
+                            ),
+                            onCardClick = onCardStackClick,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 20.dp)
-                                .aspectRatio(1f)
-                                .pointerInput(onCardStackClick) {
-                                    detectTapGestures(
-                                        onTap = { onCardStackClick() }
-                                    )
-                                }
-                        ) {
-                            FoodImageStackView(
-                                imageUrls = selectedDateImageUrls,
-                                state = FoodImageState.Ready(
-                                    timeText = "시간",
-                                    locationText = "위치",
-                                ),
-                                modifier = Modifier.fillMaxSize(),
-                            )
-                        }
+                                .aspectRatio(1f),
+                        )
                     } else {
                         AddPhotoBox(
                             modifier = Modifier

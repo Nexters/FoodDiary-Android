@@ -3,7 +3,9 @@ package com.nexters.fooddiary.core.ui.food
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -32,6 +34,7 @@ import kotlinx.coroutines.launch
 fun FoodImageStackView(
     imageUrls: List<String>,
     state: FoodImageState,
+    onCardClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     if (imageUrls.isEmpty()) return
@@ -49,6 +52,7 @@ fun FoodImageStackView(
     val scope = rememberCoroutineScope()
     val swipeThresholdPx = with(density) { 64.dp.toPx() }
     val minAdditionalDropPx = with(density) { 96.dp.toPx() }
+    val tapCancelVerticalThresholdPx = with(density) { 12.dp.toPx() }
     var stackHeightPx by remember { mutableIntStateOf(0) }
     val dropDistancePx = if (stackHeightPx > 0) stackHeightPx.toFloat() else with(density) { 260.dp.toPx() }
     var frontDragOffsetY by remember { mutableFloatStateOf(0f) }
@@ -244,7 +248,7 @@ fun FoodImageStackView(
             )
         }
 
-        // 맨 앞 카드(사용자가 직접 끌어내리는 카드)
+    // 맨 앞 카드(사용자가 직접 끌어내리는 카드)
         FoodImageCard(
             imageUrl = imageUrls[frontIndex],
             state = state,
@@ -252,7 +256,15 @@ fun FoodImageStackView(
                 .fillMaxSize()
                 .graphicsLayer {
                     translationY = frontDragOffsetY
-                },
+                }
+                .clickable(
+                    enabled = state is FoodImageState.Ready &&
+                        !isRecycling &&
+                        frontDragOffsetY <= tapCancelVerticalThresholdPx,
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = onCardClick,
+                ),
         )
     }
 }
