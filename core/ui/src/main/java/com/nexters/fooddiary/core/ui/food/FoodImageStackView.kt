@@ -36,6 +36,7 @@ fun FoodImageStackView(
 ) {
     if (imageUrls.isEmpty()) return
 
+    // 현재 맨 앞 카드 인덱스(순환)
     var currentIndex by rememberSaveable(imageUrls) { mutableIntStateOf(0) }
     val size = imageUrls.size
     val canNavigate = size > 1 && state is FoodImageState.Ready
@@ -56,6 +57,8 @@ fun FoodImageStackView(
     var recycleRotation by remember { mutableFloatStateOf(0f) }
     var recycleAlpha by remember { mutableFloatStateOf(1f) }
     var isRecycling by remember { mutableStateOf(false) }
+
+    // 앞 카드가 얼마나 내려갔는지(0~1)로 뒤 카드 상태를 연동
     val secondCardProgress = (frontDragOffsetY / dropDistancePx).coerceIn(0f, 1f)
     val incomingThirdAlpha = lerp(start = 0f, stop = 0.4f, fraction = secondCardProgress)
     val thirdCardAlpha = lerp(start = 0.4f, stop = 0.7f, fraction = secondCardProgress)
@@ -70,6 +73,7 @@ fun FoodImageStackView(
                 if (!canNavigate) return@pointerInput
 
                 detectVerticalDragGestures(
+                    // 1) 사용자가 앞 카드를 아래로 끌면 그대로 따라 내려감
                     onVerticalDrag = { change, dragAmount ->
                         if (isRecycling) return@detectVerticalDragGestures
                         val nextOffset = (frontDragOffsetY + dragAmount).coerceAtLeast(0f)
@@ -78,6 +82,7 @@ fun FoodImageStackView(
                             change.consume()
                         }
                     },
+                    // 2) 드래그가 취소되면 현재 카드 위치를 원위치로 복귀
                     onDragCancel = {
                         if (isRecycling) return@detectVerticalDragGestures
                         if (frontDragOffsetY > 0f) {
@@ -90,6 +95,7 @@ fun FoodImageStackView(
                             }
                         }
                     },
+                    // 3) 손을 뗐을 때 임계값으로 전환/복귀 분기
                     onDragEnd = {
                         if (isRecycling) return@detectVerticalDragGestures
 
@@ -97,6 +103,7 @@ fun FoodImageStackView(
                             return@detectVerticalDragGestures
                         }
 
+                        // 임계값 미만이면 스와이프 실패로 보고 원위치 복귀
                         if (frontDragOffsetY < swipeThresholdPx) {
                             scope.launch {
                                 val reset = Animatable(frontDragOffsetY)
@@ -111,6 +118,8 @@ fun FoodImageStackView(
                         scope.launch {
                             isRecycling = true
                             val outgoingIndex = frontIndex
+
+                            // 임계값 이상이면 아래로 추가 하강(중간에서 놓아도 끝까지 내려가게 보장)
                             val dropTarget = max(
                                 frontDragOffsetY + minAdditionalDropPx,
                                 dropDistancePx,
@@ -127,9 +136,11 @@ fun FoodImageStackView(
                             recycleRotation = 0f
                             recycleAlpha = 1f
 
+                            // 4) 실제 데이터 인덱스를 다음 카드로 넘겨 스택 순서를 갱신
                             currentIndex = loopedIndex(currentIndex + 1)
                             frontDragOffsetY = 0f
 
+                            // 5) 내려간 기존 앞 카드를 뒤 스택 상태(alpha/angle)로 복귀 애니메이션
                             val recycleTargetOffsetPx = 0f
                             val recycleTargetRotation = when {
                                 size == 2 -> 5f
@@ -176,6 +187,7 @@ fun FoodImageStackView(
                 )
             }
     ) {
+        // (4장 이상) 다음 턴에 3번째가 될 카드를 미리 깔아두고 점진 노출
         if (size >= 4 && recycleIndex != incomingBackIndex) {
             FoodImageCard(
                 imageUrl = imageUrls[incomingBackIndex],
@@ -189,6 +201,7 @@ fun FoodImageStackView(
             )
         }
 
+        // 현재 3번째 카드: 0번째가 내려갈수록 2번째 카드 상태로 준비
         if (size >= 3 && recycleIndex != backRightIndex) {
             FoodImageCard(
                 imageUrl = imageUrls[backRightIndex],
@@ -202,6 +215,7 @@ fun FoodImageStackView(
             )
         }
 
+        // 현재 2번째 카드: 0번째가 내려갈수록 1번째 카드 상태로 준비
         if (size >= 2 && recycleIndex != backLeftIndex) {
             FoodImageCard(
                 imageUrl = imageUrls[backLeftIndex],
@@ -215,6 +229,7 @@ fun FoodImageStackView(
             )
         }
 
+        // 내려갔던 기존 0번째 카드가 뒤 스택으로 돌아가는 전용 레이어
         recycleIndex?.let { index ->
             FoodImageCard(
                 imageUrl = imageUrls[index],
@@ -229,6 +244,7 @@ fun FoodImageStackView(
             )
         }
 
+        // 맨 앞 카드(사용자가 직접 끌어내리는 카드)
         FoodImageCard(
             imageUrl = imageUrls[frontIndex],
             state = state,
