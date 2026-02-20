@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -53,6 +54,8 @@ import com.nexters.fooddiary.core.ui.calendar.rememberMonthCalendarState
 import com.nexters.fooddiary.core.ui.calendar.rememberWeeklyCalendarState
 import com.nexters.fooddiary.core.ui.component.AddPhotoBox
 import com.nexters.fooddiary.core.ui.component.Header
+import com.nexters.fooddiary.core.ui.food.FoodImageStackView
+import com.nexters.fooddiary.core.ui.food.FoodImageState
 import com.nexters.fooddiary.core.ui.gradientBorder
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.Gray050
@@ -98,6 +101,14 @@ internal fun HomeScreen(
     val state by viewModel.collectAsState()
     val photoCountByDate by viewModel.photoCountByDate.collectAsState(initial = emptyMap())
     val currentOnNavigateToDetail by rememberUpdatedState(onNavigateToDetail)
+    // TODO: 연결 가능한 홈 이미지 URL 데이터가 준비되면 교체
+    val temporaryHomeImageUrls = remember {
+        listOf(
+            "https://picsum.photos/seed/home-food-1/900/900",
+            "https://picsum.photos/seed/home-food-2/900/900",
+            "https://picsum.photos/seed/home-food-3/900/900",
+        )
+    }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collectLatest { event ->
@@ -114,6 +125,7 @@ internal fun HomeScreen(
         onToggleCalendarView = viewModel::onToggleCalendarView,
         onNavigateToImagePicker = onNavigateToImagePicker,
         onNavigateToMyPage = onNavigateToMyPage,
+        selectedDateImageUrls = temporaryHomeImageUrls,
         modifier = modifier,
     )
 }
@@ -127,6 +139,7 @@ private fun HomeScreen(
     onToggleCalendarView: () -> Unit = {},
     onNavigateToImagePicker: () -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
+    selectedDateImageUrls: List<String> = emptyList(),
 ) {
     val weeklyCalendarState = rememberWeeklyCalendarState(selectedDate = state.selectedDate)
     val monthlyCalendarState = rememberMonthCalendarState(selectedDate = state.selectedDate)
@@ -187,13 +200,27 @@ private fun HomeScreen(
                         onDateSelected = onDateSelected,
                         photoCountByDate = photoCountByDate,
                     )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    AddPhotoBox(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        onAddPhoto = onNavigateToImagePicker,
-                    )
+                    Spacer(modifier = Modifier.height(43.dp))
+                    if (selectedDateImageUrls.isNotEmpty()) {
+                        FoodImageStackView(
+                            imageUrls = selectedDateImageUrls,
+                            state = FoodImageState.Ready(
+                                timeText = "시간",
+                                locationText = "위치",
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp)
+                                .aspectRatio(1f),
+                        )
+                    } else {
+                        AddPhotoBox(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            onAddPhoto = onNavigateToImagePicker,
+                        )
+                    }
                 }
 
                 Button(

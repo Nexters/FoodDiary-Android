@@ -3,6 +3,7 @@ package com.nexters.fooddiary.core.ui.food
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,6 +27,7 @@ import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -102,6 +108,80 @@ fun FoodImageCard(
             is FoodImageState.Pending -> {
                 FoodImagePending(
                     modifier = Modifier.fillMaxSize(),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun FoodImageStackView(
+    imageUrls: List<String>,
+    state: FoodImageState,
+    modifier: Modifier = Modifier,
+) {
+    if (imageUrls.isEmpty()) return
+
+    var currentIndex by rememberSaveable(imageUrls) { mutableIntStateOf(0) }
+    val size = imageUrls.size
+    val canNavigate = size > 1 && state is FoodImageState.Ready
+    fun loopedIndex(index: Int): Int = ((index % size) + size) % size
+    val frontIndex = loopedIndex(currentIndex)
+    val backLeftIndex = loopedIndex(currentIndex + 1)
+    val backRightIndex = loopedIndex(currentIndex + 2)
+
+    Box(
+        modifier = modifier
+    ) {
+        if (size >= 3) {
+            FoodImageCard(
+                imageUrl = imageUrls[backRightIndex],
+                state = state,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        rotationZ = -5f
+                        alpha = 0.4f
+                    }
+            )
+        }
+
+        if (size >= 2) {
+            FoodImageCard(
+                imageUrl = imageUrls[backLeftIndex],
+                state = state,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        rotationZ = 5f
+                        alpha = 0.7f
+                    }
+            )
+        }
+
+        FoodImageCard(
+            imageUrl = imageUrls[frontIndex],
+            state = state,
+            modifier = Modifier.fillMaxSize(),
+        )
+
+        if (canNavigate) {
+            Row(modifier = Modifier.fillMaxSize()) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize()
+                        .clickable {
+                            currentIndex = loopedIndex(currentIndex - 1)
+                        }
+                )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize()
+                        .clickable {
+                            currentIndex = loopedIndex(currentIndex + 1)
+                        }
                 )
             }
         }
@@ -244,5 +324,26 @@ private fun FoodImagePendingPreview() {
         imageUrl = "https://picsum.photos/300",
         state = FoodImageState.Pending,
         modifier = Modifier.size(300.dp)
+    )
+}
+
+@Preview(
+    name = "Stack View",
+    showBackground = true,
+    backgroundColor = 0xFF191821
+)
+@Composable
+private fun FoodImageStackViewPreview() {
+    FoodImageStackView(
+        imageUrls = listOf(
+            "https://picsum.photos/300?1",
+            "https://picsum.photos/300?2",
+            "https://picsum.photos/300?3",
+        ),
+        state = FoodImageState.Ready(
+            timeText = "07:00",
+            locationText = "마포구",
+        ),
+        modifier = Modifier.size(300.dp),
     )
 }
