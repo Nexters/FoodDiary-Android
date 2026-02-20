@@ -23,6 +23,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.lerp
 import kotlin.math.max
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -42,21 +43,25 @@ fun FoodImageStackView(
     val frontIndex = loopedIndex(currentIndex)
     val backLeftIndex = loopedIndex(currentIndex + 1)
     val backRightIndex = loopedIndex(currentIndex + 2)
+    val incomingBackIndex = loopedIndex(currentIndex + 3)
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
     val swipeThresholdPx = with(density) { 64.dp.toPx() }
     val minAdditionalDropPx = with(density) { 96.dp.toPx() }
     var stackHeightPx by remember { mutableIntStateOf(0) }
     val dropDistancePx = if (stackHeightPx > 0) stackHeightPx.toFloat() else with(density) { 260.dp.toPx() }
-    val recycleBackLeftOffsetPx = 0f
-    val recycleBackRightOffsetPx = 0f
     var frontDragOffsetY by remember { mutableFloatStateOf(0f) }
     var recycleIndex by remember { mutableStateOf<Int?>(null) }
     var recycleOffsetY by remember { mutableFloatStateOf(0f) }
     var recycleRotation by remember { mutableFloatStateOf(0f) }
     var recycleAlpha by remember { mutableFloatStateOf(1f) }
     var isRecycling by remember { mutableStateOf(false) }
-    val recycleToBackRight = size >= 3
+    val secondCardProgress = (frontDragOffsetY / dropDistancePx).coerceIn(0f, 1f)
+    val incomingThirdAlpha = lerp(start = 0f, stop = 0.4f, fraction = secondCardProgress)
+    val thirdCardAlpha = lerp(start = 0.4f, stop = 0.7f, fraction = secondCardProgress)
+    val thirdCardRotation = lerp(start = -5f, stop = 5f, fraction = secondCardProgress)
+    val secondCardAlpha = lerp(start = 0.7f, stop = 1f, fraction = secondCardProgress)
+    val secondCardRotation = lerp(start = 5f, stop = 0f, fraction = secondCardProgress)
 
     Box(
         modifier = modifier
@@ -125,10 +130,17 @@ fun FoodImageStackView(
                             currentIndex = loopedIndex(currentIndex + 1)
                             frontDragOffsetY = 0f
 
-                            val recycleTargetOffsetPx =
-                                if (recycleToBackRight) recycleBackRightOffsetPx else recycleBackLeftOffsetPx
-                            val recycleTargetRotation = if (recycleToBackRight) 5f else -5f
-                            val recycleTargetAlpha = if (recycleToBackRight) 0.4f else 0.7f
+                            val recycleTargetOffsetPx = 0f
+                            val recycleTargetRotation = when {
+                                size == 2 -> 5f
+                                size == 3 -> -5f
+                                else -> -5f
+                            }
+                            val recycleTargetAlpha = when {
+                                size == 2 -> 0.7f
+                                size == 3 -> 0.4f
+                                else -> 0f
+                            }
 
                             coroutineScope {
                                 launch {
@@ -164,6 +176,19 @@ fun FoodImageStackView(
                 )
             }
     ) {
+        if (size >= 4 && recycleIndex != incomingBackIndex) {
+            FoodImageCard(
+                imageUrl = imageUrls[incomingBackIndex],
+                state = state,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        rotationZ = -5f
+                        alpha = incomingThirdAlpha
+                    }
+            )
+        }
+
         if (size >= 3 && recycleIndex != backRightIndex) {
             FoodImageCard(
                 imageUrl = imageUrls[backRightIndex],
@@ -171,8 +196,8 @@ fun FoodImageStackView(
                 modifier = Modifier
                     .fillMaxSize()
                     .graphicsLayer {
-                        rotationZ = -5f
-                        alpha = 0.4f
+                        rotationZ = thirdCardRotation
+                        alpha = thirdCardAlpha
                     }
             )
         }
@@ -184,8 +209,8 @@ fun FoodImageStackView(
                 modifier = Modifier
                     .fillMaxSize()
                     .graphicsLayer {
-                        rotationZ = 5f
-                        alpha = 0.7f
+                        rotationZ = secondCardRotation
+                        alpha = secondCardAlpha
                     }
             )
         }
