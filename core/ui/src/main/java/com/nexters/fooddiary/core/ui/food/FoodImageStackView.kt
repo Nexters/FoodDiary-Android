@@ -19,9 +19,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlin.math.max
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
@@ -43,7 +45,9 @@ fun FoodImageStackView(
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
     val swipeThresholdPx = with(density) { 64.dp.toPx() }
-    val dropDistancePx = with(density) { 140.dp.toPx() }
+    val minAdditionalDropPx = with(density) { 96.dp.toPx() }
+    var stackHeightPx by remember { mutableIntStateOf(0) }
+    val dropDistancePx = if (stackHeightPx > 0) stackHeightPx.toFloat() else with(density) { 260.dp.toPx() }
     val recycleBackLeftOffsetPx = 0f
     val recycleBackRightOffsetPx = 0f
     var frontDragOffsetY by remember { mutableFloatStateOf(0f) }
@@ -55,34 +59,22 @@ fun FoodImageStackView(
     val recycleToBackRight = size >= 3
 
     Box(
-        modifier = modifier.pointerInput(canNavigate, size, isRecycling) {
-            if (!canNavigate) return@pointerInput
+        modifier = modifier
+            .onSizeChanged { stackHeightPx = it.height }
+            .pointerInput(canNavigate, size, isRecycling, dropDistancePx) {
+                if (!canNavigate) return@pointerInput
 
-            detectVerticalDragGestures(
-                onVerticalDrag = { change, dragAmount ->
-                    if (isRecycling) return@detectVerticalDragGestures
-                    val nextOffset = (frontDragOffsetY + dragAmount).coerceAtLeast(0f)
-                    if (nextOffset != frontDragOffsetY) {
-                        frontDragOffsetY = nextOffset
-                        change.consume()
-                    }
-                },
-                onDragCancel = {
-                    if (isRecycling) return@detectVerticalDragGestures
-                    if (frontDragOffsetY > 0f) {
-                        scope.launch {
-                            val reset = Animatable(frontDragOffsetY)
-                            reset.animateTo(
-                                targetValue = 0f,
-                                animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
-                            ) { frontDragOffsetY = value }
+                detectVerticalDragGestures(
+                    onVerticalDrag = { change, dragAmount ->
+                        if (isRecycling) return@detectVerticalDragGestures
+                        val nextOffset = (frontDragOffsetY + dragAmount).coerceAtLeast(0f)
+                        if (nextOffset != frontDragOffsetY) {
+                            frontDragOffsetY = nextOffset
+                            change.consume()
                         }
-                    }
-                },
-                onDragEnd = {
-                    if (isRecycling) return@detectVerticalDragGestures
-
-                    if (frontDragOffsetY < swipeThresholdPx) {
+                    },
+                    onDragCancel = {
+                        if (isRecycling) return@detectVerticalDragGestures
                         if (frontDragOffsetY > 0f) {
                             scope.launch {
                                 val reset = Animatable(frontDragOffsetY)
@@ -92,65 +84,85 @@ fun FoodImageStackView(
                                 ) { frontDragOffsetY = value }
                             }
                         }
-                        return@detectVerticalDragGestures
-                    }
+                    },
+                    onDragEnd = {
+                        if (isRecycling) return@detectVerticalDragGestures
 
-                    scope.launch {
-                        isRecycling = true
-                        val outgoingIndex = frontIndex
-
-                        val drop = Animatable(frontDragOffsetY)
-                        drop.animateTo(
-                            targetValue = dropDistancePx,
-                            animationSpec = tween(durationMillis = 120, easing = FastOutSlowInEasing),
-                        ) { frontDragOffsetY = value }
-
-                        recycleIndex = outgoingIndex
-                        recycleOffsetY = dropDistancePx
-                        recycleRotation = 0f
-                        recycleAlpha = 1f
-
-                        currentIndex = loopedIndex(currentIndex + 1)
-                        frontDragOffsetY = 0f
-
-                        val recycleTargetOffsetPx =
-                            if (recycleToBackRight) recycleBackRightOffsetPx else recycleBackLeftOffsetPx
-                        val recycleTargetRotation = if (recycleToBackRight) 5f else -5f
-                        val recycleTargetAlpha = if (recycleToBackRight) 0.4f else 0.7f
-
-                        coroutineScope {
-                            launch {
-                                val offsetAnim = Animatable(recycleOffsetY)
-                                offsetAnim.animateTo(
-                                    targetValue = recycleTargetOffsetPx,
-                                    animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing),
-                                ) { recycleOffsetY = value }
-                            }
-                            launch {
-                                val rotationAnim = Animatable(recycleRotation)
-                                rotationAnim.animateTo(
-                                    targetValue = recycleTargetRotation,
-                                    animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing),
-                                ) { recycleRotation = value }
-                            }
-                            launch {
-                                val alphaAnim = Animatable(recycleAlpha)
-                                alphaAnim.animateTo(
-                                    targetValue = recycleTargetAlpha,
-                                    animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing),
-                                ) { recycleAlpha = value }
-                            }
+                        if (frontDragOffsetY <= 0f) {
+                            return@detectVerticalDragGestures
                         }
 
-                        recycleIndex = null
-                        recycleOffsetY = 0f
-                        recycleRotation = 0f
-                        recycleAlpha = 1f
-                        isRecycling = false
-                    }
-                },
-            )
-        }
+                        if (frontDragOffsetY < swipeThresholdPx) {
+                            scope.launch {
+                                val reset = Animatable(frontDragOffsetY)
+                                reset.animateTo(
+                                    targetValue = 0f,
+                                    animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
+                                ) { frontDragOffsetY = value }
+                            }
+                            return@detectVerticalDragGestures
+                        }
+
+                        scope.launch {
+                            isRecycling = true
+                            val outgoingIndex = frontIndex
+                            val dropTarget = max(
+                                frontDragOffsetY + minAdditionalDropPx,
+                                dropDistancePx,
+                            )
+
+                            val drop = Animatable(frontDragOffsetY)
+                            drop.animateTo(
+                                targetValue = dropTarget,
+                                animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+                            ) { frontDragOffsetY = value }
+
+                            recycleIndex = outgoingIndex
+                            recycleOffsetY = dropTarget
+                            recycleRotation = 0f
+                            recycleAlpha = 1f
+
+                            currentIndex = loopedIndex(currentIndex + 1)
+                            frontDragOffsetY = 0f
+
+                            val recycleTargetOffsetPx =
+                                if (recycleToBackRight) recycleBackRightOffsetPx else recycleBackLeftOffsetPx
+                            val recycleTargetRotation = if (recycleToBackRight) 5f else -5f
+                            val recycleTargetAlpha = if (recycleToBackRight) 0.4f else 0.7f
+
+                            coroutineScope {
+                                launch {
+                                    val offsetAnim = Animatable(recycleOffsetY)
+                                    offsetAnim.animateTo(
+                                        targetValue = recycleTargetOffsetPx,
+                                        animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing),
+                                    ) { recycleOffsetY = value }
+                                }
+                                launch {
+                                    val rotationAnim = Animatable(recycleRotation)
+                                    rotationAnim.animateTo(
+                                        targetValue = recycleTargetRotation,
+                                        animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing),
+                                    ) { recycleRotation = value }
+                                }
+                                launch {
+                                    val alphaAnim = Animatable(recycleAlpha)
+                                    alphaAnim.animateTo(
+                                        targetValue = recycleTargetAlpha,
+                                        animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing),
+                                    ) { recycleAlpha = value }
+                                }
+                            }
+
+                            recycleIndex = null
+                            recycleOffsetY = 0f
+                            recycleRotation = 0f
+                            recycleAlpha = 1f
+                            isRecycling = false
+                        }
+                    },
+                )
+            }
     ) {
         if (size >= 3 && recycleIndex != backRightIndex) {
             FoodImageCard(
