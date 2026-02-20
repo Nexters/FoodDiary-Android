@@ -39,7 +39,12 @@ class HomeViewModel @AssistedInject constructor(
 
     fun onDateSelected(date: LocalDate) {
         setState { copy(selectedDate = date) }
-        _events.tryEmit(HomeEvent.NavigateToDetail(date))
+    }
+
+    fun onCardStackClicked() {
+        withState { state ->
+            _events.tryEmit(HomeEvent.NavigateToDetail(state.selectedDate))
+        }
     }
 
     fun onToggleCalendarView() {

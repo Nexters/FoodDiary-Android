@@ -3,6 +3,7 @@ package com.nexters.fooddiary.presentation.home
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,6 +40,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color.Companion.Transparent
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -122,6 +124,7 @@ internal fun HomeScreen(
         state = state,
         photoCountByDate = photoCountByDate,
         onDateSelected = viewModel::onDateSelected,
+        onCardStackClick = viewModel::onCardStackClicked,
         onToggleCalendarView = viewModel::onToggleCalendarView,
         onNavigateToImagePicker = onNavigateToImagePicker,
         onNavigateToMyPage = onNavigateToMyPage,
@@ -136,6 +139,7 @@ private fun HomeScreen(
     state: HomeScreenState = HomeScreenState(),
     photoCountByDate: Map<LocalDate, Int> = emptyMap(),
     onDateSelected: (LocalDate) -> Unit = {},
+    onCardStackClick: () -> Unit = {},
     onToggleCalendarView: () -> Unit = {},
     onNavigateToImagePicker: () -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
@@ -202,17 +206,26 @@ private fun HomeScreen(
                     )
                     Spacer(modifier = Modifier.height(43.dp))
                     if (selectedDateImageUrls.isNotEmpty()) {
-                        FoodImageStackView(
-                            imageUrls = selectedDateImageUrls,
-                            state = FoodImageState.Ready(
-                                timeText = "시간",
-                                locationText = "위치",
-                            ),
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 20.dp)
-                                .aspectRatio(1f),
-                        )
+                                .aspectRatio(1f)
+                                .pointerInput(onCardStackClick) {
+                                    detectTapGestures(
+                                        onTap = { onCardStackClick() }
+                                    )
+                                }
+                        ) {
+                            FoodImageStackView(
+                                imageUrls = selectedDateImageUrls,
+                                state = FoodImageState.Ready(
+                                    timeText = "시간",
+                                    locationText = "위치",
+                                ),
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
                     } else {
                         AddPhotoBox(
                             modifier = Modifier
