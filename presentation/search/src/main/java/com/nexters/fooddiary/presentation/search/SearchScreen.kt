@@ -17,6 +17,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
@@ -30,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,6 +73,8 @@ internal fun SearchScreen(
         onClose = onClose,
         onKeywordChanged = { keyword -> viewModel.onKeywordChanged(diaryId, keyword) },
         onSelectRestaurant = onSelectRestaurant,
+        onLoadNextPage = viewModel::loadNextPage,
+        onRetryLoadMore = viewModel::retryLoadMore,
     )
 }
 
@@ -78,6 +84,8 @@ private fun SearchScreen(
     onClose: () -> Unit,
     onKeywordChanged: (String) -> Unit,
     onSelectRestaurant: (RestaurantItem) -> Unit,
+    onLoadNextPage: () -> Unit,
+    onRetryLoadMore: () -> Unit,
 ) {
     val hasKeyword = state.keyword.isNotBlank()
 
@@ -154,7 +162,16 @@ private fun SearchScreen(
             else -> {
                 RestaurantListCard(
                     restaurants = state.restaurants,
+                    isEnd = state.isEnd,
+                    isLoading = state.isLoading,
+                    isLoadingMore = state.isLoadingMore,
+                    loadMoreErrorMessage = state.loadMoreErrorMessage,
                     onSelectRestaurant = onSelectRestaurant,
+                    onLoadNextPage = onLoadNextPage,
+                    onRetryLoadMore = onRetryLoadMore,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
                 )
             }
         }
@@ -215,21 +232,47 @@ private fun SearchInputField(
 @Composable
 private fun RestaurantListCard(
     restaurants: List<RestaurantItem>,
+    isEnd: Boolean,
+    isLoading: Boolean,
+    isLoadingMore: Boolean,
+    loadMoreErrorMessage: String?,
     onSelectRestaurant: (RestaurantItem) -> Unit,
+    onLoadNextPage: () -> Unit,
+    onRetryLoadMore: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
+    val listState = rememberLazyListState()
+    val shouldLoadNextPage = !isEnd && !isLoading && !isLoadingMore && restaurants.isNotEmpty()
+
+    LaunchedEffect(listState, shouldLoadNextPage, restaurants.size) {
+        if (!shouldLoadNextPage) return@LaunchedEffect
+
+        snapshotFlow { listState.layoutInfo }
+            .collect { layoutInfo ->
+                val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: return@collect
+                if (lastVisibleItemIndex >= layoutInfo.totalItemsCount - 2) {
+                    onLoadNextPage()
+                }
+            }
+    }
+
+    LazyColumn(
+        state = listState,
+        modifier = modifier
             .border(1.dp, Sd800, RoundedCornerShape(10.dp))
             .clip(RoundedCornerShape(10.dp))
             .padding(horizontal = 20.dp, vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
-        restaurants.forEachIndexed { index, restaurant ->
+        itemsIndexed(
+            items = restaurants,
+            key = { index, restaurant -> "${restaurant.url}_$index" },
+        ) { index, restaurant ->
             RestaurantRow(
                 restaurant = restaurant,
                 onSelect = { onSelectRestaurant(restaurant) },
             )
+            Spacer(modifier = Modifier.height(24.dp))
             if (index != restaurants.lastIndex) {
                 Spacer(
                     modifier = Modifier
@@ -237,6 +280,47 @@ private fun RestaurantListCard(
                         .height(1.dp)
                         .background(Sd800),
                 )
+            }
+        }
+
+        if (isLoadingMore) {
+            item(key = "load_more_progress") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator(
+                        color = Gray050,
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                    )
+                }
+            }
+        }
+
+        if (!loadMoreErrorMessage.isNullOrBlank()) {
+            item(key = "load_more_error") {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = stringResource(R.string.search_load_more_error),
+                        style = AppTypography.p12,
+                        color = Gray400,
+                    )
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Text(
+                        text = stringResource(R.string.search_load_more_retry),
+                        style = AppTypography.p12,
+                        color = Gray050,
+                        textDecoration = TextDecoration.Underline,
+                        modifier = Modifier.clickable(onClick = onRetryLoadMore),
+                    )
+                }
             }
         }
     }
@@ -309,5 +393,7 @@ private fun SearchScreenPreviewWithResults() {
         onClose = {},
         onKeywordChanged = {},
         onSelectRestaurant = {},
+        onLoadNextPage = {},
+        onRetryLoadMore = {},
     )
 }

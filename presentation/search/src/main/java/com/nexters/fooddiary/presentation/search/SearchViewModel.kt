@@ -27,7 +27,9 @@ data class SearchScreenState(
     val size: Int = 15,
     val isEnd: Boolean = true,
     val isLoading: Boolean = false,
+    val isLoadingMore: Boolean = false,
     val errorMessage: String? = null,
+    val loadMoreErrorMessage: String? = null,
 ) : MavericksState
 
 class SearchViewModel @AssistedInject constructor(
@@ -36,12 +38,16 @@ class SearchViewModel @AssistedInject constructor(
 ) : MavericksViewModel<SearchScreenState>(initialState) {
 
     private var searchJob: Job? = null
+    private var loadMoreJob: Job? = null
+    private var lastDiaryId: Long? = null
+    private var lastKeyword: String? = null
 
     fun onKeywordChanged(diaryId: Long?, keyword: String) {
         setState {
             copy(
                 keyword = keyword,
                 errorMessage = null,
+                loadMoreErrorMessage = null,
             )
         }
         scheduleSearch(
@@ -60,20 +66,51 @@ class SearchViewModel @AssistedInject constructor(
         )
     }
 
+    fun loadNextPage() = withState { state ->
+        if (state.isLoading || state.isLoadingMore || state.isEnd || state.restaurants.isEmpty() || loadMoreJob?.isActive == true) {
+            return@withState
+        }
+
+        val diaryId = lastDiaryId
+        val keyword = lastKeyword
+        if (diaryId == null && keyword.isNullOrBlank()) {
+            return@withState
+        }
+
+        loadMoreJob = viewModelScope.launch {
+            fetchNextPage(
+                diaryId = diaryId,
+                keyword = keyword,
+                nextPage = state.page + 1,
+                size = state.size,
+            )
+        }
+    }
+
+    fun retryLoadMore() {
+        loadNextPage()
+    }
+
     private fun scheduleSearch(
         diaryId: Long?,
         keyword: String?,
         immediate: Boolean,
     ) {
         searchJob?.cancel()
+        loadMoreJob?.cancel()
 
         if (diaryId == null && keyword.isNullOrBlank()) {
             setState {
                 copy(
                     restaurants = emptyList(),
                     totalCount = 0,
+                    page = DefaultPage,
+                    size = DefaultSize,
+                    isEnd = true,
                     isLoading = false,
+                    isLoadingMore = false,
                     errorMessage = null,
+                    loadMoreErrorMessage = null,
                 )
             }
             return
@@ -94,7 +131,14 @@ class SearchViewModel @AssistedInject constructor(
         diaryId: Long?,
         keyword: String?,
     ) {
-        setState { copy(isLoading = true, errorMessage = null) }
+        setState {
+            copy(
+                isLoading = true,
+                isLoadingMore = false,
+                errorMessage = null,
+                loadMoreErrorMessage = null,
+            )
+        }
 
         runCatching {
             searchRestaurantsUseCase(
@@ -104,6 +148,8 @@ class SearchViewModel @AssistedInject constructor(
                 size = DefaultSize,
             )
         }.onSuccess { result ->
+            lastDiaryId = diaryId
+            lastKeyword = keyword
             setState {
                 copy(
                     restaurants = result.restaurants,
@@ -112,7 +158,9 @@ class SearchViewModel @AssistedInject constructor(
                     size = result.size,
                     isEnd = result.isEnd,
                     isLoading = false,
+                    isLoadingMore = false,
                     errorMessage = null,
+                    loadMoreErrorMessage = null,
                 )
             }
         }.onFailure { throwable ->
@@ -121,8 +169,56 @@ class SearchViewModel @AssistedInject constructor(
                 copy(
                     restaurants = emptyList(),
                     totalCount = 0,
+                    page = DefaultPage,
+                    size = DefaultSize,
+                    isEnd = true,
                     isLoading = false,
+                    isLoadingMore = false,
                     errorMessage = throwable.message ?: "search_failed",
+                    loadMoreErrorMessage = null,
+                )
+            }
+        }
+    }
+
+    private suspend fun fetchNextPage(
+        diaryId: Long?,
+        keyword: String?,
+        nextPage: Int,
+        size: Int,
+    ) {
+        setState {
+            copy(
+                isLoadingMore = true,
+                loadMoreErrorMessage = null,
+            )
+        }
+
+        runCatching {
+            searchRestaurantsUseCase(
+                diaryId = diaryId,
+                keyword = keyword,
+                page = nextPage,
+                size = size,
+            )
+        }.onSuccess { result ->
+            setState {
+                copy(
+                    restaurants = restaurants + result.restaurants,
+                    totalCount = result.totalCount,
+                    page = result.page,
+                    size = result.size,
+                    isEnd = result.isEnd,
+                    isLoadingMore = false,
+                    loadMoreErrorMessage = null,
+                )
+            }
+        }.onFailure { throwable ->
+            if (throwable is CancellationException) throw throwable
+            setState {
+                copy(
+                    isLoadingMore = false,
+                    loadMoreErrorMessage = "search_load_more_error",
                 )
             }
         }
