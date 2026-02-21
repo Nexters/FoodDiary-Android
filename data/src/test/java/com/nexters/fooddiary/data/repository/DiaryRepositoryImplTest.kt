@@ -26,6 +26,7 @@ class DiaryRepositoryImplTest {
             diaryApi = diaryApi,
             diaryMapper = diaryMapper,
             isDebug = true,
+            useMockApi = true,
         )
 
         coEvery {
@@ -53,6 +54,7 @@ class DiaryRepositoryImplTest {
             diaryApi = diaryApi,
             diaryMapper = diaryMapper,
             isDebug = false,
+            useMockApi = false,
         )
 
         coEvery {

@@ -39,6 +39,8 @@ import com.nexters.fooddiary.presentation.webview.navigation.WebViewRoute
 import com.nexters.fooddiary.presentation.webview.navigation.webViewScreen
 import com.nexters.fooddiary.presentation.splash.navigation.SplashRoute
 import com.nexters.fooddiary.presentation.splash.navigation.splashScreen
+import com.nexters.fooddiary.presentation.modify.navigation.ModifyRoute
+import com.nexters.fooddiary.presentation.modify.navigation.modifyScreen
 
 @Composable
 fun FoodDiaryNavHost(
@@ -152,6 +154,7 @@ fun FoodDiaryNavHost(
         detailScreen(
             onNavigateBack = { navController.popBackStack() },
             onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
+            onNavigateToModify = { diaryId -> navController.navigate(ModifyRoute(diaryId = diaryId)) },
             onShowToast = onShowToast,
         )
 
@@ -164,7 +167,10 @@ fun FoodDiaryNavHost(
                 }
             }
         )
-
+        modifyScreen(
+            onBack = { navController.popBackStack() },
+            onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
+        )
         myPageScreen(
             navigateToWebView = { page ->
                 val url = when (page) {
