@@ -21,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
@@ -266,6 +267,14 @@ fun FoodImageStackView(
                     onClick = onCardClick,
                 ),
         )
+
+        if (isRecycling) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInteropFilter { true }
+            )
+        }
     }
 }
 
