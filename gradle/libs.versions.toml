@@ -38,10 +38,11 @@ compileSdk = "36"
 targetSdk = "36"
 calendar = "2.6.2"
 uiToolingPreviewAndroid = "1.10.1"
-coil = "2.7.0"
 material3Android = "1.4.0"
 remoteCreationCore = "1.0.0-alpha02"
 mockk = "1.14.7"
+coil = "3.3.0"
+haze = "1.6.10"
 sentryGradle = "4.3.0"
 sentryAndroid = "7.5.0"
 appcompat = "1.7.1"
@@ -151,9 +152,14 @@ firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging
 androidx-ui-tooling-preview-android = { group = "androidx.compose.ui", name = "ui-tooling-preview-android", version.ref = "uiToolingPreviewAndroid" }
 
 # Coil
-coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
+
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
 androidx-remote-creation-core = { group = "androidx.compose.remote", name = "remote-creation-core", version.ref = "remoteCreationCore" }
+
+haze = { group = "dev.chrisbanes.haze", name = "haze", version.ref = "haze" }
+haze-materials = { group = "dev.chrisbanes.haze", name = "haze-materials", version.ref = "haze" }
 
 sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentryAndroid" }
 haze = { group = "dev.chrisbanes.haze", name = "haze", version.ref = "haze" }
