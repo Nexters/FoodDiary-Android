@@ -101,6 +101,8 @@ android {
         create("debugRelease") {
             initWith(getByName("debug"))
             matchingFallbacks += listOf("debug")
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
             signingConfig = signingConfigs.findByName("dev")
             buildConfigField("boolean", "USE_MOCK_API", "false")
         }
