@@ -8,8 +8,8 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
-import com.nexters.fooddiary.domain.usecase.GetDiaryByDateUseCase
 import com.nexters.fooddiary.presentation.detail.util.toDailyMeals
+import com.nexters.fooddiary.domain.usecase.GetDiaryByDateUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -29,6 +29,7 @@ sealed interface DetailEvent {
     data class ShareMapLink(val place: String, val mapLink: String) : DetailEvent
     data object ShareLinkEmpty : DetailEvent
     data object NavigateToImagePicker : DetailEvent
+    data class NavigateToModify(val diaryId: String) : DetailEvent
 }
 
 class DetailViewModel @AssistedInject constructor(
@@ -43,16 +44,13 @@ class DetailViewModel @AssistedInject constructor(
             if (!forceRefresh && state.mealsByDate.containsKey(date)) return@withState
 
             suspend {
-                val diary = getDiaryByDateUseCase(date)
-                diary.toDailyMeals(date)
+                getDiaryByDateUseCase(date).toDailyMeals(date)
             }.execute { result ->
                 when (result) {
-                    is Success -> {
-                        copy(
-                            mealsByDate = putAndTrim(mealsByDate, date, result()),
-                            loadMealsRequest = result,
-                        )
-                    }
+                    is Success -> copy(
+                        mealsByDate = putAndTrim(mealsByDate, date, result()),
+                        loadMealsRequest = result,
+                    )
                     else -> copy(loadMealsRequest = result)
                 }
             }
@@ -81,14 +79,18 @@ class DetailViewModel @AssistedInject constructor(
     }
 
     fun navigateToPreviousDay() {
-        setState {
-            copy(selectedDate = selectedDate.minusDays(1))
+        withState { state ->
+            val newDate = state.selectedDate.minusDays(1)
+            setState { copy(selectedDate = newDate) }
+            loadMealsForDate(newDate)
         }
     }
 
     fun navigateToNextDay() {
-        setState {
-            copy(selectedDate = selectedDate.plusDays(1))
+        withState { state ->
+            val newDate = state.selectedDate.plusDays(1)
+            setState { copy(selectedDate = newDate) }
+            loadMealsForDate(newDate)
         }
     }
 
@@ -96,8 +98,8 @@ class DetailViewModel @AssistedInject constructor(
         _events.tryEmit(DetailEvent.NavigateToImagePicker)
     }
 
-    fun onEditClick(slot: MealSlot, date: LocalDate) {
-        // TODO: 수정 화면으로 이동
+    fun onEditClick(id: String) {
+        _events.tryEmit(DetailEvent.NavigateToModify(id))
     }
 
     fun onDeleteClick() {

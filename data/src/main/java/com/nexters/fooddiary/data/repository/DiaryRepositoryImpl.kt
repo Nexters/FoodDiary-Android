@@ -2,8 +2,10 @@ package com.nexters.fooddiary.data.repository
 
 import com.nexters.fooddiary.data.mapper.DiaryMapper
 import com.nexters.fooddiary.data.remote.diary.DiaryApi
+import com.nexters.fooddiary.data.remote.diary.model.UpdateDiaryRequest
 import com.nexters.fooddiary.domain.model.DiaryDetail
 import com.nexters.fooddiary.domain.model.DiaryEntry
+import com.nexters.fooddiary.domain.model.UpdateDiaryParam
 import com.nexters.fooddiary.domain.repository.DiaryRepository
 import java.time.LocalDate
 import java.time.YearMonth
@@ -14,6 +16,7 @@ class DiaryRepositoryImpl @Inject constructor(
     private val diaryApi: DiaryApi,
     private val diaryMapper: DiaryMapper,
     @Named("isDebug") private val isDebug: Boolean,
+    @Named("useMockApi") private val useMockApi: Boolean,
 ) : DiaryRepository {
 
     override suspend fun getDiary(date: LocalDate): DiaryDetail {
@@ -24,9 +27,8 @@ class DiaryRepositoryImpl @Inject constructor(
             testMode = isDebug,
         )
         val diaries = response.diaries.filter { diary ->
-            diary.diaryDate == requestedDate
+            parseDiaryDateToLocalDate(diary.diaryDate) == date
         }
-
         return DiaryDetail(
             date = date,
             diaries = diaryMapper.toDomainDiaryEntries(diaries),
@@ -42,7 +44,7 @@ class DiaryRepositoryImpl @Inject constructor(
             testMode = isDebug,
         )
         return response.diaries
-            .groupBy { LocalDate.parse(it.diaryDate) }
+            .groupBy { parseDiaryDateToLocalDate(it.diaryDate) }
             .mapValues { (_, list) -> diaryMapper.toDomainDiaryEntries(list).first() }
     }
 
@@ -62,4 +64,31 @@ class DiaryRepositoryImpl @Inject constructor(
                 ?.let { parsedDate -> parsedDate to summary.photos }
         }.toMap()
     }
+
+    override suspend fun getDiary(id: Int): DiaryEntry {
+        val response = diaryApi.getDiaryById(id, useMockApi)
+        return diaryMapper.toDomainDiaryEntries(listOf(response)).first()
+    }
+
+    override suspend fun updateDiary(diaryId: Int, param: UpdateDiaryParam): DiaryEntry {
+        val request = UpdateDiaryRequest(
+            category = param.category,
+            restaurantName = param.restaurantName,
+            restaurantUrl = param.restaurantUrl,
+            roadAddress = param.roadAddress,
+            tags = param.tags,
+            note = param.note,
+            coverPhotoId = param.coverPhotoId,
+            photoIds = param.photoIds,
+        )
+        val response = diaryApi.updateDiary(diaryId, request)
+        return diaryMapper.toDomainDiaryEntries(listOf(response)).first()
+    }
+
+    override suspend fun deleteDiary(diaryId: Int) {
+        diaryApi.deleteDiary(diaryId)
+    }
+
+    private fun parseDiaryDateToLocalDate(diaryDate: String): LocalDate =
+        LocalDate.parse(diaryDate.take(10))
 }

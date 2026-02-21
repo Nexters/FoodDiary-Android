@@ -14,6 +14,7 @@ data class DetailRoute(
 fun NavGraphBuilder.detailScreen(
     onNavigateBack: () -> Unit,
     onNavigateToImagePicker: () -> Unit,
+    onNavigateToModify: (String) -> Unit,
     onShowToast: (String) -> Unit,
 ) {
     composable<DetailRoute> { backStackEntry ->
@@ -24,6 +25,7 @@ fun NavGraphBuilder.detailScreen(
             onNavigateBack = onNavigateBack,
             onNavigateToImagePicker = onNavigateToImagePicker,
             onShowToast = onShowToast,
+            onNavigateToModify = onNavigateToModify,
         )
     }
 }
