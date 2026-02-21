@@ -66,8 +66,15 @@ class SearchViewModel @AssistedInject constructor(
         )
     }
 
-    fun loadNextPage() = withState { state ->
+    fun loadNextPage() = requestNextPage(allowOnError = false)
+
+    fun retryLoadMore() = requestNextPage(allowOnError = true)
+
+    private fun requestNextPage(allowOnError: Boolean) = withState { state ->
         if (state.isLoading || state.isLoadingMore || state.isEnd || state.restaurants.isEmpty() || loadMoreJob?.isActive == true) {
+            return@withState
+        }
+        if (!allowOnError && !state.loadMoreErrorMessage.isNullOrBlank()) {
             return@withState
         }
 
@@ -85,10 +92,6 @@ class SearchViewModel @AssistedInject constructor(
                 size = state.size,
             )
         }
-    }
-
-    fun retryLoadMore() {
-        loadNextPage()
     }
 
     private fun scheduleSearch(
