@@ -101,14 +101,6 @@ internal fun HomeScreen(
     val state by viewModel.collectAsState()
     val photoCountByDate by viewModel.photoCountByDate.collectAsState(initial = emptyMap())
     val currentOnNavigateToDetail by rememberUpdatedState(onNavigateToDetail)
-    // TODO: 연결 가능한 홈 이미지 URL 데이터가 준비되면 교체
-    val temporaryHomeImageUrls = remember {
-        listOf(
-            "https://picsum.photos/seed/home-food-1/900/900",
-            "https://picsum.photos/seed/home-food-2/900/900",
-            "https://picsum.photos/seed/home-food-3/900/900",
-        )
-    }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collectLatest { event ->
@@ -126,7 +118,7 @@ internal fun HomeScreen(
         onToggleCalendarView = viewModel::onToggleCalendarView,
         onNavigateToImagePicker = onNavigateToImagePicker,
         onNavigateToMyPage = onNavigateToMyPage,
-        selectedDateImageUrls = temporaryHomeImageUrls,
+        selectedDateImageUrls = state.weeklyPhotosByDate[state.selectedDate].orEmpty(),
         modifier = modifier,
     )
 }
