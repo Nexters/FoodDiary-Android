@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -28,8 +29,36 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import kotlin.math.max
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+
+private val SwipeThreshold = 64.dp
+private val AdditionalDropDistance = 96.dp
+private val ClickCancelThreshold = 12.dp
+private val FallbackDropDistance = 260.dp
+
+private const val ResetDurationMillis = 180
+private const val DropDurationMillis = 220
+private const val RecycleDurationMillis = 260
+
+private const val SecondCardBaseAlpha = 0.7f
+private const val ThirdCardBaseAlpha = 0.4f
+private const val HiddenAlpha = 0f
+private const val VisibleAlpha = 1f
+
+private const val PositiveRotation = 5f
+private const val NegativeRotation = -5f
+
+private fun loopedIndex(index: Int, size: Int): Int = ((index % size) + size) % size
+
+private fun recycleTargetRotation(size: Int): Float = if (size == 2) PositiveRotation else NegativeRotation
+
+private fun recycleTargetAlpha(size: Int): Float = when (size) {
+    2 -> SecondCardBaseAlpha
+    3 -> ThirdCardBaseAlpha
+    else -> HiddenAlpha
+}
 
 @Composable
 fun FoodImageStackView(
@@ -44,32 +73,60 @@ fun FoodImageStackView(
     var currentIndex by rememberSaveable(imageUrls) { mutableIntStateOf(0) }
     val size = imageUrls.size
     val canNavigate = size > 1 && state is FoodImageState.Ready
-    fun loopedIndex(index: Int): Int = ((index % size) + size) % size
-    val frontIndex = loopedIndex(currentIndex)
-    val backLeftIndex = loopedIndex(currentIndex + 1)
-    val backRightIndex = loopedIndex(currentIndex + 2)
-    val incomingBackIndex = loopedIndex(currentIndex + 3)
+    val frontIndex = loopedIndex(currentIndex, size)
+    val backLeftIndex = loopedIndex(currentIndex + 1, size)
+    val backRightIndex = loopedIndex(currentIndex + 2, size)
+    val incomingBackIndex = loopedIndex(currentIndex + 3, size)
+    val frontImageUrl = imageUrls.getOrNull(frontIndex)
+    val backLeftImageUrl = imageUrls.getOrNull(backLeftIndex)
+    val backRightImageUrl = imageUrls.getOrNull(backRightIndex)
+    val incomingBackImageUrl = imageUrls.getOrNull(incomingBackIndex)
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
-    val swipeThresholdPx = with(density) { 64.dp.toPx() }
-    val minAdditionalDropPx = with(density) { 96.dp.toPx() }
-    val tapCancelVerticalThresholdPx = with(density) { 12.dp.toPx() }
+    val swipeThresholdPx = with(density) { SwipeThreshold.toPx() }
+    val minAdditionalDropPx = with(density) { AdditionalDropDistance.toPx() }
+    val tapCancelVerticalThresholdPx = with(density) { ClickCancelThreshold.toPx() }
     var stackHeightPx by remember { mutableIntStateOf(0) }
-    val dropDistancePx = if (stackHeightPx > 0) stackHeightPx.toFloat() else with(density) { 260.dp.toPx() }
+    val dropDistancePx = if (stackHeightPx > 0) stackHeightPx.toFloat() else with(density) { FallbackDropDistance.toPx() }
     var frontDragOffsetY by remember { mutableFloatStateOf(0f) }
     var recycleIndex by remember { mutableStateOf<Int?>(null) }
     var recycleOffsetY by remember { mutableFloatStateOf(0f) }
     var recycleRotation by remember { mutableFloatStateOf(0f) }
-    var recycleAlpha by remember { mutableFloatStateOf(1f) }
+    var recycleAlpha by remember { mutableFloatStateOf(VisibleAlpha) }
     var isRecycling by remember { mutableStateOf(false) }
+    var resetJob by remember { mutableStateOf<Job?>(null) }
+
+    LaunchedEffect(imageUrls) {
+        resetJob?.cancel()
+        resetJob = null
+        frontDragOffsetY = 0f
+        recycleIndex = null
+        recycleOffsetY = 0f
+        recycleRotation = 0f
+        recycleAlpha = VisibleAlpha
+        isRecycling = false
+    }
+
+    fun animateFrontCardBackToOrigin() {
+        if (frontDragOffsetY <= 0f) return
+        resetJob?.cancel()
+        resetJob = scope.launch {
+            val reset = Animatable(frontDragOffsetY)
+            reset.animateTo(
+                targetValue = 0f,
+                animationSpec = tween(durationMillis = ResetDurationMillis, easing = FastOutSlowInEasing),
+            ) { frontDragOffsetY = value }
+            resetJob = null
+        }
+    }
 
     // 앞 카드가 얼마나 내려갔는지(0~1)로 뒤 카드 상태를 연동
     val secondCardProgress = (frontDragOffsetY / dropDistancePx).coerceIn(0f, 1f)
-    val incomingThirdAlpha = lerp(start = 0f, stop = 0.4f, fraction = secondCardProgress)
-    val thirdCardAlpha = lerp(start = 0.4f, stop = 0.7f, fraction = secondCardProgress)
-    val thirdCardRotation = lerp(start = -5f, stop = 5f, fraction = secondCardProgress)
-    val secondCardAlpha = lerp(start = 0.7f, stop = 1f, fraction = secondCardProgress)
-    val secondCardRotation = lerp(start = 5f, stop = 0f, fraction = secondCardProgress)
+    val incomingThirdAlpha = lerp(start = HiddenAlpha, stop = ThirdCardBaseAlpha, fraction = secondCardProgress)
+    val thirdCardAlpha = lerp(start = ThirdCardBaseAlpha, stop = SecondCardBaseAlpha, fraction = secondCardProgress)
+    val thirdCardRotation = lerp(start = NegativeRotation, stop = PositiveRotation, fraction = secondCardProgress)
+    val secondCardAlpha = lerp(start = SecondCardBaseAlpha, stop = VisibleAlpha, fraction = secondCardProgress)
+    val secondCardRotation = lerp(start = PositiveRotation, stop = 0f, fraction = secondCardProgress)
 
     Box(
         modifier = modifier
@@ -81,6 +138,8 @@ fun FoodImageStackView(
                     // 1) 사용자가 앞 카드를 아래로 끌면 그대로 따라 내려감
                     onVerticalDrag = { change, dragAmount ->
                         if (isRecycling) return@detectVerticalDragGestures
+                        resetJob?.cancel()
+                        resetJob = null
                         val nextOffset = (frontDragOffsetY + dragAmount).coerceAtLeast(0f)
                         if (nextOffset != frontDragOffsetY) {
                             frontDragOffsetY = nextOffset
@@ -90,15 +149,7 @@ fun FoodImageStackView(
                     // 2) 드래그가 취소되면 현재 카드 위치를 원위치로 복귀
                     onDragCancel = {
                         if (isRecycling) return@detectVerticalDragGestures
-                        if (frontDragOffsetY > 0f) {
-                            scope.launch {
-                                val reset = Animatable(frontDragOffsetY)
-                                reset.animateTo(
-                                    targetValue = 0f,
-                                    animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
-                                ) { frontDragOffsetY = value }
-                            }
-                        }
+                        animateFrontCardBackToOrigin()
                     },
                     // 3) 손을 뗐을 때 임계값으로 전환/복귀 분기
                     onDragEnd = {
@@ -110,17 +161,13 @@ fun FoodImageStackView(
 
                         // 임계값 미만이면 스와이프 실패로 보고 원위치 복귀
                         if (frontDragOffsetY < swipeThresholdPx) {
-                            scope.launch {
-                                val reset = Animatable(frontDragOffsetY)
-                                reset.animateTo(
-                                    targetValue = 0f,
-                                    animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing),
-                                ) { frontDragOffsetY = value }
-                            }
+                            animateFrontCardBackToOrigin()
                             return@detectVerticalDragGestures
                         }
 
                         scope.launch {
+                            resetJob?.cancel()
+                            resetJob = null
                             isRecycling = true
                             val outgoingIndex = frontIndex
 
@@ -133,51 +180,43 @@ fun FoodImageStackView(
                             val drop = Animatable(frontDragOffsetY)
                             drop.animateTo(
                                 targetValue = dropTarget,
-                                animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+                                animationSpec = tween(durationMillis = DropDurationMillis, easing = FastOutSlowInEasing),
                             ) { frontDragOffsetY = value }
 
                             recycleIndex = outgoingIndex
                             recycleOffsetY = dropTarget
                             recycleRotation = 0f
-                            recycleAlpha = 1f
+                            recycleAlpha = VisibleAlpha
 
                             // 4) 실제 데이터 인덱스를 다음 카드로 넘겨 스택 순서를 갱신
-                            currentIndex = loopedIndex(currentIndex + 1)
+                            currentIndex = loopedIndex(currentIndex + 1, size)
                             frontDragOffsetY = 0f
 
                             // 5) 내려간 기존 앞 카드를 뒤 스택 상태(alpha/angle)로 복귀 애니메이션
                             val recycleTargetOffsetPx = 0f
-                            val recycleTargetRotation = when {
-                                size == 2 -> 5f
-                                size == 3 -> -5f
-                                else -> -5f
-                            }
-                            val recycleTargetAlpha = when {
-                                size == 2 -> 0.7f
-                                size == 3 -> 0.4f
-                                else -> 0f
-                            }
+                            val recycleTargetRotation = recycleTargetRotation(size)
+                            val recycleTargetAlpha = recycleTargetAlpha(size)
 
                             coroutineScope {
                                 launch {
                                     val offsetAnim = Animatable(recycleOffsetY)
                                     offsetAnim.animateTo(
                                         targetValue = recycleTargetOffsetPx,
-                                        animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing),
+                                        animationSpec = tween(durationMillis = RecycleDurationMillis, easing = FastOutSlowInEasing),
                                     ) { recycleOffsetY = value }
                                 }
                                 launch {
                                     val rotationAnim = Animatable(recycleRotation)
                                     rotationAnim.animateTo(
                                         targetValue = recycleTargetRotation,
-                                        animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing),
+                                        animationSpec = tween(durationMillis = RecycleDurationMillis, easing = FastOutSlowInEasing),
                                     ) { recycleRotation = value }
                                 }
                                 launch {
                                     val alphaAnim = Animatable(recycleAlpha)
                                     alphaAnim.animateTo(
                                         targetValue = recycleTargetAlpha,
-                                        animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing),
+                                        animationSpec = tween(durationMillis = RecycleDurationMillis, easing = FastOutSlowInEasing),
                                     ) { recycleAlpha = value }
                                 }
                             }
@@ -185,7 +224,7 @@ fun FoodImageStackView(
                             recycleIndex = null
                             recycleOffsetY = 0f
                             recycleRotation = 0f
-                            recycleAlpha = 1f
+                            recycleAlpha = VisibleAlpha
                             isRecycling = false
                         }
                     },
@@ -193,23 +232,23 @@ fun FoodImageStackView(
             }
     ) {
         // (4장 이상) 다음 턴에 3번째가 될 카드를 미리 깔아두고 점진 노출
-        if (size >= 4 && recycleIndex != incomingBackIndex) {
+        if (size >= 4 && recycleIndex != incomingBackIndex && incomingBackImageUrl != null) {
             FoodImageCard(
-                imageUrl = imageUrls[incomingBackIndex],
+                imageUrl = incomingBackImageUrl,
                 state = state,
                 modifier = Modifier
                     .fillMaxSize()
                     .graphicsLayer {
-                        rotationZ = -5f
+                        rotationZ = NegativeRotation
                         alpha = incomingThirdAlpha
                     }
             )
         }
 
         // 현재 3번째 카드: 0번째가 내려갈수록 2번째 카드 상태로 준비
-        if (size >= 3 && recycleIndex != backRightIndex) {
+        if (size >= 3 && recycleIndex != backRightIndex && backRightImageUrl != null) {
             FoodImageCard(
-                imageUrl = imageUrls[backRightIndex],
+                imageUrl = backRightImageUrl,
                 state = state,
                 modifier = Modifier
                     .fillMaxSize()
@@ -221,9 +260,9 @@ fun FoodImageStackView(
         }
 
         // 현재 2번째 카드: 0번째가 내려갈수록 1번째 카드 상태로 준비
-        if (size >= 2 && recycleIndex != backLeftIndex) {
+        if (size >= 2 && recycleIndex != backLeftIndex && backLeftImageUrl != null) {
             FoodImageCard(
-                imageUrl = imageUrls[backLeftIndex],
+                imageUrl = backLeftImageUrl,
                 state = state,
                 modifier = Modifier
                     .fillMaxSize()
@@ -236,37 +275,41 @@ fun FoodImageStackView(
 
         // 내려갔던 기존 0번째 카드가 뒤 스택으로 돌아가는 전용 레이어
         recycleIndex?.let { index ->
+            imageUrls.getOrNull(index)?.let { recycleImageUrl ->
+                FoodImageCard(
+                    imageUrl = recycleImageUrl,
+                    state = state,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            translationY = recycleOffsetY
+                            rotationZ = recycleRotation
+                            alpha = recycleAlpha
+                        }
+                )
+            }
+        }
+
+        // 맨 앞 카드(사용자가 직접 끌어내리는 카드)
+        frontImageUrl?.let { imageUrl ->
             FoodImageCard(
-                imageUrl = imageUrls[index],
+                imageUrl = imageUrl,
                 state = state,
                 modifier = Modifier
                     .fillMaxSize()
                     .graphicsLayer {
-                        translationY = recycleOffsetY
-                        rotationZ = recycleRotation
-                        alpha = recycleAlpha
+                        translationY = frontDragOffsetY
                     }
+                    .clickable(
+                        enabled = state is FoodImageState.Ready &&
+                            !isRecycling &&
+                            frontDragOffsetY <= tapCancelVerticalThresholdPx,
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = onCardClick,
+                    ),
             )
         }
-
-    // 맨 앞 카드(사용자가 직접 끌어내리는 카드)
-        FoodImageCard(
-            imageUrl = imageUrls[frontIndex],
-            state = state,
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    translationY = frontDragOffsetY
-                }
-                .clickable(
-                    enabled = state is FoodImageState.Ready &&
-                        !isRecycling &&
-                        frontDragOffsetY <= tapCancelVerticalThresholdPx,
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = onCardClick,
-                ),
-        )
 
         if (isRecycling) {
             Box(
