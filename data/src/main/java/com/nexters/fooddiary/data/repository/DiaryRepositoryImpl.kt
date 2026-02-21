@@ -19,6 +19,7 @@ class DiaryRepositoryImpl @Inject constructor(
         val response = diaryApi.getDiary(
             startDate = requestedDate,
             endDate = requestedDate,
+            testMode = isDebug,
         )
         val diaries = response.diaries.filter { diary ->
             diary.diaryDate == requestedDate
