@@ -11,11 +11,38 @@ plugins {
     alias(libs.plugins.sentry.android.gradle)
 }
 
-val localProperties = Properties()
-val localPropertiesFile = rootProject.file("local.properties")
-if (localPropertiesFile.exists()) {
-    localPropertiesFile.inputStream().use { localProperties.load(it) }
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { load(it) }
+    }
 }
+
+fun localOrEnv(localKeys: List<String>, envKey: String): String {
+    val localValue = localKeys
+        .asSequence()
+        .map { key -> localProperties.getProperty(key, "").trim() }
+        .firstOrNull { it.isNotEmpty() }
+        .orEmpty()
+
+    return localValue.ifEmpty { System.getenv(envKey).orEmpty().trim() }
+}
+
+val devStoreFile = localOrEnv(listOf("dev.store.file"), "DEV_KEYSTORE_PATH")
+val devStorePassword = localOrEnv(listOf("dev.store.password"), "DEV_KEYSTORE_PASSWORD")
+val devKeyAlias = localOrEnv(listOf("dev.key.alias"), "DEV_KEY_ALIAS")
+val devKeyPassword = localOrEnv(listOf("dev.key.password"), "DEV_KEY_PASSWORD")
+
+val releaseStoreFile = localOrEnv(listOf("store.file"), "RELEASE_STORE_FILE")
+val releaseStorePassword = localOrEnv(listOf("store.password"), "RELEASE_STORE_PASSWORD")
+val releaseKeyAlias = localOrEnv(listOf("key.alias"), "RELEASE_KEY_ALIAS")
+val releaseKeyPassword = localOrEnv(listOf("key.password"), "RELEASE_KEY_PASSWORD")
+val hasReleaseSigningConfig = listOf(
+    releaseStoreFile,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword
+).all { it.isNotBlank() }
 
 android {
     namespace = "com.nexters.fooddiary"
@@ -30,26 +57,35 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("boolean", "USE_MOCK_API", "true")
-
         val webClientId = localProperties.getProperty("web.client.id", "")
-            .takeIf { it.isNotEmpty() && it != "YOUR_WEB_CLIENT_ID_HERE" }
-            ?: ""
+            .ifEmpty { System.getenv("WEB_CLIENT_ID").orEmpty() }
 
         if (webClientId.isNotEmpty()) {
             resValue("string", "custom_web_client_id", webClientId)
-            println("Web Client ID set from local.properties: ${webClientId.take(30)}...")
-        } else {
-            println("Warning: web.client.id not found in local.properties")
         }
 
-        val sentryDsn = localProperties.getProperty("sentry.dsn", "").trim()
+        val sentryDsn = localProperties.getProperty("sentry.dsn", "")
+            .ifEmpty { System.getenv("SENTRY_DSN").orEmpty() }
+            .trim()
         buildConfigField("String", "SENTRY_DSN", "\"$sentryDsn\"")
         manifestPlaceholders["sentryDsn"] = sentryDsn
     }
 
-    buildFeatures {
-        buildConfig = true
+    signingConfigs {
+        create("dev") {
+            storeFile = rootProject.file(devStoreFile)
+            storePassword = devStorePassword
+            keyAlias = devKeyAlias
+            keyPassword = devKeyPassword
+        }
+        if (hasReleaseSigningConfig) {
+            create("release") {
+                storeFile = rootProject.file(releaseStoreFile)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
     }
 
     buildTypes {
@@ -60,10 +96,20 @@ android {
                 "proguard-rules.pro"
             )
             buildConfigField("boolean", "USE_MOCK_API", "false")
+            signingConfig = signingConfigs.findByName("release")
+        }
+        create("debugRelease") {
+            initWith(getByName("debug"))
+            matchingFallbacks += listOf("debug")
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+            signingConfig = signingConfigs.findByName("dev")
+            buildConfigField("boolean", "USE_MOCK_API", "false")
         }
         debug {
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
+            buildConfigField("boolean", "USE_MOCK_API", "true")
         }
     }
     compileOptions {
@@ -74,6 +120,7 @@ android {
         jvmTarget = "17"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 
@@ -88,7 +135,7 @@ android {
 sentry {
     org.set(localProperties.getProperty("sentry.org", ""))
     projectName.set(localProperties.getProperty("sentry.project", ""))
-    authToken.set(System.getenv("SENTRY_AUTH_TOKEN") ?: localProperties.getProperty("sentry.auth.token", ""))
+    authToken.set(localProperties.getProperty("sentry.auth.token", ""))
     includeSourceContext.set(true)
     autoInstallation {
         enabled.set(true)
@@ -122,6 +169,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.haze)
 
     // Navigation Compose
     implementation(libs.androidx.navigation.compose)

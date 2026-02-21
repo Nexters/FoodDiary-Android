@@ -1,4 +1,4 @@
-package com.nexters.fooddiary.navigation
+package com.nexters.fooddiary.core.ui.alert
 
 data class DialogData(
     val title: String? = null,
@@ -11,6 +11,8 @@ data class DialogData(
 
 data class SnackBarData(
     val message: String,
+    val iconRes: Int? = null,
+    val delayMillis: Long = 2_000L,
     val actionLabel: String? = null,
     val onAction: (() -> Unit)? = null
 )
