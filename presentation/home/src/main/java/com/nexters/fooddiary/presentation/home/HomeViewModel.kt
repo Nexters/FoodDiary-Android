@@ -1,17 +1,13 @@
 package com.nexters.fooddiary.presentation.home
 
-import android.content.Context
-import androidx.lifecycle.viewModelScope
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
-import com.nexters.fooddiary.core.common.permission.PermissionUtil
 import com.nexters.fooddiary.domain.usecase.GetDiarySummaryUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +26,6 @@ sealed interface HomeEvent {
 }
 
 class HomeViewModel @AssistedInject constructor(
-    @ApplicationContext context: Context,
     @Assisted initialState: HomeScreenState,
     private val getDiarySummaryUseCase: GetDiarySummaryUseCase,
 ) : MavericksViewModel<HomeScreenState>(initialState) {
@@ -41,7 +36,6 @@ class HomeViewModel @AssistedInject constructor(
     private var loadSummaryJob: Job? = null
 
     init {
-        if (PermissionUtil.hasMediaPermission(context)) { }
         loadSummaryForSelectedWeek()
     }
 
