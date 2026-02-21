@@ -5,6 +5,7 @@ object MockRouteHandler {
     // Paths
     private const val PATH_LOGIN = "/auth/login"
     private const val PATH_VERIFY = "/auth/verify"
+    private const val PATH_DELETE_ME = "/users/me"
     private const val PATH_DIARIES = "/diaries"
     private const val PATH_PHOTOS = "/photos"
 
@@ -17,6 +18,7 @@ object MockRouteHandler {
     // Mock Files
     private const val MOCK_LOGIN_SUCCESS = "login_success.json"
     private const val MOCK_VERIFY_TOKEN_SUCCESS = "verify_token_success.json"
+    private const val MOCK_DELETE_ME_SUCCESS = "delete_me_success.json"
     private const val MOCK_CREATE_DIARY_SUCCESS = "create_diary_success.json"
     private const val MOCK_GET_DIARY_20260117 = "get_diary_20260117.json"
     private const val MOCK_UPLOAD_URL_SUCCESS = "get_upload_url_success.json"
@@ -34,6 +36,7 @@ object MockRouteHandler {
             // Auth
 //            path == PATH_LOGIN && method == "POST" -> MOCK_LOGIN_SUCCESS
 //            path == PATH_VERIFY && method == "GET" -> MOCK_VERIFY_TOKEN_SUCCESS
+//            path == PATH_DELETE_ME && method == "DELETE" -> MOCK_DELETE_ME_SUCCESS
 
             // Diary
             path == PATH_DIARIES && method == "POST" -> MOCK_CREATE_DIARY_SUCCESS

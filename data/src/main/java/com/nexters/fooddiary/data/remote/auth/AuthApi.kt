@@ -4,6 +4,7 @@ import com.nexters.fooddiary.data.remote.auth.model.request.LoginRequest
 import com.nexters.fooddiary.data.remote.auth.model.response.LoginResponse
 import com.nexters.fooddiary.data.remote.auth.model.response.VerifyTokenResponse
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 
@@ -13,4 +14,7 @@ interface AuthApi {
 
     @GET("/auth/verify")
     suspend fun verifyToken(): VerifyTokenResponse
+
+    @DELETE("/users/me")
+    suspend fun deleteMe()
 }
