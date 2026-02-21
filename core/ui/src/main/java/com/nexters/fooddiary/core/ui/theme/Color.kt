@@ -8,6 +8,7 @@ val PrimBase = Color(0xFFFE670E)
 val SdBase: Color = Color(0xFF191821)
 val Sd900 = Color(0xFF1E1D25)
 val Sd800 = Color(0xFF363347)
+val Sd700 = Color(0xFF2A2933) // chip / inactive background
 
 val RedPostBase = Color(0xFFED2F15)
 val RedPost100 = Color(0xFFFDEAE8)

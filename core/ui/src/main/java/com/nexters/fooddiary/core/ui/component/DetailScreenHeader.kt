@@ -2,6 +2,7 @@ package com.nexters.fooddiary.core.ui.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -16,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import com.nexters.fooddiary.core.ui.R
 import com.nexters.fooddiary.core.ui.theme.Gray050
@@ -25,21 +27,27 @@ import com.nexters.fooddiary.core.ui.theme.SdBase
 fun DetailScreenHeader(
     modifier: Modifier = Modifier,
     onBackButtonClick: () -> Unit = {},
-    content : @Composable () -> Unit = {}
+    content: @Composable () -> Unit = {},
 ) {
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
+            .then(modifier)
             .windowInsetsPadding(WindowInsets.statusBars.only(WindowInsetsSides.Top))
             .background(color = SdBase),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(
-            onClick = onBackButtonClick
+            onClick = onBackButtonClick,
         ) {
-            Image(painter = painterResource(R.drawable.ic_back), contentDescription = "back_button")
+            Image(
+                painter = painterResource(R.drawable.ic_back),
+                contentDescription = "back_button",
+            )
         }
-        content()
+        Box(modifier = Modifier.fillMaxWidth()) {
+            content()
+        }
     }
 }
 

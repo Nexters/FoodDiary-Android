@@ -2,8 +2,10 @@ package com.nexters.fooddiary.data.repository
 
 import com.nexters.fooddiary.data.mapper.DiaryMapper
 import com.nexters.fooddiary.data.remote.diary.DiaryApi
+import com.nexters.fooddiary.data.remote.diary.model.UpdateDiaryRequest
 import com.nexters.fooddiary.domain.model.DiaryDetail
 import com.nexters.fooddiary.domain.model.DiaryEntry
+import com.nexters.fooddiary.domain.model.UpdateDiaryParam
 import com.nexters.fooddiary.domain.repository.DiaryRepository
 import java.time.LocalDate
 import java.time.YearMonth
@@ -14,6 +16,7 @@ class DiaryRepositoryImpl @Inject constructor(
     private val diaryApi: DiaryApi,
     private val diaryMapper: DiaryMapper,
     @Named("isDebug") private val isDebug: Boolean,
+    @Named("useMockApi") private val useMockApi: Boolean,
 ) : DiaryRepository {
 
     override suspend fun getDiary(date: LocalDate): DiaryDetail {
@@ -26,7 +29,6 @@ class DiaryRepositoryImpl @Inject constructor(
         val diaries = response.diaries.filter { diary ->
             diary.diaryDate == requestedDate
         }
-
         return DiaryDetail(
             date = date,
             diaries = diaryMapper.toDomainDiaryEntries(diaries),
@@ -70,5 +72,29 @@ class DiaryRepositoryImpl @Inject constructor(
         // 현재 구현에서는 일/주/월 모두 동일한 summary API를 사용하므로
         // 내부적으로 재사용한다.
         return getDiarySummary(startDate = startDate, endDate = endDate)
+    }
+
+    override suspend fun getDiary(id: Int): DiaryEntry {
+        val response = diaryApi.getDiaryById(id, useMockApi)
+        return diaryMapper.toDomainDiaryEntries(listOf(response)).first()
+    }
+
+    override suspend fun updateDiary(diaryId: Int, param: UpdateDiaryParam): DiaryEntry {
+        val request = UpdateDiaryRequest(
+            category = param.category,
+            restaurantName = param.restaurantName,
+            restaurantUrl = param.restaurantUrl,
+            roadAddress = param.roadAddress,
+            tags = param.tags,
+            note = param.note,
+            coverPhotoId = param.coverPhotoId,
+            photoIds = param.photoIds,
+        )
+        val response = diaryApi.updateDiary(diaryId, request)
+        return diaryMapper.toDomainDiaryEntries(listOf(response)).first()
+    }
+
+    override suspend fun deleteDiary(diaryId: Int) {
+        diaryApi.deleteDiary(diaryId)
     }
 }

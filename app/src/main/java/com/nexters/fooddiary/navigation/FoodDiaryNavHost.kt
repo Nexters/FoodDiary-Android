@@ -59,9 +59,10 @@ import com.nexters.fooddiary.presentation.webview.navigation.WebViewRoute
 import com.nexters.fooddiary.presentation.webview.navigation.webViewScreen
 import com.nexters.fooddiary.presentation.splash.navigation.SplashRoute
 import com.nexters.fooddiary.presentation.splash.navigation.splashScreen
+import com.nexters.fooddiary.presentation.modify.navigation.ModifyRoute
+import com.nexters.fooddiary.presentation.modify.navigation.modifyScreen
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import androidx.compose.ui.res.stringResource
 
 @Composable
 fun FoodDiaryNavHost(
@@ -290,6 +291,9 @@ fun FoodDiaryNavHost(
                     onNavigateToImagePicker = { dateString ->
                         navController.navigate(ImagePickerRoute(dateString = dateString.toString()))
                     },
+                    onNavigateToModify = { diaryId ->
+                        navController.navigate(ModifyRoute(diaryId = diaryId))
+                    },
                     onShowToast = onShowToast,
                 )
 
@@ -299,6 +303,12 @@ fun FoodDiaryNavHost(
                             onFinish()
                         }
                     }
+                )
+                modifyScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToImagePicker = {
+                        navController.navigate(ImagePickerRoute(dateString = null))
+                    },
                 )
 
                 myPageScreen(
