@@ -15,18 +15,12 @@ class MockApiInterceptor(
     companion object {
         private const val TAG = "MockApiInterceptor"
         private const val ASSETS_PATH = "api-response"
-        private const val PATH_DIARIES = "/diaries"
     }
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
         val path = request.url.encodedPath
         val method = request.method
-
-        if (method == "GET" && path == PATH_DIARIES) {
-            Log.i(TAG, "Pass-through: $method $path (real diaries API)")
-            return chain.proceed(request)
-        }
 
         val mockFileName = MockRouteHandler.getMockFileName(path, method)
 
