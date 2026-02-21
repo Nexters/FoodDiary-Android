@@ -1,6 +1,5 @@
 package com.nexters.fooddiary.presentation.mypage
 
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -42,6 +41,7 @@ import com.airbnb.mvrx.compose.collectAsStateWithLifecycle
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.common.ContextExtension.getAppVersionName
 import com.nexters.fooddiary.core.common.R.string
+import com.nexters.fooddiary.core.ui.alert.DialogData
 import com.nexters.fooddiary.core.ui.R.drawable
 import com.nexters.fooddiary.core.ui.component.DetailScreenHeader
 import com.nexters.fooddiary.core.ui.theme.Color363347
@@ -55,6 +55,8 @@ import com.nexters.fooddiary.presentation.mypage.navigation.WebViewPage
 fun MyPageScreen(
     modifier: Modifier = Modifier,
     navigateToWebView: (WebViewPage) -> Unit = {},
+    onShowDialog: (DialogData) -> Unit = {},
+    onShowToast: (String) -> Unit = {},
     onSignOut: () -> Unit = {},
     onRequireReAuthForDeleteAccount: () -> Unit = {},
     onNavigateToAlarmSettings: () -> Unit = {},
@@ -62,7 +64,6 @@ fun MyPageScreen(
     viewModel: MyPageViewModel = mavericksViewModel()
 ) {
     val state by viewModel.collectAsStateWithLifecycle()
-    val context = LocalContext.current
     val recentLoginRequiredMessage = stringResource(string.my_page_recent_login_required)
     val deleteInProgressMessage = stringResource(string.my_page_delete_in_progress)
     val deleteFailedMessage = stringResource(string.my_page_delete_failed)
@@ -97,13 +98,7 @@ fun MyPageScreen(
                     }
                 }
 
-                Toast
-                    .makeText(
-                        context,
-                        message,
-                        Toast.LENGTH_SHORT
-                    )
-                    .show()
+                onShowToast(message)
 
                 viewModel.resetDeleteAccountResult()
             }
@@ -116,6 +111,8 @@ fun MyPageScreen(
         modifier = modifier,
         state = state,
         navigateToWebView = navigateToWebView,
+        onShowDialog = onShowDialog,
+        onShowToast = onShowToast,
         onSignOut = viewModel::signOut,
         onDeleteAccount = viewModel::deleteAccount,
         deleteInProgressMessage = deleteInProgressMessage,
@@ -129,6 +126,8 @@ internal fun MyPageScreen(
     modifier: Modifier = Modifier,
     state: MyPageState,
     navigateToWebView: (WebViewPage) -> Unit = {},
+    onShowDialog: (DialogData) -> Unit = {},
+    onShowToast: (String) -> Unit = {},
     onSignOut: () -> Unit = {},
     onDeleteAccount: () -> Unit = {},
     deleteInProgressMessage: String = "",
@@ -137,6 +136,11 @@ internal fun MyPageScreen(
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
+    val logoutDialogTitle = stringResource(string.my_page_logout_dialog_title)
+    val logoutDialogMessage = stringResource(string.my_page_logout_dialog_message)
+    val logoutDialogCancel = stringResource(string.my_page_logout_dialog_cancel)
+    val logoutText = stringResource(string.my_page_menu_logout)
+
     Column(
         modifier = Modifier
             .background(SdBase)
@@ -185,21 +189,25 @@ internal fun MyPageScreen(
         MyPageSection() {
             MyPageSubMenu(
                 menuName = stringResource(string.my_page_menu_logout),
-                onClick = onSignOut
+                onClick = {
+                    onShowDialog(
+                        DialogData(
+                            title = logoutDialogTitle,
+                            message = logoutDialogMessage,
+                            confirmText = logoutText,
+                            dismissText = logoutDialogCancel,
+                            onConfirm = onSignOut
+                        )
+                    )
+                }
             )
         }
         Spacer(modifier = Modifier.padding(bottom = 80.dp))
         Text(
             modifier = Modifier
                 .clickable {
-                    Toast
-                        .makeText(
-                            context,
-                            deleteInProgressMessage.ifEmpty { context.getString(string.my_page_delete_in_progress) },
-                            Toast.LENGTH_SHORT
-                        )
-                        .show()
-                    onDeleteAccount()
+                    onShowToast(deleteInProgressMessage.ifEmpty { context.getString(string.my_page_delete_in_progress) })
+//                    onDeleteAccount()
                 }
                 .padding(28.dp)
                 .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)),

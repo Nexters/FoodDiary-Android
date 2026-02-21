@@ -16,6 +16,8 @@ import androidx.navigation.NavHostController
 import com.nexters.fooddiary.core.common.R
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import com.nexters.fooddiary.core.ui.alert.DialogData
+import com.nexters.fooddiary.core.ui.alert.SnackBarData
 import com.nexters.fooddiary.presentation.auth.AuthUiState
 import com.nexters.fooddiary.presentation.auth.navigation.LoginRoute
 import com.nexters.fooddiary.presentation.auth.navigation.loginScreen
@@ -147,6 +149,7 @@ fun FoodDiaryNavHost(
                 }
             }
         )
+
         myPageScreen(
             navigateToWebView = { page ->
                 val url = when (page) {
@@ -155,6 +158,8 @@ fun FoodDiaryNavHost(
                 }
                 navController.navigate(WebViewRoute(url = url))
             },
+            onShowDialog = onShowDialog,
+            onShowToast = onShowToast,
             onBack = { navController.popBackStack() },
             onSignOut = {
                 signOutRequestId++
