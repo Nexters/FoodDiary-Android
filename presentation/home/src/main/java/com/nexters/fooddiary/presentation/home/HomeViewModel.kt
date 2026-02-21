@@ -63,7 +63,7 @@ class HomeViewModel @AssistedInject constructor(
     private fun loadSummaryForSelectedWeek() {
         withState { state ->
             val weekStart = weekStartOf(state.selectedDate)
-            if (state.loadedWeekStartDate == weekStart) return@withState
+            if (!shouldLoadWeek(state.selectedDate, state.loadedWeekStartDate)) return@withState
 
             loadSummaryJob?.cancel()
             loadSummaryJob = viewModelScope.launch {
@@ -74,11 +74,11 @@ class HomeViewModel @AssistedInject constructor(
                     )
                 }.getOrDefault(emptyMap())
 
-                setState { currentState ->
-                    if (weekStartOf(currentState.selectedDate) != weekStart) {
-                        currentState
+                setState {
+                    if (weekStartOf(selectedDate) != weekStart) {
+                        this
                     } else {
-                        currentState.copy(
+                        copy(
                             weeklyPhotosByDate = summaryByDate,
                             loadedWeekStartDate = weekStart,
                         )
@@ -101,3 +101,8 @@ internal fun weekStartOf(
     date: LocalDate,
     firstDayOfWeek: DayOfWeek = DayOfWeek.SUNDAY,
 ): LocalDate = date.with(TemporalAdjusters.previousOrSame(firstDayOfWeek))
+
+internal fun shouldLoadWeek(
+    selectedDate: LocalDate,
+    loadedWeekStartDate: LocalDate?,
+): Boolean = loadedWeekStartDate != weekStartOf(selectedDate)

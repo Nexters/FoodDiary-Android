@@ -23,6 +23,9 @@ class FoodDiaryMockDispatcher : Dispatcher() {
                 path.matches(Regex(MockUrlConfig.REGEX_DIARIES_QUERY)) && method == "GET" -> {
                     success(MockUrlConfig.MOCK_GET_DIARY_20260117)
                 }
+                path.matches(Regex(MockUrlConfig.REGEX_DIARIES_SUMMARY_QUERY)) && method == "GET" -> {
+                    success(MockUrlConfig.MOCK_GET_DIARY_SUMMARY_20260222)
+                }
 
                 // Photo
                 path == MockUrlConfig.PATH_PHOTOS && method == "POST" -> {

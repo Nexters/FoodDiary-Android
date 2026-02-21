@@ -118,10 +118,18 @@ internal fun HomeScreen(
         onToggleCalendarView = viewModel::onToggleCalendarView,
         onNavigateToImagePicker = onNavigateToImagePicker,
         onNavigateToMyPage = onNavigateToMyPage,
-        selectedDateImageUrls = state.weeklyPhotosByDate[state.selectedDate].orEmpty(),
+        selectedDateImageUrls = selectedDateImageUrls(
+            weeklyPhotosByDate = state.weeklyPhotosByDate,
+            selectedDate = state.selectedDate,
+        ),
         modifier = modifier,
     )
 }
+
+internal fun selectedDateImageUrls(
+    weeklyPhotosByDate: Map<LocalDate, List<String>>,
+    selectedDate: LocalDate,
+): List<String> = weeklyPhotosByDate[selectedDate].orEmpty()
 
 @Composable
 private fun HomeScreen(
