@@ -35,6 +35,11 @@ internal fun com.nexters.fooddiary.presentation.detail.MealSlot.toMealUiModel(
 
     val firstPhoto = diary.photos.firstOrNull()
     val imageUrls = diary.photos.map { it.imageUrl }
+    val prefixedTags = diary.tags
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .map { tag -> if (tag.startsWith("#")) tag else "#$tag" }
+
     return _root_ide_package_.com.nexters.fooddiary.presentation.detail.MealCardUiModel(
         id = "${date}_${name.lowercase()}",
         date = date,
@@ -42,7 +47,7 @@ internal fun com.nexters.fooddiary.presentation.detail.MealSlot.toMealUiModel(
         time = firstPhoto?.takenAt?.format(DateTimeFormatter.ofPattern("HH:mm")).orEmpty(),
         location = diary.location.orEmpty(),
         place = diary.restaurantName.orEmpty(),
-        keywords = diary.tags,
+        keywords = prefixedTags,
         mapLink = diary.mapLink.orEmpty(),
         imageUrls = imageUrls,
         status = if (diary.analysisStatus == AnalysisStatus.PROCESSING) {
