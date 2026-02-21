@@ -26,6 +26,9 @@
     <string name="my_page_delete_in_progress">탈퇴를 진행하고 있어요…</string>
     <string name="my_page_delete_failed">탈퇴에 실패했어요. 잠시 후 다시 시도해 주세요.</string>
     <string name="my_page_sign_out">탈퇴</string>
+    <string name="my_page_logout_dialog_title">로그아웃</string>
+    <string name="my_page_logout_dialog_message">로그아웃을 진행하시겠습니까?</string>
+    <string name="my_page_logout_dialog_cancel">취소</string>
 
     <!-- WebView URLs -->
     <string name="webview_url_terms_of_service">https://google.com</string>
@@ -37,5 +40,10 @@
     <string name="home_add_food_photo">오늘의 음식 사진을 추가해보세요.</string>
     <string name="home_nav_home">홈</string>
     <string name="home_nav_insight">인사이트</string>
-</resources>
 
+    <!-- Detail -->
+    <string name="detail_food_analyze">귀찮은 입력은 AI가 대신하고 있어요..</string>
+
+    <!-- Calendar -->
+    <string name="calendar">캘린더</string>
+</resources>

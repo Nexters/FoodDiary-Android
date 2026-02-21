@@ -10,7 +10,6 @@ object MockRouteHandler {
     private const val PATH_RESTAURANT_SEARCH = "/restaurant/search"
 
     // Regex Patterns
-    private val REGEX_DIARY_DATE = Regex("/diaries/\\d{4}-\\d{2}-\\d{2}")
     private val REGEX_PHOTO_ANALYZE = Regex("/photos/\\d+/analyze")
     private val REGEX_PHOTO_ANALYSIS = Regex("/photos/\\d+/analysis")
     private val REGEX_PHOTO_CONFIRM = Regex("/photos/\\d+/confirm")
@@ -40,13 +39,7 @@ object MockRouteHandler {
 
             // Diary
             path == PATH_DIARIES && method == "POST" -> MOCK_CREATE_DIARY_SUCCESS
-            path.matches(REGEX_DIARY_DATE) && method == "GET" -> {
-                if (path.contains("2026-01-17")) {
-                    MOCK_GET_DIARY_20260117
-                } else {
-                    null
-                }
-            }
+            path == PATH_DIARIES && method == "GET" -> MOCK_GET_DIARY_20260117
 
             // Photo
             path == PATH_PHOTOS && method == "POST" -> MOCK_UPLOAD_URL_SUCCESS

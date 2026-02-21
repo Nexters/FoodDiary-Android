@@ -8,7 +8,7 @@ object MockUrlConfig {
     const val PATH_RESTAURANT_SEARCH = "/restaurant/search"
     
     // Regex Patterns
-    const val REGEX_DIARY_DATE = "/diaries/\\d{4}-\\d{2}-\\d{2}"
+    const val REGEX_DIARIES_QUERY = "/diaries\\?.*"
     const val REGEX_PHOTO_ANALYZE = "/photos/\\d+/analyze"
     const val REGEX_PHOTO_ANALYSIS = "/photos/\\d+/analysis"
     const val REGEX_PHOTO_CONFIRM = "/photos/\\d+/confirm"
