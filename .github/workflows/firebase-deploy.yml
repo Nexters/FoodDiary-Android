@@ -1,0 +1,105 @@
+name: Firebase App Distribution
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:  # 수동 실행 가능
+
+jobs:
+  deploy:
+    name: Build and Deploy to Firebase
+    runs-on: ubuntu-latest
+    env:
+      # CI에서 local.properties 없이 주입 
+      WEB_CLIENT_ID: ${{ secrets.WEB_CLIENT_ID }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      DEV_KEYSTORE_PASSWORD: ${{ secrets.DEV_KEYSTORE_PASSWORD }}
+      DEV_KEY_ALIAS: ${{ secrets.DEV_KEY_ALIAS }}
+      DEV_KEY_PASSWORD: ${{ secrets.DEV_KEY_PASSWORD }}
+      DEV_KEYSTORE_PATH: mumuk-dev.jks
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for git log
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Create google-services.json
+        run: |
+          # trace/출력 끄기
+          set +x
+          mkdir -p app/src/debugRelease
+          printf "%s" "$GOOGLE_SERVICES_JSON" | base64 --decode > app/src/debugRelease/google-services.json
+          echo "google-services.json safely created"
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+
+      - name: Create dev keystore
+        run: |
+          set +x
+          umask 077
+          if [ -z "$DEV_KEY_BASE64" ]; then
+            echo "DEV_KEY_BASE64 is not set"
+            exit 1
+          fi
+          printf "%s" "$DEV_KEY_BASE64" | base64 --decode > mumuk-dev.jks
+          chmod 600 mumuk-dev.jks
+          echo "mumuk-dev.jks safely created"
+        env:
+          DEV_KEY_BASE64: ${{ secrets.DEV_KEY_BASE64 }}
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build APK (PR preview)
+        if: github.event_name == 'pull_request'
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+        run: |
+          bundle exec fastlane build
+
+      - name: Deploy to Firebase App Distribution
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID_DEV }}
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          bundle exec fastlane distribute
+
+      - name: Clean sensitive files
+        if: always()
+        run: |
+          rm -f mumuk-dev.jks app/src/debugRelease/google-services.json
+
+      - name: Upload APK artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debugRelease-${{ github.run_number }}
+          path: app/build/outputs/apk/debugRelease/app-debugRelease.apk
+          retention-days: 30

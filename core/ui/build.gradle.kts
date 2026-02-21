@@ -47,6 +47,13 @@ dependencies {
 
     api(libs.calendar.compose)
 
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+
+    // 블러, glassmorphism
+    implementation(libs.haze)
+    implementation(libs.haze.materials)
+
     // Testing
     testImplementation(libs.junit)
 }

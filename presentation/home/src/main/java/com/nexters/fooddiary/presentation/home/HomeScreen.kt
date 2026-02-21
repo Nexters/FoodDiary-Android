@@ -24,16 +24,19 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -67,6 +70,8 @@ import com.nexters.fooddiary.core.ui.theme.glassmorphism
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
+import com.nexters.fooddiary.core.ui.calendar.WeeklyCalendar
+import kotlinx.coroutines.flow.collectLatest
 import java.time.LocalDate
 
 private val BottomBarGlassStyle = GlassmorphismStyle(
@@ -74,17 +79,26 @@ private val BottomBarGlassStyle = GlassmorphismStyle(
     blurRadius = 30.dp,
 )
 
-
 @Composable
 internal fun HomeScreen(
     modifier: Modifier = Modifier,
     onNavigateToImagePicker: () -> Unit = {},
+    onNavigateToDetail: (LocalDate) -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
     onShowSnackBar: (SnackBarData) -> Unit = {},
     viewModel: HomeViewModel = mavericksViewModel(),
 ) {
     val state by viewModel.collectAsState()
     val photoCountByDate by viewModel.photoCountByDate.collectAsState(initial = emptyMap())
+    val currentOnNavigateToDetail by rememberUpdatedState(onNavigateToDetail)
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collectLatest { event ->
+            when (event) {
+                is HomeEvent.NavigateToDetail -> currentOnNavigateToDetail(event.date)
+            }
+        }
+    }
 
     HomeScreen(
         state = state,
@@ -271,7 +285,7 @@ private fun HomeBottomBar(
         ) {
             Icon(
                 painter = painterResource(id = if (isMonthlyCalendarView) drawable.ic_weekly_calendar else drawable.ic_monthly_calendar),
-                contentDescription = stringResource(R.string.calendar),
+                contentDescription = stringResource(string.calendar),
                 tint = Gray050,
             )
         }

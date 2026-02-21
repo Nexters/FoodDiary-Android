@@ -9,6 +9,8 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GetTokenResult
 import com.google.firebase.auth.GoogleAuthProvider
 import com.nexters.fooddiary.core.common.auth.GoogleSignInIntentProvider
+import com.nexters.fooddiary.data.firebase.LoginDeviceInfo
+import com.nexters.fooddiary.data.firebase.LoginDeviceInfoProvider
 import com.nexters.fooddiary.data.local.TokenStore
 import com.nexters.fooddiary.data.mapper.UserMapper
 import com.nexters.fooddiary.data.remote.auth.AuthApi
@@ -38,6 +40,7 @@ class AuthRepositoryTest {
     private val tokenStore: TokenStore = mockk(relaxed = true)
     private val userMapper: UserMapper = mockk()
     private val encryptionKeyManager: EncryptionKeyManager = mockk(relaxed = true)
+    private val loginDeviceInfoProvider: LoginDeviceInfoProvider = mockk()
     private val googleSignInIntentProvider: GoogleSignInIntentProvider = mockk(relaxed = true)
     private val context: Context = mockk(relaxed = true)
 
@@ -52,6 +55,7 @@ class AuthRepositoryTest {
             tokenStore,
             userMapper,
             encryptionKeyManager,
+            loginDeviceInfoProvider,
             googleSignInIntentProvider,
             context
         )
@@ -76,6 +80,13 @@ class AuthRepositoryTest {
         val mockTokenTask = mockk<Task<GetTokenResult>>()
         val loginResponse = LoginResponse("test_uid", "access_token", true)
         val expectedUser = User("test_uid", "test@example.com", "Test User", "http://photo.url", true)
+        val loginDeviceInfo = LoginDeviceInfo(
+            appVersion = "1.0.0",
+            deviceId = "A1B2C3D4-E5F6-7890-ABCD-EF1234567890",
+            deviceToken = "fcm_token_abc123",
+            isActive = true,
+            osVersion = "18.2"
+        )
 
         every { GoogleAuthProvider.getCredential(idToken, null) } returns mockCredential
         every { firebaseAuth.signInWithCredential(mockCredential) } returns mockAuthTask
@@ -84,7 +95,8 @@ class AuthRepositoryTest {
         every { mockFirebaseUser.getIdToken(true) } returns mockTokenTask
         coEvery { mockTokenTask.await() } returns mockGetTokenResult
         every { mockGetTokenResult.token } returns firebaseAccessToken
-        coEvery { tokenStore.saveToken(firebaseAccessToken) } returns Unit
+        coEvery { tokenStore.saveToken(loginResponse.accessToken) } returns Unit
+        coEvery { loginDeviceInfoProvider.getLoginDeviceInfo() } returns loginDeviceInfo
         coEvery { authApi.login(any()) } returns loginResponse
         every { userMapper.toDomainUser(mockFirebaseUser, true) } returns expectedUser
 
@@ -96,10 +108,16 @@ class AuthRepositoryTest {
         val user = result.getOrNull()
         assertEquals(expectedUser, user)
 
-        coVerify { tokenStore.saveToken(firebaseAccessToken) }
+        coVerify { tokenStore.saveToken(loginResponse.accessToken) }
         coVerify { 
             authApi.login(match {
-                it.provider == "google" && it.idToken == firebaseAccessToken 
+                it.appVersion == loginDeviceInfo.appVersion &&
+                    it.deviceId == loginDeviceInfo.deviceId &&
+                    it.deviceToken == loginDeviceInfo.deviceToken &&
+                    it.idToken == firebaseAccessToken &&
+                    it.isActive == loginDeviceInfo.isActive &&
+                    it.osVersion == loginDeviceInfo.osVersion &&
+                    it.provider == "google"
             }) 
         }
         verify { userMapper.toDomainUser(mockFirebaseUser, true) }
