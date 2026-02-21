@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -94,7 +95,9 @@ private fun SearchScreen(
             .fillMaxSize()
             .background(SdBase)
             .windowInsetsPadding(WindowInsets.statusBars)
-            .padding(horizontal = 16.dp),
+            .windowInsetsPadding(WindowInsets.navigationBars)
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 24.dp),
     ) {
         Row(
             modifier = Modifier
@@ -171,7 +174,7 @@ private fun SearchScreen(
                     onRetryLoadMore = onRetryLoadMore,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f),
+                        .weight(1f, fill = false),
                 )
             }
         }
@@ -261,7 +264,7 @@ private fun RestaurantListCard(
         modifier = modifier
             .border(1.dp, Sd800, RoundedCornerShape(10.dp))
             .clip(RoundedCornerShape(10.dp))
-            .padding(horizontal = 20.dp, vertical = 24.dp),
+            .padding(start = 20.dp, end = 20.dp, top = 24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         itemsIndexed(
