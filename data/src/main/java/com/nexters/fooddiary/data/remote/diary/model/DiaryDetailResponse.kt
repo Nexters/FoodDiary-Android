@@ -25,12 +25,22 @@ data class DiarySummaryResponse(
     val restaurantUrl: String? = null,
     @SerialName("category")
     val category: String?,
+    @SerialName("note")
+    val note: String?,
     @SerialName("road_address")
     val roadAddress: String? = null,
     @SerialName("tags")
     val tags: List<String>,
     @SerialName("cover_photo_url")
     val coverPhotoUrl: String?,
+    @SerialName("user_id")
+    val userId: String,
+    @SerialName("cover_photo_id")
+    val coverPhotoId: Long,
+    @SerialName("created_at")
+    val createdAt: String,
+    @SerialName("updated_at")
+    val updatedAt: String,
     @SerialName("photo_count")
     val photoCount: Int,
     @SerialName("photos")
