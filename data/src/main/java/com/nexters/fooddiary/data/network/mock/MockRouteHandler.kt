@@ -49,7 +49,7 @@ object MockRouteHandler {
             path.matches(REGEX_PHOTO_FINAL) && method == "GET" -> MOCK_GET_FINAL_RECORD
 
             // Restaurant
-            path == PATH_RESTAURANT_SEARCH && method == "GET" -> MOCK_GET_RESTAURANT_SEARCH
+//            path == PATH_RESTAURANT_SEARCH && method == "GET" -> MOCK_GET_RESTAURANT_SEARCH
 
             else -> null
         }
