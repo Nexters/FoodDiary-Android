@@ -11,6 +11,7 @@ data class DiaryEntry(
     val diaryId: Long,
     val mealType: MealType,
     val analysisStatus: AnalysisStatus,
+    val createdAt: String?,
     val restaurantName: String?,
     val category: String?,
     val location: String?,

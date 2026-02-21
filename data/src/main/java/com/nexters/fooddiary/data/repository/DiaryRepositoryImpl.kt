@@ -33,6 +33,7 @@ class DiaryRepositoryImpl @Inject constructor(
                     diaryId = diary.diaryId,
                     mealType = diary.timeType.toDomain(),
                     analysisStatus = diary.analysisStatus.toDomain(),
+                    createdAt = diary.createdAt,
                     restaurantName = diary.restaurantName,
                     category = diary.category,
                     location = diary.roadAddress,
