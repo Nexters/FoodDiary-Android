@@ -14,11 +14,11 @@ data class DiarySummaryResponse(
     @SerialName("id")
     val diaryId: Long,
     @SerialName("diary_date")
-    val diaryDate: String? = null,
+    val diaryDate: String,
     @SerialName("time_type")
-    val timeType: DiaryMealTypeResponse? = null,
+    val timeType: DiaryMealTypeResponse,
     @SerialName("analysis_status")
-    val analysisStatus: DiaryAnalysisStatusResponse? = null,
+    val analysisStatus: DiaryAnalysisStatusResponse,
     @SerialName("restaurant_name")
     val restaurantName: String?,
     @SerialName("restaurant_url")
@@ -28,11 +28,11 @@ data class DiarySummaryResponse(
     @SerialName("road_address")
     val roadAddress: String? = null,
     @SerialName("tags")
-    val tags: List<String> = emptyList(),
+    val tags: List<String>,
     @SerialName("cover_photo_url")
     val coverPhotoUrl: String?,
     @SerialName("photo_count")
-    val photoCount: Int?,
+    val photoCount: Int,
     @SerialName("photos")
     val photos: List<DiaryPhoto>,
 )

@@ -9,7 +9,6 @@ import com.nexters.fooddiary.presentation.detail.MealCardStatus
 import com.nexters.fooddiary.presentation.detail.MealCardUiModel
 import com.nexters.fooddiary.presentation.detail.MealSlot
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 internal fun DiaryDetail.toDailyMeals(date: LocalDate): DailyMeals {
     val diaryByMeal = diaries.associateBy { it.mealType }
@@ -37,7 +36,6 @@ internal fun MealSlot.toMealUiModel(
         return MealCardUiModel.empty(date, this)
     }
 
-    val firstPhoto = diary.photos.firstOrNull()
     val imageUrls = diary.photos.map { it.imageUrl }
     val prefixedTags = diary.tags
         .map { it.trim() }
@@ -48,7 +46,7 @@ internal fun MealSlot.toMealUiModel(
         id = "${date}_${name.lowercase()}",
         date = date,
         slot = this,
-        time = firstPhoto?.takenAt?.format(DateTimeFormatter.ofPattern("HH:mm")).orEmpty(),
+        time = "",
         location = diary.location.orEmpty(),
         place = diary.restaurantName.orEmpty(),
         keywords = prefixedTags,

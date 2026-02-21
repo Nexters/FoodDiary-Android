@@ -10,7 +10,6 @@ import com.nexters.fooddiary.domain.model.DiaryPhoto
 import com.nexters.fooddiary.domain.model.MealType
 import com.nexters.fooddiary.domain.repository.DiaryRepository
 import java.time.LocalDate
-import java.time.LocalDateTime
 import javax.inject.Inject
 
 class DiaryRepositoryImpl @Inject constructor(
@@ -24,7 +23,7 @@ class DiaryRepositoryImpl @Inject constructor(
             endDate = requestedDate,
         )
         val diaries = response.diaries.filter { diary ->
-            diary.diaryDate == null || diary.diaryDate == requestedDate
+            diary.diaryDate == requestedDate
         }
 
         return DiaryDetail(
@@ -32,22 +31,19 @@ class DiaryRepositoryImpl @Inject constructor(
             diaries = diaries.map { diary ->
                 DiaryEntry(
                     diaryId = diary.diaryId,
-                    mealType = diary.timeType.toDomainOrThrow(diary.diaryId),
-                    analysisStatus = diary.analysisStatus.toDomainOrThrow(diary.diaryId),
+                    mealType = diary.timeType.toDomain(),
+                    analysisStatus = diary.analysisStatus.toDomain(),
                     restaurantName = diary.restaurantName,
                     category = diary.category,
                     location = diary.roadAddress,
                     tags = diary.tags,
                     coverPhotoUrl = diary.coverPhotoUrl,
                     mapLink = diary.restaurantUrl,
-                    photoCount = diary.photoCount ?: diary.photos.size,
+                    photoCount = diary.photoCount,
                     photos = diary.photos.map { photo ->
                         DiaryPhoto(
                             photoId = photo.photoId,
                             imageUrl = photo.imageUrl,
-                            takenAt = photo.takenAt?.let { timestamp ->
-                                runCatching { LocalDateTime.parse(timestamp) }.getOrNull()
-                            },
                         )
                     },
                 )
@@ -55,20 +51,18 @@ class DiaryRepositoryImpl @Inject constructor(
         )
     }
 
-    private fun DiaryMealTypeResponse?.toDomainOrThrow(diaryId: Long): MealType {
+    private fun DiaryMealTypeResponse.toDomain(): MealType {
         return when (this) {
             DiaryMealTypeResponse.BREAKFAST -> MealType.BREAKFAST
             DiaryMealTypeResponse.LUNCH -> MealType.LUNCH
             DiaryMealTypeResponse.DINNER -> MealType.DINNER
-            null -> error("Invalid time_type for diaryId=$diaryId")
         }
     }
 
-    private fun DiaryAnalysisStatusResponse?.toDomainOrThrow(diaryId: Long): AnalysisStatus {
+    private fun DiaryAnalysisStatusResponse.toDomain(): AnalysisStatus {
         return when (this) {
             DiaryAnalysisStatusResponse.DONE -> AnalysisStatus.DONE
             DiaryAnalysisStatusResponse.PROCESSING -> AnalysisStatus.PROCESSING
-            null -> error("Invalid analysis_status for diaryId=$diaryId")
         }
     }
 }
