@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - develop
+      - feature/fix-ci-dev-release
   workflow_dispatch:  # 수동 실행 가능
 
 jobs:

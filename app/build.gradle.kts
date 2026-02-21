@@ -37,6 +37,12 @@ val releaseStoreFile = localOrEnv(listOf("store.file"), "RELEASE_STORE_FILE")
 val releaseStorePassword = localOrEnv(listOf("store.password"), "RELEASE_STORE_PASSWORD")
 val releaseKeyAlias = localOrEnv(listOf("key.alias"), "RELEASE_KEY_ALIAS")
 val releaseKeyPassword = localOrEnv(listOf("key.password"), "RELEASE_KEY_PASSWORD")
+val hasReleaseSigningConfig = listOf(
+    releaseStoreFile,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword
+).all { it.isNotBlank() }
 
 android {
     namespace = "com.nexters.fooddiary"
@@ -72,11 +78,13 @@ android {
             keyAlias = devKeyAlias
             keyPassword = devKeyPassword
         }
-        create("release") {
-            storeFile = rootProject.file(releaseStoreFile)
-            storePassword = releaseStorePassword
-            keyAlias = releaseKeyAlias
-            keyPassword = releaseKeyPassword
+        if (hasReleaseSigningConfig) {
+            create("release") {
+                storeFile = rootProject.file(releaseStoreFile)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
         }
     }
 
