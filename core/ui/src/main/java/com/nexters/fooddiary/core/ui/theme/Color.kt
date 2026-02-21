@@ -45,3 +45,4 @@ val White = Color(0xFFFFFFFF)
 val Color363347 = Color(0xFF363347)
 
 
+val TimeLocationBg = Color(0xB2191821)

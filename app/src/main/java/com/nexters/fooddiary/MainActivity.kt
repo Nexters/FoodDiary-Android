@@ -40,7 +40,8 @@ class MainActivity : ComponentActivity() {
 
             LaunchedEffect(snackBarRequestId) {
                 if (snackBarRequestId == 0) return@LaunchedEffect
-                delay(2_000)
+                val delayMillis = customSnackBarData?.delayMillis ?: 2_000L
+                delay(delayMillis)
                 customSnackBarData = null
             }
 
@@ -64,7 +65,8 @@ class MainActivity : ComponentActivity() {
                                 snackBarRequestId += 1
                             },
                             onShowToast = { message ->
-                                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                                customSnackBarData = SnackBarData(message = message)
+                                snackBarRequestId += 1
                             }
                         )
 

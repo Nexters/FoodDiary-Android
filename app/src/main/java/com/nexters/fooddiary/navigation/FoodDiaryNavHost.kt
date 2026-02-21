@@ -8,6 +8,7 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -21,6 +22,8 @@ import com.nexters.fooddiary.core.ui.alert.SnackBarData
 import com.nexters.fooddiary.presentation.auth.AuthUiState
 import com.nexters.fooddiary.presentation.auth.navigation.LoginRoute
 import com.nexters.fooddiary.presentation.auth.navigation.loginScreen
+import com.nexters.fooddiary.presentation.detail.navigation.DetailRoute
+import com.nexters.fooddiary.presentation.detail.navigation.detailScreen
 import com.nexters.fooddiary.presentation.home.calendar.navigation.calendarScreen
 import com.nexters.fooddiary.presentation.home.navigation.HomeRoute
 import com.nexters.fooddiary.presentation.home.navigation.homeScreen
@@ -48,8 +51,8 @@ fun FoodDiaryNavHost(
 ) {
     val context = LocalContext.current
     var authUiState by remember { mutableStateOf<AuthUiState?>(null) }
-    var signOutRequestId by remember { mutableStateOf(0) }
-    var deleteAccountRequestId by remember { mutableStateOf(0) }
+    var signOutRequestId by remember { mutableIntStateOf(0) }
+    var deleteAccountRequestId by remember { mutableIntStateOf(0) }
     var hasNavigatedFromSplash by remember { mutableStateOf(false) }
     var showHomeCoachmarkOnEntry by remember { mutableStateOf(false) }
     val startDestination = if (initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_IMAGE) {
@@ -145,11 +148,22 @@ fun FoodDiaryNavHost(
 
         homeScreen(
             onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
-            onNavigateToMyPage = { navController.navigate(MyPageRoute)},
+            onNavigateToDetail = { date ->
+                navController.navigate(DetailRoute(dateString = date.toString()))
+            },
+            onNavigateToMyPage = { navController.navigate(MyPageRoute) },
             showCoachmarkOnEntry = { showHomeCoachmarkOnEntry },
             onCoachmarkFlagConsumed = { showHomeCoachmarkOnEntry = false },
         )
+
+        detailScreen(
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
+            onShowToast = onShowToast,
+        )
+
         calendarScreen()
+
         imageScreen(
             onClose = {
                 if (!navController.popBackStack()) {
@@ -167,6 +181,7 @@ fun FoodDiaryNavHost(
                 navController.navigate(WebViewRoute(url = url))
             },
             onShowDialog = onShowDialog,
+            onShowToast = onShowToast,
             onBack = { navController.popBackStack() },
             onSignOut = {
                 signOutRequestId++

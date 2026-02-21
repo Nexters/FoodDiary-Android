@@ -45,7 +45,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.nexters.fooddiary.core.common.permission.PermissionUtil
 
 private const val PREVIEW_IMAGE_URL = "https://picsum.photos/200/200?random="
