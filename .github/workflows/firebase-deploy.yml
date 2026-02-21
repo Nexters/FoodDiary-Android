@@ -14,6 +14,10 @@ jobs:
       # CI에서 local.properties 없이 주입 
       WEB_CLIENT_ID: ${{ secrets.WEB_CLIENT_ID }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      DEV_KEYSTORE_PASSWORD: ${{ secrets.DEV_KEYSTORE_PASSWORD }}
+      DEV_KEY_ALIAS: ${{ secrets.DEV_KEY_ALIAS }}
+      DEV_KEY_PASSWORD: ${{ secrets.DEV_KEY_PASSWORD }}
+      DEV_KEYSTORE_PATH: mumuk-dev.jks
 
     steps:
       - name: Checkout repository
@@ -47,11 +51,25 @@ jobs:
         run: |
           # trace/출력 끄기
           set +x
-          mkdir -p app
-          printf "%s" "$GOOGLE_SERVICES_JSON" | base64 --decode > app/google-services.json
+          mkdir -p app/src/debugRelease
+          printf "%s" "$GOOGLE_SERVICES_JSON" | base64 --decode > app/src/debugRelease/google-services.json
           echo "google-services.json safely created"
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+
+      - name: Create dev keystore
+        run: |
+          set +x
+          umask 077
+          if [ -z "$DEV_KEY_BASE64" ]; then
+            echo "DEV_KEY_BASE64 is not set"
+            exit 1
+          fi
+          printf "%s" "$DEV_KEY_BASE64" | base64 --decode > mumuk-dev.jks
+          chmod 600 mumuk-dev.jks
+          echo "mumuk-dev.jks safely created"
+        env:
+          DEV_KEY_BASE64: ${{ secrets.DEV_KEY_BASE64 }}
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
@@ -73,10 +91,15 @@ jobs:
         run: |
           bundle exec fastlane distribute
 
+      - name: Clean sensitive files
+        if: always()
+        run: |
+          rm -f mumuk-dev.jks app/src/debugRelease/google-services.json
+
       - name: Upload APK artifact
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug-${{ github.run_number }}
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: app-debugRelease-${{ github.run_number }}
+          path: app/build/outputs/apk/debugRelease/app-debugRelease.apk
           retention-days: 30
