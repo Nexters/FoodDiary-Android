@@ -18,26 +18,28 @@ class DiaryRepositoryImpl @Inject constructor(
 ) : DiaryRepository {
 
     override suspend fun getDiary(date: LocalDate): DiaryDetail {
-        val responseByDate = diaryApi.getDiary(date.toString())
-        val dayResponse = responseByDate[date.toString()]
-            ?: return DiaryDetail(
-                date = date,
-                diaries = emptyList(),
-            )
+        val requestedDate = date.toString()
+        val response = diaryApi.getDiary(
+            startDate = requestedDate,
+            endDate = requestedDate,
+        )
+        val diaries = response.diaries.filter { diary ->
+            diary.diaryDate == null || diary.diaryDate == requestedDate
+        }
 
         return DiaryDetail(
             date = date,
-            diaries = dayResponse.diaries.map { diary ->
+            diaries = diaries.map { diary ->
                 DiaryEntry(
                     diaryId = diary.diaryId,
                     mealType = diary.timeType.toDomainOrThrow(diary.diaryId),
                     analysisStatus = diary.analysisStatus.toDomainOrThrow(diary.diaryId),
                     restaurantName = diary.restaurantName,
                     category = diary.category,
-                    location = diary.location,
+                    location = diary.roadAddress,
                     tags = diary.tags,
                     coverPhotoUrl = diary.coverPhotoUrl,
-                    mapLink = diary.mapLink,
+                    mapLink = diary.restaurantUrl,
                     photoCount = diary.photoCount ?: diary.photos.size,
                     photos = diary.photos.map { photo ->
                         DiaryPhoto(
