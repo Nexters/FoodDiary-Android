@@ -1,54 +1,65 @@
 {
-  "2026-02-15": {
-    "diaries": [
-      {
-        "diary_id": 12,
-        "time_type": "lunch",
-        "analysis_status": "processing",
-        "restaurant_name": null,
-        "category": null,
-        "location": "명동",
-        "tags": [
-          "칼국수",
-          "만두"
-        ],
-        "cover_photo_url": "https://mumuk.ai.kr/static/images/test.jpeg",
-        "maplink": "https://map.naver.com/p/entry/place/123456",
-        "photo_count": 3,
-        "photos": [
-          {
-            "photo_id": 101,
-            "image_url": "https://mumuk.ai.kr/static/images/test.jpeg"
-          }
-        ]
-      },
-      {
-        "diary_id": 13,
-        "time_type": "dinner",
-        "analysis_status": "done",
-        "restaurant_name": "명동교자",
-        "category": "한식",
-        "location": "을지로",
-        "tags": [
-          "평양냉면",
-          "수육"
-        ],
-        "cover_photo_url": "https://mumuk.ai.kr/static/images/test.jpeg",
-        "photo_count": 2,
-        "maplink": "https://map.naver.com/p/entry/place/654321",
-        "photos": [
-          {
-            "photo_id": 201,
-            "image_url": "https://mumuk.ai.kr/static/images/test.jpeg",
-            "taken_at": "2026-02-15T18:30:00"
-          },
-          {
-            "photo_id": 202,
-            "image_url": "https://mumuk.ai.kr/static/images/test.jpeg",
-            "taken_at": "2026-02-15T18:35:00"
-          }
-        ]
-      }
-    ]
-  }
+  "diaries": [
+    {
+      "diary_date": "2026-02-15",
+      "time_type": "lunch",
+      "restaurant_name": "명동칼국수",
+      "restaurant_url": "https://place.map.kakao.com/12345678",
+      "road_address": "서울 중구 명동길 25",
+      "category": "한식",
+      "note": null,
+      "tags": [
+        "칼국수",
+        "만두"
+      ],
+      "photo_count": 1,
+      "id": 12,
+      "user_id": "00000000-0000-0000-0000-000000000001",
+      "cover_photo_id": 1201,
+      "cover_photo_url": "https://mumuk.ai.kr/static/images/test.jpeg",
+      "created_at": "2026-02-15T12:00:00",
+      "updated_at": "2026-02-15T12:00:00",
+      "analysis_status": "processing",
+      "photos": [
+        {
+          "photo_id": 1201,
+          "image_url": "https://mumuk.ai.kr/static/images/test.jpeg",
+          "analysis_status": "processing"
+        }
+      ]
+    },
+    {
+      "diary_date": "2026-02-15",
+      "time_type": "dinner",
+      "restaurant_name": "명동교자",
+      "restaurant_url": "https://place.map.kakao.com/87654321",
+      "road_address": "서울 중구 명동10길 29",
+      "category": "한식",
+      "note": null,
+      "tags": [
+        "평양냉면",
+        "수육"
+      ],
+      "photo_count": 2,
+      "id": 13,
+      "user_id": "00000000-0000-0000-0000-000000000001",
+      "cover_photo_id": 1301,
+      "cover_photo_url": "https://mumuk.ai.kr/static/images/test.jpeg",
+      "created_at": "2026-02-15T18:30:00",
+      "updated_at": "2026-02-15T18:35:00",
+      "analysis_status": "done",
+      "photos": [
+        {
+          "photo_id": 1301,
+          "image_url": "https://mumuk.ai.kr/static/images/test.jpeg",
+          "analysis_status": "done"
+        },
+        {
+          "photo_id": 1302,
+          "image_url": "https://mumuk.ai.kr/static/images/test.jpeg",
+          "analysis_status": "done"
+        }
+      ]
+    }
+  ]
 }

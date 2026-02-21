@@ -4,51 +4,68 @@ import com.nexters.fooddiary.domain.model.AnalysisStatus
 import com.nexters.fooddiary.domain.model.DiaryDetail
 import com.nexters.fooddiary.domain.model.DiaryEntry
 import com.nexters.fooddiary.domain.model.MealType
+import com.nexters.fooddiary.presentation.detail.DailyMeals
+import com.nexters.fooddiary.presentation.detail.MealCardStatus
+import com.nexters.fooddiary.presentation.detail.MealCardUiModel
+import com.nexters.fooddiary.presentation.detail.MealSlot
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-internal fun DiaryDetail.toDailyMeals(date: LocalDate): com.nexters.fooddiary.presentation.detail.DailyMeals {
+internal fun DiaryDetail.toDailyMeals(date: LocalDate): DailyMeals {
     val diaryByMeal = diaries.associateBy { it.mealType }
-    return _root_ide_package_.com.nexters.fooddiary.presentation.detail.DailyMeals(
-        breakfast = _root_ide_package_.com.nexters.fooddiary.presentation.detail.MealSlot.BREAKFAST.toMealUiModel(
+    return DailyMeals(
+        breakfast = MealSlot.BREAKFAST.toMealUiModel(
             date,
             diaryByMeal[MealType.BREAKFAST]
         ),
-        lunch = _root_ide_package_.com.nexters.fooddiary.presentation.detail.MealSlot.LUNCH.toMealUiModel(
+        lunch = MealSlot.LUNCH.toMealUiModel(
             date,
             diaryByMeal[MealType.LUNCH]
         ),
-        dinner = _root_ide_package_.com.nexters.fooddiary.presentation.detail.MealSlot.DINNER.toMealUiModel(
+        dinner = MealSlot.DINNER.toMealUiModel(
             date,
             diaryByMeal[MealType.DINNER]
         ),
     )
 }
 
-internal fun com.nexters.fooddiary.presentation.detail.MealSlot.toMealUiModel(
+internal fun MealSlot.toMealUiModel(
     date: LocalDate,
     diary: DiaryEntry?,
-): com.nexters.fooddiary.presentation.detail.MealCardUiModel {
+): MealCardUiModel {
     if (diary == null) {
-        return _root_ide_package_.com.nexters.fooddiary.presentation.detail.MealCardUiModel.Companion.empty(date, this)
+        return MealCardUiModel.empty(date, this)
     }
 
-    val firstPhoto = diary.photos.firstOrNull()
     val imageUrls = diary.photos.map { it.imageUrl }
-    return _root_ide_package_.com.nexters.fooddiary.presentation.detail.MealCardUiModel(
+    val prefixedTags = diary.tags
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+        .map { tag -> if (tag.startsWith("#")) tag else "#$tag" }
+    val mealTimeText = if (diary.createdAt.isNullOrEmpty()) {
+        ""
+    } else {
+        runCatching { LocalDateTime.parse(diary.createdAt) }
+            .getOrNull()
+            ?.format(DateTimeFormatter.ofPattern("HH:mm"))
+            .orEmpty()
+    }
+
+    return MealCardUiModel(
         id = "${date}_${name.lowercase()}",
         date = date,
         slot = this,
-        time = firstPhoto?.takenAt?.format(DateTimeFormatter.ofPattern("HH:mm")).orEmpty(),
+        time = mealTimeText,
         location = diary.location.orEmpty(),
         place = diary.restaurantName.orEmpty(),
-        keywords = diary.tags,
+        keywords = prefixedTags,
         mapLink = diary.mapLink.orEmpty(),
         imageUrls = imageUrls,
         status = if (diary.analysisStatus == AnalysisStatus.PROCESSING) {
-            _root_ide_package_.com.nexters.fooddiary.presentation.detail.MealCardStatus.PENDING
+            MealCardStatus.PENDING
         } else {
-            _root_ide_package_.com.nexters.fooddiary.presentation.detail.MealCardStatus.READY
+            MealCardStatus.READY
         },
     )
 }

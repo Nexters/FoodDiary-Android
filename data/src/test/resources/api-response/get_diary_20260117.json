@@ -1,26 +1,60 @@
 {
-    "date": "2026-01-17",
-    "note": "오늘도 잘 먹었다!",
-    "photos": [
+  "diaries": [
+    {
+      "diary_date": "2026-01-17",
+      "time_type": "lunch",
+      "restaurant_name": "명동교자",
+      "restaurant_url": "https://place.map.kakao.com/12345678",
+      "road_address": "서울 중구 명동10길 29",
+      "category": "한식",
+      "note": null,
+      "tags": [
+        "칼국수",
+        "만두"
+      ],
+      "photo_count": 1,
+      "id": 42,
+      "user_id": "00000000-0000-0000-0000-000000000002",
+      "cover_photo_id": 420,
+      "cover_photo_url": "https://s3.example.com/photo/42",
+      "created_at": "2026-01-17T12:30:00",
+      "updated_at": "2026-01-17T12:30:00",
+      "analysis_status": "done",
+      "photos": [
         {
-            "photo_id": 42,
-            "image_url": "https://s3.example.com/photo/42",
-            "taken_at": "2026-01-17T12:30:00",
-            "location": "명동",
-            "restaurant_name": "명동교자",
-            "menu_name": "칼국수",
-            "menu_price": 10000,
-            "time_type": "lunch"
-        },
-        {
-            "photo_id": 43,
-            "image_url": "https://s3.example.com/photo/43",
-            "taken_at": "2026-01-17T18:30:00",
-            "location": "을지로",
-            "restaurant_name": "을지면옥",
-            "menu_name": "평양냉면",
-            "menu_price": 13000,
-            "time_type": "dinner"
+          "photo_id": 420,
+          "image_url": "https://s3.example.com/photo/42",
+          "analysis_status": "done"
         }
-    ]
+      ]
+    },
+    {
+      "diary_date": "2026-01-17",
+      "time_type": "dinner",
+      "restaurant_name": "을지면옥",
+      "restaurant_url": "https://place.map.kakao.com/87654321",
+      "road_address": "서울 중구 충무로14길 2-1",
+      "category": "한식",
+      "note": null,
+      "tags": [
+        "평양냉면",
+        "수육"
+      ],
+      "photo_count": 1,
+      "id": 43,
+      "user_id": "00000000-0000-0000-0000-000000000002",
+      "cover_photo_id": 430,
+      "cover_photo_url": "https://s3.example.com/photo/43",
+      "created_at": "2026-01-17T18:30:00",
+      "updated_at": "2026-01-17T18:30:00",
+      "analysis_status": "processing",
+      "photos": [
+        {
+          "photo_id": 430,
+          "image_url": "https://s3.example.com/photo/43",
+          "analysis_status": "processing"
+        }
+      ]
+    }
+  ]
 }

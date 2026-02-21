@@ -2,7 +2,7 @@ package com.nexters.fooddiary.data.remote.diary
 
 import com.nexters.fooddiary.data.remote.diary.model.CreateDiaryRequest
 import com.nexters.fooddiary.data.remote.diary.model.CreateDiaryResponse
-import com.nexters.fooddiary.data.remote.diary.model.DiaryDetailResponseByDate
+import com.nexters.fooddiary.data.remote.diary.model.DiaryDetailResponse
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -13,5 +13,9 @@ interface DiaryApi {
     suspend fun createDiary(@Body request: CreateDiaryRequest): CreateDiaryResponse
 
     @GET("/diaries")
-    suspend fun getDiary(@Query("date") date: String): Map<String, DiaryDetailResponseByDate>
+    suspend fun getDiary(
+        @Query("start_date") startDate: String,
+        @Query("end_date") endDate: String,
+        @Query("test_mode") testMode: Boolean = true,
+    ): DiaryDetailResponse
 }

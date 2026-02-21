@@ -1,7 +1,6 @@
 package com.nexters.fooddiary.domain.model
 
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 data class DiaryDetail(
     val date: LocalDate,
@@ -12,6 +11,7 @@ data class DiaryEntry(
     val diaryId: Long,
     val mealType: MealType,
     val analysisStatus: AnalysisStatus,
+    val createdAt: String?,
     val restaurantName: String?,
     val category: String?,
     val location: String?,
@@ -25,7 +25,6 @@ data class DiaryEntry(
 data class DiaryPhoto(
     val photoId: Long,
     val imageUrl: String,
-    val takenAt: LocalDateTime?,
 )
 
 enum class MealType {
