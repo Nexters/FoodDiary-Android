@@ -15,6 +15,11 @@ val localProperties = Properties().apply {
     }
 }
 
+fun localOrEnv(localKey: String, envKey: String): String {
+    val localValue = localProperties.getProperty(localKey, "").trim()
+    return localValue.ifEmpty { System.getenv(envKey).orEmpty().trim() }
+}
+
 android {
     namespace = "com.nexters.fooddiary.data"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -23,8 +28,8 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        val apiBaseUrl = localProperties.getProperty("api.base.url")
-            ?: "https://api.example.com/"
+        val apiBaseUrl = localOrEnv("api.base.url", "API_BASE_URL")
+            .ifEmpty { "https://api.example.com/" }
 
         buildConfigField(
             "String",
@@ -35,9 +40,9 @@ android {
 
     buildTypes {
         release {
-            val apiBaseUrl = localProperties.getProperty("api.base.url")
+            val apiBaseUrl = localOrEnv("api.base.url", "API_BASE_URL")
 
-            if (!apiBaseUrl.isNullOrBlank()) {
+            if (apiBaseUrl.isNotBlank()) {
                 buildConfigField(
                     "String",
                     "API_BASE_URL",
@@ -61,18 +66,33 @@ android {
     }
 }
 
-// 릴리즈 빌드가 실제로 실행될 때만 API_BASE_URL을 체크
+// CI 및 릴리즈 빌드에서 API_BASE_URL 유효성 체크
 afterEvaluate {
+    tasks.matching {
+        it.name.contains("assemble", ignoreCase = true) || it.name.contains("bundle", ignoreCase = true)
+    }.configureEach {
+        doFirst {
+            val apiBaseUrl = localOrEnv("api.base.url", "API_BASE_URL")
+            val isCi = System.getenv("CI").orEmpty().equals("true", ignoreCase = true)
+
+            if (isCi && apiBaseUrl.isBlank()) {
+                throw GradleException(
+                    "API_BASE_URL must be set in CI environment"
+                )
+            }
+        }
+    }
+
     tasks.matching { 
         it.name.contains("Release", ignoreCase = true) && 
         (it.name.contains("assemble", ignoreCase = true) || it.name.contains("bundle", ignoreCase = true))
     }.configureEach {
         doFirst {
-            val apiBaseUrl = localProperties.getProperty("api.base.url")
+            val apiBaseUrl = localOrEnv("api.base.url", "API_BASE_URL")
 
-            if (apiBaseUrl.isNullOrBlank()) {
+            if (apiBaseUrl.isBlank()) {
                 throw GradleException(
-                    "api.base.url must be set in local.properties for release builds"
+                    "api.base.url in local.properties or API_BASE_URL env must be set for release builds"
                 )
             }
         }
