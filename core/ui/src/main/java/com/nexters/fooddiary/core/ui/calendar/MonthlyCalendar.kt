@@ -47,6 +47,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -64,6 +65,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -85,6 +87,7 @@ import com.nexters.fooddiary.core.ui.theme.Sd800
 import com.nexters.fooddiary.core.ui.theme.Sd900
 import com.nexters.fooddiary.core.ui.theme.White
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -235,6 +238,30 @@ private val LazyListLayoutInfo.viewportCenterY: Int
 
 private fun LazyListItemInfo.covers(y: Int): Boolean = y in offset until offset + size
 
+private fun LazyListLayoutInfo.isItemCentered(itemIndex: Int): Boolean =
+    visibleItemsInfo.any { it.index == itemIndex && it.covers(viewportCenterY) }
+
+private fun scrollOffsetToCenterItem(density: Density, pickerHeight: Dp): Int =
+    with(density) { (pickerHeight.toPx() / 2 - ITEM_HEIGHT_DP.dp.toPx() / 2).toInt() }
+
+private suspend fun snapPickerToCenterWhenScrollEnds(
+    listState: LazyListState,
+    itemCount: Int,
+    scrollOffsetToCenter: Int
+) {
+    snapshotFlow { listState.isScrollInProgress }
+        .distinctUntilChanged()
+        .filter { !it }
+        .collect {
+            val info = listState.layoutInfo
+            val fallbackIndex = listState.firstVisibleItemIndex.coerceIn(0, (itemCount - 1).coerceAtLeast(0))
+            val indexToCenter = info.centeredItemIndex(fallbackIndex).coerceIn(0, itemCount - 1)
+            if (!info.isItemCentered(indexToCenter)) {
+                listState.animateScrollToItem(index = indexToCenter, scrollOffset = scrollOffsetToCenter)
+            }
+        }
+}
+
 private fun centeredYearMonth(
     years: List<Int>,
     startYear: Int,
@@ -383,6 +410,14 @@ private fun RowScope.PickerColumn(
     onClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val density = LocalDensity.current
+    val scrollOffsetToCenter = remember(density, pickerHeight) {
+        scrollOffsetToCenterItem(density, pickerHeight)
+    }
+
+    LaunchedEffect(listState, itemCount, scrollOffsetToCenter) {
+        snapPickerToCenterWhenScrollEnds(listState, itemCount, scrollOffsetToCenter)
+    }
     LazyColumn(
         modifier = modifier
             .weight(1f)
