@@ -38,17 +38,23 @@ class DiaryApiTest : BaseMockServerTest() {
         val date = "2026-01-17"
         
         // When
-        val response = diaryApi.getDiary(date)
+        val response = diaryApi.getDiary(
+            startDate = date,
+            endDate = date,
+        )
 
         // Then (Response Verification)
-        assertEquals("2026-01-17", response.date)
-        assertEquals(2, response.photos.size)
-        assertEquals("명동교자", response.photos[0].restaurantName)
+        assertEquals(2, response.diaries.size)
+        assertEquals("명동교자", response.diaries[0].restaurantName)
+        assertEquals(42L, response.diaries[0].diaryId)
 
         // Then (Request Verification)
         val recordedRequest = mockWebServer.takeRequest()
         assertEquals("GET", recordedRequest.method)
-        assertEquals("/diaries/2026-01-17", recordedRequest.path)
+        assertEquals(
+            "/diaries?start_date=2026-01-17&end_date=2026-01-17&test_mode=true",
+            recordedRequest.path,
+        )
     }
     
     @Test
