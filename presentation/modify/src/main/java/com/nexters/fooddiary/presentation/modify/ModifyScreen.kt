@@ -10,21 +10,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,6 +46,7 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.ui.R.drawable
 import com.nexters.fooddiary.core.ui.alert.DialogData
+import com.nexters.fooddiary.core.ui.alert.SnackBarData
 import com.nexters.fooddiary.core.ui.component.CommonChips
 import com.nexters.fooddiary.core.ui.component.CommonCircleButton
 import com.nexters.fooddiary.core.ui.component.DetailScreenHeader
@@ -76,6 +76,7 @@ fun ModifyScreen(
     onBack: () -> Unit,
     onNavigateToImagePicker: () -> Unit = {},
     onShowDialog: (DialogData) -> Unit = {},
+    onShowSnackBar: (SnackBarData) -> Unit = {},
     viewModel: ModifyViewModel = mavericksViewModel(),
 ) {
     LaunchedEffect(diaryId) {
@@ -83,6 +84,7 @@ fun ModifyScreen(
     }
     val state by viewModel.collectAsState()
     val saveErrorMessage = stringResource(R.string.modify_save_error)
+    val successMessage = stringResource(R.string.modify_save_success)
     LaunchedEffect(state.error) {
         when (val err = state.error) {
             ModifyError.Save -> {
@@ -111,7 +113,14 @@ fun ModifyScreen(
         onRemoveTag = viewModel::removeTag,
         onRemovePhotoAt = viewModel::removePhotoAt,
         onDelete = { viewModel.onDelete(onSuccess = onBack) },
-        onSave = { viewModel.onSave(onSuccess = onBack) },
+        onSave = {
+            viewModel.onSave(
+                onSuccess = {
+                    onShowSnackBar(SnackBarData(message = successMessage))
+                    onBack()
+                },
+            )
+        },
         onAddChip = { showTagDialog = true },
     )
 }
@@ -291,37 +300,18 @@ private fun AddressSection(
 ) {
     val searchPlaceholder = stringResource(R.string.modify_address_search_placeholder)
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        TextField(
+        StyledInputField(
             value = searchQuery,
             onValueChange = onSearchChange,
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = {
-                Text(
-                    text = searchPlaceholder,
-                    style = AppTypography.p15,
-                    color = Gray600,
-                )
-            },
-            trailingIcon = {
+            modifier = Modifier.defaultMinSize(minHeight = 42.dp),
+            placeholder = searchPlaceholder,
+            trailingIcon = @Composable {
                 Icon(
                     painter = painterResource(drawable.ic_search),
                     contentDescription = null,
-                    modifier = Modifier.size(24.dp),
                     tint = White,
                 )
             },
-            singleLine = true,
-            shape = InputShape,
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = InputBg,
-                unfocusedContainerColor = InputBg,
-                disabledContainerColor = InputBg,
-                focusedBorderColor = Color.Transparent,
-                unfocusedBorderColor = Color.Transparent,
-                focusedTextColor = Gray050,
-                unfocusedTextColor = Gray050,
-                cursorColor = Gray050,
-            ),
         )
         addressLines.forEachIndexed { index, line ->
             key(index) {
@@ -416,88 +406,6 @@ private fun TagChipItem(
                 .size(18.dp)
                 .clickable { onRemove(tag) },
         )
-    }
-}
-
-@Composable
-private fun TagInputDialog(
-    onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit,
-) {
-    val tagState = rememberTextFieldState()
-    val placeholder = stringResource(R.string.modify_tag_dialog_placeholder)
-    val titleTag = stringResource(R.string.modify_section_tag)
-    val cancelText = stringResource(R.string.modify_tag_dialog_cancel)
-    val confirmText = stringResource(R.string.modify_tag_dialog_confirm)
-
-    Dialog(onDismissRequest = onDismiss) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.8f)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .background(SdBase, RoundedCornerShape(16.dp))
-                    .padding(horizontal = 18.dp, vertical = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                Text(
-                    text = titleTag,
-                    style = AppTypography.hd15,
-                    color = Gray050,
-                )
-                TextField(
-                    state = tagState,
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
-                    placeholder = {
-                        Text(
-                            text = placeholder,
-                            style = AppTypography.p15,
-                            color = Gray600,
-                        )
-                    },
-                    shape = InputShape,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = InputBg,
-                        unfocusedContainerColor = InputBg,
-                        disabledContainerColor = InputBg,
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
-                        focusedTextColor = Gray050,
-                        unfocusedTextColor = Gray050,
-                        cursorColor = Gray050,
-                    ),
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    CommonCircleButton(
-                        modifier = Modifier.weight(1f),
-                        onClick = onDismiss,
-                        buttonColors = ButtonDefaults.buttonColors(
-                            contentColor = Gray200,
-                            containerColor = SdBase,
-                        ),
-                        border = BorderStroke(1.dp, Sd800),
-                        buttonText = cancelText,
-                        contentColor = Gray200,
-                    )
-                    CommonCircleButton(
-                        modifier = Modifier.weight(1f),
-                        onClick = {
-                            onConfirm(tagState.text.toString().trim())
-                        },
-                        buttonText = confirmText,
-                    )
-                }
-            }
-        }
     }
 }
 
