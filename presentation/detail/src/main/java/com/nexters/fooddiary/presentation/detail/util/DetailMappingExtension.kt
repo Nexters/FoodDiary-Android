@@ -54,6 +54,7 @@ internal fun MealSlot.toMealUiModel(
 
     return MealCardUiModel(
         id = "${date}_${name.lowercase()}",
+        diaryId = diary.diaryId,
         date = date,
         slot = this,
         time = mealTimeText,
