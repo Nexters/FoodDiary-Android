@@ -74,4 +74,31 @@ class DiaryApiTest : BaseMockServerTest() {
         val body = recordedRequest.body.readUtf8()
         assertNotNull(body)
     }
+
+    @Test
+    fun `특정_주간_다이어리_요약을_조회할_수_있다`() = runTest {
+        // Given
+        val startDate = "2026-02-22"
+        val endDate = "2026-02-28"
+
+        // When
+        val response = diaryApi.getDiarySummary(
+            startDate = startDate,
+            endDate = endDate,
+        )
+
+        // Then (Response Verification)
+        val firstDay = response["2026-02-22"]
+        assertNotNull(firstDay)
+        assertEquals(2, firstDay?.photos?.size)
+        assertEquals("https://picsum.photos/seed/20260222a/400/300", firstDay?.photos?.first())
+
+        // Then (Request Verification)
+        val recordedRequest = mockWebServer.takeRequest()
+        assertEquals("GET", recordedRequest.method)
+        assertEquals(
+            "/diaries/summary?start_date=2026-02-22&end_date=2026-02-28&test_mode=true",
+            recordedRequest.path,
+        )
+    }
 }

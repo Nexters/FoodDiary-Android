@@ -60,6 +60,9 @@ import com.nexters.fooddiary.core.ui.calendar.rememberMonthCalendarState
 import com.nexters.fooddiary.core.ui.calendar.rememberWeeklyCalendarState
 import com.nexters.fooddiary.core.ui.component.AddPhotoBox
 import com.nexters.fooddiary.core.ui.component.Header
+import com.nexters.fooddiary.core.ui.food.FoodImageStackView
+import com.nexters.fooddiary.core.ui.food.FoodImageState
+import com.nexters.fooddiary.core.ui.gradientBorder
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.GlassmorphismStyle
 import com.nexters.fooddiary.core.ui.theme.Gray050
@@ -104,13 +107,23 @@ internal fun HomeScreen(
         state = state,
         photoCountByDate = photoCountByDate,
         onDateSelected = viewModel::onDateSelected,
+        onCardStackClick = viewModel::onCardStackClicked,
         onToggleCalendarView = viewModel::onToggleCalendarView,
         onNavigateToImagePicker = onNavigateToImagePicker,
         onNavigateToMyPage = onNavigateToMyPage,
+        selectedDateImageUrls = selectedDateImageUrls(
+            weeklyPhotosByDate = state.weeklyPhotosByDate,
+            selectedDate = state.selectedDate,
+        ),
         onShowSnackBar = onShowSnackBar,
         modifier = modifier,
     )
 }
+
+internal fun selectedDateImageUrls(
+    weeklyPhotosByDate: Map<LocalDate, List<String>>,
+    selectedDate: LocalDate,
+): List<String> = weeklyPhotosByDate[selectedDate].orEmpty()
 
 @Composable
 private fun HomeScreen(
@@ -118,9 +131,11 @@ private fun HomeScreen(
     state: HomeScreenState = HomeScreenState(),
     photoCountByDate: Map<LocalDate, Int> = emptyMap(),
     onDateSelected: (LocalDate) -> Unit = {},
+    onCardStackClick: () -> Unit = {},
     onToggleCalendarView: () -> Unit = {},
     onNavigateToImagePicker: () -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
+    selectedDateImageUrls: List<String> = emptyList(),
     onShowSnackBar: (SnackBarData) -> Unit = {},
 ) {
     val screenHazeState = rememberHazeState()
@@ -195,13 +210,28 @@ private fun HomeScreen(
                         onDateSelected = onDateSelected,
                         photoCountByDate = photoCountByDate,
                     )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    AddPhotoBox(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(1f),
-                        onAddPhoto = onNavigateToImagePicker,
-                    )
+                    Spacer(modifier = Modifier.height(43.dp))
+                    if (selectedDateImageUrls.isNotEmpty()) {
+                        FoodImageStackView(
+                            imageUrls = selectedDateImageUrls,
+                            state = FoodImageState.Ready(
+                                timeText = "시간",
+                                locationText = "위치",
+                            ),
+                            onCardClick = onCardStackClick,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp)
+                                .aspectRatio(1f),
+                        )
+                    } else {
+                        AddPhotoBox(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            onAddPhoto = onNavigateToImagePicker,
+                        )
+                    }
                 }
                 Button(
                     onClick = { throw RuntimeException("Sentry/Discord 알림 테스트용 크래시") },
