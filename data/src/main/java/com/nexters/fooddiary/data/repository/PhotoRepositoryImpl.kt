@@ -21,11 +21,13 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import androidx.core.net.toUri
+import com.nexters.fooddiary.data.firebase.LoginDeviceInfoProvider
 
 internal class PhotoRepositoryImpl @Inject constructor(
     private val photoApi: PhotoApi,
     private val photoUploadDao: PhotoUploadDao,
     private val resourceProvider: ResourceProvider,
+    private val loginDeviceInfoProvider: LoginDeviceInfoProvider,
     @ApplicationContext private val context: Context
 ) : PhotoRepository {
 
@@ -36,13 +38,23 @@ internal class PhotoRepositoryImpl @Inject constructor(
         val uploadDateStr = date.toIsoDateString()
         when (val partsResult = buildMultipartParts(photoUriStrings)) {
             is PartsResult.Failure -> return@withContext Result.failure(partsResult.error)
-            is PartsResult.Success -> return@withContext uploadAndRecord(partsResult.parts, uploadDateStr)
+            is PartsResult.Success -> return@withContext uploadAndRecord(
+                partsResult.parts,
+                uploadDateStr
+            )
         }
     }
 
-    private suspend fun uploadAndRecord(parts: List<MultipartBody.Part>, uploadDateStr: String): Result<Unit> {
+    private suspend fun uploadAndRecord(
+        parts: List<MultipartBody.Part>,
+        uploadDateStr: String
+    ): Result<Unit> {
         return try {
-            val response = photoApi.batchUpload(uploadDateStr.toDatePart(), parts)
+            val response = photoApi.batchUpload(
+                date = uploadDateStr.toDatePart(),
+                photos = parts,
+                deviceId = loginDeviceInfoProvider.getLoginDeviceInfo().deviceId
+            )
             recordPendingUploads(response.results, uploadDateStr)
             Result.success(Unit)
         } catch (e: Exception) {
@@ -70,7 +82,10 @@ internal class PhotoRepositoryImpl @Inject constructor(
         return PartsResult.Success(parts.filterNotNull())
     }
 
-    private suspend fun recordPendingUploads(results: List<BatchUploadResultItem>, uploadDateStr: String) {
+    private suspend fun recordPendingUploads(
+        results: List<BatchUploadResultItem>,
+        uploadDateStr: String
+    ) {
         val entities = results.map { item ->
             PhotoUploadEntity(
                 photoId = item.photoId,

@@ -39,6 +39,7 @@ interface PhotoApi {
     @POST("/photos/batch-upload")
     suspend fun batchUpload(
         @Part("date") date: RequestBody,
+        @Part("device_id") deviceId: String,
         @Part photos: List<MultipartBody.Part>
     ): BatchUploadResponse
 }

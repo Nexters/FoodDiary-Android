@@ -85,8 +85,11 @@ dependencies {
     implementation(projects.core.classification)
     implementation(projects.domain)
 
+    implementation(libs.androidx.core.ktx)
+
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.play.services)
 
     // Retrofit
     implementation(libs.retrofit)
@@ -106,6 +109,8 @@ dependencies {
     // Firebase Auth
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.installations)
+    implementation(libs.firebase.messaging)
 
     // Google Sign-In
     implementation(libs.play.services.auth)
@@ -121,4 +126,6 @@ dependencies {
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockk)
+    testImplementation(libs.okhttp.mockwebserver)
 }
