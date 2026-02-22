@@ -310,6 +310,7 @@ fun FoodDiaryNavHost(
                         navController.navigate(ImagePickerRoute(dateString = null))
                     },
                     onShowDialog = onShowDialog,
+                    onShowSnackBar = onShowSnackBar,
                 )
 
                 myPageScreen(
