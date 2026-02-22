@@ -143,7 +143,8 @@ fun FoodDiaryNavHost(
             onNavigateToDetail = { date ->
                 navController.navigate(DetailRoute(dateString = date.toString()))
             },
-            onNavigateToMyPage = { navController.navigate(MyPageRoute)}
+            onNavigateToMyPage = { navController.navigate(MyPageRoute)},
+            onShowSnackBar = onShowSnackBar,
         )
 
         detailScreen(
