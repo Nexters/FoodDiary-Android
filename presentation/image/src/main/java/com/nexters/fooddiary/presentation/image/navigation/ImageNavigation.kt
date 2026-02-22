@@ -2,7 +2,7 @@ package com.nexters.fooddiary.presentation.image.navigation
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.nexters.fooddiary.presentation.image.ImageClassificationScreen
+import com.nexters.fooddiary.presentation.image.ImagePickerScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -12,7 +12,9 @@ fun NavGraphBuilder.imageScreen(
     onClose: () -> Unit
 ) {
     composable<ImagePickerRoute> {
-        ImageClassificationScreen(onClose = onClose)
+        ImagePickerScreen(
+            onClose = onClose,
+        )
     }
 }
 
