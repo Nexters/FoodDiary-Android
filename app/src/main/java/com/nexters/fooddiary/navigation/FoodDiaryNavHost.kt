@@ -171,6 +171,7 @@ fun FoodDiaryNavHost(
             onBack = { navController.popBackStack() },
             onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
             onShowDialog = onShowDialog,
+            onShowSnackBar = onShowSnackBar,
         )
         myPageScreen(
             navigateToWebView = { page ->

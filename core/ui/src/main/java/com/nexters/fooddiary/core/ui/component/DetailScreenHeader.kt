@@ -34,6 +34,7 @@ fun DetailScreenHeader(
             .fillMaxWidth()
             .then(modifier)
             .windowInsetsPadding(WindowInsets.statusBars.only(WindowInsetsSides.Top))
+            .padding(vertical = 16.dp)
             .background(color = SdBase),
         verticalAlignment = Alignment.CenterVertically,
     ) {
