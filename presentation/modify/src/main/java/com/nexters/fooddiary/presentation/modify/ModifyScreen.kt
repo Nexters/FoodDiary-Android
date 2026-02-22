@@ -8,28 +8,30 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,10 +41,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import coil3.compose.AsyncImage
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.ui.R.drawable
+import com.nexters.fooddiary.core.ui.alert.DialogData
 import com.nexters.fooddiary.core.ui.component.CommonChips
 import com.nexters.fooddiary.core.ui.component.CommonCircleButton
 import com.nexters.fooddiary.core.ui.component.DetailScreenHeader
@@ -71,12 +75,33 @@ fun ModifyScreen(
     diaryId: String,
     onBack: () -> Unit,
     onNavigateToImagePicker: () -> Unit = {},
+    onShowDialog: (DialogData) -> Unit = {},
     viewModel: ModifyViewModel = mavericksViewModel(),
 ) {
     LaunchedEffect(diaryId) {
         viewModel.syncDiaryId(diaryId)
     }
     val state by viewModel.collectAsState()
+    val saveErrorMessage = stringResource(R.string.modify_save_error)
+    LaunchedEffect(state.error) {
+        when (val err = state.error) {
+            ModifyError.Save -> {
+                onShowDialog(DialogData(message = saveErrorMessage))
+                viewModel.clearError()
+            }
+            null -> { }
+        }
+    }
+    var showTagDialog by remember { mutableStateOf(false) }
+    if (showTagDialog) {
+        TagInputDialog(
+            onDismiss = { showTagDialog = false },
+            onConfirm = { tag ->
+                viewModel.addTag(tag)
+                showTagDialog = false
+            },
+        )
+    }
     ModifyScreenContent(
         onBack = onBack,
         onNavigateToImagePicker = onNavigateToImagePicker,
@@ -87,7 +112,7 @@ fun ModifyScreen(
         onRemovePhotoAt = viewModel::removePhotoAt,
         onDelete = { viewModel.onDelete(onSuccess = onBack) },
         onSave = { viewModel.onSave(onSuccess = onBack) },
-        onAddChip = { }
+        onAddChip = { showTagDialog = true },
     )
 }
 
@@ -110,35 +135,42 @@ private fun ModifyScreenContent(
     val sectionAddress = stringResource(R.string.modify_section_address)
     val sectionTag = stringResource(R.string.modify_section_tag)
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(SdBase)
-            .padding(horizontal = 16.dp),
-    ) {
-        LazyColumn(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(32.dp),
-        ) {
-            item {
-                DetailScreenHeader(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    onBackButtonClick = onBack,
-                ) {
-                    Text(
-                        text = modifyTitle,
-                        style = AppTypography.p15,
-                        color = Gray050,
-                        modifier = Modifier.padding(start = 8.dp),
-                    )
-                }
+    Scaffold(
+        modifier = modifier,
+        containerColor = SdBase,
+        topBar = {
+            DetailScreenHeader(
+                onBackButtonClick = onBack,
+            ) {
+                Text(
+                    text = modifyTitle,
+                    style = AppTypography.p15,
+                    color = Gray050,
+                    modifier = Modifier.padding(start = 8.dp),
+                )
             }
+        },
+        bottomBar = {
+            ModifyBottomButtons(
+                onDelete = onDelete,
+                onSave = onSave,
+            )
+        },
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 16.dp, vertical = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(32.dp),
+            contentPadding = PaddingValues(bottom = 16.dp),
+        ) {
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    AddPhotoBox(onClick = onNavigateToImagePicker)
+                    AddPhotoToDiaryBox(onClick = onNavigateToImagePicker)
                     state.photoUrls.forEachIndexed { index, imageUrl ->
                         SelectBox(
                             imageUrl = imageUrl,
@@ -181,11 +213,6 @@ private fun ModifyScreenContent(
                 }
             }
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        ModifyBottomButtons(
-            onDelete = onDelete,
-            onSave = onSave,
-        )
     }
 }
 
@@ -215,7 +242,7 @@ private fun SelectBox(
     Box(
         modifier = Modifier
             .size(104.dp)
-            .clip(RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(16.dp))
             .background(Sd700),
     ) {
         AsyncImage(
@@ -238,11 +265,11 @@ private fun SelectBox(
 }
 
 @Composable
-private fun AddPhotoBox(onClick: () -> Unit = {}) {
+private fun AddPhotoToDiaryBox(onClick: () -> Unit = {}) {
     Box(
         modifier = Modifier
             .size(104.dp)
-            .clip(RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(16.dp))
             .dashBorder()
             .background(Sd700)
             .clickable(onClick = onClick),
@@ -264,7 +291,7 @@ private fun AddressSection(
 ) {
     val searchPlaceholder = stringResource(R.string.modify_address_search_placeholder)
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        OutlinedTextField(
+        TextField(
             value = searchQuery,
             onValueChange = onSearchChange,
             modifier = Modifier.fillMaxWidth(),
@@ -277,9 +304,9 @@ private fun AddressSection(
             },
             trailingIcon = {
                 Icon(
-                    imageVector = Icons.Default.Search,
+                    painter = painterResource(drawable.ic_search),
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp),
+                    modifier = Modifier.size(24.dp),
                     tint = White,
                 )
             },
@@ -374,6 +401,7 @@ private fun TagChipItem(
             .clip(ChipShape)
             .background(ChipInactiveBg)
             .padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(
@@ -392,6 +420,88 @@ private fun TagChipItem(
 }
 
 @Composable
+private fun TagInputDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit,
+) {
+    val tagState = rememberTextFieldState()
+    val placeholder = stringResource(R.string.modify_tag_dialog_placeholder)
+    val titleTag = stringResource(R.string.modify_section_tag)
+    val cancelText = stringResource(R.string.modify_tag_dialog_cancel)
+    val confirmText = stringResource(R.string.modify_tag_dialog_confirm)
+
+    Dialog(onDismissRequest = onDismiss) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.8f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .background(SdBase, RoundedCornerShape(16.dp))
+                    .padding(horizontal = 18.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Text(
+                    text = titleTag,
+                    style = AppTypography.hd15,
+                    color = Gray050,
+                )
+                TextField(
+                    state = tagState,
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
+                    placeholder = {
+                        Text(
+                            text = placeholder,
+                            style = AppTypography.p15,
+                            color = Gray600,
+                        )
+                    },
+                    shape = InputShape,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = InputBg,
+                        unfocusedContainerColor = InputBg,
+                        disabledContainerColor = InputBg,
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
+                        focusedTextColor = Gray050,
+                        unfocusedTextColor = Gray050,
+                        cursorColor = Gray050,
+                    ),
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    CommonCircleButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onDismiss,
+                        buttonColors = ButtonDefaults.buttonColors(
+                            contentColor = Gray200,
+                            containerColor = SdBase,
+                        ),
+                        border = BorderStroke(1.dp, Sd800),
+                        buttonText = cancelText,
+                        contentColor = Gray200,
+                    )
+                    CommonCircleButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            onConfirm(tagState.text.toString().trim())
+                        },
+                        buttonText = confirmText,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun ModifyBottomButtons(
     onDelete: () -> Unit,
     onSave: () -> Unit,
@@ -399,7 +509,9 @@ private fun ModifyBottomButtons(
     val deleteText = stringResource(R.string.modify_delete)
     val saveText = stringResource(R.string.modify_save)
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 32.dp, start = 16.dp, end = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         CommonCircleButton(
@@ -414,7 +526,8 @@ private fun ModifyBottomButtons(
             contentColor = Gray200,
         )
         CommonCircleButton(
-            modifier = Modifier.weight(2f),
+            modifier = Modifier
+                .weight(2f),
             onClick = onSave,
             buttonText = saveText,
         )
