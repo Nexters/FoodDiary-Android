@@ -2,6 +2,7 @@ package com.nexters.fooddiary.presentation.modify
 
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
+import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
@@ -32,6 +33,13 @@ class ModifyViewModel @AssistedInject constructor(
         setState { copy(tags = tags.filter { it != tag }) }
     }
 
+    fun addTag(tag: String) {
+        val trimmed = tag.trim().takeIf { it.isNotBlank() } ?: return
+        setState {
+            if (trimmed in tags) this else copy(tags = tags + trimmed)
+        }
+    }
+
     fun syncDiaryId(diaryId: String) {
         setState { copy(diaryId = diaryId) }
         diaryId.toIntOrNull()?.let { id ->
@@ -41,11 +49,17 @@ class ModifyViewModel @AssistedInject constructor(
                 when (result) {
                     is Success -> {
                         val entry = result()
+                        val entryCategory = entry.category
+                        val mergedCategories = entryCategory
+                            ?.takeIf { it.isNotBlank() }
+                            ?.let { categories + it }
+                            ?: categories
                         copy(
                             photoIds = entry.photos.map { it.photoId.toInt() },
                             photoUrls = entry.photos.map { it.imageUrl },
                             coverPhotoId = entry.coverPhotoId.toInt(),
-                            selectedCategory = entry.category ?: selectedCategory,
+                            selectedCategory = entryCategory?.takeIf { it.isNotBlank() } ?: selectedCategory,
+                            categories = mergedCategories,
                             addressLines = entry.location?.let { listOf(it) } ?: emptyList(),
                             roadAddress = entry.location ?: "",
                             restaurantName = entry.restaurantName ?: "",
@@ -61,11 +75,22 @@ class ModifyViewModel @AssistedInject constructor(
     }
 
     fun removePhotoAt(index: Int) {
-        setState {
-            copy(
-                photoIds = photoIds.filterIndexed { i, _ -> i != index },
-                photoUrls = photoUrls.filterIndexed { i, _ -> i != index },
-            )
+        withState { state ->
+            val newPhotoIds = state.photoIds.filterIndexed { i, _ -> i != index }
+            val newPhotoUrls = state.photoUrls.filterIndexed { i, _ -> i != index }
+            val removedPhotoId = state.photoIds.getOrNull(index)
+            val newCoverPhotoId = when {
+                removedPhotoId == null -> state.coverPhotoId
+                state.coverPhotoId == removedPhotoId -> newPhotoIds.firstOrNull()
+                else -> state.coverPhotoId
+            }
+            setState {
+                copy(
+                    photoIds = newPhotoIds,
+                    photoUrls = newPhotoUrls,
+                    coverPhotoId = newCoverPhotoId,
+                )
+            }
         }
     }
 
@@ -86,10 +111,20 @@ class ModifyViewModel @AssistedInject constructor(
             suspend {
                 updateDiaryUseCase(id, param)
             }.execute { result ->
-                if (result is Success) onSuccess()
-                this
+                when (result) {
+                    is Success -> {
+                        onSuccess()
+                        this
+                    }
+                    is Fail -> copy(error = ModifyError.Save)
+                    else -> this
+                }
             }
         }
+    }
+
+    fun clearError() {
+        setState { copy(error = null) }
     }
 
     fun onDelete(onSuccess: () -> Unit = {}) {

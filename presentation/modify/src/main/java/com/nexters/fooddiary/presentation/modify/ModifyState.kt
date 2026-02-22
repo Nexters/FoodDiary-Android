@@ -2,6 +2,10 @@ package com.nexters.fooddiary.presentation.modify
 
 import com.airbnb.mvrx.MavericksState
 
+sealed interface ModifyError {
+    data object Save : ModifyError
+}
+
 data class ModifyState(
     val diaryId: String = "",
     val selectedCategory: String = "",
@@ -16,4 +20,5 @@ data class ModifyState(
     val photoUrls: List<String> = emptyList(),
     val coverPhotoId: Int? = null,
     val tags: List<String> = emptyList(),
+    val error: ModifyError? = null,
 ) : MavericksState
