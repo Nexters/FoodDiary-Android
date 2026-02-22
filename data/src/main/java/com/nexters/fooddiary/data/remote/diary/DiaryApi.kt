@@ -35,7 +35,7 @@ interface DiaryApi {
     @GET("/diaries/{id}")
     suspend fun getDiaryById(
         @Path("id") id: Int,
-        @Query("test_mode") testMode: Boolean = true
+        @Query("test_mode") testMode: Boolean = false
     ): DiarySummaryResponse
 
     @PATCH("/diaries/{diary_id}")

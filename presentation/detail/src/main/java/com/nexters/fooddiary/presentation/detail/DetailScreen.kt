@@ -308,7 +308,7 @@ private fun DetailContent(
                         meal = meal,
                         mealLabel = meal.slot.toLabel(),
                         onAddPhoto = { onAddPhoto(meal.slot, meal.date) },
-                        onEditClick = { onEditClick(meal.id) },
+                        onEditClick = { onEditClick(meal.diaryId?.toString() ?: meal.id) },
                         onCopyClick = { onCopyClick(meal.mapLink) },
                         onShareClick = { onShareClick(meal.place, meal.mapLink) },
                     )

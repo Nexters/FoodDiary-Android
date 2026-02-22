@@ -16,6 +16,7 @@ enum class MealCardStatus {
 
 data class MealCardUiModel(
     val id: String,
+    val diaryId: Long? = null,
     val date: LocalDate,
     val slot: MealSlot,
     val time: String,
@@ -34,6 +35,7 @@ data class MealCardUiModel(
         fun empty(date: LocalDate, slot: MealSlot): MealCardUiModel {
             return MealCardUiModel(
                 id = "${date}_${slot.name.lowercase()}",
+                diaryId = null,
                 date = date,
                 slot = slot,
                 time = "",
