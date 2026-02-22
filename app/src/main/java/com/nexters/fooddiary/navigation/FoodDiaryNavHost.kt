@@ -309,6 +309,7 @@ fun FoodDiaryNavHost(
                     onNavigateToImagePicker = {
                         navController.navigate(ImagePickerRoute(dateString = null))
                     },
+                    onShowDialog = onShowDialog,
                 )
 
                 myPageScreen(
