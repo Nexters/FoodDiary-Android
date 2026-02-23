@@ -37,7 +37,7 @@ object MockRouteHandler {
 
             // Diary - 모든 날짜에 대해 동일 mock 사용 (Interceptor에서 요청 path의 date로 치환)
             path == PATH_DIARIES && method == "POST" -> MOCK_CREATE_DIARY_SUCCESS
-            path == PATH_DIARIES && method == "GET" -> MOCK_GET_DIARY_20260117
+//            path == PATH_DIARIES && method == "GET" -> MOCK_GET_DIARY_20260117
 
             // Photo
             path == PATH_PHOTOS && method == "POST" -> MOCK_UPLOAD_URL_SUCCESS

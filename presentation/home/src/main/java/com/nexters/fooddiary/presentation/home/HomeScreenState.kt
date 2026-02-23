@@ -8,4 +8,6 @@ data class HomeScreenState(
     val isMonthlyCalendarView: Boolean = false,
     val diaryCountByDate: Map<LocalDate, Int> = emptyMap(),
     val diaryCountByWeek: Int = 0,
+    val weeklyPhotosByDate: Map<LocalDate, List<String>> = emptyMap(),
+    val loadedWeekStartDate: LocalDate? = null,
 ) : MavericksState
