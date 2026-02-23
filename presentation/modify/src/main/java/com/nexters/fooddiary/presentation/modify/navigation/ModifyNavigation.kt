@@ -9,11 +9,14 @@ import com.nexters.fooddiary.presentation.modify.ModifyScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ModifyRoute(val diaryId: String)
+data class ModifyRoute(
+    val diaryId: String,
+    val dateString: String? = null,
+)
 
 fun NavGraphBuilder.modifyScreen(
     onBack: () -> Unit,
-    onNavigateToImagePicker: () -> Unit = {},
+    onNavigateToImagePicker: (dateString: String?) -> Unit = {},
     onShowDialog: (DialogData) -> Unit = {},
     onShowSnackBar: (SnackBarData) -> Unit = {},
 ) {
@@ -22,7 +25,7 @@ fun NavGraphBuilder.modifyScreen(
         ModifyScreen(
             diaryId = route.diaryId,
             onBack = onBack,
-            onNavigateToImagePicker = onNavigateToImagePicker,
+            onNavigateToImagePicker = { onNavigateToImagePicker(route.dateString) },
             onShowDialog = onShowDialog,
             onShowSnackBar = onShowSnackBar,
         )

@@ -15,9 +15,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -64,29 +66,29 @@ fun WeeklyCalendar(
     onHeaderBoundsChanged: (Rect) -> Unit = {},
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val visibleMonth = remember {
-        derivedStateOf {
-            YearMonth.from(calendarState.firstVisibleWeek.days.first().date)
-        }
+    var displayedYearMonth by remember(calendarState) {
+        mutableStateOf(YearMonth.from(calendarState.firstVisibleWeek.days.first().date))
     }
     Column(modifier = modifier) {
         CalendarHeader(
+            yearMonth = displayedYearMonth,
             modifier = Modifier.onGloballyPositioned { coordinates ->
                 onHeaderBoundsChanged(coordinates.boundsInRoot())
             },
-            yearMonth = visibleMonth.value,
             locale = locale,
             colors = colors,
             onPreviousClick = {
                 coroutineScope.launch {
                     val targetDate = calendarState.firstVisibleWeek.days.first().date.minusWeeks(1)
                     calendarState.animateScrollToWeek(targetDate)
+                    displayedYearMonth = YearMonth.from(targetDate)
                 }
             },
             onNextClick = {
                 coroutineScope.launch {
                     val targetDate = calendarState.firstVisibleWeek.days.first().date.plusWeeks(1)
                     calendarState.animateScrollToWeek(targetDate)
+                    displayedYearMonth = YearMonth.from(targetDate)
                 }
             }
         )

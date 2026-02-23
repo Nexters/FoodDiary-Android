@@ -63,6 +63,12 @@ class ImagePickerViewModel @AssistedInject constructor(
         }
     }
 
+    fun refreshGalleryIfHasPermission() {
+        withState { state ->
+            if (state.hasPermission) loadImagesForDate(state.filterDate ?: LocalDate.now())
+        }
+    }
+
     private fun updatePermissionState() {
         val hasPermission = PermissionUtil.hasMediaPermission(context)
         setState { copy(hasPermission = hasPermission) }

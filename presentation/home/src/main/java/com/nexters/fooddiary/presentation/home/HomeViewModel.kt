@@ -121,6 +121,8 @@ class HomeViewModel @AssistedInject constructor(
                     )
                 }.getOrDefault(emptyMap())
 
+                val photoCountByDate = summaryByDate.mapValues { (_, urls) -> urls.size }
+                _photoCountByDate.value = photoCountByDate
                 setState {
                     if (weekStartOf(selectedDate) != weekStart) {
                         this
