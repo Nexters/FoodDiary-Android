@@ -5,6 +5,12 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -12,8 +18,13 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.nexters.fooddiary.core.common.R
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
@@ -31,7 +42,6 @@ import com.nexters.fooddiary.presentation.insight.navigation.InsightRoute
 import com.nexters.fooddiary.presentation.insight.navigation.insightScreen
 import com.nexters.fooddiary.presentation.image.navigation.ImagePickerRoute
 import com.nexters.fooddiary.presentation.image.navigation.imageScreen
-import com.nexters.fooddiary.presentation.home.calendar.navigation.CalendarRoute
 import com.nexters.fooddiary.presentation.onboarding.navigation.OnboardingRoute
 import com.nexters.fooddiary.presentation.onboarding.navigation.onboardingScreen
 import com.nexters.fooddiary.presentation.mypage.navigation.MyPageRoute
@@ -41,6 +51,8 @@ import com.nexters.fooddiary.presentation.webview.navigation.WebViewRoute
 import com.nexters.fooddiary.presentation.webview.navigation.webViewScreen
 import com.nexters.fooddiary.presentation.splash.navigation.SplashRoute
 import com.nexters.fooddiary.presentation.splash.navigation.splashScreen
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 
 @Composable
 fun FoodDiaryNavHost(
@@ -55,12 +67,23 @@ fun FoodDiaryNavHost(
     var authUiState by remember { mutableStateOf<AuthUiState?>(null) }
     var signOutRequestId by remember { mutableIntStateOf(0) }
     var deleteAccountRequestId by remember { mutableIntStateOf(0) }
+    var homeCalendarToggleRequestId by remember { mutableIntStateOf(0) }
+    var isHomeMonthlyCalendarView by remember { mutableStateOf(false) }
     var hasNavigatedFromSplash by remember { mutableStateOf(false) }
+    val bottomBarHazeState = rememberHazeState()
     val startDestination = if (initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_IMAGE) {
         ImagePickerRoute
     } else {
         SplashRoute
     }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+    val isHomeRoute =
+        currentDestination?.hierarchy?.any { it.hasRoute(HomeRoute::class) } == true
+    val isInsightRoute =
+        currentDestination?.hierarchy?.any { it.hasRoute(InsightRoute::class) } == true
+    val shouldShowHomeInsightBottomBar = isHomeRoute || isInsightRoute
+    val selectedTab = if (isInsightRoute) HomeInsightTab.INSIGHT else HomeInsightTab.HOME
 
     LaunchedEffect(authUiState?.signInError) {
         authUiState?.signInError?.let { error ->
@@ -102,112 +125,146 @@ fun FoodDiaryNavHost(
         }
     }
 
-    NavHost(
-        navController = navController,
-        startDestination = startDestination,
-        enterTransition = { EnterTransition.None },
-        exitTransition = { ExitTransition.None },
-        popEnterTransition = { EnterTransition.None },
-        popExitTransition = { ExitTransition.None }
-    ) {
-        splashScreen(
-            onNavigateToHome = {
-                hasNavigatedFromSplash = true
-                navController.navigate(HomeRoute) {
-                    popUpTo(SplashRoute) { inclusive = true }
-                }
-            },
-            onNavigateToLogin = {
-                hasNavigatedFromSplash = true
-                navController.navigate(LoginRoute) {
-                    popUpTo(SplashRoute) { inclusive = true }
-                }
+    Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        bottomBar = {
+            if (shouldShowHomeInsightBottomBar) {
+                HomeInsightBottomBar(
+                    selectedTab = selectedTab,
+                    isMonthlyCalendarView = isHomeMonthlyCalendarView,
+                    showCalendarToggle = isHomeRoute,
+                    onHomeClick = {
+                        if (!isHomeRoute) {
+                            navController.navigate(HomeRoute) { launchSingleTop = true }
+                        }
+                    },
+                    onInsightClick = {
+                        if (!isInsightRoute) {
+                            navController.navigate(InsightRoute) { launchSingleTop = true }
+                        }
+                    },
+                    onCalendarViewToggle = {
+                        if (isHomeRoute) {
+                            isHomeMonthlyCalendarView = !isHomeMonthlyCalendarView
+                            homeCalendarToggleRequestId++
+                        }
+                    },
+                    hazeState = bottomBarHazeState,
+                    modifier = Modifier
+                        .windowInsetsPadding(WindowInsets.navigationBars)
+                        .padding(start = 20.dp, top = 26.dp, end = 20.dp, bottom = 24.dp)
+                )
             }
-        )
-
-        loginScreen(
-            onAuthStateChange = { state ->
-                authUiState = state
-            },
-            signOutRequestId = { signOutRequestId },
-            deleteAccountRequestId = { deleteAccountRequestId }
-        )
-
-        onboardingScreen(
-            onComplete = {
-                navController.navigate(HomeRoute) {
-                    popUpTo(OnboardingRoute) { inclusive = true }
-                    launchSingleTop = true
+        }
+    ) { _ ->
+        NavHost(
+            navController = navController,
+            startDestination = startDestination,
+            modifier = Modifier
+                .fillMaxSize()
+                .hazeSource(bottomBarHazeState),
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None },
+            popEnterTransition = { EnterTransition.None },
+            popExitTransition = { ExitTransition.None }
+        ) {
+            splashScreen(
+                onNavigateToHome = {
+                    hasNavigatedFromSplash = true
+                    navController.navigate(HomeRoute) {
+                        popUpTo(SplashRoute) { inclusive = true }
+                    }
+                },
+                onNavigateToLogin = {
+                    hasNavigatedFromSplash = true
+                    navController.navigate(LoginRoute) {
+                        popUpTo(SplashRoute) { inclusive = true }
+                    }
                 }
-            }
-        )
+            )
 
-        homeScreen(
-            onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
-            onNavigateToDetail = { date ->
-                navController.navigate(DetailRoute(dateString = date.toString()))
-            },
-            onNavigateToMyPage = { navController.navigate(MyPageRoute)},
-            onNavigateToInsight = {
-                navController.navigate(InsightRoute) { launchSingleTop = true }
-            },
-            onShowSnackBar = onShowSnackBar,
-        )
+            loginScreen(
+                onAuthStateChange = { state ->
+                    authUiState = state
+                },
+                signOutRequestId = { signOutRequestId },
+                deleteAccountRequestId = { deleteAccountRequestId }
+            )
 
-        insightScreen()
+            onboardingScreen(
+                onComplete = {
+                    navController.navigate(HomeRoute) {
+                        popUpTo(OnboardingRoute) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            )
 
-        detailScreen(
-            onNavigateBack = { navController.popBackStack() },
-            onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
-            onShowToast = onShowToast,
-        )
+            homeScreen(
+                onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
+                onNavigateToDetail = { date ->
+                    navController.navigate(DetailRoute(dateString = date.toString()))
+                },
+                onNavigateToMyPage = { navController.navigate(MyPageRoute)},
+                calendarToggleRequestId = { homeCalendarToggleRequestId },
+                onShowSnackBar = onShowSnackBar,
+            )
 
-        calendarScreen()
+            insightScreen()
 
-        imageScreen(
-            onClose = {
-                if (!navController.popBackStack()) {
-                    onFinish()
-                }
-            }
-        )
+            detailScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
+                onShowToast = onShowToast,
+            )
 
-        myPageScreen(
-            navigateToWebView = { page ->
-                val url = when (page) {
-                    WebViewPage.TermsOfService -> context.getString(R.string.webview_url_terms_of_service)
-                    WebViewPage.PrivacyPolicy -> context.getString(R.string.webview_url_privacy_policy)
+            calendarScreen()
+
+            imageScreen(
+                onClose = {
+                    if (!navController.popBackStack()) {
+                        onFinish()
+                    }
                 }
-                navController.navigate(WebViewRoute(url = url))
-            },
-            onShowDialog = onShowDialog,
-            onShowToast = onShowToast,
-            onBack = { navController.popBackStack() },
-            onSignOut = {
-                signOutRequestId++
-                navController.navigate(LoginRoute) {
-                    popUpTo(HomeRoute) { inclusive = false }
+            )
+
+            myPageScreen(
+                navigateToWebView = { page ->
+                    val url = when (page) {
+                        WebViewPage.TermsOfService -> context.getString(R.string.webview_url_terms_of_service)
+                        WebViewPage.PrivacyPolicy -> context.getString(R.string.webview_url_privacy_policy)
+                    }
+                    navController.navigate(WebViewRoute(url = url))
+                },
+                onShowDialog = onShowDialog,
+                onShowToast = onShowToast,
+                onBack = { navController.popBackStack() },
+                onSignOut = {
+                    signOutRequestId++
+                    navController.navigate(LoginRoute) {
+                        popUpTo(HomeRoute) { inclusive = false }
+                    }
+                },
+                onRequireReAuthForDeleteAccount = {
+                    deleteAccountRequestId++
+                    navController.navigate(LoginRoute) {
+                        popUpTo(HomeRoute) { inclusive = false }
+                    }
+                },
+                onNavigateToAlarmSettings = {
+                    val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                    }
+                    context.startActivity(intent)
                 }
-            },
-            onRequireReAuthForDeleteAccount = {
-                deleteAccountRequestId++
-                navController.navigate(LoginRoute) {
-                    popUpTo(HomeRoute) { inclusive = false }
+            )
+            webViewScreen(
+                onClose = {
+                    if (!navController.popBackStack()) {
+                        onFinish()
+                    }
                 }
-            },
-            onNavigateToAlarmSettings = {
-                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                }
-                context.startActivity(intent)
-            }
-        )
-        webViewScreen(
-            onClose = {
-                if (!navController.popBackStack()) {
-                    onFinish()
-                }
-            }
-        )
+            )
+        }
     }
 }

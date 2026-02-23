@@ -14,7 +14,7 @@ fun NavGraphBuilder.homeScreen(
     onNavigateToImagePicker: () -> Unit,
     onNavigateToDetail: (LocalDate) -> Unit,
     onNavigateToMyPage: () -> Unit,
-    onNavigateToInsight: () -> Unit,
+    calendarToggleRequestId: () -> Int = { 0 },
     onShowSnackBar: (SnackBarData) -> Unit,
 ) {
     composable<HomeRoute> {
@@ -22,7 +22,7 @@ fun NavGraphBuilder.homeScreen(
             onNavigateToImagePicker = onNavigateToImagePicker,
             onNavigateToDetail = onNavigateToDetail,
             onNavigateToMyPage = onNavigateToMyPage,
-            onNavigateToInsight = onNavigateToInsight,
+            calendarToggleRequestId = calendarToggleRequestId(),
             onShowSnackBar = onShowSnackBar,
         )
     }
