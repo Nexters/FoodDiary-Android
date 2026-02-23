@@ -210,7 +210,9 @@ fun FoodDiaryNavHost(
                 onShowSnackBar = onShowSnackBar,
             )
 
-            insightScreen()
+            insightScreen(
+                onNavigateToMyPage = { navController.navigate(MyPageRoute) },
+            )
 
             detailScreen(
                 onNavigateBack = { navController.popBackStack() },

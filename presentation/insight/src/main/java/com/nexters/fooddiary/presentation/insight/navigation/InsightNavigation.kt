@@ -8,8 +8,12 @@ import kotlinx.serialization.Serializable
 @Serializable
 object InsightRoute
 
-fun NavGraphBuilder.insightScreen() {
+fun NavGraphBuilder.insightScreen(
+    onNavigateToMyPage: () -> Unit = {},
+) {
     composable<InsightRoute> {
-        InsightScreen()
+        InsightScreen(
+            onNavigateToMyPage = onNavigateToMyPage,
+        )
     }
 }
