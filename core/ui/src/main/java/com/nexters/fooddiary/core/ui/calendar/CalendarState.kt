@@ -15,12 +15,12 @@ const val CALENDAR_YEAR_RANGE = 10
 @Composable
 fun rememberMonthCalendarState(
     selectedDate: LocalDate = LocalDate.now(),
-    adjacentMonths: Long = CALENDAR_YEAR_RANGE * 12L,
+    yearRange: Int = CALENDAR_YEAR_RANGE,
     firstDayOfWeek: DayOfWeek = DayOfWeek.SUNDAY,
 ): CalendarState {
-    val currentMonth = remember { YearMonth.now() }
-    val startMonth = remember(adjacentMonths) { currentMonth.minusMonths(adjacentMonths) }
-    val endMonth = remember(adjacentMonths) { currentMonth.plusMonths(adjacentMonths) }
+    val currentYear = remember { YearMonth.now().year }
+    val startMonth = remember(yearRange) { YearMonth.of(currentYear - yearRange, 1) }
+    val endMonth = remember(yearRange) { YearMonth.of(currentYear + yearRange, 12) }
 
     return rememberCalendarState(
         startMonth = startMonth,
