@@ -104,6 +104,15 @@ fun ModifyScreen(
             },
         )
     }
+    val onSaveSuccess: () -> Unit = {
+        onShowSnackBar(
+            SnackBarData(
+                message = successMessage,
+                iconRes = drawable.ic_check_circle,
+            )
+        )
+        onBack()
+    }
     ModifyScreenContent(
         onBack = onBack,
         onNavigateToImagePicker = onNavigateToImagePicker,
@@ -113,14 +122,7 @@ fun ModifyScreen(
         onRemoveTag = viewModel::removeTag,
         onRemovePhotoAt = viewModel::removePhotoAt,
         onDelete = { viewModel.onDelete(onSuccess = onBack) },
-        onSave = {
-            viewModel.onSave(
-                onSuccess = {
-                    onShowSnackBar(SnackBarData(message = successMessage))
-                    onBack()
-                },
-            )
-        },
+        onSave = { viewModel.onSave(onSuccess = onSaveSuccess) },
         onAddChip = { showTagDialog = true },
     )
 }

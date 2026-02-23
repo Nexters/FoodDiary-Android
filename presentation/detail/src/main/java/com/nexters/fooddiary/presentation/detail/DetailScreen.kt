@@ -89,9 +89,9 @@ private const val GapAfterDailyHeaderKey = "gap_after_daily_header"
 internal fun DetailScreen(
     initialDateString: String = LocalDate.now().toString(),
     viewModel: DetailViewModel = mavericksViewModel(),
-    onNavigateToModify: (String) -> Unit = {},
+    onNavigateToModify: (diaryId: String, dateString: String) -> Unit = { _, _ -> },
     onNavigateBack: () -> Unit = {},
-    onNavigateToImagePicker: () -> Unit = {},
+    onNavigateToImagePicker: (dateString: String) -> Unit = {},
     onShowToast: (String) -> Unit = {},
 ) {
     val state by viewModel.collectAsState()
@@ -125,9 +125,9 @@ internal fun DetailScreen(
                     currentOnShowToast(currentContext.getString(R.string.detail_share_map_link_empty))
                 }
                 DetailEvent.NavigateToImagePicker -> {
-                    onNavigateToImagePicker()
+                    onNavigateToImagePicker(state.selectedDate.toString())
                 }
-                is DetailEvent.NavigateToModify -> onNavigateToModify(event.diaryId)
+                is DetailEvent.NavigateToModify -> onNavigateToModify(event.diaryId, initialDateString)
             }
         }
     }

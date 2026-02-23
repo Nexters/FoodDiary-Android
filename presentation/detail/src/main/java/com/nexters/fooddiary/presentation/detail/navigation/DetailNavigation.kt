@@ -14,7 +14,7 @@ data class DetailRoute(
 fun NavGraphBuilder.detailScreen(
     onNavigateBack: () -> Unit,
     onNavigateToImagePicker: (dateString: String) -> Unit,
-    onNavigateToModify: (String) -> Unit,
+    onNavigateToModify: (diaryId: String, dateString: String) -> Unit,
     onShowToast: (String) -> Unit,
 ) {
     composable<DetailRoute> { backStackEntry ->
@@ -23,7 +23,7 @@ fun NavGraphBuilder.detailScreen(
         DetailScreen(
             initialDateString = route.dateString,
             onNavigateBack = onNavigateBack,
-            onNavigateToImagePicker = { onNavigateToImagePicker(route.dateString) },
+            onNavigateToImagePicker = { dateString -> onNavigateToImagePicker(dateString) },
             onShowToast = onShowToast,
             onNavigateToModify = onNavigateToModify,
         )

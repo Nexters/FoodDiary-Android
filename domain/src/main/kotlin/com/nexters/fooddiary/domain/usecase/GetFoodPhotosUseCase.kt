@@ -11,30 +11,32 @@ import java.time.LocalDate
 import java.time.YearMonth
 import javax.inject.Inject
 
-data class TodayPhotosResult(
+data class FoodPhotosResult(
     val foodUris: List<String>,
     val allUris: List<String>
 )
 
-class GetTodayFoodPhotosUseCase @Inject constructor(
+class GetFoodPhotosUseCase @Inject constructor(
     private val mediaRepository: MediaRepository,
     private val classificationRepository: ClassificationRepository
 ) {
-    suspend operator fun invoke(): TodayPhotosResult = coroutineScope {
-        val todayPhotos = loadTodayPhotos()
-        if (todayPhotos.isEmpty()) {
-            return@coroutineScope TodayPhotosResult(foodUris = emptyList(), allUris = emptyList())
+    suspend operator fun invoke(date: LocalDate? = null): FoodPhotosResult = coroutineScope {
+        val targetDate = date ?: LocalDate.now()
+        val photos = loadPhotosForDate(targetDate)
+        if (photos.isEmpty()) {
+            return@coroutineScope FoodPhotosResult(foodUris = emptyList(), allUris = emptyList())
         }
-        val classified = classifyPhotos(todayPhotos)
-        TodayPhotosResult(
+        val classified = classifyPhotos(photos)
+        FoodPhotosResult(
             foodUris = foodUrisByConfidence(classified),
             allUris = allUrisInOrder(classified)
         )
     }
 
-    private suspend fun loadTodayPhotos(): List<MediaItem> {
-        val photosByMonth = mediaRepository.getPhotosByMonth(YearMonth.now())
-        return photosByMonth[LocalDate.now()] ?: emptyList()
+    private suspend fun loadPhotosForDate(date: LocalDate): List<MediaItem> {
+        val photosByMonth = mediaRepository.getPhotosByMonth(YearMonth.from(date))
+        return (photosByMonth[date] ?: emptyList())
+            .sortedByDescending { it.dateTaken }
     }
 
     private suspend fun classifyPhotos(photos: List<MediaItem>): List<PhotoWithClassification> =

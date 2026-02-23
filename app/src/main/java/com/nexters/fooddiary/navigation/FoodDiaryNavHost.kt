@@ -56,6 +56,10 @@ fun FoodDiaryNavHost(
     var signOutRequestId by remember { mutableIntStateOf(0) }
     var deleteAccountRequestId by remember { mutableIntStateOf(0) }
     var hasNavigatedFromSplash by remember { mutableStateOf(false) }
+    fun navigateToImagePicker(dateString: String?) {
+        navController.navigate(ImagePickerRoute(dateString = dateString))
+    }
+
     val startDestination = if (initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_IMAGE) {
         ImagePickerRoute(dateString = null)
     } else {
@@ -143,9 +147,7 @@ fun FoodDiaryNavHost(
         )
 
         homeScreen(
-            onNavigateToImagePicker = { date ->
-                navController.navigate(ImagePickerRoute(dateString = date.toString()))
-            },
+            onNavigateToImagePicker = { date -> navigateToImagePicker(date.toString()) },
             onNavigateToDetail = { date ->
                 navController.navigate(DetailRoute(dateString = date.toString()))
             },
@@ -155,10 +157,10 @@ fun FoodDiaryNavHost(
 
         detailScreen(
             onNavigateBack = { navController.popBackStack() },
-            onNavigateToImagePicker = { dateString ->
-                navController.navigate(ImagePickerRoute(dateString = dateString))
+            onNavigateToImagePicker = { dateString -> navigateToImagePicker(dateString) },
+            onNavigateToModify = { diaryId, dateString ->
+                navController.navigate(ModifyRoute(diaryId = diaryId, dateString = dateString))
             },
-            onNavigateToModify = { diaryId -> navController.navigate(ModifyRoute(diaryId = diaryId)) },
             onShowToast = onShowToast,
         )
 
@@ -169,11 +171,11 @@ fun FoodDiaryNavHost(
                 if (!navController.popBackStack()) {
                     onFinish()
                 }
-            }
+            },
         )
         modifyScreen(
             onBack = { navController.popBackStack() },
-            onNavigateToImagePicker = { navController.navigate(ImagePickerRoute(dateString = null)) },
+            onNavigateToImagePicker = { dateString -> navigateToImagePicker(dateString) },
             onShowDialog = onShowDialog,
             onShowSnackBar = onShowSnackBar,
         )
