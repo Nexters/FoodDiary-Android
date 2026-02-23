@@ -27,6 +27,8 @@ import com.nexters.fooddiary.presentation.detail.navigation.detailScreen
 import com.nexters.fooddiary.presentation.home.calendar.navigation.calendarScreen
 import com.nexters.fooddiary.presentation.home.navigation.HomeRoute
 import com.nexters.fooddiary.presentation.home.navigation.homeScreen
+import com.nexters.fooddiary.presentation.insight.navigation.InsightRoute
+import com.nexters.fooddiary.presentation.insight.navigation.insightScreen
 import com.nexters.fooddiary.presentation.image.navigation.ImagePickerRoute
 import com.nexters.fooddiary.presentation.image.navigation.imageScreen
 import com.nexters.fooddiary.presentation.home.calendar.navigation.CalendarRoute
@@ -146,8 +148,13 @@ fun FoodDiaryNavHost(
                 navController.navigate(DetailRoute(dateString = date.toString()))
             },
             onNavigateToMyPage = { navController.navigate(MyPageRoute)},
+            onNavigateToInsight = {
+                navController.navigate(InsightRoute) { launchSingleTop = true }
+            },
             onShowSnackBar = onShowSnackBar,
         )
+
+        insightScreen()
 
         detailScreen(
             onNavigateBack = { navController.popBackStack() },

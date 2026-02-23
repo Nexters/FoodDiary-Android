@@ -34,10 +34,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.Modifier
@@ -88,6 +86,7 @@ internal fun HomeScreen(
     onNavigateToImagePicker: () -> Unit = {},
     onNavigateToDetail: (LocalDate) -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
+    onNavigateToInsight: () -> Unit = {},
     onShowSnackBar: (SnackBarData) -> Unit = {},
     viewModel: HomeViewModel = mavericksViewModel(),
 ) {
@@ -111,6 +110,7 @@ internal fun HomeScreen(
         onToggleCalendarView = viewModel::onToggleCalendarView,
         onNavigateToImagePicker = onNavigateToImagePicker,
         onNavigateToMyPage = onNavigateToMyPage,
+        onNavigateToInsight = onNavigateToInsight,
         selectedDateImageUrls = selectedDateImageUrls(
             weeklyPhotosByDate = state.weeklyPhotosByDate,
             selectedDate = state.selectedDate,
@@ -135,6 +135,7 @@ private fun HomeScreen(
     onToggleCalendarView: () -> Unit = {},
     onNavigateToImagePicker: () -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
+    onNavigateToInsight: () -> Unit = {},
     selectedDateImageUrls: List<String> = emptyList(),
     onShowSnackBar: (SnackBarData) -> Unit = {},
 ) {
@@ -142,7 +143,6 @@ private fun HomeScreen(
     val scrollState = rememberScrollState()
     val weeklyCalendarState = rememberWeeklyCalendarState(selectedDate = state.selectedDate)
     val monthlyCalendarState = rememberMonthCalendarState(selectedDate = state.selectedDate)
-    var selectedTab by remember { mutableStateOf(HomeTab.HOME) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -150,10 +150,10 @@ private fun HomeScreen(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             HomeBottomBar(
-                currentRoute = selectedTab,
+                currentRoute = HomeTab.HOME,
                 isMonthlyCalendarView = state.isMonthlyCalendarView,
-                onHomeClick = { selectedTab = HomeTab.HOME },
-                onInsightClick = { selectedTab = HomeTab.INSIGHT },
+                onHomeClick = {},
+                onInsightClick = onNavigateToInsight,
                 onCalendarViewToggle = onToggleCalendarView,
                 hazeState = screenHazeState,
                 modifier = Modifier

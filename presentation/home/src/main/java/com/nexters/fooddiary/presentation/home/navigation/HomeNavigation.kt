@@ -14,6 +14,7 @@ fun NavGraphBuilder.homeScreen(
     onNavigateToImagePicker: () -> Unit,
     onNavigateToDetail: (LocalDate) -> Unit,
     onNavigateToMyPage: () -> Unit,
+    onNavigateToInsight: () -> Unit,
     onShowSnackBar: (SnackBarData) -> Unit,
 ) {
     composable<HomeRoute> {
@@ -21,6 +22,7 @@ fun NavGraphBuilder.homeScreen(
             onNavigateToImagePicker = onNavigateToImagePicker,
             onNavigateToDetail = onNavigateToDetail,
             onNavigateToMyPage = onNavigateToMyPage,
+            onNavigateToInsight = onNavigateToInsight,
             onShowSnackBar = onShowSnackBar,
         )
     }
