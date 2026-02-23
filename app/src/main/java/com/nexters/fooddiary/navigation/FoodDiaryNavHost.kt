@@ -57,7 +57,7 @@ fun FoodDiaryNavHost(
     var deleteAccountRequestId by remember { mutableIntStateOf(0) }
     var hasNavigatedFromSplash by remember { mutableStateOf(false) }
     val startDestination = if (initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_IMAGE) {
-        ImagePickerRoute
+        ImagePickerRoute(dateString = null)
     } else {
         SplashRoute
     }
@@ -143,7 +143,9 @@ fun FoodDiaryNavHost(
         )
 
         homeScreen(
-            onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
+            onNavigateToImagePicker = { date ->
+                navController.navigate(ImagePickerRoute(dateString = date.toString()))
+            },
             onNavigateToDetail = { date ->
                 navController.navigate(DetailRoute(dateString = date.toString()))
             },
@@ -153,7 +155,9 @@ fun FoodDiaryNavHost(
 
         detailScreen(
             onNavigateBack = { navController.popBackStack() },
-            onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
+            onNavigateToImagePicker = { dateString ->
+                navController.navigate(ImagePickerRoute(dateString = dateString))
+            },
             onNavigateToModify = { diaryId -> navController.navigate(ModifyRoute(diaryId = diaryId)) },
             onShowToast = onShowToast,
         )
@@ -169,7 +173,7 @@ fun FoodDiaryNavHost(
         )
         modifyScreen(
             onBack = { navController.popBackStack() },
-            onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
+            onNavigateToImagePicker = { navController.navigate(ImagePickerRoute(dateString = null)) },
             onShowDialog = onShowDialog,
             onShowSnackBar = onShowSnackBar,
         )

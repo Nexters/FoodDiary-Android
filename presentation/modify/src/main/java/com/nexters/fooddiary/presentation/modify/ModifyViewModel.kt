@@ -113,7 +113,7 @@ class ModifyViewModel @AssistedInject constructor(
             }.execute { result ->
                 when (result) {
                     is Success -> {
-                        onSuccess()
+                        viewModelScope.launch(Dispatchers.Main.immediate) { onSuccess() }
                         this
                     }
                     is Fail -> copy(error = ModifyError.Save)
@@ -133,7 +133,7 @@ class ModifyViewModel @AssistedInject constructor(
             suspend {
                 deleteDiaryUseCase(id)
             }.execute { result ->
-                if (result is Success) onSuccess()
+                if (result is Success) viewModelScope.launch(Dispatchers.Main.immediate) { onSuccess() }
                 this
             }
         }

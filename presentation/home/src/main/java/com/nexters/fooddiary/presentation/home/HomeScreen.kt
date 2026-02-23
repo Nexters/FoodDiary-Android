@@ -85,7 +85,7 @@ private val BottomBarGlassStyle = GlassmorphismStyle(
 @Composable
 internal fun HomeScreen(
     modifier: Modifier = Modifier,
-    onNavigateToImagePicker: () -> Unit = {},
+    onNavigateToImagePicker: (LocalDate) -> Unit = {},
     onNavigateToDetail: (LocalDate) -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
     onShowSnackBar: (SnackBarData) -> Unit = {},
@@ -133,7 +133,7 @@ private fun HomeScreen(
     onDateSelected: (LocalDate) -> Unit = {},
     onCardStackClick: () -> Unit = {},
     onToggleCalendarView: () -> Unit = {},
-    onNavigateToImagePicker: () -> Unit = {},
+    onNavigateToImagePicker: (LocalDate) -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
     selectedDateImageUrls: List<String> = emptyList(),
     onShowSnackBar: (SnackBarData) -> Unit = {},
@@ -229,7 +229,7 @@ private fun HomeScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f),
-                            onAddPhoto = onNavigateToImagePicker,
+                            onAddPhoto = { onNavigateToImagePicker(state.selectedDate) },
                         )
                     }
                 }
