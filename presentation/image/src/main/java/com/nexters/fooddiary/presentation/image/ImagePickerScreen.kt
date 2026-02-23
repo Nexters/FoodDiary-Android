@@ -90,10 +90,15 @@ private object ImagePickerDimens {
 @Composable
 fun ImagePickerScreen(
     modifier: Modifier = Modifier,
+    selectedDateString: String? = null,
     onClose: () -> Unit,
     viewModel: ImagePickerViewModel = mavericksViewModel()
 ) {
     val state by viewModel.collectAsState()
+
+    LaunchedEffect(selectedDateString) {
+        viewModel.loadPhotos(selectedDateString)
+    }
 
     val requiredPermission = PermissionUtil.getRequiredMediaPermission()
     val permissionLauncher = rememberLauncherForActivityResult(

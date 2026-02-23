@@ -13,7 +13,7 @@ data class DetailRoute(
 
 fun NavGraphBuilder.detailScreen(
     onNavigateBack: () -> Unit,
-    onNavigateToImagePicker: () -> Unit,
+    onNavigateToImagePicker: (dateString: String) -> Unit,
     onNavigateToModify: (String) -> Unit,
     onShowToast: (String) -> Unit,
 ) {
@@ -23,7 +23,7 @@ fun NavGraphBuilder.detailScreen(
         DetailScreen(
             initialDateString = route.dateString,
             onNavigateBack = onNavigateBack,
-            onNavigateToImagePicker = onNavigateToImagePicker,
+            onNavigateToImagePicker = { onNavigateToImagePicker(route.dateString) },
             onShowToast = onShowToast,
             onNavigateToModify = onNavigateToModify,
         )

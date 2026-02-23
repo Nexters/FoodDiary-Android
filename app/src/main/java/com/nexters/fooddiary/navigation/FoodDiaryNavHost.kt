@@ -88,7 +88,7 @@ fun FoodDiaryNavHost(
     val bottomBarHazeState = rememberHazeState()
     var showHomeCoachmarkOnEntry by remember { mutableStateOf(false) }
     val startDestination = if (initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_IMAGE) {
-        ImagePickerRoute
+        ImagePickerRoute(dateString = null)
     } else {
         SplashRoute
     }

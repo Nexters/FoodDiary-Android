@@ -8,7 +8,7 @@ import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import com.nexters.fooddiary.core.common.permission.PermissionUtil
 import com.nexters.fooddiary.domain.usecase.BatchUploadPhotosUseCase
-import com.nexters.fooddiary.domain.usecase.GetTodayFoodPhotosUseCase
+import com.nexters.fooddiary.domain.usecase.GetFoodPhotosUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -29,17 +29,55 @@ internal fun nextSelectionAfterToggle(current: Set<Uri>, uri: Uri, maxCount: Int
 class ImagePickerViewModel @AssistedInject constructor(
     @Assisted initialState: ImagePickerState,
     @ApplicationContext private val context: Context,
-    private val getTodayFoodPhotosUseCase: GetTodayFoodPhotosUseCase,
+    private val getFoodPhotosUseCase: GetFoodPhotosUseCase,
     private val batchUploadPhotosUseCase: BatchUploadPhotosUseCase
 ) : MavericksViewModel<ImagePickerState>(initialState) {
 
     init {
-        syncPermissionAndLoadIfGranted()
+        updatePermissionState()
     }
 
     fun onPermissionGranted() {
         setState { copy(hasPermission = true) }
-        loadTodayFoodImages()
+        withState { state ->
+            loadImagesForDate(state.filterDate ?: LocalDate.now())
+        }
+    }
+
+    fun loadPhotos(dateString: String?) {
+        val date = dateString?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+        setState {
+            copy(
+                filterDate = date,
+                allImageUris = emptyList(),
+                foodImageUris = emptyList(),
+                isLoading = true,
+            )
+        }
+        withState { state ->
+            if (state.hasPermission) {
+                loadImagesForDate(date ?: LocalDate.now())
+            } else {
+                setState { copy(isLoading = false) }
+            }
+        }
+    }
+
+    private fun updatePermissionState() {
+        val hasPermission = PermissionUtil.hasMediaPermission(context)
+        setState { copy(hasPermission = hasPermission) }
+    }
+
+    private fun loadImagesForDate(targetDate: LocalDate) {
+        viewModelScope.launch {
+            setState { copy(isLoading = true) }
+            try {
+                val result = getFoodPhotosUseCase(targetDate)
+                applyLoadedImages(result.foodUris, result.allUris)
+            } catch (e: Exception) {
+                applyEmptyResult()
+            }
+        }
     }
 
     fun toggleImageSelection(uri: Uri) {
@@ -68,24 +106,6 @@ class ImagePickerViewModel @AssistedInject constructor(
 
     companion object : MavericksViewModelFactory<ImagePickerViewModel, ImagePickerState> by hiltMavericksViewModelFactory() {
         const val MAX_SELECTION_COUNT = 10
-    }
-
-    private fun syncPermissionAndLoadIfGranted() {
-        val hasPermission = PermissionUtil.hasMediaPermission(context)
-        setState { copy(hasPermission = hasPermission) }
-        if (hasPermission) loadTodayFoodImages()
-    }
-
-    private fun loadTodayFoodImages() {
-        viewModelScope.launch {
-            setState { copy(isLoading = true) }
-            try {
-                val result = getTodayFoodPhotosUseCase()
-                applyLoadedImages(result.foodUris, result.allUris)
-            } catch (e: Exception) {
-                applyEmptyResult()
-            }
-        }
     }
 
     private fun applyEmptyResult() {
