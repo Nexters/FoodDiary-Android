@@ -39,35 +39,6 @@ class FoodDiaryFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
-        val dataPayload = if (message.data.isEmpty()) "{}" else {
-            message.data.entries.joinToString(
-                prefix = "{",
-                postfix = "}",
-                separator = ", "
-            ) { (key, value) -> "\"$key\":\"$value\"" }
-        }
-
-        val notification = message.notification
-
-        //TODO FCM 메세지 확인 이후 제거 필수
-        Log.i(
-            TAG,
-            """
-            FCM message received
-            from=${message.from}
-            messageId=${message.messageId}
-            collapseKey=${message.collapseKey}
-            sentTime=${message.sentTime}
-            ttl=${message.ttl}
-            priority=${message.priority}
-            originalPriority=${message.originalPriority}
-            notification.title=${notification?.title}
-            notification.body=${notification?.body}
-            notification.channelId=${notification?.channelId}
-            data=$dataPayload
-            """.trimIndent()
-        )
-
         showNotification(message)
     }
 
