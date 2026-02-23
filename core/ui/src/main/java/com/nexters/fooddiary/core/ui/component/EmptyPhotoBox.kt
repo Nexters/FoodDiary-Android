@@ -73,12 +73,12 @@ fun AddPhotoBox(
         contentAlignment = Alignment.Center,
     ) {
         Column(
-            modifier = modifier.padding(40.dp),
+            modifier = Modifier.padding(40.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
             Image(
-                modifier = modifier.size(180.dp),
+                modifier = Modifier.size(180.dp),
                 painter = painterResource(drawable.ic_add_diary),
                 contentDescription = null,
             )
@@ -86,7 +86,7 @@ fun AddPhotoBox(
                 text = stringResource(string.home_add_food_photo),
                 style = AppTypography.p12,
                 color = White,
-                modifier = modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),
                 textAlign = TextAlign.Center

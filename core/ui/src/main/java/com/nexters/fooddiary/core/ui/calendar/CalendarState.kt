@@ -10,10 +10,12 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 
+const val CALENDAR_YEAR_RANGE = 10
+
 @Composable
 fun rememberMonthCalendarState(
     selectedDate: LocalDate = LocalDate.now(),
-    adjacentMonths: Long = 24,
+    adjacentMonths: Long = CALENDAR_YEAR_RANGE * 12L,
     firstDayOfWeek: DayOfWeek = DayOfWeek.SUNDAY,
 ): CalendarState {
     val currentMonth = remember { YearMonth.now() }

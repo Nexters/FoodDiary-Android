@@ -189,14 +189,14 @@ private fun HomeScreen(
                         calendarState = monthlyCalendarState,
                         selectedDate = state.selectedDate,
                         onDateSelected = onDateSelected,
-                        photoCountByDate = photoCountByDate,
+                        photoCountByDate = state.diaryCountByDate,
                     )
                 } else {
                     WeeklyCalendar(
                         calendarState = weeklyCalendarState,
                         selectedDate = state.selectedDate,
                         onDateSelected = onDateSelected,
-                        photoCountByDate = photoCountByDate,
+                        photoCountByDate = state.diaryCountByDate,
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                     AddPhotoBox(

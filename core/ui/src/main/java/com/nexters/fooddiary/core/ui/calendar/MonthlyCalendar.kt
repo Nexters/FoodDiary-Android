@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.LazyListLayoutInfo
@@ -47,7 +49,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -65,7 +66,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -87,13 +87,16 @@ import com.nexters.fooddiary.core.ui.theme.Sd800
 import com.nexters.fooddiary.core.ui.theme.Sd900
 import com.nexters.fooddiary.core.ui.theme.White
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import android.view.Choreographer
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
+import kotlin.coroutines.resume
 
 private val MonthDayCellCornerShape = RoundedCornerShape(4.dp)
 
@@ -227,10 +230,13 @@ private fun MonthCalendarHeader(
 
 private const val ITEM_HEIGHT_DP = 35
 private const val VISIBLE_ITEMS = 5
-private const val YEAR_RANGE = 10
 
-private fun LazyListLayoutInfo.centeredItemIndex(fallback: Int): Int =
-    visibleItemsInfo.firstOrNull { it.covers(viewportCenterY) }?.index ?: fallback
+private fun LazyListLayoutInfo.centeredItemIndex(fallback: Int): Int {
+    val centerY = viewportCenterY
+    return visibleItemsInfo.firstOrNull { it.covers(centerY) }?.index
+        ?: visibleItemsInfo.minByOrNull { kotlin.math.abs((it.offset + it.size / 2) - centerY) }?.index
+        ?: fallback
+}
 
 private val LazyListLayoutInfo.viewportCenterY: Int
     get() = (viewportStartOffset + viewportEndOffset) / 2
@@ -240,24 +246,37 @@ private fun LazyListItemInfo.covers(y: Int): Boolean = y in offset until offset 
 private fun LazyListLayoutInfo.isItemCentered(itemIndex: Int): Boolean =
     visibleItemsInfo.any { it.index == itemIndex && it.covers(viewportCenterY) }
 
-private fun scrollOffsetToCenterItem(density: Density, pickerHeight: Dp): Int =
-    with(density) { (pickerHeight.toPx() / 2 - ITEM_HEIGHT_DP.dp.toPx() / 2).toInt() }
+private suspend fun awaitNextFrame() {
+    suspendCancellableCoroutine { cont ->
+        Choreographer.getInstance().postFrameCallback {
+            cont.resume(Unit)
+        }
+    }
+}
+
+private fun scrollOffsetToCenterFromLayoutInfo(info: LazyListLayoutInfo): Int {
+    val viewportHeight = info.viewportSize.height
+    val itemHeight = info.visibleItemsInfo.firstOrNull()?.size
+        ?: return viewportHeight * (VISIBLE_ITEMS - 1) / (2 * VISIBLE_ITEMS) // estimate: itemHeight ≈ viewportHeight/VISIBLE_ITEMS
+    return (viewportHeight / 2 - itemHeight / 2).coerceIn(0, maxOf(0, viewportHeight - itemHeight))
+}
 
 private suspend fun snapPickerToCenterWhenScrollEnds(
     listState: LazyListState,
     itemCount: Int,
-    scrollOffsetToCenter: Int
 ) {
     snapshotFlow { listState.isScrollInProgress }
         .distinctUntilChanged()
         .filter { !it }
         .collect {
+            awaitNextFrame()
             val info = listState.layoutInfo
+            if (info.visibleItemsInfo.isEmpty()) return@collect
             val fallbackIndex = listState.firstVisibleItemIndex.coerceIn(0, (itemCount - 1).coerceAtLeast(0))
             val indexToCenter = info.centeredItemIndex(fallbackIndex).coerceIn(0, itemCount - 1)
-            if (!info.isItemCentered(indexToCenter)) {
-                listState.animateScrollToItem(index = indexToCenter, scrollOffset = scrollOffsetToCenter)
-            }
+            if (info.isItemCentered(indexToCenter)) return@collect
+            val scrollOffsetToCenter = scrollOffsetToCenterFromLayoutInfo(info)
+            listState.animateScrollToItem(index = indexToCenter, scrollOffset = scrollOffsetToCenter)
         }
 }
 
@@ -285,8 +304,8 @@ private fun MonthSelectBottomSheet(
     onMonthSelected: (YearMonth) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val startYear = YearMonth.now().year - YEAR_RANGE
-    val years = remember(startYear) { (startYear..startYear + YEAR_RANGE * 2).toList() }
+    val startYear = YearMonth.now().year - CALENDAR_YEAR_RANGE
+    val years = remember(startYear) { (startYear..startYear + CALENDAR_YEAR_RANGE * 2).toList() }
 
     var selectedYear by remember(currentYearMonth) { mutableStateOf(currentYearMonth.year) }
     var selectedMonth by remember(currentYearMonth) { mutableStateOf(currentYearMonth.monthValue) }
@@ -409,19 +428,16 @@ private fun RowScope.PickerColumn(
     onClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val density = LocalDensity.current
-    val scrollOffsetToCenter = remember(density, pickerHeight) {
-        scrollOffsetToCenterItem(density, pickerHeight)
-    }
-
-    LaunchedEffect(listState, itemCount, scrollOffsetToCenter) {
-        snapPickerToCenterWhenScrollEnds(listState, itemCount, scrollOffsetToCenter)
+    val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState, snapPosition = SnapPosition.Center)
+    LaunchedEffect(listState, itemCount) {
+        snapPickerToCenterWhenScrollEnds(listState, itemCount)
     }
     LazyColumn(
         modifier = modifier
             .weight(1f)
             .height(pickerHeight),
         state = listState,
+        flingBehavior = flingBehavior,
         horizontalAlignment = Alignment.CenterHorizontally,
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(0.dp),
