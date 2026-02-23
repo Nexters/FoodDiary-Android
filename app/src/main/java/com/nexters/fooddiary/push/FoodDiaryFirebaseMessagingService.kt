@@ -16,12 +16,26 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.nexters.fooddiary.MainActivity
 import com.nexters.fooddiary.R
+import com.nexters.fooddiary.domain.usecase.SyncDeviceTokenUseCase
 import com.nexters.fooddiary.navigation.NavigationConstants
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
+import javax.inject.Inject
 import com.nexters.fooddiary.core.ui.R as coreR
 
+@AndroidEntryPoint
 class FoodDiaryFirebaseMessagingService : FirebaseMessagingService() {
+    @Inject
+    lateinit var syncDeviceTokenUseCase: SyncDeviceTokenUseCase
+
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
@@ -59,8 +73,16 @@ class FoodDiaryFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        // TODO: 서버 토큰 동기화 API가 준비되면 여기서 업로드 처리
-        Log.d(TAG, "FCM token refreshed")
+        if (token.isBlank()) return
+
+        serviceScope.launch {
+            syncDeviceTokenUseCase(token)
+        }
+    }
+
+    override fun onDestroy() {
+        serviceScope.cancel()
+        super.onDestroy()
     }
 
     companion object {

@@ -10,6 +10,7 @@ import com.nexters.fooddiary.data.local.TokenStore
 import com.nexters.fooddiary.data.mapper.UserMapper
 import com.nexters.fooddiary.data.remote.auth.AuthApi
 import com.nexters.fooddiary.data.remote.auth.model.request.LoginRequest
+import com.nexters.fooddiary.data.remote.auth.model.request.UpdateDeviceRequest
 import com.nexters.fooddiary.data.security.EncryptionKeyManager
 import com.nexters.fooddiary.domain.model.DeleteAccountError
 import com.nexters.fooddiary.domain.model.DeleteAccountException
@@ -72,6 +73,26 @@ class AuthRepositoryImpl @Inject constructor(
             Result.failure(AuthException.InvalidToken())
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    override suspend fun syncDeviceToken(deviceToken: String): Result<Unit> {
+        return runCatching {
+            if (deviceToken.isBlank()) return@runCatching
+
+            tokenStore.initializeCache()
+            if (tokenStore.getCachedToken().isNullOrBlank()) return@runCatching
+
+            val deviceInfo = loginDeviceInfoProvider.getLoginDeviceInfo()
+            authApi.updateMyDevice(
+                UpdateDeviceRequest(
+                    appVersion = deviceInfo.appVersion,
+                    deviceId = deviceInfo.deviceId,
+                    deviceToken = deviceToken,
+                    isActive = deviceInfo.isActive,
+                    osVersion = deviceInfo.osVersion
+                )
+            )
         }
     }
 
