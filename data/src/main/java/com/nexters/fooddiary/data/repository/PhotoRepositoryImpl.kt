@@ -53,7 +53,7 @@ internal class PhotoRepositoryImpl @Inject constructor(
             val response = photoApi.batchUpload(
                 date = uploadDateStr.toDatePart(),
                 photos = parts,
-                deviceId = loginDeviceInfoProvider.getLoginDeviceInfo().deviceId
+                deviceId = loginDeviceInfoProvider.getLoginDeviceInfo().deviceId.toRequestBody()
             )
             recordPendingUploads(response.results, uploadDateStr)
             Result.success(Unit)
