@@ -26,16 +26,20 @@ class MockApiInterceptor(
 
         return if (mockFileName != null) {
             Log.i(TAG, "Mock Response: $method $path -> $mockFileName")
-            createMockResponse(chain, mockFileName)
+            createMockResponse(chain, mockFileName, path)
         } else {
             Log.i(TAG, "Pass-through: $method $path (no mock)")
             chain.proceed(request)
         }
     }
 
-    private fun createMockResponse(chain: Interceptor.Chain, fileName: String): Response {
-        val jsonBody = readAssetFile(fileName)
-
+    private fun createMockResponse(chain: Interceptor.Chain, fileName: String, path: String): Response {
+        var jsonBody = readAssetFile(fileName)
+        // GET /diaries/{date} mock: 응답 JSON의 date를 요청한 날짜로 치환
+        if (fileName == "get_diary_20260117.json" && path.matches(Regex("/diaries/\\d{4}-\\d{2}-\\d{2}"))) {
+            val requestedDate = path.removePrefix("/diaries/")
+            jsonBody = jsonBody.replace("\"date\":\"2026-01-17\"", "\"date\":\"$requestedDate\"")
+        }
         return Response.Builder()
             .request(chain.request())
             .protocol(Protocol.HTTP_1_1)

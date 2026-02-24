@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -49,6 +51,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.time.YearMonth
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.common.R.string
@@ -103,10 +106,14 @@ internal fun HomeScreen(
         }
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.loadInitialData()
+    }
+
     HomeScreen(
         state = state,
-        photoCountByDate = photoCountByDate,
         onDateSelected = viewModel::onDateSelected,
+        onMonthChanged = viewModel::loadPhotosForMonth,
         onCardStackClick = viewModel::onCardStackClicked,
         onToggleCalendarView = viewModel::onToggleCalendarView,
         onNavigateToImagePicker = onNavigateToImagePicker,
@@ -127,10 +134,10 @@ internal fun selectedDateImageUrls(
 
 @Composable
 private fun HomeScreen(
+    state: HomeScreenState,
     modifier: Modifier = Modifier,
-    state: HomeScreenState = HomeScreenState(),
-    photoCountByDate: Map<LocalDate, Int> = emptyMap(),
     onDateSelected: (LocalDate) -> Unit = {},
+    onMonthChanged: (YearMonth) -> Unit = {},
     onCardStackClick: () -> Unit = {},
     onToggleCalendarView: () -> Unit = {},
     onNavigateToImagePicker: () -> Unit = {},
@@ -185,11 +192,7 @@ private fun HomeScreen(
                     modifier = Modifier.padding(vertical = 18.dp),
                     onClickMyPage = onNavigateToMyPage,
                 )
-                Text(
-                    text = homeDescriptionText(photoCountByDate),
-                    style = AppTypography.p12,
-                    color = Gray050,
-                )
+                WeekCountDescription(diaryCountByWeek = state.diaryCountByWeek)
                 Text(
                     modifier = Modifier.padding(top = 12.dp, bottom = 36.dp),
                     text = stringResource(string.home_sub_description),
@@ -201,14 +204,14 @@ private fun HomeScreen(
                         calendarState = monthlyCalendarState,
                         selectedDate = state.selectedDate,
                         onDateSelected = onDateSelected,
-                        photoCountByDate = photoCountByDate,
+                        photoCountByDate = state.diaryCountByDate,
                     )
                 } else {
                     WeeklyCalendar(
                         calendarState = weeklyCalendarState,
                         selectedDate = state.selectedDate,
                         onDateSelected = onDateSelected,
-                        photoCountByDate = photoCountByDate,
+                        photoCountByDate = state.diaryCountByDate,
                     )
                     Spacer(modifier = Modifier.height(43.dp))
                     if (selectedDateImageUrls.isNotEmpty()) {
@@ -259,29 +262,68 @@ private fun HomeScreen(
 }
 
 @Composable
-private fun homeDescriptionText(photoCountByDate: Map<LocalDate, Int>): String {
-    return when (val total = photoCountByDate.values.sum()) {
-        0 -> stringResource(string.home_description_empty)
-        in 1..998 -> stringResource(string.home_description_with_count, total.toString())
-        else -> stringResource(string.home_description_with_count, "999+")
-    }
+private fun WeekCountDescription(
+    diaryCountByWeek: Int,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        modifier = modifier,
+        text = homeDescriptionText(diaryCountByWeek),
+        style = AppTypography.p12,
+        color = Gray050,
+    )
 }
 
-private enum class HomeTab {
-    HOME,
-    INSIGHT,
+@Composable
+private fun CalendarSection(
+    selectedDate: LocalDate,
+    isMonthlyCalendarView: Boolean,
+    diaryCountByDate: Map<LocalDate, Int>,
+    onDateSelected: (LocalDate) -> Unit,
+    onMonthChanged: (YearMonth) -> Unit,
+    onNavigateToImagePicker: () -> Unit,
+) {
+    val weeklyCalendarState = rememberWeeklyCalendarState(selectedDate = selectedDate)
+    val monthlyCalendarState = rememberMonthCalendarState(selectedDate = selectedDate)
+
+    if (isMonthlyCalendarView) {
+        MonthlyCalendar(
+            calendarState = monthlyCalendarState,
+            selectedDate = selectedDate,
+            onDateSelected = onDateSelected,
+            onMonthChanged = onMonthChanged,
+            photoCountByDate = diaryCountByDate,
+        )
+    } else {
+        WeeklyCalendar(
+            calendarState = weeklyCalendarState,
+            selectedDate = selectedDate,
+            onDateSelected = onDateSelected,
+            photoCountByDate = diaryCountByDate,
+            today = LocalDate.now(),
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        AddPhotoBox(
+            modifier = Modifier.fillMaxWidth(),
+            onAddPhoto = onNavigateToImagePicker,
+        )
+    }
 }
 
 @Composable
 private fun HomeBottomBar(
-    currentRoute: HomeTab,
     isMonthlyCalendarView: Boolean,
+    currentRoute: HomeTab,
     onHomeClick: () -> Unit,
     onInsightClick: () -> Unit,
     onCalendarViewToggle: () -> Unit,
     hazeState: HazeState?,
     modifier: Modifier = Modifier,
 ) {
+    var displayMonthly by remember(isMonthlyCalendarView) { mutableStateOf(isMonthlyCalendarView) }
+    LaunchedEffect(isMonthlyCalendarView) {
+        displayMonthly = isMonthlyCalendarView
+    }
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -314,12 +356,26 @@ private fun HomeBottomBar(
             },
         ) {
             Icon(
-                painter = painterResource(id = if (isMonthlyCalendarView) drawable.ic_weekly_calendar else drawable.ic_monthly_calendar),
+                painter = painterResource(id = if (displayMonthly) drawable.ic_weekly_calendar else drawable.ic_monthly_calendar),
                 contentDescription = stringResource(string.calendar),
                 tint = Gray050,
             )
         }
     }
+}
+
+@Composable
+private fun homeDescriptionText(photoCountByWeek: Int): String {
+    return when (photoCountByWeek) {
+        0 -> stringResource(string.home_description_empty)
+        in 1..998 -> stringResource(string.home_description_with_count, photoCountByWeek.toString())
+        else -> stringResource(string.home_description_with_count, "999+")
+    }
+}
+
+private enum class HomeTab {
+    HOME,
+    INSIGHT,
 }
 
 @Composable

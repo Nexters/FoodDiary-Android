@@ -34,18 +34,18 @@ class LocalMediaDataSource @Inject constructor(
         withContext(Dispatchers.IO) {
             val startDate = yearMonth.atDay(1)
             val endDate = yearMonth.atEndOfMonth()
+            getPhotosBetween(startDate, endDate)
+        }
 
-            // LocalDate를 Unix timestamp (초)로 변환
+    suspend fun getPhotosBetween(startDate: LocalDate, endDate: LocalDate): Map<LocalDate, List<PhotoData>> =
+        withContext(Dispatchers.IO) {
             val startTimestamp = startDate.atStartOfDay(ZoneId.systemDefault()).toEpochSecond()
             val endTimestamp = endDate.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toEpochSecond()
-
-            // 날짜 범위 조건
             val selection = "${Media.DATE_MODIFIED} >= ? AND ${Media.DATE_MODIFIED} < ?"
             val selectionArgs = arrayOf(
                 startTimestamp.toString(),
                 endTimestamp.toString()
             )
-
             queryPhotos(selection, selectionArgs)
         }
 

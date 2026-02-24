@@ -35,7 +35,7 @@ object MockRouteHandler {
 //            path == PATH_LOGIN && method == "POST" -> MOCK_LOGIN_SUCCESS
 //            path == PATH_VERIFY && method == "GET" -> MOCK_VERIFY_TOKEN_SUCCESS
 
-            // Diary
+            // Diary - 모든 날짜에 대해 동일 mock 사용 (Interceptor에서 요청 path의 date로 치환)
             path == PATH_DIARIES && method == "POST" -> MOCK_CREATE_DIARY_SUCCESS
 //            path == PATH_DIARIES && method == "GET" -> MOCK_GET_DIARY_20260117
 
