@@ -209,6 +209,7 @@ private fun HomeScreen(
                         calendarState = monthlyCalendarState,
                         selectedDate = state.selectedDate,
                         onDateSelected = onDateSelected,
+                        onMonthChanged = onMonthChanged,
                         photoCountByDate = photoCountByDate,
                         photoUrlsByDate = photoUrlsByDate,
                     )
