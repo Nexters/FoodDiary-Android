@@ -59,7 +59,16 @@ class DiaryRepositoryImpl @Inject constructor(
         return response.mapNotNull { (date, summary) ->
             runCatching { LocalDate.parse(date) }
                 .getOrNull()
-                ?.let { parsedDate -> parsedDate to summary.photos }
+                ?.let { parsedDate -> parsedDate to summary.photos.map { it.url } }
         }.toMap()
+    }
+
+    override suspend fun getDiariesSummary(
+        startDate: LocalDate,
+        endDate: LocalDate,
+    ): Map<LocalDate, List<String>> {
+        // 현재 구현에서는 일/주/월 모두 동일한 summary API를 사용하므로
+        // 내부적으로 재사용한다.
+        return getDiarySummary(startDate = startDate, endDate = endDate)
     }
 }

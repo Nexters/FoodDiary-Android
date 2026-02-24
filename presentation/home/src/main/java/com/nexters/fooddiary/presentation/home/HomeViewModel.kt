@@ -8,6 +8,7 @@ import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import com.nexters.fooddiary.core.common.permission.PermissionUtil
 import com.nexters.fooddiary.domain.usecase.GetDiaryByMonthUseCase
 import com.nexters.fooddiary.domain.usecase.GetDiarySummaryUseCase
+import com.nexters.fooddiary.domain.usecase.GetDiariesSummaryUseCase
 import com.nexters.fooddiary.domain.usecase.GetFoodPhotoCountByWeekUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -40,9 +41,12 @@ class HomeViewModel @AssistedInject constructor(
     private val getDiaryByMonthUseCase: GetDiaryByMonthUseCase,
     private val getDiarySummaryUseCase: GetDiarySummaryUseCase,
     private val getFoodPhotoCountByWeekUseCase: GetFoodPhotoCountByWeekUseCase,
+    private val getDiariesSummaryUseCase: GetDiariesSummaryUseCase,
 ) : MavericksViewModel<HomeScreenState>(initialState) {
     private val _photoCountByDate = MutableStateFlow<Map<LocalDate, Int>>(emptyMap())
     val photoCountByDate: StateFlow<Map<LocalDate, Int>> = _photoCountByDate.asStateFlow()
+    private val _photoUrlsByDate = MutableStateFlow<Map<LocalDate, List<String>>>(emptyMap())
+    val photoUrlsByDate: StateFlow<Map<LocalDate, List<String>>> = _photoUrlsByDate.asStateFlow()
     private val _events = MutableSharedFlow<HomeEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<HomeEvent> = _events.asSharedFlow()
     private var loadSummaryJob: Job? = null
@@ -53,9 +57,9 @@ class HomeViewModel @AssistedInject constructor(
         loadSummaryForSelectedWeek()
     }
 
-    /** 첫 화면 그린 뒤 호출. 다이어리 즉시, 이번 주 개수(ML)는 yield 후 요청. */
+    /** 첫 화면 그린 뒤 호출. 캘린더 summary 즉시, 이번 주 개수(ML)는 yield 후 요청. */
     fun loadInitialData() {
-        loadDiaryForMonth(YearMonth.from(initialSelectedDate))
+        loadPhotosForMonth(YearMonth.from(initialSelectedDate))
         if (PermissionUtil.hasMediaPermission(context)) {
             scheduleWeekCountLoadAfterYield()
         }
@@ -69,16 +73,18 @@ class HomeViewModel @AssistedInject constructor(
         }
     }
 
-    fun loadPhotosForMonth(yearMonth: YearMonth) = loadDiaryForMonth(yearMonth)
-
-    private fun loadDiaryForMonth(yearMonth: YearMonth) {
+    fun loadPhotosForMonth(yearMonth: YearMonth) {
         suspend {
             withContext(Dispatchers.IO) {
-                val diaries = getDiaryByMonthUseCase(yearMonth)
-                diaries.keys.associateWith { 1 }
+                val startDate = yearMonth.atDay(1)
+                val endDate = yearMonth.atEndOfMonth()
+                getDiariesSummaryUseCase(startDate, endDate)
             }
         }.execute { async ->
-            copy(diaryCountByDate = async.invoke() ?: emptyMap())
+            val urlsByDate = async.invoke() ?: return@execute this
+            _photoCountByDate.value = urlsByDate.mapValues { (_, photos) -> photos.size }
+            _photoUrlsByDate.value = urlsByDate
+            copy(diaryCountByDate = urlsByDate.mapValues { (_, photos) -> if (photos.isNotEmpty()) 1 else 0 })
         }
     }
 
@@ -135,7 +141,7 @@ class HomeViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface Factory : AssistedViewModelFactory<HomeViewModel, HomeScreenState> {
-        override fun create(state: HomeScreenState): HomeViewModel
+        override fun create(initialState: HomeScreenState): HomeViewModel
     }
 
     companion object : MavericksViewModelFactory<HomeViewModel, HomeScreenState> by hiltMavericksViewModelFactory()
