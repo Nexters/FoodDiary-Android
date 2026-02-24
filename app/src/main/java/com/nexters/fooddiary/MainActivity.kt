@@ -15,8 +15,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.nexters.fooddiary.core.ui.alert.AppDialogData
+import com.nexters.fooddiary.core.ui.alert.DeleteAccountDialogData
 import com.nexters.fooddiary.core.ui.alert.DialogData
 import com.nexters.fooddiary.core.ui.alert.SnackBarData
+import com.nexters.fooddiary.core.ui.component.FoodDiaryDeleteAccountDialog
 import com.nexters.fooddiary.core.ui.component.FoodDiaryDialog
 import com.nexters.fooddiary.core.ui.component.FoodDiarySnackBar
 import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
@@ -39,7 +42,7 @@ class MainActivity : ComponentActivity() {
             val hazeState = rememberHazeState()
             var customSnackBarData by remember { mutableStateOf<SnackBarData?>(null) }
             var snackBarRequestId by remember { mutableStateOf(0) }
-            var dialogData by remember { mutableStateOf<DialogData?>(null) }
+            var dialogData by remember { mutableStateOf<AppDialogData?>(null) }
 
             LaunchedEffect(snackBarRequestId) {
                 if (snackBarRequestId == 0) return@LaunchedEffect
@@ -74,10 +77,21 @@ class MainActivity : ComponentActivity() {
                         )
 
                         dialogData?.let { data ->
-                            FoodDiaryDialog(
-                                dialogData = data,
-                                onDismissRequest = { dialogData = null }
-                            )
+                            when (data) {
+                                is DialogData -> {
+                                    FoodDiaryDialog(
+                                        dialogData = data,
+                                        onDismissRequest = { dialogData = null }
+                                    )
+                                }
+
+                                is DeleteAccountDialogData -> {
+                                    FoodDiaryDeleteAccountDialog(
+                                        dialogData = data,
+                                        onDismissRequest = { dialogData = null }
+                                    )
+                                }
+                            }
                         }
                     }
 

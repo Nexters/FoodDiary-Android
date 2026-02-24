@@ -1,5 +1,7 @@
 package com.nexters.fooddiary.core.ui.alert
 
+sealed interface AppDialogData
+
 data class DialogData(
     val title: String? = null,
     val message: String,
@@ -7,7 +9,19 @@ data class DialogData(
     val dismissText: String? = null,
     val onConfirm: (() -> Unit)? = null,
     val onDismiss: (() -> Unit)? = null
-)
+) : AppDialogData
+
+data class DeleteAccountDialogData(
+    val title: String,
+    val message: String,
+    val warningItems: List<String>,
+    val agreementGuideText: String,
+    val agreementText: String,
+    val confirmText: String,
+    val dismissText: String,
+    val onConfirm: (() -> Unit)? = null,
+    val onDismiss: (() -> Unit)? = null
+) : AppDialogData
 
 data class SnackBarData(
     val message: String,

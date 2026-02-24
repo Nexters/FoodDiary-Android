@@ -34,7 +34,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.nexters.fooddiary.core.common.R
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import com.nexters.fooddiary.core.ui.alert.DialogData
+import com.nexters.fooddiary.core.ui.alert.AppDialogData
 import com.nexters.fooddiary.core.ui.alert.SnackBarData
 import com.nexters.fooddiary.presentation.auth.AuthUiState
 import com.nexters.fooddiary.presentation.auth.navigation.LoginRoute
@@ -64,7 +64,7 @@ fun FoodDiaryNavHost(
     initialDeepLink: Uri? = null,
     onFinish: () -> Unit,
     navController: NavHostController = rememberNavController(),
-    onShowDialog: (DialogData) -> Unit = {},
+    onShowDialog: (AppDialogData) -> Unit = {},
     onShowSnackBar: (SnackBarData) -> Unit = {},
     onShowToast: (String) -> Unit = {}
 ) {
