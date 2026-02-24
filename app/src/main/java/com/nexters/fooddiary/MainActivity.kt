@@ -1,7 +1,8 @@
 package com.nexters.fooddiary
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -14,13 +15,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import com.nexters.fooddiary.core.ui.alert.DialogData
 import com.nexters.fooddiary.core.ui.alert.SnackBarData
 import com.nexters.fooddiary.core.ui.component.FoodDiaryDialog
 import com.nexters.fooddiary.core.ui.component.FoodDiarySnackBar
 import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
 import com.nexters.fooddiary.navigation.FoodDiaryNavHost
+import com.nexters.fooddiary.navigation.NavigationConstants
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,11 +29,13 @@ import kotlinx.coroutines.delay
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private var launchDeepLink: Uri? by mutableStateOf(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        launchDeepLink = consumeDeepLink(intent)
         enableEdgeToEdge()
         setContent {
-            val context = LocalContext.current
             val hazeState = rememberHazeState()
             var customSnackBarData by remember { mutableStateOf<SnackBarData?>(null) }
             var snackBarRequestId by remember { mutableStateOf(0) }
@@ -55,7 +58,7 @@ class MainActivity : ComponentActivity() {
                             .hazeSource(hazeState)
                     ) {
                         FoodDiaryNavHost(
-                            initialDeepLink = intent?.data,
+                            initialDeepLink = launchDeepLink,
                             onFinish = { finish() },
                             onShowDialog = { data ->
                                 dialogData = data
@@ -89,5 +92,39 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        launchDeepLink = consumeDeepLink(intent)
+    }
+
+    private fun consumeDeepLink(intent: Intent?): Uri? {
+        val directDeepLink = intent?.data
+        if (directDeepLink != null) {
+            intent.data = null
+            return directDeepLink
+        }
+
+        val pushType = intent?.getStringExtra(PUSH_TYPE_EXTRA).orEmpty()
+        val pushDiaryDate = intent?.getStringExtra(PUSH_DIARY_DATE_EXTRA).orEmpty()
+        if (pushType != PUSH_TYPE_ANALYSIS_COMPLETE || pushDiaryDate.isBlank()) {
+            return null
+        }
+
+        intent?.removeExtra(PUSH_TYPE_EXTRA)
+        intent?.removeExtra(PUSH_DIARY_DATE_EXTRA)
+        return Uri.Builder()
+            .scheme("fooddiary")
+            .authority(NavigationConstants.DEEP_LINK_HOST_DETAIL)
+            .appendQueryParameter(NavigationConstants.DEEP_LINK_QUERY_DATE, pushDiaryDate)
+            .build()
+    }
+
+    companion object {
+        private const val PUSH_TYPE_EXTRA = "push_type"
+        private const val PUSH_DIARY_DATE_EXTRA = "push_diary_date"
+        private const val PUSH_TYPE_ANALYSIS_COMPLETE = "analysis_complete"
     }
 }

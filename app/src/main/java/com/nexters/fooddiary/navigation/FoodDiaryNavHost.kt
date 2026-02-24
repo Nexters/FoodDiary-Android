@@ -1,8 +1,13 @@
 package com.nexters.fooddiary.navigation
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.WindowInsets
@@ -23,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.nexters.fooddiary.core.common.R
@@ -63,9 +69,15 @@ fun FoodDiaryNavHost(
     onShowToast: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = {}
+    )
     var authUiState by remember { mutableStateOf<AuthUiState?>(null) }
     var signOutRequestId by remember { mutableIntStateOf(0) }
     var deleteAccountRequestId by remember { mutableIntStateOf(0) }
+    var onboardingCompleteEventId by remember { mutableIntStateOf(0) }
+    var pendingDetailDate by remember { mutableStateOf(initialDeepLink.getDetailDateOrNull()) }
     var isHomeMonthlyCalendarView by remember { mutableStateOf(false) }
     var hasNavigatedFromSplash by remember { mutableStateOf(false) }
     val bottomBarHazeState = rememberHazeState()
@@ -83,9 +95,39 @@ fun FoodDiaryNavHost(
     val shouldShowHomeInsightBottomBar = isHomeRoute || isInsightRoute
     val selectedTab = if (isInsightRoute) HomeInsightTab.INSIGHT else HomeInsightTab.HOME
 
+    val navigateToPendingDetailIfNeeded: () -> Unit = {
+        pendingDetailDate?.let { detailDate ->
+            navController.navigate(DetailRoute(dateString = detailDate))
+            pendingDetailDate = null
+        }
+    }
+
+    LaunchedEffect(initialDeepLink) {
+        initialDeepLink.getDetailDateOrNull()?.let { date ->
+            pendingDetailDate = date
+            if (hasNavigatedFromSplash) {
+                navigateToPendingDetailIfNeeded()
+            }
+        }
+    }
+
     LaunchedEffect(authUiState?.signInError) {
         authUiState?.signInError?.let { error ->
             onShowToast(error)
+        }
+    }
+
+    LaunchedEffect(onboardingCompleteEventId) {
+        if (onboardingCompleteEventId == 0) return@LaunchedEffect
+
+        val isNotificationPermissionNeeded =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+        if (isNotificationPermissionNeeded) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }
 
@@ -115,9 +157,15 @@ fun FoodDiaryNavHost(
                 } else {
                     HomeRoute
                 }
+                if (destination == HomeRoute) {
+                    onboardingCompleteEventId += 1
+                }
                 navController.navigate(destination) {
                     popUpTo(0) { inclusive = false }
                     launchSingleTop = true
+                }
+                if (destination == HomeRoute) {
+                    navigateToPendingDetailIfNeeded()
                 }
             }
         }
@@ -172,9 +220,11 @@ fun FoodDiaryNavHost(
             splashScreen(
                 onNavigateToHome = {
                     hasNavigatedFromSplash = true
+                    onboardingCompleteEventId += 1
                     navController.navigate(HomeRoute) {
                         popUpTo(SplashRoute) { inclusive = true }
                     }
+                    navigateToPendingDetailIfNeeded()
                 },
                 onNavigateToLogin = {
                     hasNavigatedFromSplash = true
@@ -194,10 +244,12 @@ fun FoodDiaryNavHost(
 
             onboardingScreen(
                 onComplete = {
+                    onboardingCompleteEventId += 1
                     navController.navigate(HomeRoute) {
                         popUpTo(OnboardingRoute) { inclusive = true }
                         launchSingleTop = true
                     }
+                    navigateToPendingDetailIfNeeded()
                 }
             )
 
@@ -269,4 +321,10 @@ fun FoodDiaryNavHost(
             )
         }
     }
+}
+
+private fun Uri?.getDetailDateOrNull(): String? {
+    if (this?.host != NavigationConstants.DEEP_LINK_HOST_DETAIL) return null
+    return getQueryParameter(NavigationConstants.DEEP_LINK_QUERY_DATE)
+        ?.takeIf { it.isNotBlank() }
 }
