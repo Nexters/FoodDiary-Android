@@ -59,6 +59,8 @@ import com.nexters.fooddiary.presentation.webview.navigation.WebViewRoute
 import com.nexters.fooddiary.presentation.webview.navigation.webViewScreen
 import com.nexters.fooddiary.presentation.splash.navigation.SplashRoute
 import com.nexters.fooddiary.presentation.splash.navigation.splashScreen
+import com.nexters.fooddiary.presentation.modify.navigation.ModifyRoute
+import com.nexters.fooddiary.presentation.modify.navigation.modifyScreen
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 
@@ -85,8 +87,9 @@ fun FoodDiaryNavHost(
     var hasNavigatedFromSplash by remember { mutableStateOf(false) }
     val bottomBarHazeState = rememberHazeState()
     var showHomeCoachmarkOnEntry by remember { mutableStateOf(false) }
+
     val startDestination = if (initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_IMAGE) {
-        ImagePickerRoute
+        ImagePickerRoute(dateString = null)
     } else {
         SplashRoute
     }
@@ -104,6 +107,10 @@ fun FoodDiaryNavHost(
             navController.navigate(DetailRoute(dateString = detailDate))
             pendingDetailDate = null
         }
+    }
+
+    fun navigateToImagePicker(dateString: String?) {
+        navController.navigate(ImagePickerRoute(dateString = dateString))
     }
 
     LaunchedEffect(initialDeepLink) {
@@ -263,7 +270,9 @@ fun FoodDiaryNavHost(
                 )
 
                 homeScreen(
-                    onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
+                    onNavigateToImagePicker = { date ->
+                        navController.navigate(ImagePickerRoute(dateString = date.toString()))
+                    },
                     onNavigateToDetail = { date ->
                         navController.navigate(DetailRoute(dateString = date.toString()))
                     },
@@ -279,7 +288,12 @@ fun FoodDiaryNavHost(
 
                 detailScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
+                    onNavigateToImagePicker = { dateString ->
+                        navController.navigate(ImagePickerRoute(dateString = dateString))
+                    },
+                    onNavigateToModify = { diaryId, dateString ->
+                        navController.navigate(ModifyRoute(diaryId = diaryId, dateString = dateString))
+                    },
                     onShowToast = onShowToast,
                 )
 
@@ -327,6 +341,12 @@ fun FoodDiaryNavHost(
                             onFinish()
                         }
                     }
+                )
+                modifyScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToImagePicker = { dateString ->
+                        navController.navigate(ImagePickerRoute(dateString = dateString))
+                    },
                 )
             }
         }

@@ -28,6 +28,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -90,10 +91,15 @@ private object ImagePickerDimens {
 @Composable
 fun ImagePickerScreen(
     modifier: Modifier = Modifier,
+    selectedDateString: String? = null,
     onClose: () -> Unit,
     viewModel: ImagePickerViewModel = mavericksViewModel()
 ) {
     val state by viewModel.collectAsState()
+
+    LaunchedEffect(selectedDateString) {
+        viewModel.loadPhotos(selectedDateString)
+    }
 
     val requiredPermission = PermissionUtil.getRequiredMediaPermission()
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -101,6 +107,12 @@ fun ImagePickerScreen(
     ) { isGranted ->
         if (isGranted) {
             viewModel.onPermissionGranted()
+        }
+    }
+
+    LaunchedEffect(state.hasPermission) {
+        if (!state.hasPermission) {
+            permissionLauncher.launch(requiredPermission)
         }
     }
 
