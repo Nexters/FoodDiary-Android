@@ -133,18 +133,15 @@ fun FoodDiaryNavHost(
                     selectedTab = selectedTab,
                     isMonthlyCalendarView = isHomeMonthlyCalendarView,
                     showCalendarToggle = isHomeRoute,
-                    onHomeClick = {
-                        if (!isHomeRoute) {
-                            navController.navigate(HomeRoute) {
-                                popUpTo(InsightRoute) { inclusive = true }
-                                launchSingleTop = true
-                            }
-                        }
-                    },
-                    onInsightClick = {
-                        if (!isInsightRoute) {
+                    onToggleClick = {
+                        if (selectedTab == HomeInsightTab.HOME) {
                             navController.navigate(InsightRoute) {
                                 popUpTo(HomeRoute) { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        } else {
+                            navController.navigate(HomeRoute) {
+                                popUpTo(InsightRoute) { inclusive = true }
                                 launchSingleTop = true
                             }
                         }

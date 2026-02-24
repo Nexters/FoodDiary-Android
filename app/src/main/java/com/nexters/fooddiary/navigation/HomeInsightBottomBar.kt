@@ -51,8 +51,7 @@ internal fun HomeInsightBottomBar(
     selectedTab: HomeInsightTab,
     isMonthlyCalendarView: Boolean,
     showCalendarToggle: Boolean,
-    onHomeClick: () -> Unit,
-    onInsightClick: () -> Unit,
+    onToggleClick: () -> Unit,
     onCalendarViewToggle: () -> Unit,
     hazeState: HazeState?,
     modifier: Modifier = Modifier,
@@ -64,8 +63,7 @@ internal fun HomeInsightBottomBar(
     ) {
         HomeInsightToggle(
             selectedTab = selectedTab,
-            onHomeClick = onHomeClick,
-            onInsightClick = onInsightClick,
+            onToggleClick = onToggleClick,
             hazeState = hazeState,
         )
         if (showCalendarToggle) {
@@ -104,8 +102,7 @@ internal fun HomeInsightBottomBar(
 @Composable
 private fun HomeInsightToggle(
     selectedTab: HomeInsightTab,
-    onHomeClick: () -> Unit,
-    onInsightClick: () -> Unit,
+    onToggleClick: () -> Unit,
     hazeState: HazeState?,
     modifier: Modifier = Modifier,
 ) {
@@ -119,6 +116,11 @@ private fun HomeInsightToggle(
                 hazeState = hazeState,
                 style = BottomBarGlassStyle,
             )
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = onToggleClick,
+            )
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -129,11 +131,6 @@ private fun HomeInsightToggle(
                 .width(75.dp)
                 .clip(CircleShape)
                 .background(if (isHomeSelected) PrimBase else Transparent)
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() },
-                    onClick = onHomeClick,
-                )
                 .padding(12.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
@@ -158,11 +155,6 @@ private fun HomeInsightToggle(
                 .width(105.dp)
                 .clip(CircleShape)
                 .background(if (isInsightSelected) PrimBase else Transparent)
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() },
-                    onClick = onInsightClick,
-                )
                 .padding(vertical = 12.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
