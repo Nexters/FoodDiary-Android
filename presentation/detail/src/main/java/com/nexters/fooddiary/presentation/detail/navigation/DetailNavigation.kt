@@ -5,6 +5,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.nexters.fooddiary.presentation.detail.DetailScreen
 import kotlinx.serialization.Serializable
+import java.time.LocalDate
 
 @Serializable
 data class DetailRoute(
@@ -13,7 +14,7 @@ data class DetailRoute(
 
 fun NavGraphBuilder.detailScreen(
     onNavigateBack: () -> Unit,
-    onNavigateToImagePicker: () -> Unit,
+    onNavigateToImagePicker: (LocalDate) -> Unit,
     onShowToast: (String) -> Unit,
 ) {
     composable<DetailRoute> { backStackEntry ->

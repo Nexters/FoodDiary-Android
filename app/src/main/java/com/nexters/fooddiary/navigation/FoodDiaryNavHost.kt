@@ -59,10 +59,9 @@ import com.nexters.fooddiary.presentation.webview.navigation.WebViewRoute
 import com.nexters.fooddiary.presentation.webview.navigation.webViewScreen
 import com.nexters.fooddiary.presentation.splash.navigation.SplashRoute
 import com.nexters.fooddiary.presentation.splash.navigation.splashScreen
-import com.nexters.fooddiary.presentation.modify.navigation.ModifyRoute
-import com.nexters.fooddiary.presentation.modify.navigation.modifyScreen
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun FoodDiaryNavHost(
@@ -289,10 +288,7 @@ fun FoodDiaryNavHost(
                 detailScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToImagePicker = { dateString ->
-                        navController.navigate(ImagePickerRoute(dateString = dateString))
-                    },
-                    onNavigateToModify = { diaryId, dateString ->
-                        navController.navigate(ModifyRoute(diaryId = diaryId, dateString = dateString))
+                        navController.navigate(ImagePickerRoute(dateString = dateString.toString()))
                     },
                     onShowToast = onShowToast,
                 )
@@ -308,8 +304,8 @@ fun FoodDiaryNavHost(
                 myPageScreen(
                     navigateToWebView = { page ->
                         val url = when (page) {
-                            WebViewPage.TermsOfService -> context.getString(R.string.webview_url_terms_of_service)
-                            WebViewPage.PrivacyPolicy -> context.getString(R.string.webview_url_privacy_policy)
+                            WebViewPage.TermsOfService -> stringResource(R.string.webview_url_terms_of_service)
+                            WebViewPage.PrivacyPolicy -> stringResource(R.string.webview_url_privacy_policy)
                         }
                         navController.navigate(WebViewRoute(url = url))
                     },
@@ -341,12 +337,6 @@ fun FoodDiaryNavHost(
                             onFinish()
                         }
                     }
-                )
-                modifyScreen(
-                    onBack = { navController.popBackStack() },
-                    onNavigateToImagePicker = { dateString ->
-                        navController.navigate(ImagePickerRoute(dateString = dateString))
-                    },
                 )
             }
         }

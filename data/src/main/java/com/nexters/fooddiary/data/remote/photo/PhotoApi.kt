@@ -38,6 +38,7 @@ interface PhotoApi {
     @Multipart
     @POST("/photos/batch-upload")
     suspend fun batchUpload(
+        @Part("test_mode") testMode: Boolean,
         @Part("date") date: RequestBody,
         @Part("device_id") deviceId: RequestBody,
         @Part photos: List<MultipartBody.Part>

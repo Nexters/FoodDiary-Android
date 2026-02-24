@@ -90,7 +90,7 @@ internal fun DetailScreen(
     initialDateString: String = LocalDate.now().toString(),
     viewModel: DetailViewModel = mavericksViewModel(),
     onNavigateBack: () -> Unit = {},
-    onNavigateToImagePicker: () -> Unit = {},
+    onNavigateToImagePicker: (LocalDate) -> Unit = {},
     onShowToast: (String) -> Unit = {},
 ) {
     val state by viewModel.collectAsState()
@@ -124,7 +124,7 @@ internal fun DetailScreen(
                     currentOnShowToast(currentContext.getString(R.string.detail_share_map_link_empty))
                 }
                 DetailEvent.NavigateToImagePicker -> {
-                    onNavigateToImagePicker()
+                    onNavigateToImagePicker(state.selectedDate)
                 }
             }
         }
