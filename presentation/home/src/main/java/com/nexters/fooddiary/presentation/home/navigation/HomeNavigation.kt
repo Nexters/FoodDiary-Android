@@ -15,6 +15,8 @@ fun NavGraphBuilder.homeScreen(
     onNavigateToDetail: (LocalDate) -> Unit,
     onNavigateToMyPage: () -> Unit,
     isMonthlyCalendarView: () -> Boolean = { false },
+    showCoachmarkOnEntry: () -> Boolean = { false },
+    onCoachmarkFlagConsumed: () -> Unit = {},
     onShowSnackBar: (SnackBarData) -> Unit,
 ) {
     composable<HomeRoute> {
@@ -23,6 +25,8 @@ fun NavGraphBuilder.homeScreen(
             onNavigateToDetail = onNavigateToDetail,
             onNavigateToMyPage = onNavigateToMyPage,
             isMonthlyCalendarView = isMonthlyCalendarView(),
+            showCoachmarkOnEntry = showCoachmarkOnEntry(),
+            onCoachmarkFlagConsumed = onCoachmarkFlagConsumed,
             onShowSnackBar = onShowSnackBar,
         )
     }

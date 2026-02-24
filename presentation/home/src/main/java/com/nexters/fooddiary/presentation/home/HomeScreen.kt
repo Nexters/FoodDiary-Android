@@ -16,11 +16,23 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color.Companion.Transparent
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
+import java.time.YearMonth
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.common.R.string
@@ -41,6 +53,10 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.flow.collectLatest
 import java.time.LocalDate
+import androidx.compose.material3.Button
+import androidx.compose.runtime.setValue
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 
 @Composable
 internal fun HomeScreen(
@@ -50,6 +66,8 @@ internal fun HomeScreen(
     onNavigateToMyPage: () -> Unit = {},
     isMonthlyCalendarView: Boolean = false,
     onShowSnackBar: (SnackBarData) -> Unit = {},
+    showCoachmarkOnEntry: Boolean = false,
+    onCoachmarkFlagConsumed: () -> Unit = {},
     viewModel: HomeViewModel = mavericksViewModel(),
 ) {
     val state by viewModel.collectAsState()
@@ -74,6 +92,8 @@ internal fun HomeScreen(
         onCardStackClick = viewModel::onCardStackClicked,
         onNavigateToImagePicker = onNavigateToImagePicker,
         onNavigateToMyPage = onNavigateToMyPage,
+        showCoachmarkOnEntry = showCoachmarkOnEntry,
+        onCoachmarkFlagConsumed = onCoachmarkFlagConsumed,
         selectedDateImageUrls = selectedDateImageUrls(
             weeklyPhotosByDate = state.weeklyPhotosByDate,
             selectedDate = state.selectedDate,
@@ -97,6 +117,8 @@ private fun HomeScreen(
     onCardStackClick: () -> Unit = {},
     onNavigateToImagePicker: () -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
+    showCoachmarkOnEntry: Boolean = false,
+    onCoachmarkFlagConsumed: () -> Unit = {},
     selectedDateImageUrls: List<String> = emptyList(),
     onShowSnackBar: (SnackBarData) -> Unit = {},
 ) {
@@ -104,6 +126,15 @@ private fun HomeScreen(
     val scrollState = rememberScrollState()
     val weeklyCalendarState = rememberWeeklyCalendarState(selectedDate = state.selectedDate)
     val monthlyCalendarState = rememberMonthCalendarState(selectedDate = state.selectedDate)
+    var weeklyHeaderBounds by remember { mutableStateOf<Rect?>(null) }
+    var showHomeCoachmark by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(showCoachmarkOnEntry) {
+        if (showCoachmarkOnEntry) {
+            showHomeCoachmark = true
+            onCoachmarkFlagConsumed()
+        }
+    }
 
     Box(
         modifier = modifier
@@ -166,6 +197,17 @@ private fun HomeScreen(
                     }
                 }
                 Spacer(modifier = Modifier.height(144.dp))
+        }
+
+        if (isMonthlyCalendarView && showHomeCoachmark) {
+            HomeCoachmarkOverlay(
+                onDismiss = { showHomeCoachmark = false },
+                hazeState = screenHazeState,
+                weeklyHeaderBounds = weeklyHeaderBounds,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zIndex(1f),
+            )
         }
     }
 }

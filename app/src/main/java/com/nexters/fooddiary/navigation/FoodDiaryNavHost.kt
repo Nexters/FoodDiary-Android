@@ -81,6 +81,7 @@ fun FoodDiaryNavHost(
     var isHomeMonthlyCalendarView by remember { mutableStateOf(false) }
     var hasNavigatedFromSplash by remember { mutableStateOf(false) }
     val bottomBarHazeState = rememberHazeState()
+    var showHomeCoachmarkOnEntry by remember { mutableStateOf(false) }
     val startDestination = if (initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_IMAGE) {
         ImagePickerRoute
     } else {
@@ -159,6 +160,8 @@ fun FoodDiaryNavHost(
                 }
                 if (destination == HomeRoute) {
                     onboardingCompleteEventId += 1
+                } else {
+                    showHomeCoachmarkOnEntry = false
                 }
                 navController.navigate(destination) {
                     popUpTo(0) { inclusive = false }
@@ -220,6 +223,7 @@ fun FoodDiaryNavHost(
             splashScreen(
                 onNavigateToHome = {
                     hasNavigatedFromSplash = true
+                    showHomeCoachmarkOnEntry = false
                     onboardingCompleteEventId += 1
                     navController.navigate(HomeRoute) {
                         popUpTo(SplashRoute) { inclusive = true }
@@ -244,6 +248,7 @@ fun FoodDiaryNavHost(
 
             onboardingScreen(
                 onComplete = {
+                    showHomeCoachmarkOnEntry = true
                     onboardingCompleteEventId += 1
                     navController.navigate(HomeRoute) {
                         popUpTo(OnboardingRoute) { inclusive = true }
@@ -261,6 +266,8 @@ fun FoodDiaryNavHost(
                 onNavigateToMyPage = { navController.navigate(MyPageRoute)},
                 isMonthlyCalendarView = { isHomeMonthlyCalendarView },
                 onShowSnackBar = onShowSnackBar,
+                showCoachmarkOnEntry = { showHomeCoachmarkOnEntry },
+                onCoachmarkFlagConsumed = { showHomeCoachmarkOnEntry = false },
             )
 
             insightScreen(
