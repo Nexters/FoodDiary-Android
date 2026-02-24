@@ -10,6 +10,7 @@ import com.nexters.fooddiary.data.local.TokenStore
 import com.nexters.fooddiary.data.mapper.UserMapper
 import com.nexters.fooddiary.data.remote.auth.AuthApi
 import com.nexters.fooddiary.data.remote.auth.model.request.LoginRequest
+import com.nexters.fooddiary.data.remote.auth.model.request.UpdateDeviceRequest
 import com.nexters.fooddiary.data.security.EncryptionKeyManager
 import com.nexters.fooddiary.domain.model.DeleteAccountError
 import com.nexters.fooddiary.domain.model.DeleteAccountException
@@ -75,6 +76,26 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun syncDeviceToken(deviceToken: String): Result<Unit> {
+        return runCatching {
+            if (deviceToken.isBlank()) return@runCatching
+
+            tokenStore.initializeCache()
+            if (tokenStore.getCachedToken().isNullOrBlank()) return@runCatching
+
+            val deviceInfo = loginDeviceInfoProvider.getLoginDeviceInfo()
+            authApi.updateMyDevice(
+                UpdateDeviceRequest(
+                    appVersion = deviceInfo.appVersion,
+                    deviceId = deviceInfo.deviceId,
+                    deviceToken = deviceToken,
+                    isActive = deviceInfo.isActive,
+                    osVersion = deviceInfo.osVersion
+                )
+            )
+        }
+    }
+
     override suspend fun initializeTokenCache() {
         tokenStore.initializeCache()
     }
@@ -107,11 +128,15 @@ class AuthRepositoryImpl @Inject constructor(
                 )
             }
 
+            // 회원 탈퇴 시 서버 계정 삭제 API도 함께 호출한다.
+            kotlin.runCatching { authApi.deleteMe() }
+            kotlin.runCatching { firebaseAuth.signOut() }
             kotlin.runCatching { tokenStore.deleteToken() }
             kotlin.runCatching { encryptionKeyManager.deleteKey() }
 
             val webClientId = context.getWebClientId()
             if (webClientId.isNotEmpty()) {
+                kotlin.runCatching { googleSignInIntentProvider.signOut(context, webClientId) }
                 kotlin.runCatching { googleSignInIntentProvider.revokeAccess(context, webClientId) }
             }
 

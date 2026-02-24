@@ -29,10 +29,25 @@
     <string name="my_page_logout_dialog_title">로그아웃</string>
     <string name="my_page_logout_dialog_message">로그아웃을 진행하시겠습니까?</string>
     <string name="my_page_logout_dialog_cancel">취소</string>
+    <string name="my_page_delete_dialog_title">탈퇴</string>
+    <string name="my_page_delete_dialog_message">탈퇴를 진행하시겠습니까?</string>
+    <string name="my_page_delete_dialog_warning_data_deleted">1.탈퇴 시 모든 데이터가 삭제됩니다.</string>
+    <string name="my_page_delete_dialog_warning_rejoin_blocked">2.탈퇴 시 한달동안 재가입이 어렵습니다.</string>
+    <string name="my_page_delete_dialog_agreement_guide">위 사항에 동의하시면 아래 동의해주세요.</string>
+    <string name="my_page_delete_dialog_agreement">위 사항에 동의합니다.</string>
+    <string name="my_page_delete_dialog_confirm">탈퇴하기</string>
+    <string name="my_page_delete_dialog_cancel">취소</string>
 
     <!-- WebView URLs -->
     <string name="webview_url_terms_of_service">https://google.com</string>
     <string name="webview_url_privacy_policy">https://naver.com</string>
+    <!-- Network error -->
+    <string name="network_error_http">HTTP %d</string>
+    <string name="network_error_timeout">요청 시간이 초과되었습니다.</string>
+    <string name="network_error_no_connection">네트워크에 연결할 수 없습니다.</string>
+    <string name="network_error_unknown">오류가 발생했습니다.</string>
+    <string name="network_error_unknown_detail">%s</string>
+
     <!-- Home -->
     <string name="home_description_empty">이번주 음식 사진을 기록해 보세요</string>
     <string name="home_description_with_count">이번주 음식 사진 %1$s개</string>
@@ -40,6 +55,7 @@
     <string name="home_add_food_photo">오늘의 음식 사진을 추가해보세요.</string>
     <string name="home_nav_home">홈</string>
     <string name="home_nav_insight">인사이트</string>
+    <string name="home_button_select">선택하기</string>
 
     <!-- Detail -->
     <string name="detail_food_analyze">귀찮은 입력은 AI가 대신하고 있어요..</string>

@@ -14,6 +14,7 @@ jobs:
       # CI에서 local.properties 없이 주입 
       WEB_CLIENT_ID: ${{ secrets.WEB_CLIENT_ID }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      API_BASE_URL: ${{ secrets.API_BASE_URL }}
       DEV_KEYSTORE_PASSWORD: ${{ secrets.DEV_KEYSTORE_PASSWORD }}
       DEV_KEY_ALIAS: ${{ secrets.DEV_KEY_ALIAS }}
       DEV_KEY_PASSWORD: ${{ secrets.DEV_KEY_PASSWORD }}
@@ -86,6 +87,7 @@ jobs:
           VERSION_CODE: ${{ github.run_number }}
           FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID_DEV }}
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          FIREBASE_TESTER_GROUPS: mumuk
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |

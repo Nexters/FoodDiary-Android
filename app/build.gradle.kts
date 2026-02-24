@@ -161,6 +161,7 @@ dependencies {
     implementation(projects.presentation.detail)
     implementation(projects.presentation.onboarding)
     implementation(projects.presentation.search)
+    implementation(projects.presentation.insight)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
