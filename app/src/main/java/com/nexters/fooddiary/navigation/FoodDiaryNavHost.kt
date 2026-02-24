@@ -135,12 +135,18 @@ fun FoodDiaryNavHost(
                     showCalendarToggle = isHomeRoute,
                     onHomeClick = {
                         if (!isHomeRoute) {
-                            navController.navigate(HomeRoute) { launchSingleTop = true }
+                            navController.navigate(HomeRoute) {
+                                popUpTo(InsightRoute) { inclusive = true }
+                                launchSingleTop = true
+                            }
                         }
                     },
                     onInsightClick = {
                         if (!isInsightRoute) {
-                            navController.navigate(InsightRoute) { launchSingleTop = true }
+                            navController.navigate(InsightRoute) {
+                                popUpTo(HomeRoute) { inclusive = true }
+                                launchSingleTop = true
+                            }
                         }
                     },
                     onCalendarViewToggle = {
