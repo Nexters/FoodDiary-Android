@@ -1,7 +1,7 @@
 {
   "diaries": [
     {
-      "diary_date": "2026-01-17",
+      "diary_date": "2026-01-17T12:30:00",
       "time_type": "lunch",
       "restaurant_name": "명동교자",
       "restaurant_url": "https://place.map.kakao.com/12345678",
@@ -20,6 +20,7 @@
       "created_at": "2026-01-17T12:30:00",
       "updated_at": "2026-01-17T12:30:00",
       "analysis_status": "done",
+      "diary_date": "2026-01-17T12:30:00",
       "photos": [
         {
           "photo_id": 420,
@@ -29,7 +30,7 @@
       ]
     },
     {
-      "diary_date": "2026-01-17",
+      "diary_date": "2026-01-17T12:30:00",
       "time_type": "dinner",
       "restaurant_name": "을지면옥",
       "restaurant_url": "https://place.map.kakao.com/87654321",

@@ -9,7 +9,8 @@ import com.nexters.fooddiary.data.remote.photo.PhotoApi
 import com.nexters.fooddiary.core.common.network.defaultMessage
 import com.nexters.fooddiary.core.common.resource.ResourceProvider
 import com.nexters.fooddiary.data.network.toNetworkError
-import com.nexters.fooddiary.data.remote.photo.model.response.BatchUploadResultItem
+import com.nexters.fooddiary.data.remote.photo.model.response.BatchUploadDiaryItem
+import com.nexters.fooddiary.data.mapper.toUploadStatus
 import com.nexters.fooddiary.domain.repository.PhotoRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -22,14 +23,22 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import androidx.core.net.toUri
 import com.nexters.fooddiary.data.firebase.LoginDeviceInfoProvider
+import javax.inject.Named
 
 internal class PhotoRepositoryImpl @Inject constructor(
     private val photoApi: PhotoApi,
     private val photoUploadDao: PhotoUploadDao,
     private val resourceProvider: ResourceProvider,
     private val loginDeviceInfoProvider: LoginDeviceInfoProvider,
-    @ApplicationContext private val context: Context
+    @Named("isDebug") private val isDebug: Boolean,
+    @ApplicationContext private val context: Context,
 ) : PhotoRepository {
+
+    override suspend fun clearPendingUploads() {
+        withContext(Dispatchers.IO) {
+            photoUploadDao.deleteAllPending()
+        }
+    }
 
     override suspend fun batchUpload(
         date: LocalDate,
@@ -51,11 +60,15 @@ internal class PhotoRepositoryImpl @Inject constructor(
     ): Result<Unit> {
         return try {
             val response = photoApi.batchUpload(
+                testMode = isDebug,
                 date = uploadDateStr.toDatePart(),
                 photos = parts,
-                deviceId = loginDeviceInfoProvider.getLoginDeviceInfo().deviceId.toRequestBody()
+                deviceId = loginDeviceInfoProvider.getLoginDeviceInfo().deviceId.toRequestBody(
+                    MEDIA_TYPE_TEXT_PLAIN.toMediaTypeOrNull()
+                ),
+                photos = parts
             )
-            recordPendingUploads(response.results, uploadDateStr)
+            recordPendingUploads(response.diaries, response.diaryDate)
             Result.success(Unit)
         } catch (e: Exception) {
             recordUploadFailure(uploadDateStr, e)
@@ -65,7 +78,7 @@ internal class PhotoRepositoryImpl @Inject constructor(
 
     private fun buildMultipartParts(photoUriStrings: List<String>): PartsResult {
         if (photoUriStrings.isEmpty()) {
-            return PartsResult.Failure(IllegalArgumentException("No photos to upload"))
+            return PartsResult.Failure(IllegalArgumentException(ERROR_NO_PHOTOS))
         }
         val resolver = context.contentResolver
         val parts = photoUriStrings.mapIndexed { index, uriString ->
@@ -76,27 +89,30 @@ internal class PhotoRepositoryImpl @Inject constructor(
         }.filterNotNull()
         if (failedUris.isNotEmpty()) {
             return PartsResult.Failure(
-                IllegalArgumentException("Failed to read image files: ${failedUris.joinToString()}")
+                IllegalArgumentException("$ERROR_READ_IMAGE_FAILED: ${failedUris.joinToString()}")
             )
         }
         return PartsResult.Success(parts.filterNotNull())
     }
 
     private suspend fun recordPendingUploads(
-        results: List<BatchUploadResultItem>,
+        diaries: List<BatchUploadDiaryItem>,
         uploadDateStr: String
     ) {
-        val entities = results.map { item ->
+        val entities = diaries.mapNotNull { item ->
+            val status = item.toUploadStatus() ?: return@mapNotNull null
             PhotoUploadEntity(
-                photoId = item.photoId,
+                photoId = null,
                 diaryId = item.diaryId,
-                imageUrl = item.imageUrl,
-                timeType = item.timeType,
+                imageUrl = null,
+                timeType = null,
                 uploadDate = uploadDateStr,
-                status = UploadStatus.PENDING
+                status = status
             )
         }
-        photoUploadDao.insertAll(entities)
+        if (entities.isNotEmpty()) {
+            photoUploadDao.insertAll(entities)
+        }
     }
 
     private suspend fun recordUploadFailure(uploadDateStr: String, error: Exception) {
@@ -117,9 +133,9 @@ internal class PhotoRepositoryImpl @Inject constructor(
     ): MultipartBody.Part? = try {
         resolver.openInputStream(uri)?.use { inputStream ->
             val bytes = inputStream.readBytes()
-            val contentType = resolver.getType(uri) ?: "image/jpeg"
+            val contentType = resolver.getType(uri) ?: MIME_TYPE_IMAGE_JPEG
             val body = bytes.toRequestBody(contentType.toMediaTypeOrNull(), 0, bytes.size)
-            MultipartBody.Part.createFormData("photos", "photo_$index.jpg", body)
+            MultipartBody.Part.createFormData(MULTIPART_FIELD_PHOTOS, "photo_$index.jpg", body)
         }
     } catch (e: Exception) {
         null
@@ -130,6 +146,12 @@ internal class PhotoRepositoryImpl @Inject constructor(
         data class Failure(val error: Exception) : PartsResult()
     }
 }
+
+private const val MEDIA_TYPE_TEXT_PLAIN = "text/plain"
+private const val MIME_TYPE_IMAGE_JPEG = "image/jpeg"
+private const val MULTIPART_FIELD_PHOTOS = "photos"
+private const val ERROR_NO_PHOTOS = "No photos to upload"
+private const val ERROR_READ_IMAGE_FAILED = "Failed to read image files"
 
 private fun LocalDate.toIsoDateString(): String =
     format(DateTimeFormatter.ISO_LOCAL_DATE)

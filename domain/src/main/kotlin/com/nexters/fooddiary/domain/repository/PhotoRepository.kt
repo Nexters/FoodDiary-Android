@@ -7,4 +7,6 @@ interface PhotoRepository {
         date: LocalDate,
         photoUriStrings: List<String>
     ): Result<Unit>
+
+    suspend fun clearPendingUploads()
 }
