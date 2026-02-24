@@ -134,7 +134,9 @@ fun MonthlyCalendar(
     photoUrlsByDate: Map<LocalDate, List<String>> = emptyMap(),
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val visibleMonth = remember { derivedStateOf { calendarState.firstVisibleMonth.yearMonth } }
+    val visibleMonth = remember(calendarState) {
+        derivedStateOf { calendarState.firstVisibleMonth.yearMonth }
+    }
     var monthBottomSheetVisible by remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
