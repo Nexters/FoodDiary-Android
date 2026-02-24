@@ -46,6 +46,8 @@ class HomeViewModel @AssistedInject constructor(
     private val _events = MutableSharedFlow<HomeEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<HomeEvent> = _events.asSharedFlow()
     private var loadSummaryJob: Job? = null
+    private var hasLoadedMonthData = false
+    private var hasLoadedWeekCount = false
 
     private val initialSelectedDate: LocalDate = initialState.selectedDate
 
@@ -55,8 +57,12 @@ class HomeViewModel @AssistedInject constructor(
 
     /** 첫 화면 그린 뒤 호출. 다이어리 즉시, 이번 주 개수(ML)는 yield 후 요청. */
     fun loadInitialData() {
-        loadDiaryForMonth(YearMonth.from(initialSelectedDate))
-        if (PermissionUtil.hasMediaPermission(context)) {
+        if (!hasLoadedMonthData) {
+            hasLoadedMonthData = true
+            loadDiaryForMonth(YearMonth.from(initialSelectedDate))
+        }
+        if (!hasLoadedWeekCount && PermissionUtil.hasMediaPermission(context)) {
+            hasLoadedWeekCount = true
             scheduleWeekCountLoadAfterYield()
         }
     }
