@@ -49,7 +49,7 @@ internal fun HomeScreen(
     onNavigateToImagePicker: () -> Unit = {},
     onNavigateToDetail: (LocalDate) -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
-    calendarToggleRequestId: Int = 0,
+    isMonthlyCalendarView: Boolean = false,
     onShowSnackBar: (SnackBarData) -> Unit = {},
     viewModel: HomeViewModel = mavericksViewModel(),
 ) {
@@ -64,14 +64,10 @@ internal fun HomeScreen(
             }
         }
     }
-    LaunchedEffect(calendarToggleRequestId) {
-        if (calendarToggleRequestId > 0) {
-            viewModel.onToggleCalendarView()
-        }
-    }
 
     HomeScreen(
         state = state,
+        isMonthlyCalendarView = isMonthlyCalendarView,
         photoCountByDate = photoCountByDate,
         onDateSelected = viewModel::onDateSelected,
         onCardStackClick = viewModel::onCardStackClicked,
@@ -95,6 +91,7 @@ internal fun selectedDateImageUrls(
 private fun HomeScreen(
     modifier: Modifier = Modifier,
     state: HomeScreenState = HomeScreenState(),
+    isMonthlyCalendarView: Boolean = false,
     photoCountByDate: Map<LocalDate, Int> = emptyMap(),
     onDateSelected: (LocalDate) -> Unit = {},
     onCardStackClick: () -> Unit = {},
@@ -135,7 +132,7 @@ private fun HomeScreen(
                     style = AppTypography.hd24,
                     color = Gray050,
                 )
-                if (state.isMonthlyCalendarView) {
+                if (isMonthlyCalendarView) {
                     MonthlyCalendar(
                         calendarState = monthlyCalendarState,
                         selectedDate = state.selectedDate,

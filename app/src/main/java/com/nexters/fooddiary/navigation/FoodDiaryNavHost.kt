@@ -67,7 +67,6 @@ fun FoodDiaryNavHost(
     var authUiState by remember { mutableStateOf<AuthUiState?>(null) }
     var signOutRequestId by remember { mutableIntStateOf(0) }
     var deleteAccountRequestId by remember { mutableIntStateOf(0) }
-    var homeCalendarToggleRequestId by remember { mutableIntStateOf(0) }
     var isHomeMonthlyCalendarView by remember { mutableStateOf(false) }
     var hasNavigatedFromSplash by remember { mutableStateOf(false) }
     val bottomBarHazeState = rememberHazeState()
@@ -136,20 +135,20 @@ fun FoodDiaryNavHost(
                     onToggleClick = {
                         if (selectedTab == HomeInsightTab.HOME) {
                             navController.navigate(InsightRoute) {
-                                popUpTo(HomeRoute) { inclusive = true }
                                 launchSingleTop = true
                             }
                         } else {
-                            navController.navigate(HomeRoute) {
-                                popUpTo(InsightRoute) { inclusive = true }
-                                launchSingleTop = true
+                            val movedBackToHome = navController.popBackStack()
+                            if (!movedBackToHome) {
+                                navController.navigate(HomeRoute) {
+                                    launchSingleTop = true
+                                }
                             }
                         }
                     },
                     onCalendarViewToggle = {
                         if (isHomeRoute) {
                             isHomeMonthlyCalendarView = !isHomeMonthlyCalendarView
-                            homeCalendarToggleRequestId++
                         }
                     },
                     hazeState = bottomBarHazeState,
@@ -209,12 +208,13 @@ fun FoodDiaryNavHost(
                     navController.navigate(DetailRoute(dateString = date.toString()))
                 },
                 onNavigateToMyPage = { navController.navigate(MyPageRoute)},
-                calendarToggleRequestId = { homeCalendarToggleRequestId },
+                isMonthlyCalendarView = { isHomeMonthlyCalendarView },
                 onShowSnackBar = onShowSnackBar,
             )
 
             insightScreen(
                 onNavigateToMyPage = { navController.navigate(MyPageRoute) },
+                onBack = onFinish,
             )
 
             detailScreen(

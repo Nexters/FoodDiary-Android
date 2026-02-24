@@ -50,10 +50,6 @@ class HomeViewModel @AssistedInject constructor(
         }
     }
 
-    fun onToggleCalendarView() {
-        setState { copy(isMonthlyCalendarView = !isMonthlyCalendarView) }
-    }
-
     private fun loadSummaryForSelectedWeek() {
         withState { state ->
             val weekStart = weekStartOf(state.selectedDate)

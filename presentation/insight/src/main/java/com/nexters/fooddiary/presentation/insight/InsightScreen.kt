@@ -1,5 +1,6 @@
 package com.nexters.fooddiary.presentation.insight
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,7 +28,9 @@ import com.nexters.fooddiary.core.ui.theme.SdBase
 fun InsightScreen(
     modifier: Modifier = Modifier,
     onNavigateToMyPage: () -> Unit = {},
+    onBack: () -> Unit = {},
 ) {
+    BackHandler(onBack = onBack)
 
     Box(
         modifier = modifier

@@ -10,10 +10,12 @@ object InsightRoute
 
 fun NavGraphBuilder.insightScreen(
     onNavigateToMyPage: () -> Unit = {},
+    onBack: () -> Unit = {},
 ) {
     composable<InsightRoute> {
         InsightScreen(
             onNavigateToMyPage = onNavigateToMyPage,
+            onBack = onBack,
         )
     }
 }
