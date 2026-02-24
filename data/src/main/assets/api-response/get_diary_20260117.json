@@ -1,7 +1,7 @@
 {
   "diaries": [
     {
-      "diary_date": "2026-02-15",
+      "diary_date": "2026-02-15T12:00:00",
       "time_type": "lunch",
       "restaurant_name": "명동칼국수",
       "restaurant_url": "https://place.map.kakao.com/12345678",
@@ -29,7 +29,7 @@
       ]
     },
     {
-      "diary_date": "2026-02-15",
+      "diary_date": "2026-02-15T12:00:00",
       "time_type": "dinner",
       "restaurant_name": "명동교자",
       "restaurant_url": "https://place.map.kakao.com/87654321",

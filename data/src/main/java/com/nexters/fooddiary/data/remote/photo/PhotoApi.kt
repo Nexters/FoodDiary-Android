@@ -15,6 +15,7 @@ import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface PhotoApi {
     @POST("/photos")
@@ -38,8 +39,9 @@ interface PhotoApi {
     @Multipart
     @POST("/photos/batch-upload")
     suspend fun batchUpload(
+        @Query("test_mode") testMode: Boolean = false,
         @Part("date") date: RequestBody,
-        @Part("device_id") deviceId: String,
+        @Part("device_id") deviceId: RequestBody,
         @Part photos: List<MultipartBody.Part>
     ): BatchUploadResponse
 }

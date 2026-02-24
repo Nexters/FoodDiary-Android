@@ -19,7 +19,7 @@ class DiaryRepositoryImpl @Inject constructor(
             endDate = requestedDate,
         )
         val diaries = response.diaries.filter { diary ->
-            diary.diaryDate == requestedDate
+            parseDiaryDateToLocalDate(diary.diaryDate) == date
         }
 
         return DiaryDetail(
@@ -27,4 +27,7 @@ class DiaryRepositoryImpl @Inject constructor(
             diaries = diaryMapper.toDomainDiaryEntries(diaries),
         )
     }
+
+    private fun parseDiaryDateToLocalDate(diaryDate: String): LocalDate =
+        LocalDate.parse(diaryDate.take(10))
 }

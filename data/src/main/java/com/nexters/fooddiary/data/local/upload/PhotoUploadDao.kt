@@ -20,4 +20,7 @@ interface PhotoUploadDao {
 
     @Query("SELECT * FROM photo_upload ORDER BY createdAt DESC")
     fun getAll(): Flow<List<PhotoUploadEntity>>
+
+    @Query("DELETE FROM photo_upload WHERE status = 'PENDING'")
+    suspend fun deleteAllPending()
 }
