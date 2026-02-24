@@ -8,23 +8,19 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import java.time.YearMonth
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.common.R.string
@@ -168,25 +164,6 @@ private fun HomeScreen(
                             onAddPhoto = onNavigateToImagePicker,
                         )
                     }
-                }
-                Button(
-                    onClick = { throw RuntimeException("Sentry/Discord 알림 테스트용 크래시") },
-                    modifier = Modifier.padding(top = 8.dp)
-                ) {
-                    Text("Sentry 테스트 (크래시)")
-                }
-                Button(
-                    onClick = {
-                        onShowSnackBar(
-                            SnackBarData(
-                                message = "리퀴드 글래스 스낵바 테스트",
-                                iconRes = drawable.ic_check_circle,
-                            )
-                        )
-                    },
-                    modifier = Modifier.padding(top = 8.dp)
-                ) {
-                    Text("스낵바 테스트")
                 }
                 Spacer(modifier = Modifier.height(144.dp))
         }
