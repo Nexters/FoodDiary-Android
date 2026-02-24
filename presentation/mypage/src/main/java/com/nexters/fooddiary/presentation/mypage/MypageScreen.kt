@@ -64,6 +64,11 @@ fun MyPageScreen(
     viewModel: MyPageViewModel = mavericksViewModel()
 ) {
     val state by viewModel.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadUserMe()
+    }
+
     val recentLoginRequiredMessage = stringResource(string.my_page_recent_login_required)
     val deleteInProgressMessage = stringResource(string.my_page_delete_in_progress)
     val deleteFailedMessage = stringResource(string.my_page_delete_failed)

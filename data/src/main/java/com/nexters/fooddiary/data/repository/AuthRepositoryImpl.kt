@@ -81,7 +81,10 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun signOut() {
         firebaseAuth.signOut()
-        kotlin.runCatching { tokenStore.deleteToken() }
+        kotlin.runCatching {
+            tokenStore.deleteToken()
+            tokenStore.deleteNickname()
+        }
         val webClientId = context.getWebClientId()
         if (webClientId.isNotEmpty()) {
             kotlin.runCatching { googleSignInIntentProvider.signOut(context, webClientId) }
@@ -107,7 +110,10 @@ class AuthRepositoryImpl @Inject constructor(
                 )
             }
 
-            kotlin.runCatching { tokenStore.deleteToken() }
+            kotlin.runCatching {
+                tokenStore.deleteToken()
+                tokenStore.deleteNickname()
+            }
             kotlin.runCatching { encryptionKeyManager.deleteKey() }
 
             val webClientId = context.getWebClientId()

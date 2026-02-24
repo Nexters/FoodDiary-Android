@@ -7,6 +7,7 @@ object MockRouteHandler {
     private const val PATH_VERIFY = "/auth/verify"
     private const val PATH_DIARIES = "/diaries"
     private const val PATH_PHOTOS = "/photos"
+    private const val PATH_USERS_ME = "/users/me"
 
     // Regex Patterns
     private val REGEX_PHOTO_ANALYZE = Regex("/photos/\\d+/analyze")
@@ -24,6 +25,7 @@ object MockRouteHandler {
     private const val MOCK_GET_ANALYSIS_RESULT = "get_analysis_result.json"
     private const val MOCK_CONFIRM_PHOTO_SUCCESS = "confirm_photo_success.json"
     private const val MOCK_GET_FINAL_RECORD = "get_final_record.json"
+    private const val MOCK_USERS_ME = "users_me.json"
 
     /**
      * path와 method를 기반으로 mock JSON 파일명을 반환
@@ -38,6 +40,9 @@ object MockRouteHandler {
             // Diary
             path == PATH_DIARIES && method == "POST" -> MOCK_CREATE_DIARY_SUCCESS
             path == PATH_DIARIES && method == "GET" -> MOCK_GET_DIARY_20260117
+
+            // User
+            path == PATH_USERS_ME && method == "GET" -> MOCK_USERS_ME
 
             // Photo
             path == PATH_PHOTOS && method == "POST" -> MOCK_UPLOAD_URL_SUCCESS
