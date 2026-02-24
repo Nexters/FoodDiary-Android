@@ -10,6 +10,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
@@ -26,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.core.content.ContextCompat
@@ -41,6 +43,7 @@ import com.nexters.fooddiary.presentation.auth.navigation.LoginRoute
 import com.nexters.fooddiary.presentation.auth.navigation.loginScreen
 import com.nexters.fooddiary.presentation.detail.navigation.DetailRoute
 import com.nexters.fooddiary.presentation.detail.navigation.detailScreen
+import com.nexters.fooddiary.presentation.home.HomeCoachmarkOverlay
 import com.nexters.fooddiary.presentation.home.navigation.HomeRoute
 import com.nexters.fooddiary.presentation.home.navigation.homeScreen
 import com.nexters.fooddiary.presentation.insight.navigation.InsightRoute
@@ -123,10 +126,10 @@ fun FoodDiaryNavHost(
 
         val isNotificationPermissionNeeded =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) != PackageManager.PERMISSION_GRANTED
         if (isNotificationPermissionNeeded) {
             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
@@ -174,157 +177,168 @@ fun FoodDiaryNavHost(
         }
     }
 
-    Scaffold(
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        bottomBar = {
-            if (shouldShowHomeInsightBottomBar) {
-                HomeInsightBottomBar(
-                    selectedTab = selectedTab,
-                    isMonthlyCalendarView = isHomeMonthlyCalendarView,
-                    showCalendarToggle = isHomeRoute,
-                    onToggleClick = {
-                        if (selectedTab == HomeInsightTab.HOME) {
-                            navController.navigate(InsightRoute) {
-                                launchSingleTop = true
-                            }
-                        } else {
-                            val movedBackToHome = navController.popBackStack()
-                            if (!movedBackToHome) {
-                                navController.navigate(HomeRoute) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            bottomBar = {
+                if (shouldShowHomeInsightBottomBar) {
+                    HomeInsightBottomBar(
+                        selectedTab = selectedTab,
+                        isMonthlyCalendarView = isHomeMonthlyCalendarView,
+                        showCalendarToggle = isHomeRoute,
+                        onToggleClick = {
+                            if (selectedTab == HomeInsightTab.HOME) {
+                                navController.navigate(InsightRoute) {
                                     launchSingleTop = true
                                 }
+                            } else {
+                                val movedBackToHome = navController.popBackStack()
+                                if (!movedBackToHome) {
+                                    navController.navigate(HomeRoute) {
+                                        launchSingleTop = true
+                                    }
+                                }
                             }
+                        },
+                        onCalendarViewToggle = {
+                            if (isHomeRoute) {
+                                isHomeMonthlyCalendarView = !isHomeMonthlyCalendarView
+                            }
+                        },
+                        hazeState = bottomBarHazeState,
+                        modifier = Modifier
+                            .windowInsetsPadding(WindowInsets.navigationBars)
+                            .padding(start = 20.dp, top = 26.dp, end = 20.dp, bottom = 24.dp)
+                    )
+                }
+            }
+        ) { _ ->
+            NavHost(
+                navController = navController,
+                startDestination = startDestination,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .hazeSource(bottomBarHazeState),
+                enterTransition = { EnterTransition.None },
+                exitTransition = { ExitTransition.None },
+                popEnterTransition = { EnterTransition.None },
+                popExitTransition = { ExitTransition.None }
+            ) {
+                splashScreen(
+                    onNavigateToHome = {
+                        hasNavigatedFromSplash = true
+                        showHomeCoachmarkOnEntry = false
+                        onboardingCompleteEventId += 1
+                        navController.navigate(HomeRoute) {
+                            popUpTo(SplashRoute) { inclusive = true }
+                        }
+                        navigateToPendingDetailIfNeeded()
+                    },
+                    onNavigateToLogin = {
+                        hasNavigatedFromSplash = true
+                        navController.navigate(LoginRoute) {
+                            popUpTo(SplashRoute) { inclusive = true }
+                        }
+                    }
+                )
+
+                loginScreen(
+                    onAuthStateChange = { state ->
+                        authUiState = state
+                    },
+                    signOutRequestId = { signOutRequestId },
+                    deleteAccountRequestId = { deleteAccountRequestId }
+                )
+
+                onboardingScreen(
+                    onComplete = {
+                        showHomeCoachmarkOnEntry = true
+                        onboardingCompleteEventId += 1
+                        navController.navigate(HomeRoute) {
+                            popUpTo(OnboardingRoute) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                        navigateToPendingDetailIfNeeded()
+                    }
+                )
+
+                homeScreen(
+                    onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
+                    onNavigateToDetail = { date ->
+                        navController.navigate(DetailRoute(dateString = date.toString()))
+                    },
+                    onNavigateToMyPage = { navController.navigate(MyPageRoute) },
+                    isMonthlyCalendarView = { isHomeMonthlyCalendarView },
+                    onShowSnackBar = onShowSnackBar,
+                )
+
+                insightScreen(
+                    onNavigateToMyPage = { navController.navigate(MyPageRoute) },
+                    onBack = onFinish,
+                )
+
+                detailScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
+                    onShowToast = onShowToast,
+                )
+
+                imageScreen(
+                    onClose = {
+                        if (!navController.popBackStack()) {
+                            onFinish()
+                        }
+                    }
+                )
+
+                myPageScreen(
+                    navigateToWebView = { page ->
+                        val url = when (page) {
+                            WebViewPage.TermsOfService -> context.getString(R.string.webview_url_terms_of_service)
+                            WebViewPage.PrivacyPolicy -> context.getString(R.string.webview_url_privacy_policy)
+                        }
+                        navController.navigate(WebViewRoute(url = url))
+                    },
+                    onShowDialog = onShowDialog,
+                    onShowToast = onShowToast,
+                    onBack = { navController.popBackStack() },
+                    onSignOut = {
+                        signOutRequestId++
+                        navController.navigate(LoginRoute) {
+                            popUpTo(HomeRoute) { inclusive = false }
                         }
                     },
-                    onCalendarViewToggle = {
-                        if (isHomeRoute) {
-                            isHomeMonthlyCalendarView = !isHomeMonthlyCalendarView
+                    onRequireReAuthForDeleteAccount = {
+                        deleteAccountRequestId++
+                        navController.navigate(LoginRoute) {
+                            popUpTo(HomeRoute) { inclusive = false }
                         }
                     },
-                    hazeState = bottomBarHazeState,
-                    modifier = Modifier
-                        .windowInsetsPadding(WindowInsets.navigationBars)
-                        .padding(start = 20.dp, top = 26.dp, end = 20.dp, bottom = 24.dp)
+                    onNavigateToAlarmSettings = {
+                        val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                        }
+                        context.startActivity(intent)
+                    }
+                )
+                webViewScreen(
+                    onClose = {
+                        if (!navController.popBackStack()) {
+                            onFinish()
+                        }
+                    }
                 )
             }
         }
-    ) { _ ->
-        NavHost(
-            navController = navController,
-            startDestination = startDestination,
-            modifier = Modifier
-                .fillMaxSize()
-                .hazeSource(bottomBarHazeState),
-            enterTransition = { EnterTransition.None },
-            exitTransition = { ExitTransition.None },
-            popEnterTransition = { EnterTransition.None },
-            popExitTransition = { ExitTransition.None }
-        ) {
-            splashScreen(
-                onNavigateToHome = {
-                    hasNavigatedFromSplash = true
-                    showHomeCoachmarkOnEntry = false
-                    onboardingCompleteEventId += 1
-                    navController.navigate(HomeRoute) {
-                        popUpTo(SplashRoute) { inclusive = true }
-                    }
-                    navigateToPendingDetailIfNeeded()
-                },
-                onNavigateToLogin = {
-                    hasNavigatedFromSplash = true
-                    navController.navigate(LoginRoute) {
-                        popUpTo(SplashRoute) { inclusive = true }
-                    }
-                }
-            )
 
-            loginScreen(
-                onAuthStateChange = { state ->
-                    authUiState = state
-                },
-                signOutRequestId = { signOutRequestId },
-                deleteAccountRequestId = { deleteAccountRequestId }
-            )
-
-            onboardingScreen(
-                onComplete = {
-                    showHomeCoachmarkOnEntry = true
-                    onboardingCompleteEventId += 1
-                    navController.navigate(HomeRoute) {
-                        popUpTo(OnboardingRoute) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                    navigateToPendingDetailIfNeeded()
-                }
-            )
-
-            homeScreen(
-                onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
-                onNavigateToDetail = { date ->
-                    navController.navigate(DetailRoute(dateString = date.toString()))
-                },
-                onNavigateToMyPage = { navController.navigate(MyPageRoute)},
-                isMonthlyCalendarView = { isHomeMonthlyCalendarView },
-                onShowSnackBar = onShowSnackBar,
-                showCoachmarkOnEntry = { showHomeCoachmarkOnEntry },
-                onCoachmarkFlagConsumed = { showHomeCoachmarkOnEntry = false },
-            )
-
-            insightScreen(
-                onNavigateToMyPage = { navController.navigate(MyPageRoute) },
-                onBack = onFinish,
-            )
-
-            detailScreen(
-                onNavigateBack = { navController.popBackStack() },
-                onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
-                onShowToast = onShowToast,
-            )
-
-        imageScreen(
-            onClose = {
-                if (!navController.popBackStack()) {
-                    onFinish()
-                }
-            }
-        )
-
-            myPageScreen(
-                navigateToWebView = { page ->
-                    val url = when (page) {
-                        WebViewPage.TermsOfService -> context.getString(R.string.webview_url_terms_of_service)
-                        WebViewPage.PrivacyPolicy -> context.getString(R.string.webview_url_privacy_policy)
-                    }
-                    navController.navigate(WebViewRoute(url = url))
-                },
-                onShowDialog = onShowDialog,
-                onShowToast = onShowToast,
-                onBack = { navController.popBackStack() },
-                onSignOut = {
-                    signOutRequestId++
-                    navController.navigate(LoginRoute) {
-                        popUpTo(HomeRoute) { inclusive = false }
-                    }
-                },
-                onRequireReAuthForDeleteAccount = {
-                    deleteAccountRequestId++
-                    navController.navigate(LoginRoute) {
-                        popUpTo(HomeRoute) { inclusive = false }
-                    }
-                },
-                onNavigateToAlarmSettings = {
-                    val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-                        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                    }
-                    context.startActivity(intent)
-                }
-            )
-            webViewScreen(
-                onClose = {
-                    if (!navController.popBackStack()) {
-                        onFinish()
-                    }
-                }
+        if (isHomeRoute && showHomeCoachmarkOnEntry) {
+            HomeCoachmarkOverlay(
+                onDismiss = { showHomeCoachmarkOnEntry = false },
+                hazeState = bottomBarHazeState,
+                weeklyHeaderBounds = null,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zIndex(1f),
             )
         }
     }

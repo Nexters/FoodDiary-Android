@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -36,7 +37,6 @@ import com.nexters.fooddiary.core.ui.theme.GlassmorphismStyle
 import com.nexters.fooddiary.core.ui.theme.White
 import com.nexters.fooddiary.core.ui.theme.glassmorphism
 import dev.chrisbanes.haze.HazeState
-import androidx.compose.ui.platform.LocalDensity
 import com.nexters.fooddiary.core.ui.R as CoreUiR
 import com.nexters.fooddiary.presentation.home.R as HomeR
 
@@ -52,7 +52,7 @@ private val CalendarCoachmarkTextOffsetY = (-98).dp
 private val WeeklyCoachmarkTopAdjustment = 10.dp
 
 @Composable
-internal fun HomeCoachmarkOverlay(
+fun HomeCoachmarkOverlay(
     onDismiss: () -> Unit,
     hazeState: HazeState?,
     weeklyHeaderBounds: Rect?,
