@@ -24,12 +24,10 @@ import com.nexters.fooddiary.presentation.auth.navigation.LoginRoute
 import com.nexters.fooddiary.presentation.auth.navigation.loginScreen
 import com.nexters.fooddiary.presentation.detail.navigation.DetailRoute
 import com.nexters.fooddiary.presentation.detail.navigation.detailScreen
-import com.nexters.fooddiary.presentation.home.calendar.navigation.calendarScreen
 import com.nexters.fooddiary.presentation.home.navigation.HomeRoute
 import com.nexters.fooddiary.presentation.home.navigation.homeScreen
 import com.nexters.fooddiary.presentation.image.navigation.ImagePickerRoute
 import com.nexters.fooddiary.presentation.image.navigation.imageScreen
-import com.nexters.fooddiary.presentation.home.calendar.navigation.CalendarRoute
 import com.nexters.fooddiary.presentation.onboarding.navigation.OnboardingRoute
 import com.nexters.fooddiary.presentation.onboarding.navigation.onboardingScreen
 import com.nexters.fooddiary.presentation.mypage.navigation.MyPageRoute
@@ -151,7 +149,8 @@ fun FoodDiaryNavHost(
             onNavigateToDetail = { date ->
                 navController.navigate(DetailRoute(dateString = date.toString()))
             },
-            onNavigateToMyPage = { navController.navigate(MyPageRoute) },
+            onNavigateToMyPage = { navController.navigate(MyPageRoute)},
+            onShowSnackBar = onShowSnackBar,
             showCoachmarkOnEntry = { showHomeCoachmarkOnEntry },
             onCoachmarkFlagConsumed = { showHomeCoachmarkOnEntry = false },
         )
@@ -161,8 +160,6 @@ fun FoodDiaryNavHost(
             onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
             onShowToast = onShowToast,
         )
-
-        calendarScreen()
 
         imageScreen(
             onClose = {

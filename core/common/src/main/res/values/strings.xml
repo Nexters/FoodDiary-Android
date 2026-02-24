@@ -33,6 +33,13 @@
     <!-- WebView URLs -->
     <string name="webview_url_terms_of_service">https://google.com</string>
     <string name="webview_url_privacy_policy">https://naver.com</string>
+    <!-- Network error -->
+    <string name="network_error_http">HTTP %d</string>
+    <string name="network_error_timeout">요청 시간이 초과되었습니다.</string>
+    <string name="network_error_no_connection">네트워크에 연결할 수 없습니다.</string>
+    <string name="network_error_unknown">오류가 발생했습니다.</string>
+    <string name="network_error_unknown_detail">%s</string>
+
     <!-- Home -->
     <string name="home_description_empty">이번주 음식 사진을 기록해 보세요</string>
     <string name="home_description_with_count">이번주 음식 사진 %1$s개</string>
@@ -40,6 +47,7 @@
     <string name="home_add_food_photo">오늘의 음식 사진을 추가해보세요.</string>
     <string name="home_nav_home">홈</string>
     <string name="home_nav_insight">인사이트</string>
+    <string name="home_button_select">선택하기</string>
 
     <!-- Detail -->
     <string name="detail_food_analyze">귀찮은 입력은 AI가 대신하고 있어요..</string>

@@ -1,32 +1,48 @@
 package com.nexters.fooddiary.core.ui.calendar
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.gestures.snapping.SnapPosition
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListItemInfo
+import androidx.compose.foundation.lazy.LazyListLayoutInfo
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -38,14 +54,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kizitonwose.calendar.compose.CalendarState
@@ -53,21 +74,33 @@ import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.daysOfWeek
+import com.nexters.fooddiary.core.common.R.string
+import com.nexters.fooddiary.core.ui.R.drawable
 import com.nexters.fooddiary.core.ui.calendar.theme.CalendarColors
 import com.nexters.fooddiary.core.ui.calendar.theme.calendarColors
+import com.nexters.fooddiary.core.ui.theme.AppTypography.hd16
 import com.nexters.fooddiary.core.ui.theme.Gray600
+import com.nexters.fooddiary.core.ui.theme.Gray700
 import com.nexters.fooddiary.core.ui.theme.Gray900
+import com.nexters.fooddiary.core.ui.theme.PrimBase
+import com.nexters.fooddiary.core.ui.theme.Sd800
 import com.nexters.fooddiary.core.ui.theme.Sd900
+import com.nexters.fooddiary.core.ui.theme.White
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import android.view.Choreographer
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
-import java.util.Collections.emptyMap
 import java.util.Locale
+import kotlin.coroutines.resume
 
+private val MonthDayCellCornerShape = RoundedCornerShape(4.dp)
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MonthlyCalendar(
     modifier: Modifier = Modifier,
@@ -81,7 +114,8 @@ fun MonthlyCalendar(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val visibleMonth = remember { derivedStateOf { calendarState.firstVisibleMonth.yearMonth } }
-    var monthDropdownExpanded by remember { mutableStateOf(false) }
+    var monthBottomSheetVisible by remember { mutableStateOf(false) }
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     LaunchedEffect(calendarState) {
         snapshotFlow { calendarState.firstVisibleMonth.yearMonth }
@@ -91,25 +125,31 @@ fun MonthlyCalendar(
             }
     }
 
+    LaunchedEffect(monthBottomSheetVisible) {
+        if (monthBottomSheetVisible) {
+            bottomSheetState.show()
+        }
+    }
+
     Column(modifier = modifier) {
-        Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
-            MonthCalendarHeader(
-                yearMonth = visibleMonth.value,
-                locale = locale,
-                colors = colors,
-                onClick = { monthDropdownExpanded = true },
-            )
-            MonthSelectDropdown(
-                expanded = monthDropdownExpanded,
-                onDismissRequest = { monthDropdownExpanded = false },
+        MonthCalendarHeader(
+            yearMonth = visibleMonth.value,
+            colors = colors,
+            onClick = { monthBottomSheetVisible = true },
+        )
+        if (monthBottomSheetVisible) {
+            MonthSelectBottomSheet(
+                sheetState = bottomSheetState,
+                onDismissRequest = { monthBottomSheetVisible = false },
                 currentYearMonth = visibleMonth.value,
                 locale = locale,
                 colors = colors,
                 onMonthSelected = { targetYearMonth ->
                     coroutineScope.launch {
+                        bottomSheetState.hide()
+                        monthBottomSheetVisible = false
                         calendarState.animateScrollToMonth(targetYearMonth)
                     }
-                    monthDropdownExpanded = false
                 },
             )
         }
@@ -135,23 +175,25 @@ fun MonthlyCalendar(
             HorizontalCalendar(
                 state = calendarState,
                 dayContent = { day ->
-                    val photoCount = photoCountByDate[day.date] ?: 0
-                    MonthDayCell(
-                        day = day,
-                        isSelected = day.date == selectedDate,
-                        photoCount = photoCount,
-                        colors = colors,
-                        onClick = {
-                            if (day.position != DayPosition.MonthDate) {
-                                coroutineScope.launch {
-                                    calendarState.animateScrollToMonth(YearMonth.from(day.date))
+                    key(day.date) {
+                        val photoCount = photoCountByDate[day.date] ?: 0
+                        MonthDayCell(
+                            day = day,
+                            isSelected = day.date == selectedDate,
+                            photoCount = photoCount,
+                            colors = colors,
+                            onClick = {
+                                if (day.position != DayPosition.MonthDate) {
+                                    coroutineScope.launch {
+                                        calendarState.animateScrollToMonth(YearMonth.from(day.date))
+                                        onDateSelected(day.date)
+                                    }
+                                } else {
                                     onDateSelected(day.date)
                                 }
-                            } else {
-                                onDateSelected(day.date)
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             )
         }
@@ -161,7 +203,6 @@ fun MonthlyCalendar(
 @Composable
 private fun MonthCalendarHeader(
     yearMonth: YearMonth,
-    locale: Locale,
     colors: CalendarColors,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -187,9 +228,75 @@ private fun MonthCalendarHeader(
     }
 }
 
+private const val ITEM_HEIGHT_DP = 35
+private const val VISIBLE_ITEMS = 5
+
+private fun LazyListLayoutInfo.centeredItemIndex(fallback: Int): Int {
+    val centerY = viewportCenterY
+    return visibleItemsInfo.firstOrNull { it.covers(centerY) }?.index
+        ?: visibleItemsInfo.minByOrNull { kotlin.math.abs((it.offset + it.size / 2) - centerY) }?.index
+        ?: fallback
+}
+
+private val LazyListLayoutInfo.viewportCenterY: Int
+    get() = (viewportStartOffset + viewportEndOffset) / 2
+
+private fun LazyListItemInfo.covers(y: Int): Boolean = y in offset until offset + size
+
+private fun LazyListLayoutInfo.isItemCentered(itemIndex: Int): Boolean =
+    visibleItemsInfo.any { it.index == itemIndex && it.covers(viewportCenterY) }
+
+private suspend fun awaitNextFrame() {
+    suspendCancellableCoroutine { cont ->
+        Choreographer.getInstance().postFrameCallback {
+            cont.resume(Unit)
+        }
+    }
+}
+
+private fun scrollOffsetToCenterFromLayoutInfo(info: LazyListLayoutInfo): Int {
+    val viewportHeight = info.viewportSize.height
+    val itemHeight = info.visibleItemsInfo.firstOrNull()?.size
+        ?: return viewportHeight * (VISIBLE_ITEMS - 1) / (2 * VISIBLE_ITEMS) // estimate: itemHeight ≈ viewportHeight/VISIBLE_ITEMS
+    return (viewportHeight / 2 - itemHeight / 2).coerceIn(0, maxOf(0, viewportHeight - itemHeight))
+}
+
+private suspend fun snapPickerToCenterWhenScrollEnds(
+    listState: LazyListState,
+    itemCount: Int,
+) {
+    snapshotFlow { listState.isScrollInProgress }
+        .distinctUntilChanged()
+        .filter { !it }
+        .collect {
+            awaitNextFrame()
+            val info = listState.layoutInfo
+            if (info.visibleItemsInfo.isEmpty()) return@collect
+            val fallbackIndex = listState.firstVisibleItemIndex.coerceIn(0, (itemCount - 1).coerceAtLeast(0))
+            val indexToCenter = info.centeredItemIndex(fallbackIndex).coerceIn(0, itemCount - 1)
+            if (info.isItemCentered(indexToCenter)) return@collect
+            val scrollOffsetToCenter = scrollOffsetToCenterFromLayoutInfo(info)
+            listState.animateScrollToItem(index = indexToCenter, scrollOffset = scrollOffsetToCenter)
+        }
+}
+
+private fun centeredYearMonth(
+    years: List<Int>,
+    startYear: Int,
+    yearState: LazyListState,
+    monthState: LazyListState,
+    fallbackYear: Int,
+    fallbackMonth: Int
+): YearMonth {
+    val y = years.getOrNull(yearState.layoutInfo.centeredItemIndex((fallbackYear - startYear).coerceIn(0, years.lastIndex))) ?: fallbackYear
+    val m = (monthState.layoutInfo.centeredItemIndex((fallbackMonth - 1).coerceIn(0, 11)) + 1).coerceIn(1, 12)
+    return YearMonth.of(y, m)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun MonthSelectDropdown(
-    expanded: Boolean,
+private fun MonthSelectBottomSheet(
+    sheetState: SheetState,
     onDismissRequest: () -> Unit,
     currentYearMonth: YearMonth,
     locale: Locale,
@@ -197,31 +304,192 @@ private fun MonthSelectDropdown(
     onMonthSelected: (YearMonth) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    DropdownMenu(
-        expanded = expanded,
+    val startYear = YearMonth.now().year - CALENDAR_YEAR_RANGE
+    val years = remember(startYear) { (startYear..startYear + CALENDAR_YEAR_RANGE * 2).toList() }
+
+    var selectedYear by remember(currentYearMonth) { mutableStateOf(currentYearMonth.year) }
+    var selectedMonth by remember(currentYearMonth) { mutableStateOf(currentYearMonth.monthValue) }
+
+    val yearListState = rememberLazyListState()
+    val monthListState = rememberLazyListState()
+
+    LaunchedEffect(currentYearMonth) {
+        yearListState.animateScrollToItem((currentYearMonth.year - startYear).coerceIn(0, years.lastIndex))
+        monthListState.animateScrollToItem(currentYearMonth.monthValue - 1)
+    }
+
+    ModalBottomSheet(
         onDismissRequest = onDismissRequest,
-        modifier = modifier
-            .heightIn(max = 320.dp)
-            .wrapContentSize(Alignment.TopStart),
+        sheetState = sheetState,
+        containerColor = Sd900,
+        dragHandle = null,
+        modifier = modifier,
     ) {
-        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-            (1..12).forEach { monthValue ->
-                val yearMonth = YearMonth.of(currentYearMonth.year, monthValue)
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = "${yearMonth.year}년 ${monthValue}월",
-                            color = colors.headerText,
-                            fontSize = 14.sp,
-                        )
-                    },
-                    onClick = {
-                        onMonthSelected(yearMonth)
-                    },
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+        ) {
+            CloseButton(modifier = Modifier.align(Alignment.End), onClick = onDismissRequest)
+
+            MonthPickerContent(
+                years = years,
+                startYear = startYear,
+                selectedYear = selectedYear,
+                selectedMonth = selectedMonth,
+                onYearClick = { selectedYear = it },
+                onMonthClick = { selectedMonth = it },
+                yearListState = yearListState,
+                monthListState = monthListState,
+                onConfirm = { onMonthSelected(centeredYearMonth(years, startYear, yearListState, monthListState, selectedYear, selectedMonth)) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun MonthPickerContent(
+    years: List<Int>,
+    startYear: Int,
+    selectedYear: Int,
+    selectedMonth: Int,
+    onYearClick: (Int) -> Unit,
+    onMonthClick: (Int) -> Unit,
+    yearListState: LazyListState,
+    monthListState: LazyListState,
+    onConfirm: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val pickerHeight = (ITEM_HEIGHT_DP * VISIBLE_ITEMS).dp
+    val contentPadding = PaddingValues(vertical = (ITEM_HEIGHT_DP * (VISIBLE_ITEMS - 1) / 2).dp)
+
+    val centeredYearIndex by remember {
+        derivedStateOf {
+            yearListState.layoutInfo.centeredItemIndex((selectedYear - startYear).coerceIn(0, years.lastIndex))
+        }
+    }
+    val centeredMonthIndex by remember {
+        derivedStateOf {
+            monthListState.layoutInfo.centeredItemIndex((selectedMonth - 1).coerceIn(0, 11))
+        }
+    }
+
+    Box(modifier = modifier.fillMaxWidth()) {
+        SelectionBand()
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            PickerColumn(
+                itemCount = years.size,
+                pickerHeight = pickerHeight,
+                contentPadding = contentPadding,
+                listState = yearListState,
+                centeredIndex = centeredYearIndex,
+                label = { "${years[it]}년" },
+                onClick = { onYearClick(years[it]) },
+            )
+            PickerColumn(
+                itemCount = 12,
+                pickerHeight = pickerHeight,
+                contentPadding = contentPadding,
+                listState = monthListState,
+                centeredIndex = centeredMonthIndex,
+                label = { "${it + 1}월" },
+                onClick = { onMonthClick(it + 1) },
+            )
+        }
+    }
+
+    Spacer(modifier = Modifier.height(24.dp))
+
+    SelectButton(onClick = onConfirm)
+}
+
+@Composable
+private fun BoxScope.SelectionBand(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .align(Alignment.Center)
+            .height(ITEM_HEIGHT_DP.dp)
+            .background(Sd800, RoundedCornerShape(10.dp))
+    )
+}
+
+@Composable
+private fun RowScope.PickerColumn(
+    itemCount: Int,
+    pickerHeight: Dp,
+    contentPadding: PaddingValues,
+    listState: LazyListState,
+    centeredIndex: Int,
+    label: (Int) -> String,
+    onClick: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState, snapPosition = SnapPosition.Center)
+    LaunchedEffect(listState, itemCount) {
+        snapPickerToCenterWhenScrollEnds(listState, itemCount)
+    }
+    LazyColumn(
+        modifier = modifier
+            .weight(1f)
+            .height(pickerHeight),
+        state = listState,
+        flingBehavior = flingBehavior,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        contentPadding = contentPadding,
+        verticalArrangement = Arrangement.spacedBy(0.dp),
+    ) {
+        items(itemCount) { index ->
+            val isInSelectionBand = index == centeredIndex
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(ITEM_HEIGHT_DP.dp)
+                    .clickable { onClick(index) },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = label(index),
+                    color = if (isInSelectionBand) White else Gray700,
+                    fontSize = 18.sp,
                 )
             }
         }
     }
+}
+
+@Composable
+private fun SelectButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(containerColor = PrimBase),
+        shape = CircleShape
+    ) {
+        Text(
+            text = stringResource(string.home_button_select),
+            style = hd16,
+        )
+    }
+}
+
+@Composable
+private fun CloseButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
+    Image(
+        modifier = modifier
+            .clickable { onClick() },
+        painter = painterResource(drawable.ic_close),
+        contentDescription = ""
+    )
 }
 
 @Composable
@@ -258,8 +526,6 @@ private fun MonthDayCell(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isCurrentMonth = day.position == DayPosition.MonthDate
-
     Box(
         modifier = modifier
             .wrapContentSize()
@@ -268,18 +534,17 @@ private fun MonthDayCell(
         contentAlignment = Alignment.TopCenter
     ) {
         NeonStyleDay(
-            modifier = modifier
-                .clickable(onClick = onClick),
+            modifier = Modifier,
             topText = day.date.dayOfMonth.toString(),
             isSelected = isSelected,
-            showDot = false,
+            showDot = photoCount > 0,
             content = {
                 val dashedBorderColor = if (isSelected) Gray900 else colors.weekdayText
                 Box(
                     modifier = Modifier
                         .padding(top = 6.dp)
                         .requiredSize(32.dp)
-                        .clip(RoundedCornerShape(4.dp))
+                        .clip(MonthDayCellCornerShape)
                         .background(
                             if (isSelected) colors.selectedInnerBox else Transparent
                         )
@@ -314,6 +579,20 @@ private fun MonthDayCell(
             }
         )
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true, backgroundColor = 0xFF1E1D25)
+@Composable
+private fun MonthSelectBottomSheetPreview() {
+    MonthSelectBottomSheet(
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        onDismissRequest = {},
+        currentYearMonth = YearMonth.now(),
+        locale = Locale.getDefault(),
+        colors = calendarColors(),
+        onMonthSelected = {}
+    )
 }
 
 @Preview

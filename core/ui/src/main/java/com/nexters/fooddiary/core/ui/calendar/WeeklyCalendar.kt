@@ -1,12 +1,12 @@
 package com.nexters.fooddiary.core.ui.calendar
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -40,8 +41,7 @@ import com.kizitonwose.calendar.compose.weekcalendar.rememberWeekCalendarState
 import com.nexters.fooddiary.core.ui.R.drawable
 import com.nexters.fooddiary.core.ui.calendar.theme.CalendarColors
 import com.nexters.fooddiary.core.ui.calendar.theme.calendarColors
-import com.nexters.fooddiary.core.ui.gradientBorder
-import com.nexters.fooddiary.core.ui.theme.White
+import com.nexters.fooddiary.core.ui.theme.Gray700
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -50,15 +50,6 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 internal val CalendarContainerShape = RoundedCornerShape(16.dp)
-
-private val WeeklyStrokeGradient = Brush.linearGradient(
-    *arrayOf(
-        0f to White.copy(alpha = 0.3f),
-        1f to White.copy(alpha = 0f),
-    ),
-    start = Offset(0f, 0f),
-    end = Offset(1000f, 1000f),
-)
 
 @Composable
 fun WeeklyCalendar(
@@ -69,6 +60,7 @@ fun WeeklyCalendar(
     locale: Locale = Locale.getDefault(),
     colors: CalendarColors = calendarColors(),
     photoCountByDate: Map<LocalDate, Int> = emptyMap(),
+    today: LocalDate = LocalDate.now(),
     onHeaderBoundsChanged: (Rect) -> Unit = {},
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -104,19 +96,21 @@ fun WeeklyCalendar(
         Column(
             modifier = Modifier
                 .clip(CalendarContainerShape)
-                .gradientBorder(1.dp, WeeklyStrokeGradient, CalendarContainerShape)
-                .padding(16.dp),
+                .border(1.dp, color = Gray700.copy(alpha = 0.3f), CalendarContainerShape)
+                .padding(vertical = 8.dp, horizontal = 12.dp),
         ) {
             WeekCalendar(
                 state = calendarState,
                 dayContent = { day ->
                     val photoCount = photoCountByDate[day.date] ?: 0
+                    val isEnabled = !day.date.isAfter(today)
                     DayCell(
                         date = day.date,
                         isSelected = day.date == selectedDate,
                         hasData = photoCount > 0,
+                        isEnabled = isEnabled,
                         locale = locale,
-                        onClick = { onDateSelected(day.date) }
+                        onClick = { if (isEnabled) onDateSelected(day.date) }
                     )
                 }
             )
@@ -170,6 +164,7 @@ private fun DayCell(
     date: LocalDate,
     isSelected: Boolean,
     hasData: Boolean,
+    isEnabled: Boolean = true,
     locale: Locale,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -181,7 +176,8 @@ private fun DayCell(
         isSelected = isSelected,
         modifier = modifier
             .heightIn(max = 56.dp)
-            .clickable(onClick = onClick)
+            .then(if (isEnabled) Modifier.clickable(onClick = onClick) else Modifier.clickable(enabled = false) {})
+            .then(if (!isEnabled) Modifier.alpha(0.4f) else Modifier)
     )
 }
 

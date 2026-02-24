@@ -2,6 +2,7 @@ package com.nexters.fooddiary.presentation.home.navigation
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.nexters.fooddiary.core.ui.alert.SnackBarData
 import com.nexters.fooddiary.presentation.home.HomeScreen
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
@@ -15,6 +16,7 @@ fun NavGraphBuilder.homeScreen(
     onNavigateToMyPage: () -> Unit,
     showCoachmarkOnEntry: () -> Boolean = { false },
     onCoachmarkFlagConsumed: () -> Unit = {},
+    onShowSnackBar: (SnackBarData) -> Unit,
 ) {
     composable<HomeRoute> {
         HomeScreen(
@@ -23,6 +25,7 @@ fun NavGraphBuilder.homeScreen(
             onNavigateToMyPage = onNavigateToMyPage,
             showCoachmarkOnEntry = showCoachmarkOnEntry(),
             onCoachmarkFlagConsumed = onCoachmarkFlagConsumed,
+            onShowSnackBar = onShowSnackBar,
         )
     }
 }

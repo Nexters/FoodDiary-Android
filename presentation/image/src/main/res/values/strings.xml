@@ -13,9 +13,14 @@
     <string name="image_classification_not_food">음식이 아닙니다. (신뢰도: %1$s)</string>
     <string name="image_mime_type">image/*</string>
 
-    <!-- Image Picker -->
+    <!-- Image Picker (Home-pic-select) -->
     <string name="image_picker_back">뒤로가기</string>
     <string name="image_picker_icon">이미지 아이콘</string>
+    <string name="image_picker_deselect_all">모두해제</string>
+    <string name="image_picker_hint_max">10장까지 선택할 수 있어요.</string>
+    <string name="image_picker_select_count">선택하기(%d)</string>
+    <string name="image_picker_section_food">음식</string>
+    <string name="image_picker_section_all">전체</string>
     <string name="image_picker_permission_message">이미지 접근 권한이 필요합니다</string>
     <string name="image_picker_request_permission">권한 요청</string>
     <string name="image_picker_loading">로딩 중…</string>
@@ -23,5 +28,4 @@
     <string name="image_picker_gallery_image">갤러리 이미지</string>
     <string name="image_picker_selected">선택됨</string>
     <string name="image_picker_unselected">선택 안됨</string>
-    <string name="image_picker_done">추가하기</string>
 </resources>
