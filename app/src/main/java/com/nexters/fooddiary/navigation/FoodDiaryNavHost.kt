@@ -270,7 +270,9 @@ fun FoodDiaryNavHost(
                 )
 
                 homeScreen(
-                    onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
+                    onNavigateToImagePicker = { date ->
+                        navController.navigate(ImagePickerRoute(dateString = date.toString()))
+                    },
                     onNavigateToDetail = { date ->
                         navController.navigate(DetailRoute(dateString = date.toString()))
                     },
@@ -286,9 +288,11 @@ fun FoodDiaryNavHost(
 
                 detailScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
-                    onNavigateToModify = { diaryId ->
-                        navController.navigate(ModifyRoute(diaryId = diaryId))
+                    onNavigateToImagePicker = { dateString ->
+                        navController.navigate(ImagePickerRoute(dateString = dateString))
+                    },
+                    onNavigateToModify = { diaryId, dateString ->
+                        navController.navigate(ModifyRoute(diaryId = diaryId, dateString = dateString))
                     },
                     onShowToast = onShowToast,
                 )
@@ -340,7 +344,9 @@ fun FoodDiaryNavHost(
                 )
                 modifyScreen(
                     onBack = { navController.popBackStack() },
-                    onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
+                    onNavigateToImagePicker = { dateString ->
+                        navController.navigate(ImagePickerRoute(dateString = dateString))
+                    },
                 )
             }
         }

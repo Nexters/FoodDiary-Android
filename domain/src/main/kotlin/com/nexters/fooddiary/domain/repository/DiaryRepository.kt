@@ -2,7 +2,6 @@ package com.nexters.fooddiary.domain.repository
 
 import com.nexters.fooddiary.domain.model.DiaryEntry
 import com.nexters.fooddiary.domain.model.DiaryDetail
-import com.nexters.fooddiary.domain.model.DiaryEntry
 import com.nexters.fooddiary.domain.model.UpdateDiaryParam
 import java.time.LocalDate
 import java.time.YearMonth

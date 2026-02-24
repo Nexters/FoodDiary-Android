@@ -141,7 +141,8 @@ class ImagePickerViewModel @AssistedInject constructor(
         urisToUpload: List<String>,
         onResult: (UploadResult) -> Unit
     ) {
-        batchUploadPhotosUseCase(LocalDate.now(), urisToUpload)
+        val targetDate = awaitState().filterDate ?: LocalDate.now()
+        batchUploadPhotosUseCase(targetDate, urisToUpload)
             .onSuccess { onResult(UploadResult.Success) }
             .onFailure { e -> onResult(UploadResult.Failure(e)) }
     }

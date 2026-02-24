@@ -66,6 +66,13 @@ android {
     }
 }
 
+// Resolve duplicate META-INF resources for androidTest (e.g. jspecify + logging-interceptor)
+android.packaging {
+    resources {
+        excludes += "/META-INF/versions/9/OSGI-INF/MANIFEST.MF"
+    }
+}
+
 // CI 및 릴리즈 빌드에서 API_BASE_URL 유효성 체크
 afterEvaluate {
     tasks.matching {
@@ -143,9 +150,14 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
-    // Testing
+    // Unit testing
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
     testImplementation(libs.okhttp.mockwebserver)
+
+    // Instrumentation testing (androidTest)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.espresso.core)
 }

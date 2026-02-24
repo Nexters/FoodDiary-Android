@@ -159,7 +159,7 @@ private fun HomeScreen(
                         AddPhotoBox(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .weight(1f),
+                                .aspectRatio(1f),
                             onAddPhoto = { onNavigateToImagePicker(state.selectedDate) },
                         )
                     }

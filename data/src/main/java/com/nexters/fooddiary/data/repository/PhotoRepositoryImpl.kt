@@ -66,7 +66,6 @@ internal class PhotoRepositoryImpl @Inject constructor(
                 deviceId = loginDeviceInfoProvider.getLoginDeviceInfo().deviceId.toRequestBody(
                     MEDIA_TYPE_TEXT_PLAIN.toMediaTypeOrNull()
                 ),
-                photos = parts
             )
             recordPendingUploads(response.diaries, response.diaryDate)
             Result.success(Unit)
