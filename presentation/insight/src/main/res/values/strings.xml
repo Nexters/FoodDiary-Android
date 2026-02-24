@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="insight_ready_message">인사이트를 제공하기 위해\n최소 1주일간의 데이터가 필요해요.</string>
+</resources>

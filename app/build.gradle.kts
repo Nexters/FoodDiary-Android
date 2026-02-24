@@ -160,6 +160,7 @@ dependencies {
     implementation(projects.presentation.splash)
     implementation(projects.presentation.detail)
     implementation(projects.presentation.onboarding)
+    implementation(projects.presentation.insight)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

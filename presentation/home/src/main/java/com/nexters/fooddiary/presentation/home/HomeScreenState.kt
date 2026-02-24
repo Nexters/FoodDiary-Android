@@ -5,7 +5,6 @@ import java.time.LocalDate
 
 data class HomeScreenState(
     val selectedDate: LocalDate = LocalDate.now(),
-    val isMonthlyCalendarView: Boolean = false,
     val diaryCountByDate: Map<LocalDate, Int> = emptyMap(),
     val diaryCountByWeek: Int = 0,
     val weeklyPhotosByDate: Map<LocalDate, List<String>> = emptyMap(),
