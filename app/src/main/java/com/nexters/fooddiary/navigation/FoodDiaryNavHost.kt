@@ -35,7 +35,6 @@ import com.nexters.fooddiary.presentation.auth.navigation.LoginRoute
 import com.nexters.fooddiary.presentation.auth.navigation.loginScreen
 import com.nexters.fooddiary.presentation.detail.navigation.DetailRoute
 import com.nexters.fooddiary.presentation.detail.navigation.detailScreen
-import com.nexters.fooddiary.presentation.home.calendar.navigation.calendarScreen
 import com.nexters.fooddiary.presentation.home.navigation.HomeRoute
 import com.nexters.fooddiary.presentation.home.navigation.homeScreen
 import com.nexters.fooddiary.presentation.insight.navigation.InsightRoute
@@ -223,15 +222,13 @@ fun FoodDiaryNavHost(
                 onShowToast = onShowToast,
             )
 
-            calendarScreen()
-
-            imageScreen(
-                onClose = {
-                    if (!navController.popBackStack()) {
-                        onFinish()
-                    }
+        imageScreen(
+            onClose = {
+                if (!navController.popBackStack()) {
+                    onFinish()
                 }
-            )
+            }
+        )
 
             myPageScreen(
                 navigateToWebView = { page ->
