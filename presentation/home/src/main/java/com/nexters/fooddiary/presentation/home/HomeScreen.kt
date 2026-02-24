@@ -306,42 +306,6 @@ private fun WeekCountDescription(
 }
 
 @Composable
-private fun CalendarSection(
-    selectedDate: LocalDate,
-    isMonthlyCalendarView: Boolean,
-    diaryCountByDate: Map<LocalDate, Int>,
-    onDateSelected: (LocalDate) -> Unit,
-    onMonthChanged: (YearMonth) -> Unit,
-    onNavigateToImagePicker: () -> Unit,
-) {
-    val weeklyCalendarState = rememberWeeklyCalendarState(selectedDate = selectedDate)
-    val monthlyCalendarState = rememberMonthCalendarState(selectedDate = selectedDate)
-
-    if (isMonthlyCalendarView) {
-        MonthlyCalendar(
-            calendarState = monthlyCalendarState,
-            selectedDate = selectedDate,
-            onDateSelected = onDateSelected,
-            onMonthChanged = onMonthChanged,
-            photoCountByDate = diaryCountByDate,
-        )
-    } else {
-        WeeklyCalendar(
-            calendarState = weeklyCalendarState,
-            selectedDate = selectedDate,
-            onDateSelected = onDateSelected,
-            photoCountByDate = diaryCountByDate,
-            today = LocalDate.now(),
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        AddPhotoBox(
-            modifier = Modifier.fillMaxWidth(),
-            onAddPhoto = onNavigateToImagePicker,
-        )
-    }
-}
-
-@Composable
 private fun HomeBottomBar(
     isMonthlyCalendarView: Boolean,
     currentRoute: HomeTab,
