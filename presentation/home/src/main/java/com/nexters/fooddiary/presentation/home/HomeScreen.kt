@@ -55,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import java.time.YearMonth
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
@@ -162,7 +163,6 @@ private fun HomeScreen(
     val scrollState = rememberScrollState()
     val weeklyCalendarState = rememberWeeklyCalendarState(selectedDate = state.selectedDate)
     val monthlyCalendarState = rememberMonthCalendarState(selectedDate = state.selectedDate)
-    val hazeState = rememberHazeState()
     var weeklyHeaderBounds by remember { mutableStateOf<Rect?>(null) }
     var selectedTab by remember { mutableStateOf(HomeTab.HOME) }
     var showHomeCoachmark by rememberSaveable { mutableStateOf(false) }
@@ -174,119 +174,126 @@ private fun HomeScreen(
         }
     }
 
-    Scaffold(
+    Box(
         modifier = modifier.fillMaxSize(),
-        containerColor = SdBase,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        bottomBar = {
-            HomeBottomBar(
-                currentRoute = selectedTab,
-                isMonthlyCalendarView = state.isMonthlyCalendarView,
-                onHomeClick = { selectedTab = HomeTab.HOME },
-                onInsightClick = { selectedTab = HomeTab.INSIGHT },
-                onCalendarViewToggle = onToggleCalendarView,
-                hazeState = screenHazeState,
-                modifier = Modifier
-                    .windowInsetsPadding(WindowInsets.navigationBars)
-                    .padding(start = 20.dp, end = 20.dp, bottom = 24.dp)
-            )
-        },
-    ) { innerPadding ->
-        val layoutDirection = LocalLayoutDirection.current
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .hazeSource(screenHazeState)
-                .background(SdBase)
-                .padding(
-                    start = innerPadding.calculateStartPadding(layoutDirection),
-                    top = innerPadding.calculateTopPadding(),
-                    end = innerPadding.calculateEndPadding(layoutDirection),
-                    bottom = 0.dp,
+    ) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = SdBase,
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            bottomBar = {
+                HomeBottomBar(
+                    currentRoute = selectedTab,
+                    isMonthlyCalendarView = state.isMonthlyCalendarView,
+                    onHomeClick = { selectedTab = HomeTab.HOME },
+                    onInsightClick = { selectedTab = HomeTab.INSIGHT },
+                    onCalendarViewToggle = onToggleCalendarView,
+                    hazeState = screenHazeState,
+                    modifier = Modifier
+                        .windowInsetsPadding(WindowInsets.navigationBars)
+                        .padding(start = 20.dp, end = 20.dp, bottom = 24.dp)
                 )
-        ) {
-            Column(
+            },
+        ) { innerPadding ->
+            val layoutDirection = LocalLayoutDirection.current
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(scrollState)
-                    .padding(20.dp),
+                    .hazeSource(screenHazeState)
+                    .background(SdBase)
+                    .padding(
+                        start = innerPadding.calculateStartPadding(layoutDirection),
+                        top = innerPadding.calculateTopPadding(),
+                        end = innerPadding.calculateEndPadding(layoutDirection),
+                        bottom = 0.dp,
+                    )
             ) {
-                Header(
-                    modifier = Modifier.padding(vertical = 18.dp),
-                    onClickMyPage = onNavigateToMyPage,
-                )
-                WeekCountDescription(diaryCountByWeek = state.diaryCountByWeek)
-                Text(
-                    modifier = Modifier.padding(top = 12.dp, bottom = 36.dp),
-                    text = stringResource(string.home_sub_description),
-                    style = AppTypography.hd24,
-                    color = Gray050,
-                )
-                if (state.isMonthlyCalendarView) {
-                    MonthlyCalendar(
-                        calendarState = monthlyCalendarState,
-                        selectedDate = state.selectedDate,
-                        onDateSelected = onDateSelected,
-                        photoCountByDate = state.diaryCountByDate,
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scrollState)
+                        .padding(20.dp),
+                ) {
+                    Header(
+                        modifier = Modifier.padding(vertical = 18.dp),
+                        onClickMyPage = onNavigateToMyPage,
                     )
-                } else {
-                    WeeklyCalendar(
-                        calendarState = weeklyCalendarState,
-                        selectedDate = state.selectedDate,
-                        onDateSelected = onDateSelected,
-                        photoCountByDate = state.diaryCountByDate,
+                    WeekCountDescription(diaryCountByWeek = state.diaryCountByWeek)
+                    Text(
+                        modifier = Modifier.padding(top = 12.dp, bottom = 36.dp),
+                        text = stringResource(string.home_sub_description),
+                        style = AppTypography.hd24,
+                        color = Gray050,
                     )
-                    Spacer(modifier = Modifier.height(43.dp))
-                    if (selectedDateImageUrls.isNotEmpty()) {
-                        FoodImageStackView(
-                            imageUrls = selectedDateImageUrls,
-                            state = FoodImageState.Ready(
-                                timeText = "시간",
-                                locationText = "위치",
-                            ),
-                            onCardClick = onCardStackClick,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 20.dp)
-                                .aspectRatio(1f),
+                    if (state.isMonthlyCalendarView) {
+                        MonthlyCalendar(
+                            calendarState = monthlyCalendarState,
+                            selectedDate = state.selectedDate,
+                            onDateSelected = onDateSelected,
+                            photoCountByDate = state.diaryCountByDate,
                         )
                     } else {
-                        AddPhotoBox(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f),
-                            onAddPhoto = onNavigateToImagePicker,
+                        WeeklyCalendar(
+                            calendarState = weeklyCalendarState,
+                            selectedDate = state.selectedDate,
+                            onDateSelected = onDateSelected,
+                            photoCountByDate = state.diaryCountByDate,
                         )
-                    }
-                }
-                Button(
-                    onClick = { throw RuntimeException("Sentry/Discord 알림 테스트용 크래시") },
-                    modifier = Modifier.padding(top = 8.dp)
-                ) {
-                    Text("Sentry 테스트 (크래시)")
-                }
-                Button(
-                    onClick = {
-                        onShowSnackBar(
-                            SnackBarData(
-                                message = "리퀴드 글래스 스낵바 테스트",
-                                iconRes = drawable.ic_check_circle,
+                        Spacer(modifier = Modifier.height(43.dp))
+                        if (selectedDateImageUrls.isNotEmpty()) {
+                            FoodImageStackView(
+                                imageUrls = selectedDateImageUrls,
+                                state = FoodImageState.Ready(
+                                    timeText = "시간",
+                                    locationText = "위치",
+                                ),
+                                onCardClick = onCardStackClick,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 20.dp)
+                                    .aspectRatio(1f),
                             )
-                        )
-                    },
-                    modifier = Modifier.padding(top = 8.dp)
-                ) {
-                    Text("스낵바 테스트")
+                        } else {
+                            AddPhotoBox(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f),
+                                onAddPhoto = onNavigateToImagePicker,
+                            )
+                        }
+                    }
+                    Button(
+                        onClick = { throw RuntimeException("Sentry/Discord 알림 테스트용 크래시") },
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        Text("Sentry 테스트 (크래시)")
+                    }
+                    Button(
+                        onClick = {
+                            onShowSnackBar(
+                                SnackBarData(
+                                    message = "리퀴드 글래스 스낵바 테스트",
+                                    iconRes = drawable.ic_check_circle,
+                                )
+                            )
+                        },
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        Text("스낵바 테스트")
+                    }
+                    Spacer(modifier = Modifier.height(144.dp))
                 }
-                Spacer(modifier = Modifier.height(144.dp))
             }
         }
 
         if (!state.isMonthlyCalendarView && showHomeCoachmark) {
             HomeCoachmarkOverlay(
                 onDismiss = { showHomeCoachmark = false },
-                hazeState = hazeState,
+                hazeState = screenHazeState,
                 weeklyHeaderBounds = weeklyHeaderBounds,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zIndex(1f),
             )
         }
     }
