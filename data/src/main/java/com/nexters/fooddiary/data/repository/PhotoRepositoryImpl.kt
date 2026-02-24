@@ -9,8 +9,7 @@ import com.nexters.fooddiary.data.remote.photo.PhotoApi
 import com.nexters.fooddiary.core.common.network.defaultMessage
 import com.nexters.fooddiary.core.common.resource.ResourceProvider
 import com.nexters.fooddiary.data.network.toNetworkError
-import com.nexters.fooddiary.data.remote.photo.model.response.BatchUploadDiaryItem
-import com.nexters.fooddiary.data.mapper.toUploadStatus
+import com.nexters.fooddiary.data.remote.photo.model.response.BatchUploadResultItem
 import com.nexters.fooddiary.domain.repository.PhotoRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -67,7 +66,7 @@ internal class PhotoRepositoryImpl @Inject constructor(
                 ),
                 photos = parts
             )
-            recordPendingUploads(response.diaries, response.diaryDate)
+            recordPendingUploads(response.results, uploadDateStr)
             Result.success(Unit)
         } catch (e: Exception) {
             recordUploadFailure(uploadDateStr, e)
@@ -95,18 +94,17 @@ internal class PhotoRepositoryImpl @Inject constructor(
     }
 
     private suspend fun recordPendingUploads(
-        diaries: List<BatchUploadDiaryItem>,
+        results: List<BatchUploadResultItem>,
         uploadDateStr: String
     ) {
-        val entities = diaries.mapNotNull { item ->
-            val status = item.toUploadStatus() ?: return@mapNotNull null
+        val entities = results.map { item ->
             PhotoUploadEntity(
-                photoId = null,
+                photoId = item.photoId,
                 diaryId = item.diaryId,
-                imageUrl = null,
-                timeType = null,
+                imageUrl = item.imageUrl,
+                timeType = item.timeType,
                 uploadDate = uploadDateStr,
-                status = status
+                status = UploadStatus.PENDING
             )
         }
         if (entities.isNotEmpty()) {
