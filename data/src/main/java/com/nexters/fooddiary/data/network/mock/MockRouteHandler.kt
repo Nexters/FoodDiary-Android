@@ -8,6 +8,7 @@ object MockRouteHandler {
     private const val PATH_DELETE_ME = "/users/me"
     private const val PATH_DIARIES = "/diaries"
     private const val PATH_PHOTOS = "/photos"
+    private const val PATH_RESTAURANT_SEARCH = "/restaurant/search"
     private const val PATH_USERS_ME = "/users/me"
 
     // Regex Patterns
@@ -28,6 +29,7 @@ object MockRouteHandler {
     private const val MOCK_CONFIRM_PHOTO_SUCCESS = "confirm_photo_success.json"
     private const val MOCK_GET_FINAL_RECORD = "get_final_record.json"
     private const val MOCK_USERS_ME = "users_me.json"
+    private const val MOCK_GET_RESTAURANT_SEARCH = "get_restaurant_search.json"
 
     /**
      * path와 method를 기반으로 mock JSON 파일명을 반환
@@ -53,6 +55,9 @@ object MockRouteHandler {
             path.matches(REGEX_PHOTO_ANALYSIS) && method == "GET" -> MOCK_GET_ANALYSIS_RESULT
             path.matches(REGEX_PHOTO_CONFIRM) && method == "POST" -> MOCK_CONFIRM_PHOTO_SUCCESS
             path.matches(REGEX_PHOTO_FINAL) && method == "GET" -> MOCK_GET_FINAL_RECORD
+
+            // Restaurant
+//            path == PATH_RESTAURANT_SEARCH && method == "GET" -> MOCK_GET_RESTAURANT_SEARCH
 
             else -> null
         }

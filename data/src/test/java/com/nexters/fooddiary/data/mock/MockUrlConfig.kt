@@ -6,6 +6,7 @@ object MockUrlConfig {
     const val PATH_DIARIES = "/diaries"
     const val PATH_DIARIES_SUMMARY = "/diaries/summary"
     const val PATH_PHOTOS = "/photos"
+    const val PATH_RESTAURANT_SEARCH = "/restaurant/search"
     
     // Regex Patterns
     const val REGEX_DIARIES_QUERY = "/diaries\\?.*"
@@ -25,4 +26,5 @@ object MockUrlConfig {
     const val MOCK_GET_ANALYSIS_RESULT = "get_analysis_result.json"
     const val MOCK_CONFIRM_PHOTO_SUCCESS = "confirm_photo_success.json"
     const val MOCK_GET_FINAL_RECORD = "get_final_record.json"
+    const val MOCK_GET_RESTAURANT_SEARCH = "get_restaurant_search.json"
 }

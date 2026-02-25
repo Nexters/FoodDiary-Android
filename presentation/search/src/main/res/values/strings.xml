@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_close">닫기</string>
+    <string name="search_placeholder">검색어를 입력해주세요.</string>
+    <string name="search_guide_title">이 식당을 찾고 계신가요?</string>
+    <string name="search_select">선택</string>
+    <string name="search_empty">검색 결과가 없습니다.</string>
+    <string name="search_error">식당 검색 중 오류가 발생했습니다.</string>
+    <string name="search_load_more_error">추가 식당을 불러오지 못했습니다.</string>
+    <string name="search_load_more_retry">다시 시도</string>
+</resources>

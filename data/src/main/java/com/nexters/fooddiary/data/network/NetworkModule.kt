@@ -7,6 +7,7 @@ import com.nexters.fooddiary.data.remote.auth.AuthApi
 import com.nexters.fooddiary.data.remote.diary.DiaryApi
 import com.nexters.fooddiary.data.remote.photo.PhotoApi
 import com.nexters.fooddiary.data.remote.user.UserApi
+import com.nexters.fooddiary.data.remote.restaurant.RestaurantApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -79,6 +80,11 @@ object NetworkModule {
     @Singleton
     fun provideUserApi(retrofit: Retrofit): UserApi =
         retrofit.create(UserApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideRestaurantApi(retrofit: Retrofit): RestaurantApi =
+        retrofit.create(RestaurantApi::class.java)
 }
 
 private fun OkHttpClient.Builder.addMockInterceptor(
