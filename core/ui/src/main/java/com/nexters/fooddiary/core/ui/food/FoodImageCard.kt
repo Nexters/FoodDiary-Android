@@ -123,6 +123,8 @@ private fun TagChip(
     textColor: Color,
     modifier: Modifier = Modifier
 ) {
+    if (text.isBlank()) return
+
     Box(
         modifier = modifier
             .defaultMinSize(minHeight = 18.dp)
@@ -166,23 +168,25 @@ private fun FoodImage(
         }
 
         // 상단: 시간 + 위치 태그
-        Row(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(10.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TagChip(
-                text = timeText,
-                backgroundColor = TimeLocationBg,
-                textColor = White,
-            )
-            TagChip(
-                text = locationText,
-                backgroundColor = TimeLocationBg,
-                textColor = White,
-            )
+        if (timeText.isNotBlank() || locationText.isNotBlank()) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TagChip(
+                    text = timeText,
+                    backgroundColor = TimeLocationBg,
+                    textColor = White,
+                )
+                TagChip(
+                    text = locationText,
+                    backgroundColor = TimeLocationBg,
+                    textColor = White,
+                )
+            }
         }
     }
 }
