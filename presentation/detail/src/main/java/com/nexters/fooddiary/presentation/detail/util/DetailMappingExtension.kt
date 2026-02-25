@@ -64,6 +64,7 @@ internal fun MealSlot.toMealUiModel(
         location = diary.location.orEmpty(),
         place = diary.restaurantName.orEmpty(),
         keywords = prefixedTags,
+        note = diary.note.orEmpty(),
         mapLink = diary.mapLink.orEmpty(),
         imageUrls = imageUrls,
         status = when (diary.analysisStatus) {

@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -429,6 +430,7 @@ private fun MealSection(
             MealInfoSection(
                 place = meal.place,
                 keywords = meal.keywords,
+                note = meal.note,
                 onCopyClick = onCopyClick,
                 onShareClick = onShareClick,
             )
@@ -441,6 +443,7 @@ private fun MealSection(
 private fun MealInfoSection(
     place: String,
     keywords: List<String>,
+    note: String,
     onCopyClick: () -> Unit,
     onShareClick: () -> Unit,
 ) {
@@ -525,6 +528,42 @@ private fun MealInfoSection(
                 }
             }
         }
+
+        if (note.isNotBlank()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = Color(0xFF1D1C27),
+                        shape = RoundedCornerShape(10.dp),
+                    )
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Icon(
+                        painter = painterResource(CoreUiR.drawable.ic_ai_analysis),
+                        contentDescription = null,
+                        tint = Color.Unspecified,
+                    )
+                    Text(
+                        text = stringResource(id = R.string.detail_ai_summary_title),
+                        color = White,
+                        style = AppTypography.p12,
+                        fontWeight = FontWeight.Medium,
+                    )
+                }
+
+                Text(
+                    text = note,
+                    color = White,
+                    style = AppTypography.p12,
+                )
+            }
+        }
     }
 }
 
@@ -570,6 +609,7 @@ private fun DetailScreenPreview() {
                 location = "마포구",
                 place = "호진이네",
                 keywords = listOf("#양장피", "#어향동고"),
+                note = "테이블 가득 차려진 한 상 차림의 음식 사진입니다.",
                 mapLink = "https://map.naver.com/p/entry/place/123456",
                 imageUrls = listOf("https://picsum.photos/300"),
                 status = MealCardStatus.READY,
@@ -582,6 +622,7 @@ private fun DetailScreenPreview() {
                 location = "강남구",
                 place = "",
                 keywords = emptyList(),
+                note = "",
                 mapLink = "",
                 imageUrls = listOf("https://picsum.photos/300"),
                 status = MealCardStatus.PENDING,
@@ -594,6 +635,7 @@ private fun DetailScreenPreview() {
                 location = "",
                 place = "",
                 keywords = emptyList(),
+                note = "",
                 mapLink = "",
                 imageUrls = emptyList(),
                 status = MealCardStatus.EMPTY,
@@ -606,6 +648,7 @@ private fun DetailScreenPreview() {
                 location = "서초구",
                 place = "카페",
                 keywords = listOf("#커피"),
+                note = "간단히 커피와 디저트를 먹었어요.",
                 mapLink = "",
                 imageUrls = listOf("https://picsum.photos/301"),
                 status = MealCardStatus.READY,

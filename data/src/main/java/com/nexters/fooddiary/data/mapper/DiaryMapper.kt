@@ -20,6 +20,7 @@ class DiaryMapper @Inject constructor() {
                 createdAt = diary.createdAt,
                 restaurantName = diary.restaurantName,
                 category = diary.category,
+                note = diary.note,
                 location = diary.roadAddress,
                 tags = diary.tags,
                 coverPhotoUrl = diary.coverPhotoUrl,

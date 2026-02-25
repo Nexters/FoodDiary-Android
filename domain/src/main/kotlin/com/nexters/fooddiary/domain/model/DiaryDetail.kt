@@ -14,6 +14,7 @@ data class DiaryEntry(
     val createdAt: String?,
     val restaurantName: String?,
     val category: String?,
+    val note: String?,
     val location: String?,
     val tags: List<String>,
     val coverPhotoUrl: String?,
