@@ -31,10 +31,10 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -50,7 +50,6 @@ import com.nexters.fooddiary.core.ui.alert.SnackBarData
 import com.nexters.fooddiary.core.ui.component.CommonChips
 import com.nexters.fooddiary.core.ui.component.CommonCircleButton
 import com.nexters.fooddiary.core.ui.component.DetailScreenHeader
-import com.nexters.fooddiary.core.ui.dashBorder
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.Gray050
 import com.nexters.fooddiary.core.ui.theme.Gray200
@@ -74,7 +73,6 @@ private val InputShape = RoundedCornerShape(10.dp)
 fun ModifyScreen(
     diaryId: String,
     onBack: () -> Unit,
-    onNavigateToImagePicker: () -> Unit = {},
     onShowDialog: (DialogData) -> Unit = {},
     onShowSnackBar: (SnackBarData) -> Unit = {},
     viewModel: ModifyViewModel = mavericksViewModel(),
@@ -94,6 +92,17 @@ fun ModifyScreen(
             null -> { }
         }
     }
+    LaunchedEffect(viewModel) {
+        viewModel.events.collectLatest { event ->
+            when (event) {
+                ModifyEvent.Saved -> {
+                    onShowSnackBar(SnackBarData(message = successMessage))
+                    onBack()
+                }
+                ModifyEvent.Deleted -> onBack()
+            }
+        }
+    }
     var showTagDialog by remember { mutableStateOf(false) }
     if (showTagDialog) {
         TagInputDialog(
@@ -106,21 +115,13 @@ fun ModifyScreen(
     }
     ModifyScreenContent(
         onBack = onBack,
-        onNavigateToImagePicker = onNavigateToImagePicker,
         state = state,
         onSelect = viewModel::selectCategory,
         onSearchChange = viewModel::updateAddressSearch,
         onRemoveTag = viewModel::removeTag,
         onRemovePhotoAt = viewModel::removePhotoAt,
-        onDelete = { viewModel.onDelete(onSuccess = onBack) },
-        onSave = {
-            viewModel.onSave(
-                onSuccess = {
-                    onShowSnackBar(SnackBarData(message = successMessage))
-                    onBack()
-                },
-            )
-        },
+        onDelete = viewModel::onDelete,
+        onSave = viewModel::onSave,
         onAddChip = { showTagDialog = true },
     )
 }
@@ -129,7 +130,6 @@ fun ModifyScreen(
 private fun ModifyScreenContent(
     modifier: Modifier = Modifier,
     onBack: () -> Unit = {},
-    onNavigateToImagePicker: () -> Unit = {},
     onSelect: (String) -> Unit = {},
     onSearchChange: (String) -> Unit = {},
     onRemoveTag: (String) -> Unit = {},
@@ -179,7 +179,6 @@ private fun ModifyScreenContent(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    AddPhotoToDiaryBox(onClick = onNavigateToImagePicker)
                     state.photoUrls.forEachIndexed { index, imageUrl ->
                         SelectBox(
                             imageUrl = imageUrl,
@@ -269,25 +268,6 @@ private fun SelectBox(
                 .padding(top = 8.dp, end = 8.dp),
             painter = painterResource(drawable.ic_close),
             contentDescription = "Close",
-        )
-    }
-}
-
-@Composable
-private fun AddPhotoToDiaryBox(onClick: () -> Unit = {}) {
-    Box(
-        modifier = Modifier
-            .size(104.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .dashBorder()
-            .background(Sd700)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            imageVector = Icons.Default.Add,
-            tint = Color.White,
-            contentDescription = "Add Photo",
         )
     }
 }

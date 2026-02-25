@@ -67,5 +67,6 @@ internal fun MealSlot.toMealUiModel(
         } else {
             MealCardStatus.READY
         },
+        diaryId = diary.diaryId.toString(),
     )
 }

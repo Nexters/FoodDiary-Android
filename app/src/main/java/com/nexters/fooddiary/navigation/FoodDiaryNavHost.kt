@@ -306,9 +306,6 @@ fun FoodDiaryNavHost(
                 )
                 modifyScreen(
                     onBack = { navController.popBackStack() },
-                    onNavigateToImagePicker = {
-                        navController.navigate(ImagePickerRoute(dateString = null))
-                    },
                     onShowDialog = onShowDialog,
                     onShowSnackBar = onShowSnackBar,
                 )

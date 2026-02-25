@@ -22,20 +22,20 @@ interface DiaryApi {
     suspend fun getDiary(
         @Query("start_date") startDate: String,
         @Query("end_date") endDate: String,
-        @Query("test_mode") testMode: Boolean = true,
+        @Query("test_mode") testMode: Boolean = false,
     ): DiaryDetailResponse
 
     @GET("/diaries/summary")
     suspend fun getDiarySummary(
         @Query("start_date") startDate: String,
         @Query("end_date") endDate: String,
-        @Query("test_mode") testMode: Boolean = true,
+        @Query("test_mode") testMode: Boolean = false,
     ): Map<String, DiarySummaryByDateItemResponse>
 
     @GET("/diaries/{id}")
     suspend fun getDiaryById(
         @Path("id") id: Int,
-        @Query("test_mode") testMode: Boolean = true
+        @Query("test_mode") testMode: Boolean = false
     ): DiarySummaryResponse
 
     @PATCH("/diaries/{diary_id}")

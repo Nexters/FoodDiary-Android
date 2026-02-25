@@ -13,7 +13,6 @@ data class ModifyRoute(val diaryId: String)
 
 fun NavGraphBuilder.modifyScreen(
     onBack: () -> Unit,
-    onNavigateToImagePicker: () -> Unit = {},
     onShowDialog: (DialogData) -> Unit = {},
     onShowSnackBar: (SnackBarData) -> Unit = {},
 ) {
@@ -22,7 +21,6 @@ fun NavGraphBuilder.modifyScreen(
         ModifyScreen(
             diaryId = route.diaryId,
             onBack = onBack,
-            onNavigateToImagePicker = onNavigateToImagePicker,
             onShowDialog = onShowDialog,
             onShowSnackBar = onShowSnackBar,
         )

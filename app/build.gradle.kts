@@ -109,7 +109,7 @@ android {
         debug {
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
-            buildConfigField("boolean", "USE_MOCK_API", "true")
+            buildConfigField("boolean", "USE_MOCK_API", "false")
         }
     }
     compileOptions {

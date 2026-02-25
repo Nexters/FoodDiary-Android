@@ -8,6 +8,7 @@ import com.nexters.fooddiary.domain.model.DiaryEntry
 import com.nexters.fooddiary.domain.model.UpdateDiaryParam
 import com.nexters.fooddiary.domain.repository.DiaryRepository
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import javax.inject.Inject
 import javax.inject.Named
@@ -27,7 +28,7 @@ class DiaryRepositoryImpl @Inject constructor(
             testMode = isDebug,
         )
         val diaries = response.diaries.filter { diary ->
-            diary.diaryDate == requestedDate
+            diary.diaryDate.toLocalDateOrNull() == date
         }
         return DiaryDetail(
             date = date,
@@ -44,7 +45,12 @@ class DiaryRepositoryImpl @Inject constructor(
             testMode = isDebug,
         )
         return response.diaries
-            .groupBy { LocalDate.parse(it.diaryDate) }
+            .mapNotNull { diary ->
+                diary.diaryDate.toLocalDateOrNull()?.let { parsedDate ->
+                    parsedDate to diary
+                }
+            }
+            .groupBy({ it.first }, { it.second })
             .mapValues { (_, list) -> diaryMapper.toDomainDiaryEntries(list).first() }
     }
 
@@ -59,9 +65,9 @@ class DiaryRepositoryImpl @Inject constructor(
         )
 
         return response.mapNotNull { (date, summary) ->
-            runCatching { LocalDate.parse(date) }
-                .getOrNull()
-                ?.let { parsedDate -> parsedDate to summary.photos.map { it.url } }
+            date.toLocalDateOrNull()?.let { parsedDate ->
+                parsedDate to summary.photos.map { it.url }
+            }
         }.toMap()
     }
 
@@ -97,4 +103,11 @@ class DiaryRepositoryImpl @Inject constructor(
     override suspend fun deleteDiary(diaryId: Int) {
         diaryApi.deleteDiary(diaryId)
     }
+}
+
+private fun String.toLocalDateOrNull(): LocalDate? {
+    return runCatching { LocalDate.parse(this) }
+        .getOrElse {
+            runCatching { LocalDateTime.parse(this).toLocalDate() }.getOrNull()
+        }
 }

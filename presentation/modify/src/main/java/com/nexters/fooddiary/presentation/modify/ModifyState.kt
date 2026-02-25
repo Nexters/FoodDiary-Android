@@ -8,6 +8,7 @@ sealed interface ModifyError {
 
 data class ModifyState(
     val diaryId: String = "",
+    val isInitialSynced: Boolean = false,
     val selectedCategory: String = "",
     val categories: Set<String> = setOf(),
     val addressSearchQuery: String = "",
