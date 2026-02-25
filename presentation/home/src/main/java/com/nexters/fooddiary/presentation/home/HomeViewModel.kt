@@ -50,6 +50,8 @@ class HomeViewModel @AssistedInject constructor(
     private val _events = MutableSharedFlow<HomeEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<HomeEvent> = _events.asSharedFlow()
     private var loadSummaryJob: Job? = null
+    private var hasLoadedMonthData = false
+    private var hasLoadedWeekCount = false
 
     private val initialSelectedDate: LocalDate = initialState.selectedDate
 
@@ -61,6 +63,12 @@ class HomeViewModel @AssistedInject constructor(
     fun loadInitialData() {
         loadPhotosForMonth(YearMonth.from(initialSelectedDate))
         if (PermissionUtil.hasMediaPermission(context)) {
+        if (!hasLoadedMonthData) {
+            hasLoadedMonthData = true
+            loadDiaryForMonth(YearMonth.from(initialSelectedDate))
+        }
+        if (!hasLoadedWeekCount && PermissionUtil.hasMediaPermission(context)) {
+            hasLoadedWeekCount = true
             scheduleWeekCountLoadAfterYield()
         }
     }
@@ -105,10 +113,6 @@ class HomeViewModel @AssistedInject constructor(
         withState { state ->
             _events.tryEmit(HomeEvent.NavigateToDetail(state.selectedDate))
         }
-    }
-
-    fun onToggleCalendarView() {
-        setState { copy(isMonthlyCalendarView = !isMonthlyCalendarView) }
     }
 
     private fun loadSummaryForSelectedWeek() {
