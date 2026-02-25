@@ -61,11 +61,9 @@ class HomeViewModel @AssistedInject constructor(
 
     /** 첫 화면 그린 뒤 호출. 캘린더 summary 즉시, 이번 주 개수(ML)는 yield 후 요청. */
     fun loadInitialData() {
-        loadPhotosForMonth(YearMonth.from(initialSelectedDate))
-        if (PermissionUtil.hasMediaPermission(context)) {
         if (!hasLoadedMonthData) {
             hasLoadedMonthData = true
-            loadDiaryForMonth(YearMonth.from(initialSelectedDate))
+            loadPhotosForMonth(YearMonth.from(initialSelectedDate))
         }
         if (!hasLoadedWeekCount && PermissionUtil.hasMediaPermission(context)) {
             hasLoadedWeekCount = true
