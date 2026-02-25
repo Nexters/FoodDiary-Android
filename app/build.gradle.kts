@@ -159,6 +159,7 @@ dependencies {
     implementation(projects.presentation.webview)
     implementation(projects.presentation.splash)
     implementation(projects.presentation.detail)
+    implementation(projects.presentation.modify)
     implementation(projects.presentation.onboarding)
     implementation(projects.presentation.search)
     implementation(projects.presentation.insight)

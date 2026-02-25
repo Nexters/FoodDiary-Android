@@ -30,6 +30,7 @@ sealed interface DetailEvent {
     data class ShareMapLink(val place: String, val mapLink: String) : DetailEvent
     data object ShareLinkEmpty : DetailEvent
     data object NavigateToImagePicker : DetailEvent
+    data class NavigateToModify(val diaryId: String) : DetailEvent
 }
 
 class DetailViewModel @AssistedInject constructor(
@@ -100,7 +101,16 @@ class DetailViewModel @AssistedInject constructor(
     }
 
     fun onEditClick(slot: MealSlot, date: LocalDate) {
-        // TODO: 수정 화면으로 이동
+        withState { state ->
+            val meals = state.mealsByDate[date] ?: return@withState
+            val selectedMeal = when (slot) {
+                MealSlot.BREAKFAST -> meals.breakfast
+                MealSlot.LUNCH -> meals.lunch
+                MealSlot.DINNER -> meals.dinner
+            }
+            val diaryId = selectedMeal.diaryId?.takeIf { it.isNotBlank() } ?: return@withState
+            _events.tryEmit(DetailEvent.NavigateToModify(diaryId))
+        }
     }
 
     fun onDeleteClick() {

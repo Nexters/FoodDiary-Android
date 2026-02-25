@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -47,15 +48,12 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.ui.R.drawable
 import com.nexters.fooddiary.core.ui.alert.DialogData
 import com.nexters.fooddiary.core.ui.alert.SnackBarData
-import com.nexters.fooddiary.core.ui.component.CommonChips
-import com.nexters.fooddiary.core.ui.component.CommonCircleButton
 import com.nexters.fooddiary.core.ui.component.DetailScreenHeader
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.Gray050
 import com.nexters.fooddiary.core.ui.theme.Gray200
 import com.nexters.fooddiary.core.ui.theme.Gray400
 import com.nexters.fooddiary.core.ui.theme.Gray600
-import com.nexters.fooddiary.core.ui.theme.Sd700
 import com.nexters.fooddiary.core.ui.theme.Sd800
 import com.nexters.fooddiary.core.ui.theme.Sd900
 import com.nexters.fooddiary.core.ui.theme.SdBase
@@ -64,7 +62,7 @@ import com.nexters.fooddiary.core.ui.theme.White
 private const val PLACEHOLDER_IMAGE_URL = "https://picsum.photos/200/300"
 
 private val SectionTitleColor = Gray050
-private val ChipInactiveBg = Sd700
+private val ChipInactiveBg = Sd800
 private val InputBg = Sd900
 private val ChipShape = RoundedCornerShape(999.dp)
 private val InputShape = RoundedCornerShape(10.dp)
@@ -251,7 +249,7 @@ private fun SelectBox(
         modifier = Modifier
             .size(104.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(Sd700),
+            .background(Sd800),
     ) {
         AsyncImage(
             model = imageUrl,
@@ -266,7 +264,7 @@ private fun SelectBox(
                 }
                 .align(Alignment.TopEnd)
                 .padding(top = 8.dp, end = 8.dp),
-            painter = painterResource(drawable.ic_close),
+            painter = painterResource(drawable.ic_circle_close),
             contentDescription = "Close",
         )
     }
@@ -287,7 +285,7 @@ private fun AddressSection(
             placeholder = searchPlaceholder,
             trailingIcon = @Composable {
                 Icon(
-                    painter = painterResource(drawable.ic_search),
+                    imageVector = Icons.Default.Search,
                     contentDescription = null,
                     tint = White,
                 )
@@ -380,7 +378,7 @@ private fun TagChipItem(
             color = Gray400,
         )
         Image(
-            painter = painterResource(drawable.ic_close),
+            painter = painterResource(drawable.ic_circle_close),
             contentDescription = deleteContentDesc,
             modifier = Modifier
                 .size(18.dp)

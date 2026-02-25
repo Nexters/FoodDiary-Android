@@ -89,9 +89,9 @@ private const val GapAfterDailyHeaderKey = "gap_after_daily_header"
 internal fun DetailScreen(
     initialDateString: String = LocalDate.now().toString(),
     viewModel: DetailViewModel = mavericksViewModel(),
-    onNavigateToModify: (String) -> Unit = {},
     onNavigateBack: () -> Unit = {},
     onNavigateToImagePicker: (LocalDate) -> Unit = {},
+    onNavigateToModify: (String) -> Unit = {},
     onShowToast: (String) -> Unit = {},
 ) {
     val state by viewModel.collectAsState()
@@ -127,7 +127,9 @@ internal fun DetailScreen(
                 DetailEvent.NavigateToImagePicker -> {
                     onNavigateToImagePicker(state.selectedDate)
                 }
-                is DetailEvent.NavigateToModify -> onNavigateToModify(event.diaryId)
+                is DetailEvent.NavigateToModify -> {
+                    onNavigateToModify(event.diaryId)
+                }
             }
         }
     }
@@ -155,7 +157,7 @@ private fun DetailContent(
     onNextDay: () -> Unit = {},
     onDeleteClick: () -> Unit = {},
     onAddPhoto: (MealSlot, LocalDate) -> Unit = { _, _ -> },
-    onEditClick: (String) -> Unit = { _ -> },
+    onEditClick: (MealSlot, LocalDate) -> Unit = { _, _ -> },
     onCopyClick: (String) -> Unit = {},
     onShareClick: (String, String) -> Unit = { _, _ -> }, // (place, mapLink)
 ) {
@@ -308,7 +310,7 @@ private fun DetailContent(
                         meal = meal,
                         mealLabel = meal.slot.toLabel(),
                         onAddPhoto = { onAddPhoto(meal.slot, meal.date) },
-                        onEditClick = { meal.diaryId?.let(onEditClick) },
+                        onEditClick = { onEditClick(meal.slot, meal.date) },
                         onCopyClick = { onCopyClick(meal.mapLink) },
                         onShareClick = { onShareClick(meal.place, meal.mapLink) },
                     )

@@ -55,12 +55,12 @@ import com.nexters.fooddiary.presentation.onboarding.navigation.onboardingScreen
 import com.nexters.fooddiary.presentation.mypage.navigation.MyPageRoute
 import com.nexters.fooddiary.presentation.mypage.navigation.WebViewPage
 import com.nexters.fooddiary.presentation.mypage.navigation.myPageScreen
+import com.nexters.fooddiary.presentation.modify.navigation.ModifyRoute
+import com.nexters.fooddiary.presentation.modify.navigation.modifyScreen
 import com.nexters.fooddiary.presentation.webview.navigation.WebViewRoute
 import com.nexters.fooddiary.presentation.webview.navigation.webViewScreen
 import com.nexters.fooddiary.presentation.splash.navigation.SplashRoute
 import com.nexters.fooddiary.presentation.splash.navigation.splashScreen
-import com.nexters.fooddiary.presentation.modify.navigation.ModifyRoute
-import com.nexters.fooddiary.presentation.modify.navigation.modifyScreen
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 
@@ -297,17 +297,18 @@ fun FoodDiaryNavHost(
                     onShowToast = onShowToast,
                 )
 
+                modifyScreen(
+                    onBack = { navController.popBackStack() },
+                    onShowDialog = { dialog -> onShowDialog(dialog) },
+                    onShowSnackBar = onShowSnackBar,
+                )
+
                 imageScreen(
                     onClose = {
                         if (!navController.popBackStack()) {
                             onFinish()
                         }
                     }
-                )
-                modifyScreen(
-                    onBack = { navController.popBackStack() },
-                    onShowDialog = onShowDialog,
-                    onShowSnackBar = onShowSnackBar,
                 )
 
                 myPageScreen(

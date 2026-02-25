@@ -47,5 +47,5 @@ interface DiaryApi {
     @DELETE("/diaries/{diary_id}")
     suspend fun deleteDiary(
         @Path("diary_id") diaryId: Int,
-    ): Unit
+    )
 }
