@@ -304,8 +304,8 @@ fun FoodDiaryNavHost(
                 myPageScreen(
                     navigateToWebView = { page ->
                         val url = when (page) {
-                            WebViewPage.TermsOfService -> stringResource(R.string.webview_url_terms_of_service)
-                            WebViewPage.PrivacyPolicy -> stringResource(R.string.webview_url_privacy_policy)
+                            WebViewPage.TermsOfService -> context.getString(R.string.webview_url_terms_of_service)
+                            WebViewPage.PrivacyPolicy -> context.getString(R.string.webview_url_privacy_policy)
                         }
                         navController.navigate(WebViewRoute(url = url))
                     },
