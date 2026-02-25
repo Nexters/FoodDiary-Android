@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
@@ -24,7 +26,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.LazyListLayoutInfo
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -52,15 +53,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.RoundRect
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -69,6 +71,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import com.kizitonwose.calendar.compose.CalendarState
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.core.CalendarDay
@@ -86,6 +89,7 @@ import com.nexters.fooddiary.core.ui.theme.PrimBase
 import com.nexters.fooddiary.core.ui.theme.Sd800
 import com.nexters.fooddiary.core.ui.theme.Sd900
 import com.nexters.fooddiary.core.ui.theme.White
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.flow.filter
@@ -100,6 +104,22 @@ import kotlin.coroutines.resume
 
 private val MonthDayCellCornerShape = RoundedCornerShape(4.dp)
 
+private fun onDayClicked(
+    day: CalendarDay,
+    coroutineScope: CoroutineScope,
+    calendarState: CalendarState,
+    onDateSelected: (LocalDate) -> Unit,
+) {
+    if (day.position != DayPosition.MonthDate) {
+        coroutineScope.launch {
+            calendarState.animateScrollToMonth(YearMonth.from(day.date))
+            onDateSelected(day.date)
+        }
+    } else {
+        onDateSelected(day.date)
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MonthlyCalendar(
@@ -111,9 +131,12 @@ fun MonthlyCalendar(
     colors: CalendarColors = calendarColors(),
     onMonthChanged: (YearMonth) -> Unit = {},
     photoCountByDate: Map<LocalDate, Int> = emptyMap(),
+    photoUrlsByDate: Map<LocalDate, List<String>> = emptyMap(),
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val visibleMonth = remember { derivedStateOf { calendarState.firstVisibleMonth.yearMonth } }
+    val visibleMonth = remember(calendarState) {
+        derivedStateOf { calendarState.firstVisibleMonth.yearMonth }
+    }
     var monthBottomSheetVisible by remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -176,22 +199,13 @@ fun MonthlyCalendar(
                 state = calendarState,
                 dayContent = { day ->
                     key(day.date) {
-                        val photoCount = photoCountByDate[day.date] ?: 0
                         MonthDayCell(
                             day = day,
                             isSelected = day.date == selectedDate,
-                            photoCount = photoCount,
+                            photoCount = photoCountByDate[day.date] ?: 0,
+                            photoUrls = photoUrlsByDate[day.date].orEmpty().take(2),
                             colors = colors,
-                            onClick = {
-                                if (day.position != DayPosition.MonthDate) {
-                                    coroutineScope.launch {
-                                        calendarState.animateScrollToMonth(YearMonth.from(day.date))
-                                        onDateSelected(day.date)
-                                    }
-                                } else {
-                                    onDateSelected(day.date)
-                                }
-                            }
+                            onClick = { onDayClicked(day, coroutineScope, calendarState, onDateSelected) },
                         )
                     }
                 }
@@ -522,6 +536,7 @@ private fun MonthDayCell(
     day: CalendarDay,
     isSelected: Boolean,
     photoCount: Int,
+    photoUrls: List<String>,
     colors: CalendarColors,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -539,44 +554,123 @@ private fun MonthDayCell(
             isSelected = isSelected,
             showDot = photoCount > 0,
             content = {
-                val dashedBorderColor = if (isSelected) Gray900 else colors.weekdayText
-                Box(
-                    modifier = Modifier
-                        .padding(top = 6.dp)
-                        .requiredSize(32.dp)
-                        .clip(MonthDayCellCornerShape)
-                        .background(
-                            if (isSelected) colors.selectedInnerBox else Transparent
-                        )
-                        .drawBehind {
-                            val path = Path().apply {
-                                addRoundRect(
-                                    RoundRect(
-                                        left = 0f,
-                                        top = 0f,
-                                        right = size.width,
-                                        bottom = size.height,
-                                        cornerRadius = CornerRadius(4.dp.toPx()),
-                                    )
-                                )
-                            }
-                            drawPath(
-                                path = path,
-                                color = dashedBorderColor,
-                                style = Stroke(
-                                    width = 2.dp.toPx(),
-                                    pathEffect = PathEffect.dashPathEffect(
-                                        intervals = floatArrayOf(3.dp.toPx(), 2.dp.toPx()),
-                                        phase = 0f,
-                                    ),
-                                ),
-                            )
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    // 이미지 추가 예정
-                }
+                MonthDayThumbnailBox(
+                    isSelected = isSelected,
+                    colors = colors,
+                    photoUrls = photoUrls,
+                )
             }
+        )
+    }
+}
+
+@Composable
+private fun MonthDayThumbnailBox(
+    isSelected: Boolean,
+    colors: CalendarColors,
+    photoUrls: List<String>,
+) {
+    val dashedBorderColor = if (isSelected) Gray900 else colors.weekdayText
+    val showDashedBorder = photoUrls.isEmpty()
+    Box(
+        modifier = Modifier
+            .padding(top = 6.dp)
+            .requiredSize(32.dp)
+            .clip(MonthDayCellCornerShape)
+            .background(if (isSelected) colors.selectedInnerBox else Transparent)
+            .then(
+                if (showDashedBorder) Modifier.monthDayDashedBorder(dashedBorderColor)
+                else Modifier
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        MonthDayThumbnails(photoUrls = photoUrls)
+    }
+}
+
+private fun Modifier.monthDayDashedBorder(color: androidx.compose.ui.graphics.Color) = drawBehind {
+    val path = Path().apply {
+        addRoundRect(
+            RoundRect(
+                left = 0f,
+                top = 0f,
+                right = size.width,
+                bottom = size.height,
+                cornerRadius = CornerRadius(4.dp.toPx()),
+            )
+        )
+    }
+    drawPath(
+        path = path,
+        color = color,
+        style = Stroke(
+            width = 2.dp.toPx(),
+            pathEffect = PathEffect.dashPathEffect(
+                intervals = floatArrayOf(3.dp.toPx(), 2.dp.toPx()),
+                phase = 0f,
+            ),
+        ),
+    )
+}
+
+@Composable
+private fun MonthDayThumbnails(photoUrls: List<String>) {
+    when (photoUrls.size) {
+        1 -> SingleDayThumbnail(url = photoUrls[0])
+        2 -> TwoDayThumbnails(urls = photoUrls)
+        else -> { /* pic=0: 빈 셀 */ }
+    }
+}
+
+@Composable
+private fun SingleDayThumbnail(url: String) {
+    MonthDayThumbnailImage(
+        url = url,
+        modifier = Modifier
+            .size(20.dp, 26.dp)
+            .clip(MonthDayCellCornerShape)
+            .border(1.dp, White, MonthDayCellCornerShape),
+    )
+}
+
+@Composable
+private fun MonthDayThumbnailImage(
+    url: String,
+    modifier: Modifier = Modifier,
+) {
+        AsyncImage(
+            model = url,
+            contentDescription = null,
+            modifier = modifier,
+            contentScale = ContentScale.Crop,
+        )
+}
+
+private val MonthDayThumbnailSize = 20.dp
+
+@Composable
+private fun TwoDayThumbnails(urls: List<String>) {
+    if (urls.size < 2) return
+    Box(modifier = Modifier.fillMaxSize()) {
+        MonthDayThumbnailImage(
+            url = urls[0],
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .offset(x = (2).dp, y = (3).dp)
+                .rotate(-10f)
+                .size(20.dp, 26.dp)
+                .clip(MonthDayCellCornerShape)
+                .border(1.dp, White, MonthDayCellCornerShape),
+        )
+        MonthDayThumbnailImage(
+            url = urls[1],
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .offset(x = (-1).dp, y = (-1).dp)
+                .rotate(4f)
+                .size(20.dp, 26.dp)
+                .clip(MonthDayCellCornerShape)
+                .border(1.dp, White, MonthDayCellCornerShape),
         )
     }
 }
@@ -598,18 +692,24 @@ private fun MonthSelectBottomSheetPreview() {
 @Preview
 @Composable
 private fun MonthlyCalendarPreview() {
+    val today = LocalDate.now()
     val state = rememberMonthCalendarState(
-        selectedDate = LocalDate.now(),
+        selectedDate = today,
         firstDayOfWeek = DayOfWeek.SUNDAY
     )
+    val placeholderUri = "https://picsum.photos/200/300" // Example URL for a 200x300 image
 
     MonthlyCalendar(
         calendarState = state,
-        selectedDate = LocalDate.now(),
+        selectedDate = today,
         onDateSelected = {},
         photoCountByDate = mapOf(
-            LocalDate.now() to 3,
-            LocalDate.now().minusDays(2) to 1
-        )
+            today to 3,
+            today.minusDays(2) to 1
+        ),
+        photoUrlsByDate = mapOf(
+            today to listOf(placeholderUri, placeholderUri),
+            today.minusDays(2) to listOf(placeholderUri),
+        ),
     )
 }

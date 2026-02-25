@@ -12,4 +12,5 @@ interface DiaryRepository {
         startDate: LocalDate,
         endDate: LocalDate,
     ): Map<LocalDate, List<String>>
+    suspend fun getDiariesSummary(startDate: LocalDate, endDate: LocalDate): Map<LocalDate, List<String>>
 }

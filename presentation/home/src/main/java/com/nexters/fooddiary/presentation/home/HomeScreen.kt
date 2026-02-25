@@ -51,6 +51,8 @@ internal fun HomeScreen(
     viewModel: HomeViewModel = mavericksViewModel(),
 ) {
     val state by viewModel.collectAsState()
+    val photoCountByDate by viewModel.photoCountByDate.collectAsState(initial = emptyMap())
+    val photoUrlsByDate by viewModel.photoUrlsByDate.collectAsState(initial = emptyMap())
     val currentOnNavigateToDetail by rememberUpdatedState(onNavigateToDetail)
 
     LaunchedEffect(viewModel) {
@@ -77,6 +79,8 @@ internal fun HomeScreen(
             selectedDate = state.selectedDate,
         ),
         onShowSnackBar = onShowSnackBar,
+        photoCountByDate = photoCountByDate,
+        photoUrlsByDate = photoUrlsByDate,
         modifier = modifier,
     )
 }
@@ -97,6 +101,8 @@ private fun HomeScreen(
     onNavigateToMyPage: () -> Unit = {},
     selectedDateImageUrls: List<String> = emptyList(),
     onShowSnackBar: (SnackBarData) -> Unit = {},
+    photoCountByDate: Map<LocalDate, Int> = emptyMap(),
+    photoUrlsByDate: Map<LocalDate, List<String>> = emptyMap(),
 ) {
     val screenHazeState = rememberHazeState()
     val scrollState = rememberScrollState()
@@ -131,7 +137,9 @@ private fun HomeScreen(
                         calendarState = monthlyCalendarState,
                         selectedDate = state.selectedDate,
                         onDateSelected = onDateSelected,
-                        photoCountByDate = state.diaryCountByDate,
+                        onMonthChanged = onMonthChanged,
+                        photoCountByDate = photoCountByDate,
+                        photoUrlsByDate = photoUrlsByDate,
                     )
                 } else {
                     WeeklyCalendar(
