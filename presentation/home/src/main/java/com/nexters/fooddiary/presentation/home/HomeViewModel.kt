@@ -6,7 +6,6 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import com.nexters.fooddiary.core.common.permission.PermissionUtil
-import com.nexters.fooddiary.domain.usecase.GetDiaryByMonthUseCase
 import com.nexters.fooddiary.domain.usecase.GetDiarySummaryUseCase
 import com.nexters.fooddiary.domain.usecase.GetDiariesSummaryUseCase
 import com.nexters.fooddiary.domain.usecase.GetFoodPhotoCountByWeekUseCase
@@ -38,7 +37,6 @@ sealed interface HomeEvent {
 class HomeViewModel @AssistedInject constructor(
     @ApplicationContext private val context: Context,
     @Assisted initialState: HomeScreenState,
-    private val getDiaryByMonthUseCase: GetDiaryByMonthUseCase,
     private val getDiarySummaryUseCase: GetDiarySummaryUseCase,
     private val getFoodPhotoCountByWeekUseCase: GetFoodPhotoCountByWeekUseCase,
     private val getDiariesSummaryUseCase: GetDiariesSummaryUseCase,
