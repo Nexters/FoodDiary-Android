@@ -61,6 +61,7 @@ import com.nexters.fooddiary.presentation.splash.navigation.SplashRoute
 import com.nexters.fooddiary.presentation.splash.navigation.splashScreen
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun FoodDiaryNavHost(
@@ -85,8 +86,9 @@ fun FoodDiaryNavHost(
     var hasNavigatedFromSplash by remember { mutableStateOf(false) }
     val bottomBarHazeState = rememberHazeState()
     var showHomeCoachmarkOnEntry by remember { mutableStateOf(false) }
+
     val startDestination = if (initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_IMAGE) {
-        ImagePickerRoute
+        ImagePickerRoute(dateString = null)
     } else {
         SplashRoute
     }
@@ -104,6 +106,10 @@ fun FoodDiaryNavHost(
             navController.navigate(DetailRoute(dateString = detailDate))
             pendingDetailDate = null
         }
+    }
+
+    fun navigateToImagePicker(dateString: String?) {
+        navController.navigate(ImagePickerRoute(dateString = dateString))
     }
 
     LaunchedEffect(initialDeepLink) {
@@ -263,7 +269,9 @@ fun FoodDiaryNavHost(
                 )
 
                 homeScreen(
-                    onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
+                    onNavigateToImagePicker = { date ->
+                        navController.navigate(ImagePickerRoute(dateString = date.toString()))
+                    },
                     onNavigateToDetail = { date ->
                         navController.navigate(DetailRoute(dateString = date.toString()))
                     },
@@ -279,7 +287,9 @@ fun FoodDiaryNavHost(
 
                 detailScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToImagePicker = { navController.navigate(ImagePickerRoute) },
+                    onNavigateToImagePicker = { dateString ->
+                        navController.navigate(ImagePickerRoute(dateString = dateString.toString()))
+                    },
                     onShowToast = onShowToast,
                 )
 
@@ -294,8 +304,8 @@ fun FoodDiaryNavHost(
                 myPageScreen(
                     navigateToWebView = { page ->
                         val url = when (page) {
-                            WebViewPage.TermsOfService -> context.getString(R.string.webview_url_terms_of_service)
-                            WebViewPage.PrivacyPolicy -> context.getString(R.string.webview_url_privacy_policy)
+                            WebViewPage.TermsOfService -> stringResource(R.string.webview_url_terms_of_service)
+                            WebViewPage.PrivacyPolicy -> stringResource(R.string.webview_url_privacy_policy)
                         }
                         navController.navigate(WebViewRoute(url = url))
                     },

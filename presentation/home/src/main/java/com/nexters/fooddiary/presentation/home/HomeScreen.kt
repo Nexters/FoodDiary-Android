@@ -43,7 +43,7 @@ import java.time.LocalDate
 @Composable
 internal fun HomeScreen(
     modifier: Modifier = Modifier,
-    onNavigateToImagePicker: () -> Unit = {},
+    onNavigateToImagePicker: (LocalDate) -> Unit = {},
     onNavigateToDetail: (LocalDate) -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
     isMonthlyCalendarView: Boolean = false,
@@ -97,7 +97,8 @@ private fun HomeScreen(
     onDateSelected: (LocalDate) -> Unit = {},
     isMonthlyCalendarView: Boolean = false,
     onCardStackClick: () -> Unit = {},
-    onNavigateToImagePicker: () -> Unit = {},
+    onToggleCalendarView: () -> Unit = {},
+    onNavigateToImagePicker: (LocalDate) -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
     selectedDateImageUrls: List<String> = emptyList(),
     onShowSnackBar: (SnackBarData) -> Unit = {},
@@ -166,8 +167,8 @@ private fun HomeScreen(
                         AddPhotoBox(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .weight(1f),
-                            onAddPhoto = onNavigateToImagePicker,
+                                .aspectRatio(1f),
+                            onAddPhoto = { onNavigateToImagePicker(state.selectedDate) },
                         )
                     }
                 }
