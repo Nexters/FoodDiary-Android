@@ -1,0 +1,70 @@
+package com.nexters.fooddiary.presentation.insight
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.Image
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.nexters.fooddiary.core.ui.component.Header
+import com.nexters.fooddiary.core.ui.theme.AppTypography
+import com.nexters.fooddiary.core.ui.theme.Gray050
+import com.nexters.fooddiary.core.ui.theme.SdBase
+
+@Composable
+fun InsightScreen(
+    modifier: Modifier = Modifier,
+    onNavigateToMyPage: () -> Unit = {},
+    onBack: () -> Unit = {},
+) {
+    BackHandler(onBack = onBack)
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(SdBase)
+    ) {
+        Header(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(start = 20.dp, top = 38.dp, end = 20.dp),
+            onClickMyPage = onNavigateToMyPage,
+        )
+        Column(
+            modifier = Modifier.align(Alignment.Center),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.img_ready_insight),
+                contentDescription = null,
+            )
+            Spacer(modifier = Modifier.height(42.dp))
+            Text(
+                text = stringResource(id = R.string.insight_ready_message),
+                style = AppTypography.p15,
+                color = Gray050,
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun InsightScreenPreview() {
+    InsightScreen()
+}

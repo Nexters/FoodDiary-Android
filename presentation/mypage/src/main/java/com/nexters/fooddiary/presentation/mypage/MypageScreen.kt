@@ -41,6 +41,8 @@ import com.airbnb.mvrx.compose.collectAsStateWithLifecycle
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.common.ContextExtension.getAppVersionName
 import com.nexters.fooddiary.core.common.R.string
+import com.nexters.fooddiary.core.ui.alert.AppDialogData
+import com.nexters.fooddiary.core.ui.alert.DeleteAccountDialogData
 import com.nexters.fooddiary.core.ui.alert.DialogData
 import com.nexters.fooddiary.core.ui.R.drawable
 import com.nexters.fooddiary.core.ui.component.DetailScreenHeader
@@ -55,7 +57,7 @@ import com.nexters.fooddiary.presentation.mypage.navigation.WebViewPage
 fun MyPageScreen(
     modifier: Modifier = Modifier,
     navigateToWebView: (WebViewPage) -> Unit = {},
-    onShowDialog: (DialogData) -> Unit = {},
+    onShowDialog: (AppDialogData) -> Unit = {},
     onShowToast: (String) -> Unit = {},
     onSignOut: () -> Unit = {},
     onRequireReAuthForDeleteAccount: () -> Unit = {},
@@ -131,7 +133,7 @@ internal fun MyPageScreen(
     modifier: Modifier = Modifier,
     state: MyPageState,
     navigateToWebView: (WebViewPage) -> Unit = {},
-    onShowDialog: (DialogData) -> Unit = {},
+    onShowDialog: (AppDialogData) -> Unit = {},
     onShowToast: (String) -> Unit = {},
     onSignOut: () -> Unit = {},
     onDeleteAccount: () -> Unit = {},
@@ -145,6 +147,16 @@ internal fun MyPageScreen(
     val logoutDialogMessage = stringResource(string.my_page_logout_dialog_message)
     val logoutDialogCancel = stringResource(string.my_page_logout_dialog_cancel)
     val logoutText = stringResource(string.my_page_menu_logout)
+    val deleteDialogTitle = stringResource(string.my_page_delete_dialog_title)
+    val deleteDialogMessage = stringResource(string.my_page_delete_dialog_message)
+    val deleteDialogWarningDataDeleted =
+        stringResource(string.my_page_delete_dialog_warning_data_deleted)
+    val deleteDialogWarningRejoinBlocked =
+        stringResource(string.my_page_delete_dialog_warning_rejoin_blocked)
+    val deleteDialogAgreementGuide = stringResource(string.my_page_delete_dialog_agreement_guide)
+    val deleteDialogAgreement = stringResource(string.my_page_delete_dialog_agreement)
+    val deleteDialogConfirm = stringResource(string.my_page_delete_dialog_confirm)
+    val deleteDialogCancel = stringResource(string.my_page_delete_dialog_cancel)
 
     Column(
         modifier = Modifier
@@ -211,8 +223,28 @@ internal fun MyPageScreen(
         Text(
             modifier = Modifier
                 .clickable {
-                    onShowToast(deleteInProgressMessage.ifEmpty { context.getString(string.my_page_delete_in_progress) })
-//                    onDeleteAccount()
+                    onShowDialog(
+                        DeleteAccountDialogData(
+                            title = deleteDialogTitle,
+                            message = deleteDialogMessage,
+                            warningItems = listOf(
+                                deleteDialogWarningDataDeleted,
+                                deleteDialogWarningRejoinBlocked
+                            ),
+                            agreementGuideText = deleteDialogAgreementGuide,
+                            agreementText = deleteDialogAgreement,
+                            confirmText = deleteDialogConfirm,
+                            dismissText = deleteDialogCancel,
+                            onConfirm = {
+                                onShowToast(
+                                    deleteInProgressMessage.ifEmpty {
+                                        context.getString(string.my_page_delete_in_progress)
+                                    }
+                                )
+                                onDeleteAccount()
+                            }
+                        )
+                    )
                 }
                 .padding(28.dp)
                 .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)),
