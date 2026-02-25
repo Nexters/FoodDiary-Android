@@ -57,6 +57,9 @@ enum class DiaryMealTypeResponse {
 
     @SerialName("dinner")
     DINNER,
+
+    @SerialName("snack")
+    SNACK,
 }
 
 @Serializable
@@ -66,4 +69,7 @@ enum class DiaryAnalysisStatusResponse {
 
     @SerialName("processing")
     PROCESSING,
+
+    @SerialName("failed")
+    FAILED,
 }

@@ -12,4 +12,5 @@
     <string name="detail_meal_breakfast">아침</string>
     <string name="detail_meal_lunch">점심</string>
     <string name="detail_meal_dinner">저녁</string>
+    <string name="detail_meal_snack">간식</string>
 </resources>

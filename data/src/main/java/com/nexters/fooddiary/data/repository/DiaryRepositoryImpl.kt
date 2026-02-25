@@ -6,6 +6,7 @@ import com.nexters.fooddiary.domain.model.DiaryDetail
 import com.nexters.fooddiary.domain.model.DiaryEntry
 import com.nexters.fooddiary.domain.repository.DiaryRepository
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 import javax.inject.Inject
 import javax.inject.Named
@@ -24,7 +25,7 @@ class DiaryRepositoryImpl @Inject constructor(
             testMode = isDebug,
         )
         val diaries = response.diaries.filter { diary ->
-            diary.diaryDate == requestedDate
+            LocalDateTime.parse(diary.diaryDate).toLocalDate() == date
         }
 
         return DiaryDetail(
@@ -42,7 +43,7 @@ class DiaryRepositoryImpl @Inject constructor(
             testMode = isDebug,
         )
         return response.diaries
-            .groupBy { LocalDate.parse(it.diaryDate) }
+            .groupBy { diary -> LocalDateTime.parse(diary.diaryDate).toLocalDate() }
             .mapValues { (_, list) -> diaryMapper.toDomainDiaryEntries(list).first() }
     }
 

@@ -27,6 +27,10 @@ internal fun DiaryDetail.toDailyMeals(date: LocalDate): DailyMeals {
             date,
             diaryByMeal[MealType.DINNER]
         ),
+        snack = MealSlot.SNACK.toMealUiModel(
+            date,
+            diaryByMeal[MealType.SNACK]
+        ),
     )
 }
 
@@ -62,10 +66,10 @@ internal fun MealSlot.toMealUiModel(
         keywords = prefixedTags,
         mapLink = diary.mapLink.orEmpty(),
         imageUrls = imageUrls,
-        status = if (diary.analysisStatus == AnalysisStatus.PROCESSING) {
-            MealCardStatus.PENDING
-        } else {
-            MealCardStatus.READY
+        status = when (diary.analysisStatus) {
+            AnalysisStatus.PROCESSING -> MealCardStatus.PENDING
+            AnalysisStatus.FAILED,
+            AnalysisStatus.DONE -> MealCardStatus.READY
         },
     )
 }

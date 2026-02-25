@@ -534,6 +534,7 @@ private fun MealSlot.toLabel(): String {
         MealSlot.BREAKFAST -> stringResource(id = R.string.detail_meal_breakfast)
         MealSlot.LUNCH -> stringResource(id = R.string.detail_meal_lunch)
         MealSlot.DINNER -> stringResource(id = R.string.detail_meal_dinner)
+        MealSlot.SNACK -> stringResource(id = R.string.detail_meal_snack)
     }
 }
 
@@ -596,6 +597,18 @@ private fun DetailScreenPreview() {
                 mapLink = "",
                 imageUrls = emptyList(),
                 status = MealCardStatus.EMPTY,
+            ),
+            snack = MealCardUiModel(
+                id = "4",
+                date = today,
+                slot = MealSlot.SNACK,
+                time = "16:00",
+                location = "서초구",
+                place = "카페",
+                keywords = listOf("#커피"),
+                mapLink = "",
+                imageUrls = listOf("https://picsum.photos/301"),
+                status = MealCardStatus.READY,
             ),
         ),
     )

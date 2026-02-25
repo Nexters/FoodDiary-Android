@@ -6,6 +6,7 @@ enum class MealSlot {
     BREAKFAST,
     LUNCH,
     DINNER,
+    SNACK,
 }
 
 enum class MealCardStatus {
@@ -52,9 +53,10 @@ data class DailyMeals(
     val breakfast: MealCardUiModel,
     val lunch: MealCardUiModel,
     val dinner: MealCardUiModel,
+    val snack: MealCardUiModel,
 ) {
     fun asOrderedList(): List<MealCardUiModel> {
-        return listOf(breakfast, lunch, dinner)
+        return listOf(breakfast, lunch, dinner, snack)
     }
 
     companion object {
@@ -63,6 +65,7 @@ data class DailyMeals(
                 breakfast = MealCardUiModel.empty(date, MealSlot.BREAKFAST),
                 lunch = MealCardUiModel.empty(date, MealSlot.LUNCH),
                 dinner = MealCardUiModel.empty(date, MealSlot.DINNER),
+                snack = MealCardUiModel.empty(date, MealSlot.SNACK),
             )
         }
     }

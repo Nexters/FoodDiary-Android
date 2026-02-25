@@ -44,6 +44,7 @@ class DiaryMapper @Inject constructor() {
             DiaryMealTypeResponse.BREAKFAST -> MealType.BREAKFAST
             DiaryMealTypeResponse.LUNCH -> MealType.LUNCH
             DiaryMealTypeResponse.DINNER -> MealType.DINNER
+            DiaryMealTypeResponse.SNACK -> MealType.SNACK
         }
     }
 
@@ -51,6 +52,7 @@ class DiaryMapper @Inject constructor() {
         return when (this) {
             DiaryAnalysisStatusResponse.DONE -> AnalysisStatus.DONE
             DiaryAnalysisStatusResponse.PROCESSING -> AnalysisStatus.PROCESSING
+            DiaryAnalysisStatusResponse.FAILED -> AnalysisStatus.FAILED
         }
     }
 }
