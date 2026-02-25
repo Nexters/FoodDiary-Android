@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class DetailState(
     val selectedDate: LocalDate = LocalDate.now(),
@@ -70,7 +71,9 @@ class DetailViewModel @AssistedInject constructor(
     }
 
     fun syncSelectedDate(dateString: String) {
-        syncSelectedDate(LocalDate.parse(dateString))
+        dateString.toLocalDateOrNull()?.let { parsedDate ->
+            syncSelectedDate(parsedDate)
+        }
     }
 
     fun syncSelectedDate(date: LocalDate) {
@@ -142,4 +145,11 @@ class DetailViewModel @AssistedInject constructor(
     companion object : MavericksViewModelFactory<DetailViewModel, DetailState> by hiltMavericksViewModelFactory() {
         private const val MAX_MEALS_CACHE_SIZE = 14
     }
+}
+
+private fun String.toLocalDateOrNull(): LocalDate? {
+    return runCatching { LocalDate.parse(this) }
+        .getOrElse {
+            runCatching { LocalDateTime.parse(this).toLocalDate() }.getOrNull()
+        }
 }

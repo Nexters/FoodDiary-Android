@@ -1,8 +1,12 @@
 {
   "2026-02-22": {
     "photos": [
-      "https://picsum.photos/seed/20260222a/400/300",
-      "https://picsum.photos/seed/20260222b/400/300"
+      {
+        "url": "https://picsum.photos/seed/20260222a/400/300"
+      },
+      {
+        "url": "https://picsum.photos/seed/20260222b/400/300"
+      }
     ]
   }
 }

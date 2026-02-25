@@ -47,10 +47,11 @@ class DiaryMapper @Inject constructor() {
         }
     }
 
-    private fun DiaryAnalysisStatusResponse.toDomain(): AnalysisStatus {
+    private fun DiaryAnalysisStatusResponse?.toDomain(): AnalysisStatus {
         return when (this) {
             DiaryAnalysisStatusResponse.DONE -> AnalysisStatus.DONE
             DiaryAnalysisStatusResponse.PROCESSING -> AnalysisStatus.PROCESSING
+            null -> AnalysisStatus.PROCESSING
         }
     }
 }

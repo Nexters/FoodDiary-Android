@@ -18,7 +18,7 @@ data class DiarySummaryResponse(
     @SerialName("time_type")
     val timeType: DiaryMealTypeResponse,
     @SerialName("analysis_status")
-    val analysisStatus: DiaryAnalysisStatusResponse,
+    val analysisStatus: DiaryAnalysisStatusResponse? = null,
     @SerialName("restaurant_name")
     val restaurantName: String?,
     @SerialName("restaurant_url")
