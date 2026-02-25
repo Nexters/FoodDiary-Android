@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
@@ -28,6 +30,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -97,6 +100,11 @@ fun FoodImageCard(
                     imageUrl = imageUrl,
                     timeText = state.timeText,
                     locationText = state.locationText,
+                )
+            }
+            is FoodImageState.Processing -> {
+                FoodImageProcessing(
+                    imageUrl = imageUrl,
                 )
             }
             is FoodImageState.Pending -> {
@@ -180,6 +188,50 @@ private fun FoodImage(
 }
 
 @Composable
+private fun FoodImageProcessing(
+    imageUrl: String,
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = "Food image processing",
+            contentScale = ContentScale.Crop,
+            placeholder = previewPlaceholder(),
+            error = previewPlaceholder(),
+            modifier = Modifier
+                .fillMaxSize()
+                .blur(20.dp),
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.35f))
+        )
+
+        Column(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Image(
+                painter = painterResource(drawable.ic_img_analysis_processing),
+                contentDescription = null,
+                modifier = Modifier.size(155.dp, 158.dp),
+            )
+            Text(
+                text = stringResource(string.detail_food_analyze),
+                style = AppTypography.p12,
+                color = White,
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+}
+
+@Composable
 private fun FoodImagePending(
     modifier: Modifier,
 ) {
@@ -229,6 +281,20 @@ private fun FoodImageReadyPreview() {
             timeText = "07:00",
             locationText = "마포구",
         ),
+        modifier = Modifier.size(300.dp)
+    )
+}
+
+@Preview(
+    name = "Processing State",
+    showBackground = true,
+    backgroundColor = 0xFF191821
+)
+@Composable
+private fun FoodImageProcessingPreview() {
+    FoodImageCard(
+        imageUrl = "https://picsum.photos/300",
+        state = FoodImageState.Processing,
         modifier = Modifier.size(300.dp)
     )
 }

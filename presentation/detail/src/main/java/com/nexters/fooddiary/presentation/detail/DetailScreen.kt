@@ -398,30 +398,47 @@ private fun MealSection(
                 )
             }
         } else {
-            // Pending 또는 Ready 상태: HorizontalPager로 FoodImageCard 표시
-            val pagerState = rememberPagerState(pageCount = { meal.imageUrls.size })
-            val state = when {
-                meal.isPending -> FoodImageState.Pending
-                meal.isReady -> FoodImageState.Ready(
+            if (meal.isPending) {
+                val firstImageUrl = meal.imageUrls.firstOrNull()
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                ) {
+                    FoodImageCard(
+                        imageUrl = firstImageUrl.orEmpty(),
+                        state = if (firstImageUrl.isNullOrEmpty()) {
+                            FoodImageState.Pending
+                        } else {
+                            FoodImageState.Processing
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f)
+                    )
+                }
+            } else {
+                // Ready 상태: HorizontalPager로 FoodImageCard 표시
+                val pagerState = rememberPagerState(pageCount = { meal.imageUrls.size })
+                val state = FoodImageState.Ready(
                     timeText = meal.time,
                     locationText = meal.location,
                 )
-                else -> FoodImageState.Pending
-            }
 
-            HorizontalPager(
-                state = pagerState,
-                contentPadding = PaddingValues(horizontal = 20.dp),
-                pageSpacing = 12.dp,
-                modifier = Modifier.fillMaxWidth()
-            ) { page ->
-                FoodImageCard(
-                    imageUrl = meal.imageUrls[page],
-                    state = state,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                )
+                HorizontalPager(
+                    state = pagerState,
+                    contentPadding = PaddingValues(horizontal = 20.dp),
+                    pageSpacing = 12.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) { page ->
+                    FoodImageCard(
+                        imageUrl = meal.imageUrls[page],
+                        state = state,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f)
+                    )
+                }
             }
         }
 
@@ -459,8 +476,8 @@ private fun MealInfoSection(
         ) {
             // 장소명
             Text(
-                text = place,
-                style = AppTypography.hd16,
+                text = place.ifBlank { stringResource(id = R.string.detail_place_empty_guide) },
+                style = AppTypography.p12,
                 fontWeight = FontWeight.Bold,
                 color = White,
             )
