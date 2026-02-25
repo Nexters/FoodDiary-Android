@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class DiarySummaryByDateItemResponse(
     @SerialName("photos")
-    val photos: List<String>,
+    val photos: List<DiarySummaryPhoto> = emptyList(),
 )

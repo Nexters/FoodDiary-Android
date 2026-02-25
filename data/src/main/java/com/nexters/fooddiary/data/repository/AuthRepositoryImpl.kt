@@ -102,7 +102,10 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun signOut() {
         firebaseAuth.signOut()
-        kotlin.runCatching { tokenStore.deleteToken() }
+        kotlin.runCatching {
+            tokenStore.deleteToken()
+            tokenStore.deleteNickname()
+        }
         val webClientId = context.getWebClientId()
         if (webClientId.isNotEmpty()) {
             kotlin.runCatching { googleSignInIntentProvider.signOut(context, webClientId) }
@@ -128,6 +131,10 @@ class AuthRepositoryImpl @Inject constructor(
                 )
             }
 
+            kotlin.runCatching {
+                tokenStore.deleteToken()
+                tokenStore.deleteNickname()
+            }
             // 회원 탈퇴 시 서버 계정 삭제 API도 함께 호출한다.
             kotlin.runCatching { authApi.deleteMe() }
             kotlin.runCatching { firebaseAuth.signOut() }

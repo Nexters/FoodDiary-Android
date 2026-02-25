@@ -14,13 +14,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.airbnb.mvrx.compose.collectAsState
+import com.airbnb.mvrx.compose.collectAsState as collectMavericksState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.common.R.string
 import com.nexters.fooddiary.core.ui.alert.SnackBarData
@@ -39,18 +40,21 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.flow.collectLatest
 import java.time.LocalDate
+import java.time.YearMonth
 
 @Composable
 internal fun HomeScreen(
     modifier: Modifier = Modifier,
-    onNavigateToImagePicker: () -> Unit = {},
+    onNavigateToImagePicker: (LocalDate) -> Unit = {},
     onNavigateToDetail: (LocalDate) -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
     isMonthlyCalendarView: Boolean = false,
     onShowSnackBar: (SnackBarData) -> Unit = {},
     viewModel: HomeViewModel = mavericksViewModel(),
 ) {
-    val state by viewModel.collectAsState()
+    val state by viewModel.collectMavericksState()
+    val photoCountByDate by viewModel.photoCountByDate.collectAsState()
+    val photoUrlsByDate by viewModel.photoUrlsByDate.collectAsState()
     val currentOnNavigateToDetail by rememberUpdatedState(onNavigateToDetail)
 
     LaunchedEffect(viewModel) {
@@ -77,6 +81,9 @@ internal fun HomeScreen(
             selectedDate = state.selectedDate,
         ),
         onShowSnackBar = onShowSnackBar,
+        onMonthChanged = viewModel::loadPhotosForMonth,
+        photoCountByDate = photoCountByDate,
+        photoUrlsByDate = photoUrlsByDate,
         modifier = modifier,
     )
 }
@@ -93,10 +100,14 @@ private fun HomeScreen(
     onDateSelected: (LocalDate) -> Unit = {},
     isMonthlyCalendarView: Boolean = false,
     onCardStackClick: () -> Unit = {},
-    onNavigateToImagePicker: () -> Unit = {},
+    onToggleCalendarView: () -> Unit = {},
+    onNavigateToImagePicker: (LocalDate) -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
     selectedDateImageUrls: List<String> = emptyList(),
     onShowSnackBar: (SnackBarData) -> Unit = {},
+    onMonthChanged: (YearMonth) -> Unit = {},
+    photoCountByDate: Map<LocalDate, Int> = emptyMap(),
+    photoUrlsByDate: Map<LocalDate, List<String>> = emptyMap(),
 ) {
     val screenHazeState = rememberHazeState()
     val scrollState = rememberScrollState()
@@ -131,7 +142,9 @@ private fun HomeScreen(
                         calendarState = monthlyCalendarState,
                         selectedDate = state.selectedDate,
                         onDateSelected = onDateSelected,
-                        photoCountByDate = state.diaryCountByDate,
+                        onMonthChanged = onMonthChanged,
+                        photoCountByDate = photoCountByDate,
+                        photoUrlsByDate = photoUrlsByDate,
                     )
                 } else {
                     WeeklyCalendar(
@@ -158,8 +171,8 @@ private fun HomeScreen(
                         AddPhotoBox(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .weight(1f),
-                            onAddPhoto = onNavigateToImagePicker,
+                                .aspectRatio(1f),
+                            onAddPhoto = { onNavigateToImagePicker(state.selectedDate) },
                         )
                     }
                 }

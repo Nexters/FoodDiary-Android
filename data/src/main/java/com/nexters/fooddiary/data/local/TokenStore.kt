@@ -25,21 +25,26 @@ class TokenStore @Inject constructor(
     private val encryptionKeyManager: EncryptionKeyManager
 ) {
     private val dataStore: DataStore<Preferences> = context.tokenDataStore
-    
+
     private val TOKEN_KEY = stringPreferencesKey("encrypted_auth_token")
+    private val NICKNAME_KEY = stringPreferencesKey("user_nickname")
 
     private var cachedToken: String? = null
+    private var cachedNickname: String? = null
 
     fun getCachedToken(): String? = cachedToken
 
+    fun getCachedNickname(): String? = cachedNickname
+
     suspend fun initializeCache() {
         cachedToken = getToken()
+        cachedNickname = getNickname()
     }
 
     suspend fun saveToken(token: String) {
         val encryptionKey = encryptionKeyManager.getOrCreateKey()
         val encryptedToken = AesEncryption.encrypt(token, encryptionKey)
-        
+
         dataStore.edit { preferences ->
             preferences[TOKEN_KEY] = encryptedToken
         }
@@ -47,11 +52,25 @@ class TokenStore @Inject constructor(
         cachedToken = token
     }
 
+    suspend fun saveNickname(nickname: String) {
+        dataStore.edit { preferences ->
+            preferences[NICKNAME_KEY] = nickname
+        }
+
+        cachedNickname = nickname
+    }
+
     suspend fun getToken(): String? = runCatching {
         dataStore.data.first()[TOKEN_KEY]?.let { encryptedToken ->
             val encryptionKey = encryptionKeyManager.getOrCreateKey()
             AesEncryption.decrypt(encryptedToken, encryptionKey)
         }
+    }.getOrNull()
+
+    suspend fun getNickname(): String? = runCatching {
+        val nickname = dataStore.data.first()[NICKNAME_KEY]
+        cachedNickname = nickname
+        nickname
     }.getOrNull()
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -75,6 +94,14 @@ class TokenStore @Inject constructor(
         cachedToken = null
     }
 
-    suspend fun hasToken(): Boolean = 
+    suspend fun deleteNickname() {
+        dataStore.edit { preferences ->
+            preferences.remove(NICKNAME_KEY)
+        }
+
+        cachedNickname = null
+    }
+
+    suspend fun hasToken(): Boolean =
         dataStore.data.first()[TOKEN_KEY] != null
 }

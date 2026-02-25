@@ -21,11 +21,15 @@ object DatabaseModule {
     @Singleton
     fun provideFoodDiaryDatabase(
         @ApplicationContext context: Context
-    ): FoodDiaryDatabase = Room.databaseBuilder(
-        context,
-        FoodDiaryDatabase::class.java,
-        DB_NAME
-    ).build()
+    ): FoodDiaryDatabase {
+        val database = Room.databaseBuilder(
+            context,
+            FoodDiaryDatabase::class.java,
+            DB_NAME
+        ).build()
+        database.openHelper.writableDatabase
+        return database
+    }
 
     @Provides
     @Singleton
