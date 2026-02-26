@@ -107,6 +107,7 @@ class DetailViewModel @AssistedInject constructor(
                 MealSlot.BREAKFAST -> meals.breakfast
                 MealSlot.LUNCH -> meals.lunch
                 MealSlot.DINNER -> meals.dinner
+                MealSlot.SNACK -> meals.snack
             }
             val diaryId = selectedMeal.diaryId?.takeIf { it.isNotBlank() } ?: return@withState
             _events.tryEmit(DetailEvent.NavigateToModify(diaryId))
