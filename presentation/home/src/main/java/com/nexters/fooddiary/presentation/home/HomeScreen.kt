@@ -157,6 +157,7 @@ private fun HomeScreen(
                         FoodImageStackView(
                             imageUrls = selectedDateImageUrls,
                             state = state.selectedDateImageState,
+                            stateByImageUrl = state.selectedDateImageStatesByUrl,
                             onCardClick = onCardStackClick,
                             modifier = Modifier
                                 .fillMaxWidth()

@@ -116,6 +116,7 @@ class HomeViewModel @AssistedInject constructor(
                     timeText = "",
                     locationText = "",
                 ),
+                selectedDateImageStatesByUrl = emptyMap(),
             )
         }
         loadSummaryForSelectedWeek()
@@ -159,20 +160,25 @@ class HomeViewModel @AssistedInject constructor(
     private fun loadSelectedDateImageState(targetDate: LocalDate) {
         loadSelectedDateImageStateJob?.cancel()
         loadSelectedDateImageStateJob = viewModelScope.launch {
-            val selectedDateImageState = runCatching {
-                getDiaryByDateUseCase(targetDate).toHomeFoodImageState()
+            val selectedDateImageStatesByUrl = runCatching {
+                getDiaryByDateUseCase(targetDate).toHomeFoodImageStatesByUrl()
             }.getOrDefault(
-                FoodImageState.Ready(
-                    timeText = "",
-                    locationText = "",
-                )
+                emptyMap()
             )
 
             setState {
                 if (selectedDate != targetDate) {
                     this
                 } else {
-                    copy(selectedDateImageState = selectedDateImageState)
+                    copy(
+                        selectedDateImageState = selectedDateImageStatesByUrl.values
+                            .firstOrNull()
+                            ?: FoodImageState.Ready(
+                                timeText = "",
+                                locationText = "",
+                            ),
+                        selectedDateImageStatesByUrl = selectedDateImageStatesByUrl,
+                    )
                 }
             }
         }
@@ -196,12 +202,14 @@ internal fun shouldLoadWeek(
     loadedWeekStartDate: LocalDate?,
 ): Boolean = loadedWeekStartDate != weekStartOf(selectedDate)
 
-private fun DiaryDetail.toHomeFoodImageState(): FoodImageState.Ready {
-    val firstDiary = diaries.firstOrNull { it.photos.isNotEmpty() } ?: diaries.firstOrNull()
-    return FoodImageState.Ready(
-        timeText = firstDiary?.createdAt.toHomeTimeText(),
-        locationText = firstDiary?.location.orEmpty(),
-    )
+private fun DiaryDetail.toHomeFoodImageStatesByUrl(): Map<String, FoodImageState> {
+    return diaries.flatMap { diary ->
+        val state = FoodImageState.Ready(
+            timeText = diary.createdAt.toHomeTimeText(),
+            locationText = diary.location.orEmpty(),
+        )
+        diary.photos.map { photo -> photo.imageUrl to state }
+    }.toMap()
 }
 
 private fun String?.toHomeTimeText(): String {
