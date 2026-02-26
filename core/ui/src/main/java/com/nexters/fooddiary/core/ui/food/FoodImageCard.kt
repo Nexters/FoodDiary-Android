@@ -103,7 +103,7 @@ fun FoodImageCard(
                 )
             }
             is FoodImageState.Processing -> {
-                FoodImageProcessing(
+                FoodImageProcessingCard(
                     imageUrl = imageUrl,
                 )
             }
@@ -192,7 +192,7 @@ private fun FoodImage(
 }
 
 @Composable
-private fun FoodImageProcessing(
+private fun FoodImageProcessingCard(
     imageUrl: String,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
