@@ -45,6 +45,7 @@ class DiaryMapper @Inject constructor() {
             "breakfast" -> MealType.BREAKFAST
             "lunch" -> MealType.LUNCH
             "dinner" -> MealType.DINNER
+            "snack" -> MealType.SNACK
             else -> null
         }
     }

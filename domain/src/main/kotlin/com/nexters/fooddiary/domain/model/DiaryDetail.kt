@@ -33,6 +33,7 @@ enum class MealType {
     BREAKFAST,
     LUNCH,
     DINNER,
+    SNACK,
 }
 
 enum class AnalysisStatus {
