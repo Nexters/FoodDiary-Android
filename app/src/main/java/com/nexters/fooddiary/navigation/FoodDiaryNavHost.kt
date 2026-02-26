@@ -56,7 +56,11 @@ import com.nexters.fooddiary.presentation.mypage.navigation.MyPageRoute
 import com.nexters.fooddiary.presentation.mypage.navigation.WebViewPage
 import com.nexters.fooddiary.presentation.mypage.navigation.myPageScreen
 import com.nexters.fooddiary.presentation.modify.navigation.ModifyRoute
+import com.nexters.fooddiary.presentation.modify.navigation.MODIFY_SEARCH_RESULT_NAME
+import com.nexters.fooddiary.presentation.modify.navigation.MODIFY_SEARCH_RESULT_ROAD_ADDRESS
+import com.nexters.fooddiary.presentation.modify.navigation.MODIFY_SEARCH_RESULT_URL
 import com.nexters.fooddiary.presentation.modify.navigation.modifyScreen
+import com.nexters.fooddiary.presentation.search.navigation.SearchRoute
 import com.nexters.fooddiary.presentation.search.navigation.searchScreen
 import com.nexters.fooddiary.presentation.webview.navigation.WebViewRoute
 import com.nexters.fooddiary.presentation.webview.navigation.webViewScreen
@@ -300,6 +304,11 @@ fun FoodDiaryNavHost(
 
                 modifyScreen(
                     onBack = { navController.popBackStack() },
+                    onNavigateToSearch = { query ->
+                        navController.navigate(
+                            SearchRoute(keyword = query.takeIf { it.isNotBlank() })
+                        )
+                    },
                     onShowDialog = { dialog -> onShowDialog(dialog) },
                     onShowSnackBar = onShowSnackBar,
                 )
@@ -318,7 +327,19 @@ fun FoodDiaryNavHost(
                             onFinish()
                         }
                     },
-                    onSelectRestaurant = {
+                    onSelectRestaurant = { restaurant ->
+                        navController.previousBackStackEntry?.savedStateHandle?.set(
+                            MODIFY_SEARCH_RESULT_NAME,
+                            restaurant.name,
+                        )
+                        navController.previousBackStackEntry?.savedStateHandle?.set(
+                            MODIFY_SEARCH_RESULT_ROAD_ADDRESS,
+                            restaurant.roadAddress,
+                        )
+                        navController.previousBackStackEntry?.savedStateHandle?.set(
+                            MODIFY_SEARCH_RESULT_URL,
+                            restaurant.url,
+                        )
                         navController.popBackStack()
                     }
                 )

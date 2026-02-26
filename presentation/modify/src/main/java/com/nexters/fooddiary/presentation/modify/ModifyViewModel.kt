@@ -36,7 +36,36 @@ class ModifyViewModel @AssistedInject constructor(
     }
 
     fun updateAddressSearch(query: String) {
-        setState { copy(addressSearchQuery = query) }
+        setState {
+            copy(
+                addressSearchQuery = query,
+                isAddressManuallyUpdated = true,
+            )
+        }
+    }
+
+    fun applySearchResult(
+        name: String,
+        roadAddress: String,
+        url: String,
+    ) {
+        val normalizedName = name.trim()
+        val normalizedRoadAddress = roadAddress.trim()
+        val normalizedUrl = url.trim()
+        val normalizedAddressLines = normalizedName
+            .takeIf { it.isNotBlank() }
+            ?.let(::listOf)
+            ?: emptyList()
+        setState {
+            copy(
+                addressSearchQuery = normalizedRoadAddress.ifBlank { normalizedName },
+                addressLines = normalizedAddressLines,
+                roadAddress = normalizedRoadAddress,
+                restaurantName = normalizedName,
+                restaurantUrl = normalizedUrl,
+                isAddressManuallyUpdated = true,
+            )
+        }
     }
 
     fun removeTag(tag: String) {
@@ -61,7 +90,11 @@ class ModifyViewModel @AssistedInject constructor(
 
         setState {
             if (this.diaryId == diaryId) this
-            else copy(diaryId = diaryId, isInitialSynced = false)
+            else copy(
+                diaryId = diaryId,
+                isInitialSynced = false,
+                isAddressManuallyUpdated = false,
+            )
         }
         diaryId.toIntOrNull()?.let { id ->
             suspend {
@@ -76,16 +109,22 @@ class ModifyViewModel @AssistedInject constructor(
                             ?.takeIf { it.isNotBlank() }
                             ?.let { categories + it }
                             ?: categories
+                        val normalizedAddressLines = entry.restaurantName
+                            ?.takeIf { it.isNotBlank() }
+                            ?.let(::listOf)
+                            ?: emptyList()
+                        val shouldKeepAddress = isAddressManuallyUpdated
                         copy(
                             photoIds = entry.photos.map { it.photoId.toInt() },
                             photoUrls = entry.photos.map { it.imageUrl },
                             coverPhotoId = entry.coverPhotoId.toInt(),
                             selectedCategory = entryCategory?.takeIf { it.isNotBlank() } ?: selectedCategory,
                             categories = mergedCategories,
-                            addressLines = entry.location?.let { listOf(it) } ?: emptyList(),
-                            roadAddress = entry.location ?: "",
-                            restaurantName = entry.restaurantName ?: "",
-                            restaurantUrl = entry.mapLink ?: "",
+                            addressLines = if (shouldKeepAddress) addressLines else normalizedAddressLines,
+                            addressSearchQuery = if (shouldKeepAddress) addressSearchQuery else (entry.location ?: ""),
+                            roadAddress = if (shouldKeepAddress) roadAddress else (entry.location ?: ""),
+                            restaurantName = if (shouldKeepAddress) restaurantName else (entry.restaurantName ?: ""),
+                            restaurantUrl = if (shouldKeepAddress) restaurantUrl else (entry.mapLink ?: ""),
                             note = entry.note ?: "",
                             tags = entry.tags.ifEmpty { tags },
                             isInitialSynced = true,

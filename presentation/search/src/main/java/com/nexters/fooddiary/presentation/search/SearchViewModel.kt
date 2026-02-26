@@ -66,6 +66,24 @@ class SearchViewModel @AssistedInject constructor(
         )
     }
 
+    fun searchByKeywordImmediately(
+        diaryId: Long?,
+        keyword: String,
+    ) {
+        setState {
+            copy(
+                keyword = keyword,
+                errorMessage = null,
+                loadMoreErrorMessage = null,
+            )
+        }
+        scheduleSearch(
+            diaryId = diaryId,
+            keyword = keyword,
+            immediate = true,
+        )
+    }
+
     fun loadNextPage() = requestNextPage(allowOnError = false)
 
     fun retryLoadMore() = requestNextPage(allowOnError = true)

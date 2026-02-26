@@ -10,6 +10,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class SearchRoute(
     val diaryId: Long? = null,
+    val keyword: String? = null,
 )
 
 fun NavGraphBuilder.searchScreen(
@@ -20,6 +21,7 @@ fun NavGraphBuilder.searchScreen(
         val route = backStackEntry.toRoute<SearchRoute>()
         SearchScreen(
             diaryId = route.diaryId,
+            initialKeyword = route.keyword,
             onClose = onClose,
             onSelectRestaurant = onSelectRestaurant,
         )

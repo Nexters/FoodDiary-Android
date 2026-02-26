@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
@@ -58,6 +59,7 @@ import com.nexters.fooddiary.core.ui.theme.Sd800
 import com.nexters.fooddiary.core.ui.theme.Sd900
 import com.nexters.fooddiary.core.ui.theme.SdBase
 import com.nexters.fooddiary.core.ui.theme.White
+import com.nexters.fooddiary.presentation.modify.navigation.ModifySearchResult
 
 private const val PLACEHOLDER_IMAGE_URL = "https://picsum.photos/200/300"
 
@@ -71,6 +73,9 @@ private val InputShape = RoundedCornerShape(10.dp)
 fun ModifyScreen(
     diaryId: String,
     onBack: () -> Unit,
+    onNavigateToSearch: (String) -> Unit = {},
+    searchResult: ModifySearchResult? = null,
+    onSearchResultConsumed: () -> Unit = {},
     onShowDialog: (DialogData) -> Unit = {},
     onShowSnackBar: (SnackBarData) -> Unit = {},
     viewModel: ModifyViewModel = mavericksViewModel(),
@@ -101,6 +106,16 @@ fun ModifyScreen(
             }
         }
     }
+    LaunchedEffect(searchResult) {
+        searchResult?.let { result ->
+            viewModel.applySearchResult(
+                name = result.name,
+                roadAddress = result.roadAddress,
+                url = result.url,
+            )
+            onSearchResultConsumed()
+        }
+    }
     var showTagDialog by remember { mutableStateOf(false) }
     if (showTagDialog) {
         TagInputDialog(
@@ -115,7 +130,7 @@ fun ModifyScreen(
         onBack = onBack,
         state = state,
         onSelect = viewModel::selectCategory,
-        onSearchChange = viewModel::updateAddressSearch,
+        onSearchClick = onNavigateToSearch,
         onRemoveTag = viewModel::removeTag,
         onRemovePhotoAt = viewModel::removePhotoAt,
         onDelete = viewModel::onDelete,
@@ -129,7 +144,7 @@ private fun ModifyScreenContent(
     modifier: Modifier = Modifier,
     onBack: () -> Unit = {},
     onSelect: (String) -> Unit = {},
-    onSearchChange: (String) -> Unit = {},
+    onSearchClick: (String) -> Unit = {},
     onRemoveTag: (String) -> Unit = {},
     onRemovePhotoAt: (Int) -> Unit = {},
     onAddChip: () -> Unit = {},
@@ -202,7 +217,7 @@ private fun ModifyScreenContent(
                 ) {
                     AddressSection(
                         searchQuery = state.addressSearchQuery,
-                        onSearchChange = onSearchChange,
+                        onSearchClick = onSearchClick,
                         addressLines = state.addressLines,
                     )
                 }
@@ -273,24 +288,32 @@ private fun SelectBox(
 @Composable
 private fun AddressSection(
     searchQuery: String,
-    onSearchChange: (String) -> Unit,
+    onSearchClick: (String) -> Unit,
     addressLines: List<String>,
 ) {
     val searchPlaceholder = stringResource(R.string.modify_address_search_placeholder)
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        StyledInputField(
-            value = searchQuery,
-            onValueChange = onSearchChange,
-            modifier = Modifier.defaultMinSize(minHeight = 42.dp),
-            placeholder = searchPlaceholder,
-            trailingIcon = @Composable {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = null,
-                    tint = White,
-                )
-            },
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onSearchClick(searchQuery) }
+        ) {
+            StyledInputField(
+                value = searchQuery,
+                onValueChange = {},
+                modifier = Modifier.defaultMinSize(minHeight = 42.dp),
+                placeholder = searchPlaceholder,
+                enabled = false,
+                readOnly = true,
+                trailingIcon = @Composable {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = null,
+                        tint = White,
+                    )
+                },
+            )
+        }
         addressLines.forEachIndexed { index, line ->
             key(index) {
                 AddressLineItem(line = line)

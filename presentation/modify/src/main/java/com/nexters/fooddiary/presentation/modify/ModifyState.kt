@@ -11,6 +11,7 @@ data class ModifyState(
     val isInitialSynced: Boolean = false,
     val selectedCategory: String = "",
     val categories: Set<String> = setOf(),
+    val isAddressManuallyUpdated: Boolean = false,
     val addressSearchQuery: String = "",
     val addressLines: List<String> = emptyList(),
     val roadAddress: String = "",

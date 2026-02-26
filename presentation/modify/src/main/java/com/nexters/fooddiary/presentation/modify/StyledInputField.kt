@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,23 +36,40 @@ internal fun StyledInputField(
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
     singleLine: Boolean = true,
     shape: Shape = DefaultInputShape,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+    onClick: (() -> Unit)? = null,
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier
+            .then(
+                if (onClick == null) {
+                    Modifier
+                } else {
+                    Modifier.clickable(
+                        interactionSource = interactionSource,
+                        indication = LocalIndication.current,
+                        onClick = onClick,
+                    )
+                }
+            )
             .clip(shape)
             .fillMaxWidth(),
         textStyle = AppTypography.p15.copy(color = Gray050),
         singleLine = singleLine,
+        enabled = enabled,
+        readOnly = readOnly,
         decorationBox = { innerTextField ->
             OutlinedTextFieldDefaults.DecorationBox(
                 value = value,
                 innerTextField = innerTextField,
-                enabled = true,
+                enabled = enabled,
                 singleLine = singleLine,
                 visualTransformation = VisualTransformation.None,
-                interactionSource = remember { MutableInteractionSource() },
+                interactionSource = interactionSource,
                 placeholder = @Composable {
                     Text(
                         text = placeholder,
@@ -65,8 +84,11 @@ internal fun StyledInputField(
                     disabledContainerColor = InputBg,
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent,
+                    disabledBorderColor = Color.Transparent,
                     focusedTextColor = Gray050,
                     unfocusedTextColor = Gray050,
+                    disabledTextColor = Gray050,
+                    disabledPlaceholderColor = Gray600,
                     cursorColor = White,
                 ),
                 contentPadding = contentPadding,
