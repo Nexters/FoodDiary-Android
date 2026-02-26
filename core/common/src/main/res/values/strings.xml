@@ -40,7 +40,7 @@
 
     <!-- WebView URLs -->
     <string name="webview_url_terms_of_service">https://google.com</string>
-    <string name="webview_url_privacy_policy">https://naver.com</string>
+    <string name="webview_url_privacy_policy">https://www.notion.so/enebin/311c690fca2b80bc8c89c5f7cc5cb35c</string>
     <!-- Network error -->
     <string name="network_error_http">HTTP %d</string>
     <string name="network_error_timeout">요청 시간이 초과되었습니다.</string>
