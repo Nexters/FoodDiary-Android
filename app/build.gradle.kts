@@ -146,11 +146,17 @@ sentry {
     projectName.set(localProperties.getProperty("sentry.project", ""))
     authToken.set(sentryAuthToken)
     includeSourceContext.set(true)
-    autoUploadProguardMapping.set(sentryAuthToken.isNotBlank())
+    autoUploadProguardMapping.set(false)
     autoInstallation {
         enabled.set(true)
         sentryVersion.set(libs.versions.sentryAndroid.get())
     }
+}
+
+tasks.matching { task ->
+    task.name.startsWith("uploadSentry") || task.name.startsWith("sentryUpload")
+}.configureEach {
+    enabled = false
 }
 
 dependencies {
