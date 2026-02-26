@@ -86,19 +86,6 @@ class AuthViewModel @AssistedInject constructor(
         }
     }
 
-    fun signOut() {
-        viewModelScope.launch {
-            try {
-                setState { copy(isLoading = true) }
-                signOutUseCase()
-                checkAuthenticationStatus()
-                setState { copy(isLoading = false) }
-            } catch (e: Exception) {
-                setState { copy(isLoading = false) }
-            }
-        }
-    }
-
     fun deleteAccount() {
         viewModelScope.launch {
             try {

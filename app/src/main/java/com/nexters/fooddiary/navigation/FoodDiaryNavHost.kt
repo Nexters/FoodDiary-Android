@@ -84,7 +84,6 @@ fun FoodDiaryNavHost(
         onResult = {}
     )
     var authUiState by remember { mutableStateOf<AuthUiState?>(null) }
-    var signOutRequestId by remember { mutableIntStateOf(0) }
     var deleteAccountRequestId by remember { mutableIntStateOf(0) }
     var onboardingCompleteEventId by remember { mutableIntStateOf(0) }
     var pendingDetailDate by remember { mutableStateOf(initialDeepLink.getDetailDateOrNull()) }
@@ -104,6 +103,8 @@ fun FoodDiaryNavHost(
         currentDestination?.hierarchy?.any { it.hasRoute(HomeRoute::class) } == true
     val isInsightRoute =
         currentDestination?.hierarchy?.any { it.hasRoute(InsightRoute::class) } == true
+    val isLoginRoute =
+        currentDestination?.hierarchy?.any { it.hasRoute(LoginRoute::class) } == true
     val shouldShowHomeInsightBottomBar = isHomeRoute || isInsightRoute
     val selectedTab = if (isInsightRoute) HomeInsightTab.INSIGHT else HomeInsightTab.HOME
 
@@ -151,10 +152,7 @@ fun FoodDiaryNavHost(
     LaunchedEffect(authUiState?.isAuthenticated, authUiState?.isFirst) {
         if (!hasNavigatedFromSplash) return@LaunchedEffect
 
-        // 로그아웃/회원탈퇴 완료 시 requestId 리셋
-        if (signOutRequestId > 0 && authUiState?.isAuthenticated == false) {
-            signOutRequestId = 0
-        }
+        // 회원탈퇴 재인증 흐름 완료 시 requestId 리셋
         if (deleteAccountRequestId > 0 && authUiState?.isAuthenticated == false) {
             deleteAccountRequestId = 0
         }
@@ -162,12 +160,14 @@ fun FoodDiaryNavHost(
         authUiState?.isAuthenticated?.let { isAuthenticated ->
             if (!isAuthenticated) {
                 // 로그아웃 → LoginRoute로 이동
-                navController.navigate(LoginRoute) {
-                    popUpTo(0) { inclusive = false }
-                    launchSingleTop = true
+                if (!isLoginRoute) { //이미 LoginRoute일때는 예외 처리
+                    navController.navigate(LoginRoute) {
+                        popUpTo(0) { inclusive = false }
+                        launchSingleTop = true
+                    }
                 }
-            } else if (signOutRequestId == 0 && deleteAccountRequestId == 0) {
-                // 로그인 → isFirst 체크해서 Onboarding 또는 Home으로 이동 (단, 로그아웃/회원탈퇴 중이 아닐 때만)
+            } else if (deleteAccountRequestId == 0) {
+                // 로그인 → isFirst 체크해서 Onboarding 또는 Home으로 이동 (단, 회원탈퇴 재인증 중이 아닐 때만)
                 val destination = if (authUiState?.isFirst == true) {
                     OnboardingRoute
                 } else {
@@ -258,7 +258,6 @@ fun FoodDiaryNavHost(
                     onAuthStateChange = { state ->
                         authUiState = state
                     },
-                    signOutRequestId = { signOutRequestId },
                     deleteAccountRequestId = { deleteAccountRequestId }
                 )
 
@@ -356,9 +355,9 @@ fun FoodDiaryNavHost(
                     onShowToast = onShowToast,
                     onBack = { navController.popBackStack() },
                     onSignOut = {
-                        signOutRequestId++
                         navController.navigate(LoginRoute) {
-                            popUpTo(HomeRoute) { inclusive = false }
+                            popUpTo(0) { inclusive = false }
+                            launchSingleTop = true
                         }
                     },
                     onRequireReAuthForDeleteAccount = {

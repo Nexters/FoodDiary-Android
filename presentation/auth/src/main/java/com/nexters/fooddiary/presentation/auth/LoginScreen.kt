@@ -49,7 +49,6 @@ internal fun LoginScreen(
     modifier: Modifier = Modifier,
     authViewModel: AuthViewModel = mavericksViewModel(),
     onAuthStateChange: (AuthUiState) -> Unit = {},
-    signOutRequestId: Int = 0,
     deleteAccountRequestId: Int = 0,
 ) {
     val context = LocalContext.current
@@ -65,12 +64,6 @@ internal fun LoginScreen(
 
     LaunchedEffect(authUiState) {
         onAuthStateChange(authUiState)
-    }
-
-    LaunchedEffect(signOutRequestId) {
-        if (signOutRequestId > 0) {
-            authViewModel.signOut()
-        }
     }
 
     LaunchedEffect(deleteAccountRequestId) {
