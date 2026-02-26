@@ -91,7 +91,7 @@ class DiaryApiTest : BaseMockServerTest() {
         val firstDay = response["2026-02-22"]
         assertNotNull(firstDay)
         assertEquals(2, firstDay?.photos?.size)
-        assertEquals("https://picsum.photos/seed/20260222a/400/300", firstDay?.photos?.first())
+        assertEquals("https://picsum.photos/seed/20260222a/400/300", firstDay?.photos?.first()?.url)
 
         // Then (Request Verification)
         val recordedRequest = mockWebServer.takeRequest()

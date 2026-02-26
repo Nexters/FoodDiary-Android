@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
@@ -28,6 +30,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -99,6 +102,11 @@ fun FoodImageCard(
                     locationText = state.locationText,
                 )
             }
+            is FoodImageState.Processing -> {
+                FoodImageProcessingCard(
+                    imageUrl = imageUrl,
+                )
+            }
             is FoodImageState.Pending -> {
                 FoodImagePending(
                     modifier = Modifier.fillMaxSize(),
@@ -115,6 +123,8 @@ private fun TagChip(
     textColor: Color,
     modifier: Modifier = Modifier
 ) {
+    if (text.isBlank()) return
+
     Box(
         modifier = modifier
             .defaultMinSize(minHeight = 18.dp)
@@ -158,22 +168,68 @@ private fun FoodImage(
         }
 
         // 상단: 시간 + 위치 태그
-        Row(
+        if (timeText.isNotBlank() || locationText.isNotBlank()) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TagChip(
+                    text = timeText,
+                    backgroundColor = TimeLocationBg,
+                    textColor = White,
+                )
+                TagChip(
+                    text = locationText,
+                    backgroundColor = TimeLocationBg,
+                    textColor = White,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FoodImageProcessingCard(
+    imageUrl: String,
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = "Food image processing",
+            contentScale = ContentScale.Crop,
+            placeholder = previewPlaceholder(),
+            error = previewPlaceholder(),
             modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(10.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxSize()
+                .blur(20.dp),
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.35f))
+        )
+
+        Column(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            TagChip(
-                text = timeText,
-                backgroundColor = TimeLocationBg,
-                textColor = White,
+            Image(
+                painter = painterResource(drawable.ic_img_analysis_processing),
+                contentDescription = null,
+                modifier = Modifier.size(155.dp, 158.dp),
             )
-            TagChip(
-                text = locationText,
-                backgroundColor = TimeLocationBg,
-                textColor = White,
+            Text(
+                text = stringResource(string.detail_food_analyze),
+                style = AppTypography.p12,
+                color = White,
+                textAlign = TextAlign.Center,
             )
         }
     }
@@ -229,6 +285,20 @@ private fun FoodImageReadyPreview() {
             timeText = "07:00",
             locationText = "마포구",
         ),
+        modifier = Modifier.size(300.dp)
+    )
+}
+
+@Preview(
+    name = "Processing State",
+    showBackground = true,
+    backgroundColor = 0xFF191821
+)
+@Composable
+private fun FoodImageProcessingPreview() {
+    FoodImageCard(
+        imageUrl = "https://picsum.photos/300",
+        state = FoodImageState.Processing,
         modifier = Modifier.size(300.dp)
     )
 }

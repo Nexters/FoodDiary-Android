@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -397,30 +398,47 @@ private fun MealSection(
                 )
             }
         } else {
-            // Pending 또는 Ready 상태: HorizontalPager로 FoodImageCard 표시
-            val pagerState = rememberPagerState(pageCount = { meal.imageUrls.size })
-            val state = when {
-                meal.isPending -> FoodImageState.Pending
-                meal.isReady -> FoodImageState.Ready(
+            if (meal.isPending) {
+                val firstImageUrl = meal.imageUrls.firstOrNull()
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                ) {
+                    FoodImageCard(
+                        imageUrl = firstImageUrl.orEmpty(),
+                        state = if (firstImageUrl.isNullOrEmpty()) {
+                            FoodImageState.Pending
+                        } else {
+                            FoodImageState.Processing
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f)
+                    )
+                }
+            } else {
+                // Ready 상태: HorizontalPager로 FoodImageCard 표시
+                val pagerState = rememberPagerState(pageCount = { meal.imageUrls.size })
+                val state = FoodImageState.Ready(
                     timeText = meal.time,
                     locationText = meal.location,
                 )
-                else -> FoodImageState.Pending
-            }
 
-            HorizontalPager(
-                state = pagerState,
-                contentPadding = PaddingValues(horizontal = 20.dp),
-                pageSpacing = 12.dp,
-                modifier = Modifier.fillMaxWidth()
-            ) { page ->
-                FoodImageCard(
-                    imageUrl = meal.imageUrls[page],
-                    state = state,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                )
+                HorizontalPager(
+                    state = pagerState,
+                    contentPadding = PaddingValues(horizontal = 20.dp),
+                    pageSpacing = 12.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) { page ->
+                    FoodImageCard(
+                        imageUrl = meal.imageUrls[page],
+                        state = state,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f)
+                    )
+                }
             }
         }
 
@@ -429,6 +447,7 @@ private fun MealSection(
             MealInfoSection(
                 place = meal.place,
                 keywords = meal.keywords,
+                note = meal.note,
                 onCopyClick = onCopyClick,
                 onShareClick = onShareClick,
             )
@@ -441,6 +460,7 @@ private fun MealSection(
 private fun MealInfoSection(
     place: String,
     keywords: List<String>,
+    note: String,
     onCopyClick: () -> Unit,
     onShareClick: () -> Unit,
 ) {
@@ -456,8 +476,8 @@ private fun MealInfoSection(
         ) {
             // 장소명
             Text(
-                text = place,
-                style = AppTypography.hd16,
+                text = place.ifBlank { stringResource(id = R.string.detail_place_empty_guide) },
+                style = AppTypography.p12,
                 fontWeight = FontWeight.Bold,
                 color = White,
             )
@@ -525,6 +545,42 @@ private fun MealInfoSection(
                 }
             }
         }
+
+        if (note.isNotBlank()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = Color(0xFF1D1C27),
+                        shape = RoundedCornerShape(10.dp),
+                    )
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Icon(
+                        painter = painterResource(CoreUiR.drawable.ic_ai_analysis),
+                        contentDescription = null,
+                        tint = Color.Unspecified,
+                    )
+                    Text(
+                        text = stringResource(id = R.string.detail_ai_summary_title),
+                        color = White,
+                        style = AppTypography.p12,
+                        fontWeight = FontWeight.Medium,
+                    )
+                }
+
+                Text(
+                    text = note,
+                    color = White,
+                    style = AppTypography.p12,
+                )
+            }
+        }
     }
 }
 
@@ -534,6 +590,7 @@ private fun MealSlot.toLabel(): String {
         MealSlot.BREAKFAST -> stringResource(id = R.string.detail_meal_breakfast)
         MealSlot.LUNCH -> stringResource(id = R.string.detail_meal_lunch)
         MealSlot.DINNER -> stringResource(id = R.string.detail_meal_dinner)
+        MealSlot.SNACK -> stringResource(id = R.string.detail_meal_snack)
     }
 }
 
@@ -569,6 +626,7 @@ private fun DetailScreenPreview() {
                 location = "마포구",
                 place = "호진이네",
                 keywords = listOf("#양장피", "#어향동고"),
+                note = "테이블 가득 차려진 한 상 차림의 음식 사진입니다.",
                 mapLink = "https://map.naver.com/p/entry/place/123456",
                 imageUrls = listOf("https://picsum.photos/300"),
                 status = MealCardStatus.READY,
@@ -581,6 +639,7 @@ private fun DetailScreenPreview() {
                 location = "강남구",
                 place = "",
                 keywords = emptyList(),
+                note = "",
                 mapLink = "",
                 imageUrls = listOf("https://picsum.photos/300"),
                 status = MealCardStatus.PENDING,
@@ -593,9 +652,23 @@ private fun DetailScreenPreview() {
                 location = "",
                 place = "",
                 keywords = emptyList(),
+                note = "",
                 mapLink = "",
                 imageUrls = emptyList(),
                 status = MealCardStatus.EMPTY,
+            ),
+            snack = MealCardUiModel(
+                id = "4",
+                date = today,
+                slot = MealSlot.SNACK,
+                time = "16:00",
+                location = "서초구",
+                place = "카페",
+                keywords = listOf("#커피"),
+                note = "간단히 커피와 디저트를 먹었어요.",
+                mapLink = "",
+                imageUrls = listOf("https://picsum.photos/301"),
+                status = MealCardStatus.READY,
             ),
         ),
     )

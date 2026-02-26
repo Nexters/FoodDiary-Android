@@ -58,7 +58,7 @@ object AppTypography {
         fontFamily = PretendardFontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
-        lineHeight = 12.sp,
+        lineHeight = 15.6.sp,
         letterSpacing = 0.sp,
     )
 }
