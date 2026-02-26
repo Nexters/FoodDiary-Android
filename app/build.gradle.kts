@@ -32,6 +32,12 @@ val devStoreFile = localOrEnv(listOf("dev.store.file"), "DEV_KEYSTORE_PATH")
 val devStorePassword = localOrEnv(listOf("dev.store.password"), "DEV_KEYSTORE_PASSWORD")
 val devKeyAlias = localOrEnv(listOf("dev.key.alias"), "DEV_KEY_ALIAS")
 val devKeyPassword = localOrEnv(listOf("dev.key.password"), "DEV_KEY_PASSWORD")
+val hasDevSigningConfig = listOf(
+    devStoreFile,
+    devStorePassword,
+    devKeyAlias,
+    devKeyPassword
+).all { it.isNotBlank() }
 
 val releaseStoreFile = localOrEnv(listOf("store.file"), "RELEASE_STORE_FILE")
 val releaseStorePassword = localOrEnv(listOf("store.password"), "RELEASE_STORE_PASSWORD")
@@ -72,11 +78,13 @@ android {
     }
 
     signingConfigs {
-        create("dev") {
-            storeFile = rootProject.file(devStoreFile)
-            storePassword = devStorePassword
-            keyAlias = devKeyAlias
-            keyPassword = devKeyPassword
+        if (hasDevSigningConfig) {
+            create("dev") {
+                storeFile = rootProject.file(devStoreFile)
+                storePassword = devStorePassword
+                keyAlias = devKeyAlias
+                keyPassword = devKeyPassword
+            }
         }
         if (hasReleaseSigningConfig) {
             create("release") {
