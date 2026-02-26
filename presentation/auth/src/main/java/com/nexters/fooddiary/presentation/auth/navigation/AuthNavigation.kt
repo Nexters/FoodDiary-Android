@@ -11,13 +11,11 @@ object LoginRoute
 
 fun NavGraphBuilder.loginScreen(
     onAuthStateChange: (AuthUiState) -> Unit = {},
-    signOutRequestId: () -> Int = { 0 },
     deleteAccountRequestId: () -> Int = { 0 }
 ) {
     composable<LoginRoute> {
         LoginScreen(
             onAuthStateChange = onAuthStateChange,
-            signOutRequestId = signOutRequestId(),
             deleteAccountRequestId = deleteAccountRequestId()
         )
     }
