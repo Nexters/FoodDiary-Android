@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class DetailState(
     val selectedDate: LocalDate = LocalDate.now(),
@@ -29,6 +30,7 @@ sealed interface DetailEvent {
     data class ShareMapLink(val place: String, val mapLink: String) : DetailEvent
     data object ShareLinkEmpty : DetailEvent
     data object NavigateToImagePicker : DetailEvent
+    data class NavigateToModify(val diaryId: String) : DetailEvent
 }
 
 class DetailViewModel @AssistedInject constructor(
@@ -70,7 +72,9 @@ class DetailViewModel @AssistedInject constructor(
     }
 
     fun syncSelectedDate(dateString: String) {
-        syncSelectedDate(LocalDate.parse(dateString))
+        dateString.toLocalDateOrNull()?.let { parsedDate ->
+            syncSelectedDate(parsedDate)
+        }
     }
 
     fun syncSelectedDate(date: LocalDate) {
@@ -97,7 +101,17 @@ class DetailViewModel @AssistedInject constructor(
     }
 
     fun onEditClick(slot: MealSlot, date: LocalDate) {
-        // TODO: 수정 화면으로 이동
+        withState { state ->
+            val meals = state.mealsByDate[date] ?: return@withState
+            val selectedMeal = when (slot) {
+                MealSlot.BREAKFAST -> meals.breakfast
+                MealSlot.LUNCH -> meals.lunch
+                MealSlot.DINNER -> meals.dinner
+                MealSlot.SNACK -> meals.snack
+            }
+            val diaryId = selectedMeal.diaryId?.takeIf { it.isNotBlank() } ?: return@withState
+            _events.tryEmit(DetailEvent.NavigateToModify(diaryId))
+        }
     }
 
     fun onDeleteClick() {
@@ -142,4 +156,11 @@ class DetailViewModel @AssistedInject constructor(
     companion object : MavericksViewModelFactory<DetailViewModel, DetailState> by hiltMavericksViewModelFactory() {
         private const val MAX_MEALS_CACHE_SIZE = 14
     }
+}
+
+private fun String.toLocalDateOrNull(): LocalDate? {
+    return runCatching { LocalDate.parse(this) }
+        .getOrElse {
+            runCatching { LocalDateTime.parse(this).toLocalDate() }.getOrNull()
+        }
 }

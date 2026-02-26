@@ -59,14 +59,22 @@ import com.nexters.fooddiary.domain.model.RestaurantItem
 @Composable
 internal fun SearchScreen(
     diaryId: Long?,
+    initialKeyword: String?,
     onClose: () -> Unit,
     onSelectRestaurant: (RestaurantItem) -> Unit = {},
     viewModel: SearchViewModel = mavericksViewModel(),
 ) {
     val state by viewModel.collectAsStateWithLifecycle()
 
-    LaunchedEffect(diaryId) {
-        viewModel.loadInitialRecommendations(diaryId)
+    LaunchedEffect(diaryId, initialKeyword) {
+        if (initialKeyword.isNullOrBlank()) {
+            viewModel.loadInitialRecommendations(diaryId)
+        } else {
+            viewModel.searchByKeywordImmediately(
+                diaryId = diaryId,
+                keyword = initialKeyword,
+            )
+        }
     }
 
     SearchScreen(

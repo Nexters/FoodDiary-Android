@@ -25,6 +25,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeParseException
 import javax.inject.Inject
 import com.nexters.fooddiary.core.ui.R as coreR
@@ -142,7 +143,8 @@ class FoodDiaryFirebaseMessagingService : FirebaseMessagingService() {
     private fun formatDiaryDate(rawDate: String): String? {
         if (rawDate.isBlank()) return null
         return try {
-            val date = LocalDate.parse(rawDate)
+            val date = runCatching { LocalDate.parse(rawDate) }
+                .getOrElse { LocalDateTime.parse(rawDate).toLocalDate() }
             "${date.monthValue}월 ${date.dayOfMonth}일"
         } catch (_: DateTimeParseException) {
             rawDate

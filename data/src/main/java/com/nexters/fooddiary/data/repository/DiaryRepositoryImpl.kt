@@ -2,8 +2,10 @@ package com.nexters.fooddiary.data.repository
 
 import com.nexters.fooddiary.data.mapper.DiaryMapper
 import com.nexters.fooddiary.data.remote.diary.DiaryApi
+import com.nexters.fooddiary.data.remote.diary.model.UpdateDiaryRequest
 import com.nexters.fooddiary.domain.model.DiaryDetail
 import com.nexters.fooddiary.domain.model.DiaryEntry
+import com.nexters.fooddiary.domain.model.UpdateDiaryParam
 import com.nexters.fooddiary.domain.repository.DiaryRepository
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -25,7 +27,7 @@ class DiaryRepositoryImpl @Inject constructor(
             testMode = isDebug,
         )
         val diaries = response.diaries.filter { diary ->
-            LocalDateTime.parse(diary.diaryDate).toLocalDate() == date
+            diary.diaryDate.toLocalDateOrNull() == date
         }
 
         return DiaryDetail(
@@ -43,7 +45,12 @@ class DiaryRepositoryImpl @Inject constructor(
             testMode = isDebug,
         )
         return response.diaries
-            .groupBy { diary -> LocalDateTime.parse(diary.diaryDate).toLocalDate() }
+            .mapNotNull { diary ->
+                diary.diaryDate.toLocalDateOrNull()?.let { parsedDate ->
+                    parsedDate to diary
+                }
+            }
+            .groupBy({ it.first }, { it.second })
             .mapValues { (_, list) -> diaryMapper.toDomainDiaryEntries(list).first() }
     }
 
@@ -68,8 +75,37 @@ class DiaryRepositoryImpl @Inject constructor(
         startDate: LocalDate,
         endDate: LocalDate,
     ): Map<LocalDate, List<String>> {
-        // 현재 구현에서는 일/주/월 모두 동일한 summary API를 사용하므로
-        // 내부적으로 재사용한다.
         return getDiarySummary(startDate = startDate, endDate = endDate)
     }
+
+    override suspend fun getDiary(id: Int): DiaryEntry {
+        val response = diaryApi.getDiaryById(id, testMode = false)
+        return diaryMapper.toDomainDiaryEntries(listOf(response)).first()
+    }
+
+    override suspend fun updateDiary(diaryId: Int, param: UpdateDiaryParam): DiaryEntry {
+        val request = UpdateDiaryRequest(
+            category = param.category,
+            restaurantName = param.restaurantName,
+            restaurantUrl = param.restaurantUrl,
+            roadAddress = param.roadAddress,
+            tags = param.tags,
+            note = param.note,
+            coverPhotoId = param.coverPhotoId,
+            photoIds = param.photoIds,
+        )
+        val response = diaryApi.updateDiary(diaryId = diaryId, request = request)
+        return diaryMapper.toDomainDiaryEntries(listOf(response)).first()
+    }
+
+    override suspend fun deleteDiary(diaryId: Int) {
+        diaryApi.deleteDiary(diaryId)
+    }
+}
+
+private fun String.toLocalDateOrNull(): LocalDate? {
+    return runCatching { LocalDate.parse(this) }
+        .getOrElse {
+            runCatching { LocalDateTime.parse(this).toLocalDate() }.getOrNull()
+        }
 }

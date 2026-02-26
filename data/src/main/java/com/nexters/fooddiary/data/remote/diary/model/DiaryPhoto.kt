@@ -9,4 +9,6 @@ data class DiaryPhoto(
     val photoId: Long,
     @SerialName("image_url")
     val imageUrl: String,
+    @SerialName("analysis_status")
+    val analysisStatus: DiaryAnalysisStatusResponse? = null,
 )

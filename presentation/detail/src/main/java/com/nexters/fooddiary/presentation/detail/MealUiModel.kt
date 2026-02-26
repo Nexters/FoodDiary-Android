@@ -27,6 +27,7 @@ data class MealCardUiModel(
     val mapLink: String,
     val imageUrls: List<String>,
     val status: MealCardStatus,
+    val diaryId: String? = null,
 ) {
     val isEmpty: Boolean get() = status == MealCardStatus.EMPTY
     val isPending: Boolean get() = status == MealCardStatus.PENDING

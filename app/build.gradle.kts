@@ -109,7 +109,7 @@ android {
         debug {
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
-            buildConfigField("boolean", "USE_MOCK_API", "true")
+            buildConfigField("boolean", "USE_MOCK_API", "false")
         }
     }
     compileOptions {
@@ -159,6 +159,7 @@ dependencies {
     implementation(projects.presentation.webview)
     implementation(projects.presentation.splash)
     implementation(projects.presentation.detail)
+    implementation(projects.presentation.modify)
     implementation(projects.presentation.onboarding)
     implementation(projects.presentation.search)
     implementation(projects.presentation.insight)

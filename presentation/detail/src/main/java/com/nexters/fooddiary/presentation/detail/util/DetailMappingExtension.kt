@@ -72,5 +72,6 @@ internal fun MealSlot.toMealUiModel(
             AnalysisStatus.FAILED,
             AnalysisStatus.DONE -> MealCardStatus.READY
         },
+        diaryId = diary.diaryId.toString(),
     )
 }

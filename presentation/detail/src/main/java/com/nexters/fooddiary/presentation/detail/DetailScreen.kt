@@ -92,6 +92,7 @@ internal fun DetailScreen(
     viewModel: DetailViewModel = mavericksViewModel(),
     onNavigateBack: () -> Unit = {},
     onNavigateToImagePicker: (LocalDate) -> Unit = {},
+    onNavigateToModify: (String) -> Unit = {},
     onShowToast: (String) -> Unit = {},
 ) {
     val state by viewModel.collectAsState()
@@ -126,6 +127,9 @@ internal fun DetailScreen(
                 }
                 DetailEvent.NavigateToImagePicker -> {
                     onNavigateToImagePicker(state.selectedDate)
+                }
+                is DetailEvent.NavigateToModify -> {
+                    onNavigateToModify(event.diaryId)
                 }
             }
         }
