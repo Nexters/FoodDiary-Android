@@ -61,13 +61,13 @@ class DiaryRepositoryImpl @Inject constructor(
         val response = diaryApi.getDiarySummary(
             startDate = startDate.toString(),
             endDate = endDate.toString(),
-            testMode = false,
+            testMode = isDebug,
         )
 
         return response.mapNotNull { (date, summary) ->
-            date.toLocalDateOrNull()?.let { parsedDate ->
-                parsedDate to summary.photos.map { it.url }
-            }
+            runCatching { LocalDate.parse(date) }
+                .getOrNull()
+                ?.let { parsedDate -> parsedDate to summary.photos.map { it.url } }
         }.toMap()
     }
 
@@ -75,8 +75,6 @@ class DiaryRepositoryImpl @Inject constructor(
         startDate: LocalDate,
         endDate: LocalDate,
     ): Map<LocalDate, List<String>> {
-        // 현재 구현에서는 일/주/월 모두 동일한 summary API를 사용하므로
-        // 내부적으로 재사용한다.
         return getDiarySummary(startDate = startDate, endDate = endDate)
     }
 

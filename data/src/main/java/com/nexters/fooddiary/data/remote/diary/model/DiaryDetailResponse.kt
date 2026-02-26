@@ -16,9 +16,9 @@ data class DiarySummaryResponse(
     @SerialName("diary_date")
     val diaryDate: String,
     @SerialName("time_type")
-    val timeType: String? = null,
+    val timeType: DiaryMealTypeResponse,
     @SerialName("analysis_status")
-    val analysisStatus: String? = null,
+    val analysisStatus: DiaryAnalysisStatusResponse,
     @SerialName("restaurant_name")
     val restaurantName: String?,
     @SerialName("restaurant_url")
@@ -30,7 +30,7 @@ data class DiarySummaryResponse(
     @SerialName("road_address")
     val roadAddress: String? = null,
     @SerialName("tags")
-    val tags: List<String> = emptyList(),
+    val tags: List<String>,
     @SerialName("cover_photo_url")
     val coverPhotoUrl: String?,
     @SerialName("user_id")
@@ -42,10 +42,25 @@ data class DiarySummaryResponse(
     @SerialName("updated_at")
     val updatedAt: String,
     @SerialName("photo_count")
-    val photoCount: Int = 0,
+    val photoCount: Int,
     @SerialName("photos")
-    val photos: List<DiaryPhoto> = emptyList(),
+    val photos: List<DiaryPhoto>,
 )
+
+@Serializable
+enum class DiaryMealTypeResponse {
+    @SerialName("breakfast")
+    BREAKFAST,
+
+    @SerialName("lunch")
+    LUNCH,
+
+    @SerialName("dinner")
+    DINNER,
+
+    @SerialName("snack")
+    SNACK,
+}
 
 @Serializable
 enum class DiaryAnalysisStatusResponse {
@@ -54,4 +69,7 @@ enum class DiaryAnalysisStatusResponse {
 
     @SerialName("processing")
     PROCESSING,
+
+    @SerialName("failed")
+    FAILED,
 }

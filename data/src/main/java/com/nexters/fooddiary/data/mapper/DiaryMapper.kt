@@ -1,5 +1,7 @@
 package com.nexters.fooddiary.data.mapper
 
+import com.nexters.fooddiary.data.remote.diary.model.DiaryAnalysisStatusResponse
+import com.nexters.fooddiary.data.remote.diary.model.DiaryMealTypeResponse
 import com.nexters.fooddiary.data.remote.diary.model.DiaryPhoto
 import com.nexters.fooddiary.data.remote.diary.model.DiarySummaryResponse
 import com.nexters.fooddiary.domain.model.AnalysisStatus
@@ -10,11 +12,10 @@ import javax.inject.Inject
 
 class DiaryMapper @Inject constructor() {
     fun toDomainDiaryEntries(diaries: List<DiarySummaryResponse>): List<DiaryEntry> {
-        return diaries.mapNotNull { diary ->
-            val mealType = diary.timeType.toDomainOrNull() ?: return@mapNotNull null
+        return diaries.map { diary ->
             DiaryEntry(
                 diaryId = diary.diaryId,
-                mealType = mealType,
+                mealType = diary.timeType.toDomain(),
                 analysisStatus = diary.analysisStatus.toDomain(),
                 createdAt = diary.createdAt,
                 restaurantName = diary.restaurantName,
@@ -40,21 +41,20 @@ class DiaryMapper @Inject constructor() {
         )
     }
 
-    private fun String?.toDomainOrNull(): MealType? {
-        return when (this?.trim()?.lowercase()) {
-            "breakfast" -> MealType.BREAKFAST
-            "lunch" -> MealType.LUNCH
-            "dinner" -> MealType.DINNER
-            "snack" -> MealType.SNACK
-            else -> null
+    private fun DiaryMealTypeResponse.toDomain(): MealType {
+        return when (this) {
+            DiaryMealTypeResponse.BREAKFAST -> MealType.BREAKFAST
+            DiaryMealTypeResponse.LUNCH -> MealType.LUNCH
+            DiaryMealTypeResponse.DINNER -> MealType.DINNER
+            DiaryMealTypeResponse.SNACK -> MealType.SNACK
         }
     }
 
-    private fun String?.toDomain(): AnalysisStatus {
-        return when (this?.trim()?.lowercase()) {
-            "done" -> AnalysisStatus.DONE
-            "processing" -> AnalysisStatus.PROCESSING
-            else -> AnalysisStatus.PROCESSING
+    private fun DiaryAnalysisStatusResponse.toDomain(): AnalysisStatus {
+        return when (this) {
+            DiaryAnalysisStatusResponse.DONE -> AnalysisStatus.DONE
+            DiaryAnalysisStatusResponse.PROCESSING -> AnalysisStatus.PROCESSING
+            DiaryAnalysisStatusResponse.FAILED -> AnalysisStatus.FAILED
         }
     }
 }
