@@ -154,7 +154,7 @@ platform :android do
   # Main Lanes
   # ============================================================================
 
-  desc "Build debugRelease APK with version code injection"
+  desc "Build release APK with version code injection"
   lane :build do
     # Get version code from environment (set by CI)
     version_code = ENV['VERSION_CODE']
@@ -163,17 +163,17 @@ platform :android do
       UI.user_error!("VERSION_CODE environment variable is not set")
     end
 
-    UI.message("Building debugRelease APK with version code: #{version_code}")
+    UI.message("Building release APK with version code: #{version_code}")
 
-    # Build debugRelease APK with version code
+    # Build release APK with version code
     gradle(
-      task: "assembleDebugRelease",
+      task: "assembleRelease",
       properties: {
         "versionCode" => version_code
       }
     )
 
-    UI.success("DebugRelease APK built successfully with version code: #{version_code}")
+    UI.success("Release APK built successfully with version code: #{version_code}")
   end
 
   desc "Deploy to Firebase App Distribution"
@@ -205,14 +205,14 @@ platform :android do
     UI.message("  App ID: #{app_id[0..20]}... (truncated)")
     UI.message("  Token: #{firebase_token ? 'SET' : 'NOT SET'}")
     UI.message("  Version Code: #{version_code}")
-    UI.message("  APK Path: app/build/outputs/apk/debugRelease/app-debugRelease.apk")
+    UI.message("  APK Path: app/build/outputs/apk/release/app-release.apk")
     UI.message("  Groups: #{tester_groups}")
 
     # Upload to Firebase App Distribution
     firebase_app_distribution(
       app: app_id,
       firebase_cli_token: firebase_token,
-      apk_path: "app/build/outputs/apk/debugRelease/app-debugRelease.apk",
+      apk_path: "app/build/outputs/apk/release/app-release.apk",
       groups: tester_groups,
       release_notes: release_notes
     )
