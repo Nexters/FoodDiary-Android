@@ -49,6 +49,7 @@ val hasReleaseSigningConfig = listOf(
     releaseKeyAlias,
     releaseKeyPassword
 ).all { it.isNotBlank() }
+val sentryAuthToken = localOrEnv(listOf("sentry.auth.token"), "SENTRY_AUTH_TOKEN")
 
 android {
     namespace = "com.nexters.fooddiary"
@@ -143,8 +144,9 @@ android {
 sentry {
     org.set(localProperties.getProperty("sentry.org", ""))
     projectName.set(localProperties.getProperty("sentry.project", ""))
-    authToken.set(localProperties.getProperty("sentry.auth.token", ""))
+    authToken.set(sentryAuthToken)
     includeSourceContext.set(true)
+    autoUploadProguardMapping.set(sentryAuthToken.isNotBlank())
     autoInstallation {
         enabled.set(true)
         sentryVersion.set(libs.versions.sentryAndroid.get())
