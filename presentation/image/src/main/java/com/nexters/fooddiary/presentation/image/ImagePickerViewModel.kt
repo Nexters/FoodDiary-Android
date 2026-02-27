@@ -17,11 +17,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
-sealed class UploadResult {
-    data object Success : UploadResult()
-    data class Failure(val error: Throwable? = null) : UploadResult()
-}
-
 internal fun nextSelectionAfterToggle(current: Set<Uri>, uri: Uri, maxCount: Int): Set<Uri> =
     if (current.contains(uri)) current - uri
     else if (current.size < maxCount) current + uri
@@ -52,6 +47,7 @@ class ImagePickerViewModel @AssistedInject constructor(
                 allImageUris = emptyList(),
                 foodImageUris = emptyList(),
                 isLoading = true,
+                uploadSucceededDate = null,
             )
         }
         withState { state ->
@@ -94,13 +90,12 @@ class ImagePickerViewModel @AssistedInject constructor(
         setState { copy(selectedUris = emptySet()) }
     }
 
-    fun uploadImage(onResult: (UploadResult) -> Unit) {
+    fun uploadImage() {
         viewModelScope.launch(Dispatchers.Main.immediate) {
             val state = awaitState()
             val urisToUpload = state.selectedUris.map { it.toString() }
             val targetDate = state.filterDate ?: LocalDate.now()
             if (urisToUpload.isEmpty()) {
-                onResult(UploadResult.Failure())
                 return@launch
             }
 
@@ -115,9 +110,13 @@ class ImagePickerViewModel @AssistedInject constructor(
             }
 
             result
-                .onSuccess { onResult(UploadResult.Success) }
-                .onFailure { error -> onResult(UploadResult.Failure(error)) }
+                .onSuccess { setState { copy(uploadSucceededDate = targetDate) } }
+                .onFailure { /* enqueue 실패 시 화면 유지 */ }
         }
+    }
+
+    fun consumeUploadSuccess() {
+        setState { copy(uploadSucceededDate = null) }
     }
 
     @AssistedFactory

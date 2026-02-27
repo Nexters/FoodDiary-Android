@@ -1,13 +1,15 @@
 package com.nexters.fooddiary.presentation.home
 
 import android.content.Context
-import android.content.pm.LauncherUserInfo
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import com.nexters.fooddiary.core.common.permission.PermissionUtil
+import com.nexters.fooddiary.core.ui.food.FoodImageState
+import com.nexters.fooddiary.domain.model.DiaryDetail
+import com.nexters.fooddiary.domain.usecase.GetDiaryByDateUseCase
 import com.nexters.fooddiary.domain.usecase.GetDiarySummaryUseCase
 import com.nexters.fooddiary.domain.usecase.GetDiariesSummaryUseCase
 import com.nexters.fooddiary.domain.usecase.GetFoodPhotoCountByWeekUseCase
@@ -29,7 +31,9 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import java.util.Collections.emptyMap
 
@@ -41,6 +45,7 @@ class HomeViewModel @AssistedInject constructor(
     @ApplicationContext private val context: Context,
     @Assisted initialState: HomeScreenState,
     private val getUserInfoUseCase: GetUserInfoUseCase,
+    private val getDiaryByDateUseCase: GetDiaryByDateUseCase,
     private val getDiarySummaryUseCase: GetDiarySummaryUseCase,
     private val getFoodPhotoCountByWeekUseCase: GetFoodPhotoCountByWeekUseCase,
     private val getDiariesSummaryUseCase: GetDiariesSummaryUseCase,
@@ -52,6 +57,7 @@ class HomeViewModel @AssistedInject constructor(
     private val _events = MutableSharedFlow<HomeEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<HomeEvent> = _events.asSharedFlow()
     private var loadSummaryJob: Job? = null
+    private var loadSelectedDateImageStateJob: Job? = null
     private var hasLoadedMonthData = false
     private var hasLoadedWeekCount = false
 
@@ -60,9 +66,10 @@ class HomeViewModel @AssistedInject constructor(
     init {
         loadSummaryForSelectedWeek()
         loadUserMe()
+        loadSelectedDateImageState(initialSelectedDate)
     }
 
-   private fun loadUserMe() {
+    private fun loadUserMe() {
         suspend { getUserInfoUseCase().getOrNull() }
             .execute { result ->
                 when (result) {
@@ -70,6 +77,7 @@ class HomeViewModel @AssistedInject constructor(
                         val name = result.invoke().orEmpty()
                         copy(userName = name)
                     }
+
                     else -> this
                 }
             }
@@ -119,8 +127,29 @@ class HomeViewModel @AssistedInject constructor(
     }
 
     fun onDateSelected(date: LocalDate) {
-        setState { copy(selectedDate = date) }
+        setState {
+            copy(
+                selectedDate = date,
+                selectedDateImageState = FoodImageState.Ready(
+                    timeText = "",
+                    locationText = "",
+                ),
+                selectedDateImageStatesByUrl = emptyMap(),
+            )
+        }
         loadSummaryForSelectedWeek()
+        loadSelectedDateImageState(date)
+    }
+
+    fun onDiaryUpdated(date: LocalDate) {
+        withState { state ->
+            if (YearMonth.from(state.selectedDate) == YearMonth.from(date)) {
+                loadPhotosForMonth(YearMonth.from(state.selectedDate))
+            }
+            if (weekStartOf(state.selectedDate) == weekStartOf(date)) {
+                loadSummaryForSelectedWeek(forceRefresh = true)
+            }
+        }
     }
 
     fun onCardStackClicked() {
@@ -129,10 +158,12 @@ class HomeViewModel @AssistedInject constructor(
         }
     }
 
-    private fun loadSummaryForSelectedWeek() {
+    private fun loadSummaryForSelectedWeek(forceRefresh: Boolean = false) {
         withState { state ->
             val weekStart = weekStartOf(state.selectedDate)
-            if (!shouldLoadWeek(state.selectedDate, state.loadedWeekStartDate)) return@withState
+            if (!forceRefresh && !shouldLoadWeek(state.selectedDate, state.loadedWeekStartDate)) {
+                return@withState
+            }
 
             loadSummaryJob?.cancel()
             loadSummaryJob = viewModelScope.launch {
@@ -157,6 +188,33 @@ class HomeViewModel @AssistedInject constructor(
         }
     }
 
+    private fun loadSelectedDateImageState(targetDate: LocalDate) {
+        loadSelectedDateImageStateJob?.cancel()
+        loadSelectedDateImageStateJob = viewModelScope.launch {
+            val selectedDateImageStatesByUrl = runCatching {
+                getDiaryByDateUseCase(targetDate).toHomeFoodImageStatesByUrl()
+            }.getOrDefault(
+                emptyMap()
+            )
+
+            setState {
+                if (selectedDate != targetDate) {
+                    this
+                } else {
+                    copy(
+                        selectedDateImageState = selectedDateImageStatesByUrl.values
+                            .firstOrNull()
+                            ?: FoodImageState.Ready(
+                                timeText = "",
+                                locationText = "",
+                            ),
+                        selectedDateImageStatesByUrl = selectedDateImageStatesByUrl,
+                    )
+                }
+            }
+        }
+    }
+
     @AssistedFactory
     interface Factory : AssistedViewModelFactory<HomeViewModel, HomeScreenState> {
         override fun create(initialState: HomeScreenState): HomeViewModel
@@ -174,3 +232,21 @@ internal fun shouldLoadWeek(
     selectedDate: LocalDate,
     loadedWeekStartDate: LocalDate?,
 ): Boolean = loadedWeekStartDate != weekStartOf(selectedDate)
+
+private fun DiaryDetail.toHomeFoodImageStatesByUrl(): Map<String, FoodImageState> {
+    return diaries.flatMap { diary ->
+        val state = FoodImageState.Ready(
+            timeText = diary.createdAt.toHomeTimeText(),
+            locationText = diary.location.orEmpty(),
+        )
+        diary.photos.map { photo -> photo.imageUrl to state }
+    }.toMap()
+}
+
+private fun String?.toHomeTimeText(): String {
+    if (this.isNullOrEmpty()) return ""
+    return runCatching { LocalDateTime.parse(this) }
+        .getOrNull()
+        ?.format(DateTimeFormatter.ofPattern("HH:mm"))
+        .orEmpty()
+}

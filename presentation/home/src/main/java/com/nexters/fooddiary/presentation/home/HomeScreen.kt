@@ -32,7 +32,6 @@ import com.nexters.fooddiary.core.ui.calendar.rememberWeeklyCalendarState
 import com.nexters.fooddiary.core.ui.component.AddPhotoBox
 import com.nexters.fooddiary.core.ui.component.Header
 import com.nexters.fooddiary.core.ui.food.FoodImageStackView
-import com.nexters.fooddiary.core.ui.food.FoodImageState
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.Gray050
 import com.nexters.fooddiary.core.ui.theme.SdBase
@@ -50,6 +49,8 @@ internal fun HomeScreen(
     onNavigateToDetail: (LocalDate) -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
     isMonthlyCalendarView: Boolean = false,
+    pushSyncDateString: String? = null,
+    onPushSyncConsumed: () -> Unit = {},
     onShowSnackBar: (SnackBarData) -> Unit = {},
     viewModel: HomeViewModel = mavericksViewModel(),
 ) {
@@ -68,6 +69,15 @@ internal fun HomeScreen(
 
     LaunchedEffect(Unit) {
         viewModel.loadInitialData()
+    }
+
+    LaunchedEffect(pushSyncDateString) {
+        if (pushSyncDateString == null) return@LaunchedEffect
+        val syncDate = runCatching { LocalDate.parse(pushSyncDateString) }.getOrNull()
+        if (syncDate != null) {
+            viewModel.onDiaryUpdated(syncDate)
+        }
+        onPushSyncConsumed()
     }
 
     HomeScreen(
@@ -159,10 +169,8 @@ private fun HomeScreen(
                     if (selectedDateImageUrls.isNotEmpty()) {
                         FoodImageStackView(
                             imageUrls = selectedDateImageUrls,
-                            state = FoodImageState.Ready(
-                                timeText = "시간",
-                                locationText = "위치",
-                            ),
+                            state = state.selectedDateImageState,
+                            stateByImageUrl = state.selectedDateImageStatesByUrl,
                             onCardClick = onCardStackClick,
                             modifier = Modifier
                                 .fillMaxWidth()
