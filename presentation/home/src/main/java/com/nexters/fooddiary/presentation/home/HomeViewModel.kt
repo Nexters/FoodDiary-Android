@@ -142,6 +142,7 @@ class HomeViewModel @AssistedInject constructor(
     }
 
     fun onDiaryUpdated(date: LocalDate) {
+        setState { copy(pendingDates = pendingDates - date) }
         withState { state ->
             if (YearMonth.from(state.selectedDate) == YearMonth.from(date)) {
                 loadPhotosForMonth(YearMonth.from(state.selectedDate))
@@ -150,6 +151,10 @@ class HomeViewModel @AssistedInject constructor(
                 loadSummaryForSelectedWeek(forceRefresh = true)
             }
         }
+    }
+
+    fun onDiaryUploadPending(date: LocalDate) {
+        setState { copy(pendingDates = pendingDates + date) }
     }
 
     fun onCardStackClicked() {

@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -91,10 +92,10 @@ fun FoodDiaryNavHost(
     var deleteAccountRequestId by remember { mutableIntStateOf(0) }
     var onboardingCompleteEventId by remember { mutableIntStateOf(0) }
     var pendingDetailDate by remember { mutableStateOf(initialDeepLink.getDetailDateOrNull()) }
-    var isHomeMonthlyCalendarView by remember { mutableStateOf(false) }
+    var isHomeMonthlyCalendarView by rememberSaveable { mutableStateOf(false) }
     var hasNavigatedFromSplash by remember { mutableStateOf(false) }
     val bottomBarHazeState = rememberHazeState()
-    var showHomeCoachmarkOnEntry by remember { mutableStateOf(false) }
+    var showHomeCoachmarkOnEntry by rememberSaveable { mutableStateOf(false) }
 
     val startDestination = if (initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_IMAGE) {
         ImagePickerRoute(dateString = null)
@@ -349,9 +350,24 @@ fun FoodDiaryNavHost(
                         }
                     },
                     onUploadSuccess = { uploadedDate ->
+                        val previousIsHome =
+                            navController.previousBackStackEntry?.destination?.hasRoute(HomeRoute::class) == true
+                        val previousIsDetail =
+                            navController.previousBackStackEntry?.destination?.hasRoute(DetailRoute::class) == true
+                        if (previousIsHome) {
+                            navController.previousBackStackEntry
+                                ?.savedStateHandle
+                                ?.set(PushSyncConstants.UPLOAD_PENDING_DIARY_DATE, uploadedDate.toString())
+                        }
                         navController.popBackStack()
-                        navController.navigate(DetailRoute(dateString = uploadedDate.toString())) {
-                            launchSingleTop = true
+                        if (previousIsDetail) {
+                            navController.navigate(DetailRoute(dateString = uploadedDate.toString())) {
+                                launchSingleTop = true
+                            }
+                        } else if (!previousIsHome) {
+                            navController.navigate(HomeRoute) {
+                                launchSingleTop = true
+                            }
                         }
                     }
                 )

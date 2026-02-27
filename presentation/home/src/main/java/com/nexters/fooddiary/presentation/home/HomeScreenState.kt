@@ -15,5 +15,6 @@ data class HomeScreenState(
         locationText = "",
     ),
     val selectedDateImageStatesByUrl: Map<String, FoodImageState> = emptyMap(),
+    val pendingDates: Set<LocalDate> = emptySet(),
     val loadedWeekStartDate: LocalDate? = null,
 ) : MavericksState
