@@ -4,6 +4,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -25,7 +26,7 @@ import kotlin.math.sin
 data class GlassmorphismStyle(
     val cornerRadius: Dp = 20.dp,
     val backgroundColor: Color = Color(0x4D515151),
-    val borderWidth: Dp = 1.dp,
+    val borderWidth: Dp = 2.2.dp,
     val borderAngleDegrees: Float = 95.94f,
     val borderStops: List<Pair<Float, Color>> = listOf(
         0.1671f to Color.White.copy(alpha = 0.11f),
@@ -51,13 +52,26 @@ fun Modifier.glassmorphism(
         .clip(shape)
         .drawBehind {
             val cornerRadius = CornerRadius(style.cornerRadius.toPx(), style.cornerRadius.toPx())
-            val strokeWidth = style.borderWidth.toPx()
 
             drawRoundRect(
                 color = style.backgroundColor,
                 cornerRadius = cornerRadius
             )
+        }
+        .then(
+            if (hazeState != null) {
+                Modifier.hazeEffect(state = hazeState) {
+                    this.style = hazeMaterialStyle
+                }
+            } else {
+                Modifier
+            }
+        )
+        .drawWithContent {
+            drawContent()
 
+            val cornerRadius = CornerRadius(style.cornerRadius.toPx(), style.cornerRadius.toPx())
+            val strokeWidth = style.borderWidth.toPx()
             val (start, end) = gradientOffsetsForAngle(size, style.borderAngleDegrees)
             val borderBrush = Brush.linearGradient(
                 colorStops = style.borderStops.toTypedArray(),
@@ -71,15 +85,6 @@ fun Modifier.glassmorphism(
                 style = Stroke(width = strokeWidth)
             )
         }
-        .then(
-            if (hazeState != null) {
-                Modifier.hazeEffect(state = hazeState) {
-                    this.style = hazeMaterialStyle
-                }
-            } else {
-                Modifier
-            }
-        )
 }
 
 private fun gradientOffsetsForAngle(size: Size, angleDegrees: Float): Pair<Offset, Offset> {
