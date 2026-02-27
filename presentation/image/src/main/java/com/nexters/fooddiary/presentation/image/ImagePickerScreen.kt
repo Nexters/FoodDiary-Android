@@ -1,6 +1,7 @@
 package com.nexters.fooddiary.presentation.image
 
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -32,6 +33,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
@@ -57,6 +59,7 @@ import com.nexters.fooddiary.core.ui.theme.Gray050
 import com.nexters.fooddiary.core.ui.theme.Gray400
 import com.nexters.fooddiary.core.ui.theme.PrimBase
 import com.nexters.fooddiary.core.ui.theme.SdBase
+import java.time.LocalDate
 
 private const val PREVIEW_IMAGE_URL = "https://picsum.photos/200/200?random="
 
@@ -93,9 +96,13 @@ fun ImagePickerScreen(
     modifier: Modifier = Modifier,
     selectedDateString: String? = null,
     onClose: () -> Unit,
+    onUploadSuccess: (LocalDate) -> Unit = {},
     viewModel: ImagePickerViewModel = mavericksViewModel()
 ) {
     val state by viewModel.collectAsState()
+    val currentOnUploadSuccess by rememberUpdatedState(onUploadSuccess)
+
+    BackHandler(onBack = onClose)
 
     LaunchedEffect(selectedDateString) {
         viewModel.loadPhotos(selectedDateString)
@@ -116,6 +123,13 @@ fun ImagePickerScreen(
         }
     }
 
+    LaunchedEffect(state.uploadSucceededDate) {
+        state.uploadSucceededDate?.let { uploadedDate ->
+            currentOnUploadSuccess(uploadedDate)
+            viewModel.consumeUploadSuccess()
+        }
+    }
+
     ImagePickerContent(
         modifier = modifier,
         foodImageUris = state.foodImageUris,
@@ -126,12 +140,7 @@ fun ImagePickerScreen(
         onImageClick = { uri -> viewModel.toggleImageSelection(uri) },
         onDeselectAll = { viewModel.clearSelection() },
         onDone = {
-            viewModel.uploadImage { result ->
-                when (result) {
-                    is UploadResult.Success -> onClose()
-                    is UploadResult.Failure -> { /* 실패 시 처리 없음 */ }
-                }
-            }
+            viewModel.uploadImage()
         },
         onClose = onClose,
         onRequestPermission = { permissionLauncher.launch(requiredPermission) }

@@ -16,11 +16,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-sealed class UploadResult {
-    data object Success : UploadResult()
-    data class Failure(val error: Throwable? = null) : UploadResult()
-}
-
 internal fun nextSelectionAfterToggle(current: Set<Uri>, uri: Uri, maxCount: Int): Set<Uri> =
     if (current.contains(uri)) current - uri
     else if (current.size < maxCount) current + uri
@@ -52,6 +47,7 @@ class ImagePickerViewModel @AssistedInject constructor(
                 allImageUris = emptyList(),
                 foodImageUris = emptyList(),
                 isLoading = true,
+                uploadSucceededDate = null,
             )
         }
         withState { state ->
@@ -94,15 +90,18 @@ class ImagePickerViewModel @AssistedInject constructor(
         setState { copy(selectedUris = emptySet()) }
     }
 
-    fun uploadImage(onResult: (UploadResult) -> Unit) {
+    fun uploadImage() {
         viewModelScope.launch {
             val urisToUpload = selectedUrisAsStrings()
             if (urisToUpload.isEmpty()) {
-                onResult(UploadResult.Failure())
                 return@launch
             }
-            performUpload(urisToUpload, onResult)
+            performUpload(urisToUpload)
         }
+    }
+
+    fun consumeUploadSuccess() {
+        setState { copy(uploadSucceededDate = null) }
     }
 
     @AssistedFactory
@@ -137,13 +136,14 @@ class ImagePickerViewModel @AssistedInject constructor(
     private suspend fun selectedUrisAsStrings(): List<String> =
         awaitState().selectedUris.map { it.toString() }
 
-    private suspend fun performUpload(
-        urisToUpload: List<String>,
-        onResult: (UploadResult) -> Unit
-    ) {
+    private suspend fun performUpload(urisToUpload: List<String>) {
         val targetDate = awaitState().filterDate ?: LocalDate.now()
         batchUploadPhotosUseCase(targetDate, urisToUpload)
-            .onSuccess { onResult(UploadResult.Success) }
-            .onFailure { e -> onResult(UploadResult.Failure(e)) }
+            .onSuccess {
+                setState { copy(uploadSucceededDate = targetDate) }
+            }
+            .onFailure {
+                // 실패 시 현재 화면 유지 (기존 동작)
+            }
     }
 }

@@ -313,9 +313,23 @@ fun FoodDiaryNavHost(
                 )
 
                 imageScreen(
-                    onClose = {
-                        if (!navController.popBackStack()) {
+                    onClose = { selectedDateString ->
+                        val previousIsDetail =
+                            navController.previousBackStackEntry?.destination?.hasRoute(DetailRoute::class) == true
+                        if (previousIsDetail && !selectedDateString.isNullOrBlank()) {
+                            navController.popBackStack()
+                            navController.popBackStack()
+                            navController.navigate(DetailRoute(dateString = selectedDateString)) {
+                                launchSingleTop = true
+                            }
+                        } else if (!navController.popBackStack()) {
                             onFinish()
+                        }
+                    },
+                    onUploadSuccess = { uploadedDate ->
+                        navController.popBackStack()
+                        navController.navigate(DetailRoute(dateString = uploadedDate.toString())) {
+                            launchSingleTop = true
                         }
                     }
                 )

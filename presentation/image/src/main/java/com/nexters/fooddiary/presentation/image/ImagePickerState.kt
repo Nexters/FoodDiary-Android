@@ -11,4 +11,5 @@ data class ImagePickerState(
     val hasPermission: Boolean = false,
     val selectedUris: Set<Uri> = emptySet(),
     val filterDate: LocalDate? = null,
+    val uploadSucceededDate: LocalDate? = null,
 ) : MavericksState
