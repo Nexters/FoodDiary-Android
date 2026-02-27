@@ -12,4 +12,5 @@
     <string name="push_analysis_complete_title">음식 사진 분석이 완료됐어요</string>
     <string name="push_analysis_complete_body">%1$s사진을 AI가 기록을 완료했어요.</string>
     <string name="push_analysis_complete_body_no_date">음식 사진 분석이 완료됐어요.</string>
+    <string name="push_analysis_complete_snackbar">AI가 기록을 완료했습니다.</string>
 </resources>

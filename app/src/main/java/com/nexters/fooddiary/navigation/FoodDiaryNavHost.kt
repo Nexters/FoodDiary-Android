@@ -33,11 +33,13 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.nexters.fooddiary.core.common.R
+import com.nexters.fooddiary.R
+import com.nexters.fooddiary.core.common.push.PushSyncConstants
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.nexters.fooddiary.core.ui.alert.AppDialogData
 import com.nexters.fooddiary.core.ui.alert.SnackBarData
+import com.nexters.fooddiary.push.PushSyncEventBus
 import com.nexters.fooddiary.presentation.auth.AuthUiState
 import com.nexters.fooddiary.presentation.auth.navigation.LoginRoute
 import com.nexters.fooddiary.presentation.auth.navigation.loginScreen
@@ -68,6 +70,8 @@ import com.nexters.fooddiary.presentation.splash.navigation.SplashRoute
 import com.nexters.fooddiary.presentation.splash.navigation.splashScreen
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
+import com.nexters.fooddiary.core.common.R as CommonR
+import com.nexters.fooddiary.core.ui.R as CoreUiR
 
 @Composable
 fun FoodDiaryNavHost(
@@ -131,6 +135,24 @@ fun FoodDiaryNavHost(
     LaunchedEffect(authUiState?.signInError) {
         authUiState?.signInError?.let { error ->
             onShowToast(error)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        PushSyncEventBus.analysisCompleteEvents.collect { event ->
+            val currentEntry = navController.currentBackStackEntry
+            val isSyncTarget = currentEntry?.destination?.hierarchy?.any { destination ->
+                destination.hasRoute(HomeRoute::class) || destination.hasRoute(DetailRoute::class)
+            } == true
+            if (isSyncTarget) {
+                currentEntry.savedStateHandle[PushSyncConstants.PUSH_SYNC_DIARY_DATE] = event.diaryDate
+            }
+            onShowSnackBar(
+                SnackBarData(
+                    message = context.getString(R.string.push_analysis_complete_snackbar),
+                    iconRes = CoreUiR.drawable.ic_ai_analysis
+                )
+            )
         }
     }
 
@@ -360,8 +382,8 @@ fun FoodDiaryNavHost(
                 myPageScreen(
                     navigateToWebView = { page ->
                         val url = when (page) {
-                            WebViewPage.TermsOfService -> context.getString(R.string.webview_url_terms_of_service)
-                            WebViewPage.PrivacyPolicy -> context.getString(R.string.webview_url_privacy_policy)
+                            WebViewPage.TermsOfService -> context.getString(CommonR.string.webview_url_terms_of_service)
+                            WebViewPage.PrivacyPolicy -> context.getString(CommonR.string.webview_url_privacy_policy)
                         }
                         navController.navigate(WebViewRoute(url = url))
                     },
