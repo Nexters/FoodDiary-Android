@@ -5,46 +5,18 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BatchUploadResponse(
-    @SerialName("results")
-    val results: List<BatchUploadResultItem>
+    @SerialName("diary_date")
+    val diaryDate: String? = null,
+    @SerialName("diaries")
+    val diaries: List<BatchUploadDiaryItem> = emptyList(),
 )
 
 @Serializable
-data class BatchUploadResultItem(
-    @SerialName("analysis")
-    val analysis: BatchUploadAnalysis?,
+data class BatchUploadDiaryItem(
     @SerialName("diary_id")
     val diaryId: Long,
-    @SerialName("image_url")
-    val imageUrl: String,
-    @SerialName("photo_id")
-    val photoId: Long,
+    @SerialName("diary_status")
+    val diaryStatus: String,
     @SerialName("time_type")
-    val timeType: String
-)
-
-@Serializable
-data class BatchUploadAnalysis(
-    @SerialName("food_category")
-    val foodCategory: String? = null,
-    @SerialName("keywords")
-    val keywords: List<String>? = null,
-    @SerialName("menu_candidates")
-    val menuCandidates: List<BatchUploadMenuCandidate>? = null,
-    @SerialName("restaurant_candidates")
-    val restaurantCandidates: List<BatchUploadRestaurantCandidate>? = null
-)
-
-@Serializable
-data class BatchUploadMenuCandidate(
-    @SerialName("name")
-    val name: String
-)
-
-@Serializable
-data class BatchUploadRestaurantCandidate(
-    @SerialName("confidence")
-    val confidence: Double,
-    @SerialName("name")
-    val name: String
+    val timeType: String,
 )

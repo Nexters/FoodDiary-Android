@@ -317,6 +317,12 @@ fun FoodDiaryNavHost(
                         if (!navController.popBackStack()) {
                             onFinish()
                         }
+                    },
+                    onUploadSuccess = { uploadedDate ->
+                        navController.popBackStack()
+                        navController.navigate(DetailRoute(dateString = uploadedDate.toString())) {
+                            launchSingleTop = true
+                        }
                     }
                 )
 

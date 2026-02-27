@@ -9,7 +9,7 @@ import com.nexters.fooddiary.data.remote.photo.PhotoApi
 import com.nexters.fooddiary.core.common.network.defaultMessage
 import com.nexters.fooddiary.core.common.resource.ResourceProvider
 import com.nexters.fooddiary.data.network.toNetworkError
-import com.nexters.fooddiary.data.remote.photo.model.response.BatchUploadResultItem
+import com.nexters.fooddiary.data.remote.photo.model.response.BatchUploadDiaryItem
 import com.nexters.fooddiary.domain.repository.PhotoRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -66,7 +66,7 @@ internal class PhotoRepositoryImpl @Inject constructor(
                 ),
                 photos = parts
             )
-            recordPendingUploads(response.results, uploadDateStr)
+            recordPendingUploads(response.diaries, uploadDateStr)
             Result.success(Unit)
         } catch (e: Exception) {
             recordUploadFailure(uploadDateStr, e)
@@ -94,14 +94,12 @@ internal class PhotoRepositoryImpl @Inject constructor(
     }
 
     private suspend fun recordPendingUploads(
-        results: List<BatchUploadResultItem>,
+        diaries: List<BatchUploadDiaryItem>,
         uploadDateStr: String
     ) {
-        val entities = results.map { item ->
+        val entities = diaries.map { item ->
             PhotoUploadEntity(
-                photoId = item.photoId,
                 diaryId = item.diaryId,
-                imageUrl = item.imageUrl,
                 timeType = item.timeType,
                 uploadDate = uploadDateStr,
                 status = UploadStatus.PENDING

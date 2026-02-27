@@ -5,6 +5,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.nexters.fooddiary.presentation.image.ImagePickerScreen
 import kotlinx.serialization.Serializable
+import java.time.LocalDate
 
 @Serializable
 data class ImagePickerRoute(
@@ -12,14 +13,15 @@ data class ImagePickerRoute(
 )
 
 fun NavGraphBuilder.imageScreen(
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    onUploadSuccess: (LocalDate) -> Unit,
 ) {
     composable<ImagePickerRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<ImagePickerRoute>()
         ImagePickerScreen(
             selectedDateString = route.dateString,
             onClose = onClose,
+            onUploadSuccess = onUploadSuccess,
         )
     }
 }
-
