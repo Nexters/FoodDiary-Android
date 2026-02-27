@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import com.nexters.fooddiary.core.ui.component.DetailScreenHeader
+import org.json.JSONObject
 
 @Composable
 fun WebViewScreen(
@@ -80,7 +81,22 @@ private fun String.toWebViewFriendlyUrl(): String {
 }
 
 private fun WebView.injectOverflowFixCss() {
-    val css = "html, body, * { overflow-y: auto !important; height: auto !important; }"
+    val css = """
+        html, body,
+        #notion-app,
+        #notion-app > .notion-app-inner,
+        #notion-app .notion-frame,
+        #notion-app .notion-scroller.vertical {
+            overflow-y: auto !important;
+            height: auto !important;
+            max-height: none !important;
+        }
+        #notion-app,
+        #notion-app > .notion-app-inner {
+            min-height: 100vh !important;
+        }
+    """.trimIndent()
+    val safeCss = JSONObject.quote(css)
     val js = """
         (function() {
             var style = document.getElementById('fooddiary-overflow-fix');
@@ -89,7 +105,7 @@ private fun WebView.injectOverflowFixCss() {
                 style.id = 'fooddiary-overflow-fix';
                 document.head.appendChild(style);
             }
-            style.textContent = '$css';
+            style.textContent = $safeCss;
         })();
     """.trimIndent()
     evaluateJavascript(js, null)
