@@ -51,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
@@ -132,6 +133,7 @@ fun MonthlyCalendar(
     onMonthChanged: (YearMonth) -> Unit = {},
     photoCountByDate: Map<LocalDate, Int> = emptyMap(),
     photoUrlsByDate: Map<LocalDate, List<String>> = emptyMap(),
+    today: LocalDate = LocalDate.now(),
 ) {
     val coroutineScope = rememberCoroutineScope()
     val visibleMonth = remember(calendarState) {
@@ -198,14 +200,20 @@ fun MonthlyCalendar(
             HorizontalCalendar(
                 state = calendarState,
                 dayContent = { day ->
+                    val isEnabled = !day.date.isAfter(today)
                     key(day.date) {
                         MonthDayCell(
                             day = day,
                             isSelected = day.date == selectedDate,
+                            isEnabled = isEnabled,
                             photoCount = photoCountByDate[day.date] ?: 0,
                             photoUrls = photoUrlsByDate[day.date].orEmpty().take(2),
                             colors = colors,
-                            onClick = { onDayClicked(day, coroutineScope, calendarState, onDateSelected) },
+                            onClick = {
+                                if (isEnabled) {
+                                    onDayClicked(day, coroutineScope, calendarState, onDateSelected)
+                                }
+                            },
                         )
                     }
                 }
@@ -535,6 +543,7 @@ private fun MonthWeekDaysHeader(
 private fun MonthDayCell(
     day: CalendarDay,
     isSelected: Boolean,
+    isEnabled: Boolean,
     photoCount: Int,
     photoUrls: List<String>,
     colors: CalendarColors,
@@ -544,7 +553,11 @@ private fun MonthDayCell(
     Box(
         modifier = modifier
             .wrapContentSize()
-            .clickable(onClick = onClick)
+            .then(
+                if (isEnabled) Modifier.clickable(onClick = onClick)
+                else Modifier.clickable(enabled = false) {}
+            )
+            .then(if (!isEnabled) Modifier.alpha(0.4f) else Modifier)
             .padding(4.dp),
         contentAlignment = Alignment.TopCenter
     ) {
@@ -570,7 +583,7 @@ private fun MonthDayThumbnailBox(
     colors: CalendarColors,
     photoUrls: List<String>,
 ) {
-    val dashedBorderColor = if (isSelected) Gray900 else colors.weekdayText
+    val dashedBorderColor = Gray900
     val showDashedBorder = photoUrls.isEmpty()
     Box(
         modifier = Modifier

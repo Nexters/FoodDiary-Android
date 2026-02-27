@@ -86,6 +86,7 @@ internal fun HomeScreen(
         onDateSelected = viewModel::onDateSelected,
         onCardStackClick = viewModel::onCardStackClicked,
         onNavigateToImagePicker = onNavigateToImagePicker,
+        onNavigateToDetail = onNavigateToDetail,
         onNavigateToMyPage = onNavigateToMyPage,
         selectedDateImageUrls = selectedDateImageUrls(
             weeklyPhotosByDate = state.weeklyPhotosByDate,
@@ -112,6 +113,7 @@ private fun HomeScreen(
     isMonthlyCalendarView: Boolean = false,
     onCardStackClick: () -> Unit = {},
     onNavigateToImagePicker: (LocalDate) -> Unit = {},
+    onNavigateToDetail: (LocalDate) -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
     selectedDateImageUrls: List<String> = emptyList(),
     onShowSnackBar: (SnackBarData) -> Unit = {},
@@ -153,7 +155,12 @@ private fun HomeScreen(
                     MonthlyCalendar(
                         calendarState = monthlyCalendarState,
                         selectedDate = state.selectedDate,
-                        onDateSelected = onDateSelected,
+                        onDateSelected = { date ->
+                            onDateSelected(date)
+                            if (!date.isAfter(LocalDate.now())) {
+                                onNavigateToDetail(date)
+                            }
+                        },
                         onMonthChanged = onMonthChanged,
                         photoCountByDate = photoCountByDate,
                         photoUrlsByDate = photoUrlsByDate,
