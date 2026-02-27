@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -39,6 +40,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -73,8 +75,11 @@ import com.nexters.fooddiary.core.ui.component.DetailScreenHeader
 import com.nexters.fooddiary.core.ui.food.FoodImageCard
 import com.nexters.fooddiary.core.ui.food.FoodImageState
 import com.nexters.fooddiary.core.ui.theme.AppTypography
+import com.nexters.fooddiary.core.ui.theme.GlassmorphismStyle
+import com.nexters.fooddiary.core.ui.theme.Gray050
 import com.nexters.fooddiary.core.ui.theme.SdBase
 import com.nexters.fooddiary.core.ui.theme.White
+import com.nexters.fooddiary.core.ui.theme.glassmorphism
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.flow.collectLatest
@@ -86,6 +91,10 @@ private const val DetailHeaderKey = "detail_header"
 private const val GapDetailToDailyKey = "gap_detail_to_daily"
 private const val DailyHeaderInlineKey = "daily_header_inline"
 private const val GapAfterDailyHeaderKey = "gap_after_daily_header"
+private val DetailFloatingButtonGlassStyle = GlassmorphismStyle(
+    cornerRadius = 999.dp,
+    blurRadius = 30.dp,
+)
 
 @Composable
 internal fun DetailScreen(
@@ -158,6 +167,7 @@ internal fun DetailScreen(
         onEditClick = viewModel::onEditClick,
         onCopyClick = viewModel::onCopyClick,
         onShareClick = viewModel::onShareClick,
+        onAddFloatingPhotoClick = { onNavigateToImagePicker(state.selectedDate) },
     )
 }
 
@@ -173,6 +183,7 @@ private fun DetailContent(
     onEditClick: (MealSlot, LocalDate) -> Unit = { _, _ -> },
     onCopyClick: (String) -> Unit = {},
     onShareClick: (String, String) -> Unit = { _, _ -> }, // (place, mapLink)
+    onAddFloatingPhotoClick: () -> Unit = {},
 ) {
     var isMoreMenuExpanded by remember { mutableStateOf(false) }
     val meals = mealsByDate[selectedDate] ?: DailyMeals.empty(selectedDate)
@@ -350,6 +361,31 @@ private fun DetailContent(
                     onNextDay = onNextDay,
                     hazeState = hazeState,
                     modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            IconButton(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 20.dp, bottom = 24.dp)
+                    .size(60.dp)
+                    .glassmorphism(
+                        hazeState = hazeState,
+                        style = DetailFloatingButtonGlassStyle,
+                    ),
+                onClick = onAddFloatingPhotoClick,
+                shape = CircleShape,
+                colors = IconButtonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = Gray050,
+                    disabledContainerColor = Color.Transparent,
+                    disabledContentColor = Gray050,
+                ),
+            ) {
+                Icon(
+                    painter = painterResource(id = CoreUiR.drawable.ic_add),
+                    contentDescription = null,
+                    tint = Gray050,
                 )
             }
         }
