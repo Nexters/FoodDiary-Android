@@ -39,7 +39,7 @@
     <string name="my_page_delete_dialog_cancel">취소</string>
 
     <!-- WebView URLs -->
-    <string name="webview_url_terms_of_service">https://google.com</string>
+    <string name="webview_url_terms_of_service">https://shadow-bridge-c40.notion.site/31488bba374f80b687f7ce83edc325a4</string>
     <string name="webview_url_privacy_policy">https://www.notion.so/enebin/311c690fca2b80bc8c89c5f7cc5cb35c</string>
     <!-- Network error -->
     <string name="network_error_http">HTTP %d</string>
