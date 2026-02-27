@@ -5,6 +5,7 @@ import com.nexters.fooddiary.core.ui.food.FoodImageState
 import java.time.LocalDate
 
 data class HomeScreenState(
+    val userName: String = "",
     val selectedDate: LocalDate = LocalDate.now(),
     val diaryCountByDate: Map<LocalDate, Int> = emptyMap(),
     val diaryCountByWeek: Int = 0,

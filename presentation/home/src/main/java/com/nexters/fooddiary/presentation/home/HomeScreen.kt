@@ -35,6 +35,7 @@ import com.nexters.fooddiary.core.ui.food.FoodImageStackView
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.Gray050
 import com.nexters.fooddiary.core.ui.theme.SdBase
+import com.nexters.fooddiary.core.ui.R as coreR
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.flow.collectLatest
@@ -110,7 +111,6 @@ private fun HomeScreen(
     onDateSelected: (LocalDate) -> Unit = {},
     isMonthlyCalendarView: Boolean = false,
     onCardStackClick: () -> Unit = {},
-    onToggleCalendarView: () -> Unit = {},
     onNavigateToImagePicker: (LocalDate) -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
     selectedDateImageUrls: List<String> = emptyList(),
@@ -138,12 +138,14 @@ private fun HomeScreen(
         ) {
                 Header(
                     modifier = Modifier.padding(vertical = 18.dp),
+                    leftIconResId = coreR.drawable.ic_app_icon,
+                    leftIconColorFilter = null,
                     onClickMyPage = onNavigateToMyPage,
                 )
                 WeekCountDescription(diaryCountByWeek = state.diaryCountByWeek)
                 Text(
                     modifier = Modifier.padding(top = 12.dp, bottom = 36.dp),
-                    text = stringResource(string.home_sub_description),
+                    text = stringResource(string.home_sub_description, state.userName),
                     style = AppTypography.hd24,
                     color = Gray050,
                 )
@@ -217,6 +219,7 @@ private fun homeDescriptionText(photoCountByWeek: Int): String {
 private fun HomeScreenPreview() {
     HomeScreen(
         state = HomeScreenState(
+            userName = "소연"
         ),
     )
 }

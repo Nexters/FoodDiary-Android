@@ -23,6 +23,8 @@ private const val HeaderHeightDp = 32
 @Composable
 fun Header(
     modifier: Modifier = Modifier,
+    leftIconResId: Int = R.drawable.ic_txt_logo,
+    leftIconColorFilter: ColorFilter? = ColorFilter.tint(Color.White),
     onClickMyPage: () -> Unit = { },
 ) {
     Row(
@@ -37,8 +39,8 @@ fun Header(
             contentAlignment = Alignment.Center,
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_txt_logo),
-                colorFilter = ColorFilter.tint(Color.White),
+                painter = painterResource(id = leftIconResId),
+                colorFilter = leftIconColorFilter,
                 contentDescription = "Text Logo",
             )
         }

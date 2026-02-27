@@ -7,13 +7,14 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import com.nexters.fooddiary.core.common.permission.PermissionUtil
-import com.nexters.fooddiary.domain.usecase.BatchUploadPhotosUseCase
 import com.nexters.fooddiary.domain.usecase.GetFoodPhotosUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 internal fun nextSelectionAfterToggle(current: Set<Uri>, uri: Uri, maxCount: Int): Set<Uri> =
@@ -25,7 +26,6 @@ class ImagePickerViewModel @AssistedInject constructor(
     @Assisted initialState: ImagePickerState,
     @ApplicationContext private val context: Context,
     private val getFoodPhotosUseCase: GetFoodPhotosUseCase,
-    private val batchUploadPhotosUseCase: BatchUploadPhotosUseCase
 ) : MavericksViewModel<ImagePickerState>(initialState) {
 
     init {
@@ -91,12 +91,27 @@ class ImagePickerViewModel @AssistedInject constructor(
     }
 
     fun uploadImage() {
-        viewModelScope.launch {
-            val urisToUpload = selectedUrisAsStrings()
+        viewModelScope.launch(Dispatchers.Main.immediate) {
+            val state = awaitState()
+            val urisToUpload = state.selectedUris.map { it.toString() }
+            val targetDate = state.filterDate ?: LocalDate.now()
             if (urisToUpload.isEmpty()) {
                 return@launch
             }
-            performUpload(urisToUpload)
+
+            val result = withContext(Dispatchers.Default) {
+                runCatching {
+                    ImageUploadWorker.enqueue(
+                        context = context,
+                        targetDate = targetDate,
+                        uriStrings = urisToUpload,
+                    )
+                }
+            }
+
+            result
+                .onSuccess { setState { copy(uploadSucceededDate = targetDate) } }
+                .onFailure { /* enqueue 실패 시 화면 유지 */ }
         }
     }
 
@@ -133,17 +148,4 @@ class ImagePickerViewModel @AssistedInject constructor(
         }
     }
 
-    private suspend fun selectedUrisAsStrings(): List<String> =
-        awaitState().selectedUris.map { it.toString() }
-
-    private suspend fun performUpload(urisToUpload: List<String>) {
-        val targetDate = awaitState().filterDate ?: LocalDate.now()
-        batchUploadPhotosUseCase(targetDate, urisToUpload)
-            .onSuccess {
-                setState { copy(uploadSucceededDate = targetDate) }
-            }
-            .onFailure {
-                // 실패 시 현재 화면 유지 (기존 동작)
-            }
-    }
 }
