@@ -13,14 +13,14 @@ data class ImagePickerRoute(
 )
 
 fun NavGraphBuilder.imageScreen(
-    onClose: () -> Unit,
+    onClose: (String?) -> Unit,
     onUploadSuccess: (LocalDate) -> Unit,
 ) {
     composable<ImagePickerRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<ImagePickerRoute>()
         ImagePickerScreen(
             selectedDateString = route.dateString,
-            onClose = onClose,
+            onClose = { onClose(route.dateString) },
             onUploadSuccess = onUploadSuccess,
         )
     }

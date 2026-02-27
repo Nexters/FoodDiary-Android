@@ -1,6 +1,7 @@
 package com.nexters.fooddiary.presentation.image
 
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -100,6 +101,8 @@ fun ImagePickerScreen(
 ) {
     val state by viewModel.collectAsState()
     val currentOnUploadSuccess by rememberUpdatedState(onUploadSuccess)
+
+    BackHandler(onBack = onClose)
 
     LaunchedEffect(selectedDateString) {
         viewModel.loadPhotos(selectedDateString)
