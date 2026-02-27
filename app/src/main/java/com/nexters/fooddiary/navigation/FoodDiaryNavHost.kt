@@ -314,9 +314,7 @@ fun FoodDiaryNavHost(
 
                 imageScreen(
                     onClose = {
-                        if (!navController.popBackStack()) {
-                            onFinish()
-                        }
+                        navController.popBackStack()
                     }
                 )
 

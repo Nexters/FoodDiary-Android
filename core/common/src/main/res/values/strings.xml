@@ -51,7 +51,7 @@
     <!-- Home -->
     <string name="home_description_empty">이번주 음식 사진을 기록해 보세요</string>
     <string name="home_description_with_count">이번주 음식 사진 %1$s개</string>
-    <string name="home_sub_description">길동님의 음식 기록, \n지금 바로 쓸 수 있어요</string>
+    <string name="home_sub_description">%s님의 음식 기록, \n지금 바로 쓸 수 있어요</string>
     <string name="home_add_food_photo">오늘의 음식 사진을 추가해보세요.</string>
     <string name="home_nav_home">홈</string>
     <string name="home_nav_insight">인사이트</string>

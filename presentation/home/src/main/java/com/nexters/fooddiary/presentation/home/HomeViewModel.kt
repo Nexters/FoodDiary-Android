@@ -1,14 +1,17 @@
 package com.nexters.fooddiary.presentation.home
 
 import android.content.Context
+import android.content.pm.LauncherUserInfo
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
+import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import com.nexters.fooddiary.core.common.permission.PermissionUtil
 import com.nexters.fooddiary.domain.usecase.GetDiarySummaryUseCase
 import com.nexters.fooddiary.domain.usecase.GetDiariesSummaryUseCase
 import com.nexters.fooddiary.domain.usecase.GetFoodPhotoCountByWeekUseCase
+import com.nexters.fooddiary.domain.usecase.GetUserInfoUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -37,6 +40,7 @@ sealed interface HomeEvent {
 class HomeViewModel @AssistedInject constructor(
     @ApplicationContext private val context: Context,
     @Assisted initialState: HomeScreenState,
+    private val getUserInfoUseCase: GetUserInfoUseCase,
     private val getDiarySummaryUseCase: GetDiarySummaryUseCase,
     private val getFoodPhotoCountByWeekUseCase: GetFoodPhotoCountByWeekUseCase,
     private val getDiariesSummaryUseCase: GetDiariesSummaryUseCase,
@@ -55,6 +59,20 @@ class HomeViewModel @AssistedInject constructor(
 
     init {
         loadSummaryForSelectedWeek()
+        loadUserMe()
+    }
+
+   private fun loadUserMe() {
+        suspend { getUserInfoUseCase().getOrNull() }
+            .execute { result ->
+                when (result) {
+                    is Success -> {
+                        val name = result.invoke().orEmpty()
+                        copy(userName = name)
+                    }
+                    else -> this
+                }
+            }
     }
 
     /** 첫 화면 그린 뒤 호출. 캘린더 summary 즉시, 이번 주 개수(ML)는 yield 후 요청. */
