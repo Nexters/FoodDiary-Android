@@ -37,8 +37,7 @@ fun Header(
             contentAlignment = Alignment.Center,
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_txt_logo),
-                colorFilter = ColorFilter.tint(Color.White),
+                painter = painterResource(id = R.drawable.ic_app_icon),
                 contentDescription = "Text Logo",
             )
         }
