@@ -104,14 +104,12 @@ internal fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
-                painter = painterResource(id = CoreR.drawable.img_app_title_text),
+                painter = painterResource(id = CoreR.drawable.ic_app_main_logo_text),
                 contentDescription = stringResource(id = AuthR.string.app_title),
                 modifier = Modifier
-                    .width(215.dp)
-                    .height(58.dp),
+                    .width(225.dp)
+                    .height(82.dp),
             )
-
-            Spacer(modifier = Modifier.height(20.dp))
 
             Image(
                 painter = painterResource(id = CoreR.drawable.img_app_title_image),
