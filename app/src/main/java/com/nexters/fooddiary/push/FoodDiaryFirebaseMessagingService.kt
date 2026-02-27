@@ -40,6 +40,13 @@ class FoodDiaryFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
+        val type = message.data["type"].orEmpty()
+        val diaryDate = message.data["diary_date"].orEmpty()
+
+        if (type == ANALYSIS_COMPLETE_TYPE && diaryDate.isNotBlank()) {
+            PushSyncEventBus.publishAnalysisComplete(diaryDate)
+        }
+
         showNotification(message)
     }
 

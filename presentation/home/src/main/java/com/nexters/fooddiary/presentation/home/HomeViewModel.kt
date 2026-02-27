@@ -123,16 +123,29 @@ class HomeViewModel @AssistedInject constructor(
         loadSelectedDateImageState(date)
     }
 
+    fun onDiaryUpdated(date: LocalDate) {
+        withState { state ->
+            if (YearMonth.from(state.selectedDate) == YearMonth.from(date)) {
+                loadPhotosForMonth(YearMonth.from(state.selectedDate))
+            }
+            if (weekStartOf(state.selectedDate) == weekStartOf(date)) {
+                loadSummaryForSelectedWeek(forceRefresh = true)
+            }
+        }
+    }
+
     fun onCardStackClicked() {
         withState { state ->
             _events.tryEmit(HomeEvent.NavigateToDetail(state.selectedDate))
         }
     }
 
-    private fun loadSummaryForSelectedWeek() {
+    private fun loadSummaryForSelectedWeek(forceRefresh: Boolean = false) {
         withState { state ->
             val weekStart = weekStartOf(state.selectedDate)
-            if (!shouldLoadWeek(state.selectedDate, state.loadedWeekStartDate)) return@withState
+            if (!forceRefresh && !shouldLoadWeek(state.selectedDate, state.loadedWeekStartDate)) {
+                return@withState
+            }
 
             loadSummaryJob?.cancel()
             loadSummaryJob = viewModelScope.launch {

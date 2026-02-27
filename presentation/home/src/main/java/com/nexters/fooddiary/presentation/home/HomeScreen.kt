@@ -48,6 +48,8 @@ internal fun HomeScreen(
     onNavigateToDetail: (LocalDate) -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
     isMonthlyCalendarView: Boolean = false,
+    pushSyncDateString: String? = null,
+    onPushSyncConsumed: () -> Unit = {},
     onShowSnackBar: (SnackBarData) -> Unit = {},
     viewModel: HomeViewModel = mavericksViewModel(),
 ) {
@@ -66,6 +68,15 @@ internal fun HomeScreen(
 
     LaunchedEffect(Unit) {
         viewModel.loadInitialData()
+    }
+
+    LaunchedEffect(pushSyncDateString) {
+        if (pushSyncDateString == null) return@LaunchedEffect
+        val syncDate = runCatching { LocalDate.parse(pushSyncDateString) }.getOrNull()
+        if (syncDate != null) {
+            viewModel.onDiaryUpdated(syncDate)
+        }
+        onPushSyncConsumed()
     }
 
     HomeScreen(

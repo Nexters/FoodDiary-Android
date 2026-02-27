@@ -89,6 +89,8 @@ private const val GapAfterDailyHeaderKey = "gap_after_daily_header"
 @Composable
 internal fun DetailScreen(
     initialDateString: String = LocalDate.now().toString(),
+    pushSyncDateString: String? = null,
+    onPushSyncConsumed: () -> Unit = {},
     viewModel: DetailViewModel = mavericksViewModel(),
     onNavigateBack: () -> Unit = {},
     onNavigateToImagePicker: (LocalDate) -> Unit = {},
@@ -106,6 +108,15 @@ internal fun DetailScreen(
 
     LaunchedEffect(state.selectedDate) {
         viewModel.loadMealsForDate(state.selectedDate)
+    }
+
+    LaunchedEffect(pushSyncDateString) {
+        if (pushSyncDateString == null) return@LaunchedEffect
+        val syncDate = runCatching { LocalDate.parse(pushSyncDateString) }.getOrNull()
+        if (syncDate != null && syncDate == state.selectedDate) {
+            viewModel.refreshMealsForDate(syncDate)
+        }
+        onPushSyncConsumed()
     }
 
     LaunchedEffect(viewModel) {
