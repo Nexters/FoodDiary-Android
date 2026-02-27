@@ -53,6 +53,7 @@ private const val NegativeRotation = -5f
 fun FoodImageStackView(
     imageUrls: List<String>,
     state: FoodImageState,
+    stateByImageUrl: Map<String, FoodImageState> = emptyMap(),
     onCardClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
@@ -61,7 +62,6 @@ fun FoodImageStackView(
     // 현재 맨 앞 카드 인덱스(순환)
     var currentIndex by rememberSaveable(imageUrls) { mutableIntStateOf(0) }
     val size = imageUrls.size
-    val canNavigate = size > 1 && state is FoodImageState.Ready
     val frontIndex = loopedIndex(currentIndex, size)
     val backLeftIndex = loopedIndex(currentIndex + 1, size)
     val backRightIndex = loopedIndex(currentIndex + 2, size)
@@ -70,6 +70,11 @@ fun FoodImageStackView(
     val backLeftImageUrl = imageUrls.getOrNull(backLeftIndex)
     val backRightImageUrl = imageUrls.getOrNull(backRightIndex)
     val incomingBackImageUrl = imageUrls.getOrNull(incomingBackIndex)
+    fun stateOf(imageUrl: String?): FoodImageState {
+        if (imageUrl == null) return state
+        return stateByImageUrl[imageUrl] ?: state
+    }
+    val canNavigate = size > 1 && stateOf(frontImageUrl) is FoodImageState.Ready
     val density = LocalDensity.current
     val scope = rememberCoroutineScope()
     val swipeThresholdPx = with(density) { SwipeThreshold.toPx() }
@@ -209,7 +214,7 @@ fun FoodImageStackView(
         if (size >= 4 && stackAnimationState.recycleIndex != incomingBackIndex && incomingBackImageUrl != null) {
             FoodImageCard(
                 imageUrl = incomingBackImageUrl,
-                state = state,
+                state = stateOf(incomingBackImageUrl),
                 modifier = Modifier
                     .fillMaxSize()
                     .graphicsLayer {
@@ -223,7 +228,7 @@ fun FoodImageStackView(
         if (size >= 3 && stackAnimationState.recycleIndex != backRightIndex && backRightImageUrl != null) {
             FoodImageCard(
                 imageUrl = backRightImageUrl,
-                state = state,
+                state = stateOf(backRightImageUrl),
                 modifier = Modifier
                     .fillMaxSize()
                     .graphicsLayer {
@@ -237,7 +242,7 @@ fun FoodImageStackView(
         if (size >= 2 && stackAnimationState.recycleIndex != backLeftIndex && backLeftImageUrl != null) {
             FoodImageCard(
                 imageUrl = backLeftImageUrl,
-                state = state,
+                state = stateOf(backLeftImageUrl),
                 modifier = Modifier
                     .fillMaxSize()
                     .graphicsLayer {
@@ -252,7 +257,7 @@ fun FoodImageStackView(
             imageUrls.getOrNull(index)?.let { recycleImageUrl ->
                 FoodImageCard(
                     imageUrl = recycleImageUrl,
-                    state = state,
+                    state = stateOf(recycleImageUrl),
                     modifier = Modifier
                         .fillMaxSize()
                         .graphicsLayer {
@@ -268,14 +273,14 @@ fun FoodImageStackView(
         frontImageUrl?.let { imageUrl ->
             FoodImageCard(
                 imageUrl = imageUrl,
-                state = state,
+                state = stateOf(imageUrl),
                 modifier = Modifier
                     .fillMaxSize()
                     .graphicsLayer {
                         translationY = stackAnimationState.frontOffset
                     }
                     .clickable(
-                        enabled = state is FoodImageState.Ready &&
+                        enabled = stateOf(imageUrl) is FoodImageState.Ready &&
                             !stackAnimationState.isRecycling &&
                             stackAnimationState.frontOffset <= tapCancelVerticalThresholdPx,
                         interactionSource = remember { MutableInteractionSource() },
