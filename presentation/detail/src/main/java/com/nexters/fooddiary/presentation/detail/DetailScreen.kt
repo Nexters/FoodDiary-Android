@@ -68,6 +68,7 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.ui.R as CoreUiR
 import com.nexters.fooddiary.core.ui.component.AddPhotoBox
+import com.nexters.fooddiary.core.ui.component.AddPhotoBoxMode
 import com.nexters.fooddiary.core.ui.component.DetailScreenHeader
 import com.nexters.fooddiary.core.ui.food.FoodImageCard
 import com.nexters.fooddiary.core.ui.food.FoodImageState
@@ -409,6 +410,7 @@ private fun MealSection(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f),
+                    mode = AddPhotoBoxMode.NO_IMAGE_RECORDED,
                     onAddPhoto = onAddPhoto
                 )
             }
