@@ -64,7 +64,7 @@ fun WeeklyCalendar(
     onHeaderBoundsChanged: (Rect) -> Unit = {},
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val visibleMonth = remember {
+    val visibleMonth = remember(calendarState) {
         derivedStateOf {
             YearMonth.from(calendarState.firstVisibleWeek.days.first().date)
         }
