@@ -138,7 +138,7 @@ class HomeViewModel @AssistedInject constructor(
                     locationText = "",
                 ),
                 selectedDateImageStatesByUrl = emptyMap(),
-                hasAddableImagesForSelectedDate = false,
+                hasAddableImagesForSelectedDate = null,
             )
         }
         loadSummaryForSelectedWeek()
@@ -147,6 +147,7 @@ class HomeViewModel @AssistedInject constructor(
     }
 
     fun onDiaryUpdated(date: LocalDate) {
+        setState { copy(pendingDates = pendingDates - date) }
         withState { state ->
             if (YearMonth.from(state.selectedDate) == YearMonth.from(date)) {
                 loadPhotosForMonth(YearMonth.from(state.selectedDate))
@@ -160,9 +161,20 @@ class HomeViewModel @AssistedInject constructor(
         }
     }
 
+    fun onDiaryUploadPending(date: LocalDate) {
+        setState { copy(pendingDates = pendingDates + date) }
+    }
+
     fun onCardStackClicked() {
         withState { state ->
             _events.tryEmit(HomeEvent.NavigateToDetail(state.selectedDate))
+        }
+    }
+
+    fun refreshAddableImageState() {
+        withState { state ->
+            setState { copy(hasAddableImagesForSelectedDate = null) }
+            loadAddableImageStateForSelectedDate(state.selectedDate)
         }
     }
 

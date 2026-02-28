@@ -38,6 +38,7 @@ import com.nexters.fooddiary.core.ui.theme.White
 enum class AddPhotoBoxMode {
     ADDABLE,
     NO_IMAGE_RECORDED,
+    NO_IMAGE_RECORDED_DETAIL,
 }
 
 @Composable
@@ -54,6 +55,8 @@ fun AddPhotoBox(
     }
     val textRes = if (isAddable) {
         string.home_add_food_photo
+    } else if (mode == AddPhotoBoxMode.NO_IMAGE_RECORDED_DETAIL) {
+        string.detail_no_food_photo_recorded
     } else {
         string.home_no_food_photo_recorded
     }
