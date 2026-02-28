@@ -1,5 +1,6 @@
 package com.nexters.fooddiary.presentation.detail.util
 
+import com.nexters.fooddiary.core.common.toLocalTimeText
 import com.nexters.fooddiary.domain.model.AnalysisStatus
 import com.nexters.fooddiary.domain.model.DiaryDetail
 import com.nexters.fooddiary.domain.model.DiaryEntry
@@ -9,8 +10,6 @@ import com.nexters.fooddiary.presentation.detail.MealCardStatus
 import com.nexters.fooddiary.presentation.detail.MealCardUiModel
 import com.nexters.fooddiary.presentation.detail.MealSlot
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 internal fun DiaryDetail.toDailyMeals(date: LocalDate): DailyMeals {
     val diaryByMeal = diaries.associateBy { it.mealType }
@@ -47,14 +46,7 @@ internal fun MealSlot.toMealUiModel(
         .map { it.trim() }
         .filter { it.isNotEmpty() }
         .map { tag -> if (tag.startsWith("#")) tag else "#$tag" }
-    val mealTimeText = if (diary.createdAt.isNullOrEmpty()) {
-        ""
-    } else {
-        runCatching { LocalDateTime.parse(diary.createdAt) }
-            .getOrNull()
-            ?.format(DateTimeFormatter.ofPattern("HH:mm"))
-            .orEmpty()
-    }
+    val mealTimeText = diary.createdAt.toLocalTimeText()
 
     return MealCardUiModel(
         id = "${date}_${name.lowercase()}",
