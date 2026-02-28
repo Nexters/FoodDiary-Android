@@ -7,6 +7,7 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import com.nexters.fooddiary.core.common.permission.PermissionUtil
+import com.nexters.fooddiary.core.common.toLocalTimeText
 import com.nexters.fooddiary.core.ui.food.FoodImageState
 import com.nexters.fooddiary.domain.model.DiaryDetail
 import com.nexters.fooddiary.domain.usecase.GetDiaryByDateUseCase
@@ -32,9 +33,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import java.util.Collections.emptyMap
 
@@ -283,17 +282,9 @@ internal fun shouldLoadWeek(
 private fun DiaryDetail.toHomeFoodImageStatesByUrl(): Map<String, FoodImageState> {
     return diaries.flatMap { diary ->
         val state = FoodImageState.Ready(
-            timeText = diary.createdAt.toHomeTimeText(),
+            timeText = diary.createdAt.toLocalTimeText(),
             locationText = diary.location.orEmpty(),
         )
         diary.photos.map { photo -> photo.imageUrl to state }
     }.toMap()
-}
-
-private fun String?.toHomeTimeText(): String {
-    if (this.isNullOrEmpty()) return ""
-    return runCatching { LocalDateTime.parse(this) }
-        .getOrNull()
-        ?.format(DateTimeFormatter.ofPattern("HH:mm"))
-        .orEmpty()
 }
