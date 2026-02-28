@@ -13,6 +13,7 @@ import com.nexters.fooddiary.domain.usecase.GetDiaryByDateUseCase
 import com.nexters.fooddiary.domain.usecase.GetDiarySummaryUseCase
 import com.nexters.fooddiary.domain.usecase.GetDiariesSummaryUseCase
 import com.nexters.fooddiary.domain.usecase.GetFoodPhotoCountByWeekUseCase
+import com.nexters.fooddiary.domain.usecase.GetGalleryPhotoUrisUseCase
 import com.nexters.fooddiary.domain.usecase.GetUserInfoUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -49,6 +50,7 @@ class HomeViewModel @AssistedInject constructor(
     private val getDiarySummaryUseCase: GetDiarySummaryUseCase,
     private val getFoodPhotoCountByWeekUseCase: GetFoodPhotoCountByWeekUseCase,
     private val getDiariesSummaryUseCase: GetDiariesSummaryUseCase,
+    private val getGalleryPhotoUrisUseCase: GetGalleryPhotoUrisUseCase,
 ) : MavericksViewModel<HomeScreenState>(initialState) {
     private val _photoCountByDate = MutableStateFlow<Map<LocalDate, Int>>(emptyMap())
     val photoCountByDate: StateFlow<Map<LocalDate, Int>> = _photoCountByDate.asStateFlow()
@@ -67,6 +69,7 @@ class HomeViewModel @AssistedInject constructor(
         loadSummaryForSelectedWeek()
         loadUserMe()
         loadSelectedDateImageState(initialSelectedDate)
+        loadAddableImageStateForSelectedDate(initialSelectedDate)
     }
 
     private fun loadUserMe() {
@@ -135,10 +138,12 @@ class HomeViewModel @AssistedInject constructor(
                     locationText = "",
                 ),
                 selectedDateImageStatesByUrl = emptyMap(),
+                hasAddableImagesForSelectedDate = false,
             )
         }
         loadSummaryForSelectedWeek()
         loadSelectedDateImageState(date)
+        loadAddableImageStateForSelectedDate(date)
     }
 
     fun onDiaryUpdated(date: LocalDate) {
@@ -149,6 +154,9 @@ class HomeViewModel @AssistedInject constructor(
             }
             if (weekStartOf(state.selectedDate) == weekStartOf(date)) {
                 loadSummaryForSelectedWeek(forceRefresh = true)
+            }
+            if (state.selectedDate == date) {
+                loadAddableImageStateForSelectedDate(state.selectedDate)
             }
         }
     }
@@ -215,6 +223,33 @@ class HomeViewModel @AssistedInject constructor(
                             ),
                         selectedDateImageStatesByUrl = selectedDateImageStatesByUrl,
                     )
+                }
+            }
+        }
+    }
+
+    private fun loadAddableImageStateForSelectedDate(targetDate: LocalDate) {
+        if (!PermissionUtil.hasMediaPermission(context)) {
+            setState {
+                if (selectedDate != targetDate) {
+                    this
+                } else {
+                    copy(hasAddableImagesForSelectedDate = false)
+                }
+            }
+            return
+        }
+
+        viewModelScope.launch {
+            val hasAddableImagesForSelectedDate = runCatching {
+                getGalleryPhotoUrisUseCase(targetDate).isNotEmpty()
+            }.getOrDefault(false)
+
+            setState {
+                if (selectedDate != targetDate) {
+                    this
+                } else {
+                    copy(hasAddableImagesForSelectedDate = hasAddableImagesForSelectedDate)
                 }
             }
         }

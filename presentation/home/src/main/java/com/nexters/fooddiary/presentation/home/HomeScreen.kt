@@ -30,6 +30,7 @@ import com.nexters.fooddiary.core.ui.calendar.WeeklyCalendar
 import com.nexters.fooddiary.core.ui.calendar.rememberMonthCalendarState
 import com.nexters.fooddiary.core.ui.calendar.rememberWeeklyCalendarState
 import com.nexters.fooddiary.core.ui.component.AddPhotoBox
+import com.nexters.fooddiary.core.ui.component.AddPhotoBoxMode
 import com.nexters.fooddiary.core.ui.component.Header
 import com.nexters.fooddiary.core.ui.food.FoodImageCard
 import com.nexters.fooddiary.core.ui.food.FoodImageState
@@ -98,6 +99,7 @@ internal fun HomeScreen(
         onDateSelected = viewModel::onDateSelected,
         onCardStackClick = viewModel::onCardStackClicked,
         onNavigateToImagePicker = onNavigateToImagePicker,
+        onNavigateToDetail = onNavigateToDetail,
         onNavigateToMyPage = onNavigateToMyPage,
         selectedDateImageUrls = selectedDateImageUrls(
             weeklyPhotosByDate = state.weeklyPhotosByDate,
@@ -125,6 +127,7 @@ private fun HomeScreen(
     isMonthlyCalendarView: Boolean = false,
     onCardStackClick: () -> Unit = {},
     onNavigateToImagePicker: (LocalDate) -> Unit = {},
+    onNavigateToDetail: (LocalDate) -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
     selectedDateImageUrls: List<String> = emptyList(),
     isSelectedDatePending: Boolean = false,
@@ -137,6 +140,7 @@ private fun HomeScreen(
     val scrollState = rememberScrollState()
     val weeklyCalendarState = rememberWeeklyCalendarState(selectedDate = state.selectedDate)
     val monthlyCalendarState = rememberMonthCalendarState(selectedDate = state.selectedDate)
+    val canShowAddPhoto = state.hasAddableImagesForSelectedDate
 
     Box(
         modifier = modifier
@@ -167,7 +171,12 @@ private fun HomeScreen(
                     MonthlyCalendar(
                         calendarState = monthlyCalendarState,
                         selectedDate = state.selectedDate,
-                        onDateSelected = onDateSelected,
+                        onDateSelected = { date ->
+                            onDateSelected(date)
+                            if (!date.isAfter(LocalDate.now())) {
+                                onNavigateToDetail(date)
+                            }
+                        },
                         onMonthChanged = onMonthChanged,
                         photoCountByDate = photoCountByDate,
                         photoUrlsByDate = photoUrlsByDate,
@@ -205,6 +214,11 @@ private fun HomeScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .aspectRatio(1f),
+                            mode = if (canShowAddPhoto) {
+                                AddPhotoBoxMode.ADDABLE
+                            } else {
+                                AddPhotoBoxMode.NO_IMAGE_RECORDED
+                            },
                             onAddPhoto = { onNavigateToImagePicker(state.selectedDate) },
                         )
                     }

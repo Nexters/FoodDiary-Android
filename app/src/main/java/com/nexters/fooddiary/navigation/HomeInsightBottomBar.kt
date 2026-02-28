@@ -1,6 +1,7 @@
 package com.nexters.fooddiary.navigation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +21,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -31,9 +33,9 @@ import com.nexters.fooddiary.core.common.R.string
 import com.nexters.fooddiary.core.ui.R.drawable
 import com.nexters.fooddiary.core.ui.theme.GlassmorphismStyle
 import com.nexters.fooddiary.core.ui.theme.Gray050
-import com.nexters.fooddiary.core.ui.theme.PrimBase
 import com.nexters.fooddiary.core.ui.theme.White
 import com.nexters.fooddiary.core.ui.theme.glassmorphism
+import com.nexters.fooddiary.core.ui.theme.neonShadow
 import dev.chrisbanes.haze.HazeState
 
 internal enum class HomeInsightTab {
@@ -44,6 +46,12 @@ internal enum class HomeInsightTab {
 private val BottomBarGlassStyle = GlassmorphismStyle(
     cornerRadius = 999.dp,
     blurRadius = 30.dp,
+)
+private val BottomBarNeonBackgroundBrush = Brush.verticalGradient(
+    colors = listOf(Color(0xFFFE670E), Color(0xFFFF853D))
+)
+private val BottomBarNeonBorderBrush = Brush.verticalGradient(
+    colors = listOf(Color.White.copy(alpha = 0.3f), Color.Transparent)
 )
 
 @Composable
@@ -129,8 +137,7 @@ private fun HomeInsightToggle(
             modifier = Modifier
                 .height(44.dp)
                 .width(75.dp)
-                .clip(CircleShape)
-                .background(if (isHomeSelected) PrimBase else Transparent)
+                .neonSelectionBackground(isHomeSelected)
                 .padding(12.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
@@ -153,8 +160,7 @@ private fun HomeInsightToggle(
             modifier = Modifier
                 .height(44.dp)
                 .width(105.dp)
-                .clip(CircleShape)
-                .background(if (isInsightSelected) PrimBase else Transparent)
+                .neonSelectionBackground(isInsightSelected)
                 .padding(vertical = 12.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
@@ -173,5 +179,20 @@ private fun HomeInsightToggle(
                 color = if (isInsightSelected) White else Gray050,
             )
         }
+    }
+}
+
+private fun Modifier.neonSelectionBackground(isSelected: Boolean): Modifier {
+    return if (isSelected) {
+        this
+            .neonShadow(
+                color = Color(0x66FF8842),
+                blurRadius = 16.dp,
+                borderRadius = 22.dp,
+            )
+            .border(width = 1.dp, brush = BottomBarNeonBorderBrush, shape = CircleShape)
+            .background(brush = BottomBarNeonBackgroundBrush, shape = CircleShape)
+    } else {
+        this.background(color = Transparent, shape = CircleShape)
     }
 }

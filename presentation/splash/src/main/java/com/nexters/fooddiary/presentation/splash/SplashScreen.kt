@@ -1,8 +1,13 @@
 package com.nexters.fooddiary.presentation.splash
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -10,10 +15,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.airbnb.mvrx.compose.collectAsStateWithLifecycle
 import com.airbnb.mvrx.compose.mavericksViewModel
+import com.nexters.fooddiary.core.ui.R as CoreR
 
 @Composable
 internal fun SplashScreen(
@@ -47,11 +55,23 @@ private fun SplashContent(
             .background(Color(0xFF191821)),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = "스플래시",
-            fontSize = 36.sp,
-            color = Color.White
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id = CoreR.drawable.ic_app_main_logo_text),
+                contentDescription = null,
+                modifier = Modifier
+                    .width(225.dp)
+                    .height(82.dp),
+            )
+
+            Image(
+                painter = painterResource(id = CoreR.drawable.img_app_title_image),
+                contentDescription = null,
+                modifier = Modifier.size(180.dp)
+            )
+        }
     }
 }
 

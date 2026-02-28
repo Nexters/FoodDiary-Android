@@ -35,11 +35,29 @@ import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.Gray900
 import com.nexters.fooddiary.core.ui.theme.White
 
+enum class AddPhotoBoxMode {
+    ADDABLE,
+    NO_IMAGE_RECORDED,
+}
+
 @Composable
 fun AddPhotoBox(
     modifier: Modifier = Modifier,
+    mode: AddPhotoBoxMode = AddPhotoBoxMode.ADDABLE,
     onAddPhoto: () -> Unit,
 ) {
+    val isAddable = mode == AddPhotoBoxMode.ADDABLE
+    val imageRes = if (isAddable) {
+        drawable.ic_add_diary
+    } else {
+        drawable.ic_img_not
+    }
+    val textRes = if (isAddable) {
+        string.home_add_food_photo
+    } else {
+        string.home_no_food_photo_recorded
+    }
+
     Box(
         modifier = modifier
             .heightIn(min = 200.dp)
@@ -69,7 +87,10 @@ fun AddPhotoBox(
                     ),
                 )
             }
-            .clickable(onClick = onAddPhoto),
+            .clickable(
+                enabled = isAddable,
+                onClick = onAddPhoto,
+            ),
         contentAlignment = Alignment.Center,
     ) {
         Column(
@@ -79,11 +100,11 @@ fun AddPhotoBox(
         ) {
             Image(
                 modifier = Modifier.size(180.dp),
-                painter = painterResource(drawable.ic_add_diary),
+                painter = painterResource(imageRes),
                 contentDescription = null,
             )
             Text(
-                text = stringResource(string.home_add_food_photo),
+                text = stringResource(textRes),
                 style = AppTypography.p12,
                 color = White,
                 modifier = Modifier
