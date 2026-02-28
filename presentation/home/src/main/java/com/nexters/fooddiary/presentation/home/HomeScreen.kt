@@ -30,6 +30,7 @@ import com.nexters.fooddiary.core.ui.calendar.WeeklyCalendar
 import com.nexters.fooddiary.core.ui.calendar.rememberMonthCalendarState
 import com.nexters.fooddiary.core.ui.calendar.rememberWeeklyCalendarState
 import com.nexters.fooddiary.core.ui.component.AddPhotoBox
+import com.nexters.fooddiary.core.ui.component.AddPhotoBoxMode
 import com.nexters.fooddiary.core.ui.component.Header
 import com.nexters.fooddiary.core.ui.food.FoodImageStackView
 import com.nexters.fooddiary.core.ui.theme.AppTypography
@@ -125,6 +126,7 @@ private fun HomeScreen(
     val scrollState = rememberScrollState()
     val weeklyCalendarState = rememberWeeklyCalendarState(selectedDate = state.selectedDate)
     val monthlyCalendarState = rememberMonthCalendarState(selectedDate = state.selectedDate)
+    val canShowAddPhoto = state.hasAddableImagesForSelectedDate
 
     Box(
         modifier = modifier
@@ -189,6 +191,11 @@ private fun HomeScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .aspectRatio(1f),
+                            mode = if (canShowAddPhoto) {
+                                AddPhotoBoxMode.ADDABLE
+                            } else {
+                                AddPhotoBoxMode.NO_IMAGE_RECORDED
+                            },
                             onAddPhoto = { onNavigateToImagePicker(state.selectedDate) },
                         )
                     }
