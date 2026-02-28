@@ -446,7 +446,7 @@ private fun MealSection(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f),
-                    mode = AddPhotoBoxMode.NO_IMAGE_RECORDED,
+                    mode = AddPhotoBoxMode.NO_IMAGE_RECORDED_DETAIL,
                     onAddPhoto = onAddPhoto
                 )
             }

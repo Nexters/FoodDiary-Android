@@ -138,7 +138,7 @@ class HomeViewModel @AssistedInject constructor(
                     locationText = "",
                 ),
                 selectedDateImageStatesByUrl = emptyMap(),
-                hasAddableImagesForSelectedDate = false,
+                hasAddableImagesForSelectedDate = null,
             )
         }
         loadSummaryForSelectedWeek()
@@ -168,6 +168,13 @@ class HomeViewModel @AssistedInject constructor(
     fun onCardStackClicked() {
         withState { state ->
             _events.tryEmit(HomeEvent.NavigateToDetail(state.selectedDate))
+        }
+    }
+
+    fun refreshAddableImageState() {
+        withState { state ->
+            setState { copy(hasAddableImagesForSelectedDate = null) }
+            loadAddableImageStateForSelectedDate(state.selectedDate)
         }
     }
 

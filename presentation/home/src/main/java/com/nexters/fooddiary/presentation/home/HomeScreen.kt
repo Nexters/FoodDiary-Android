@@ -1,5 +1,7 @@
 package com.nexters.fooddiary.presentation.home
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,17 +15,23 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.airbnb.mvrx.compose.collectAsState as collectMavericksState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.common.R.string
+import com.nexters.fooddiary.core.common.permission.PermissionUtil
 import com.nexters.fooddiary.core.ui.alert.SnackBarData
 import com.nexters.fooddiary.core.ui.calendar.MonthlyCalendar
 import com.nexters.fooddiary.core.ui.calendar.WeeklyCalendar
@@ -59,10 +67,22 @@ internal fun HomeScreen(
     onShowSnackBar: (SnackBarData) -> Unit = {},
     viewModel: HomeViewModel = mavericksViewModel(),
 ) {
+    val context = LocalContext.current
     val state by viewModel.collectMavericksState()
     val photoCountByDate by viewModel.photoCountByDate.collectAsState()
     val photoUrlsByDate by viewModel.photoUrlsByDate.collectAsState()
     val currentOnNavigateToDetail by rememberUpdatedState(onNavigateToDetail)
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    val requiredPermission = PermissionUtil.getRequiredMediaPermission()
+    val mediaPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.loadInitialData()
+            viewModel.refreshAddableImageState()
+        }
+    }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collectLatest { event ->
@@ -74,6 +94,24 @@ internal fun HomeScreen(
 
     LaunchedEffect(Unit) {
         viewModel.loadInitialData()
+        if (!PermissionUtil.hasMediaPermission(context)) {
+            mediaPermissionLauncher.launch(requiredPermission)
+        }
+    }
+
+    DisposableEffect(lifecycleOwner, viewModel) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refreshAddableImageState()
+                if (!PermissionUtil.hasMediaPermission(context)) {
+                    mediaPermissionLauncher.launch(requiredPermission)
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
     }
 
     LaunchedEffect(pushSyncDateString) {
@@ -204,6 +242,13 @@ private fun HomeScreen(
                         FoodImageCard(
                             imageUrl = "",
                             state = FoodImageState.Pending,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp)
+                                .aspectRatio(1f),
+                        )
+                    } else if (canShowAddPhoto == null) {
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 20.dp)
