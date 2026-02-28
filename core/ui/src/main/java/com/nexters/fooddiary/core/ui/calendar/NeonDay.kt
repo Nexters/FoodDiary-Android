@@ -49,7 +49,7 @@ fun NeonStyleDay(
                 if (isSelected) {
                     Modifier.neonShadow(
                         color = Color(0x66FF8842),
-                        blurRadius = 16.dp,
+                        blurRadius = 4.dp,
                         borderRadius = 8.dp
                     )
                 } else {
