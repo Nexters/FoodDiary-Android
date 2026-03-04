@@ -10,7 +10,10 @@
     <string name="detail_share_prefix">%1$s 맛을 기억하시나요?\n뭐먹었지에서 확인해보세요.</string>
     <string name="detail_ai_summary_title">AI가 요약했어요.</string>
     <string name="detail_place_empty_guide">수정버튼을 눌러 내용을 기록해주세요.</string>
-    <string name="detail_menu_delete">삭제하기</string>
+    <string name="detail_menu_delete">전체삭제</string>
+    <string name="detail_delete_success">전체 삭제가 완료됐어요.</string>
+    <string name="detail_delete_empty">삭제할 기록이 없어요.</string>
+    <string name="detail_delete_failed">전체 삭제에 실패했어요. 잠시 후 다시 시도해주세요.</string>
     <string name="detail_meal_breakfast">아침</string>
     <string name="detail_meal_lunch">점심</string>
     <string name="detail_meal_dinner">저녁</string>
