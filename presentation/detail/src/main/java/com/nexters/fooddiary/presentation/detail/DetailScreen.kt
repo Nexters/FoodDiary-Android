@@ -152,6 +152,12 @@ internal fun DetailScreen(
                 is DetailEvent.NavigateToModify -> {
                     onNavigateToModify(event.diaryId)
                 }
+                DetailEvent.DeleteEmpty -> {
+                    currentOnShowToast(currentContext.getString(R.string.detail_delete_empty))
+                }
+                DetailEvent.DeleteFailed -> {
+                    currentOnShowToast(currentContext.getString(R.string.detail_delete_failed))
+                }
             }
         }
     }
