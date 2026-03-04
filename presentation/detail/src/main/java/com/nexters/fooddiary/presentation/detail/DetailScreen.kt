@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -41,6 +42,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -66,6 +68,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.ui.R as CoreUiR
@@ -78,6 +81,7 @@ import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.GlassmorphismStyle
 import com.nexters.fooddiary.core.ui.theme.Gray050
 import com.nexters.fooddiary.core.ui.theme.SdBase
+import com.nexters.fooddiary.core.ui.theme.Sd900
 import com.nexters.fooddiary.core.ui.theme.White
 import com.nexters.fooddiary.core.ui.theme.glassmorphism
 import dev.chrisbanes.haze.hazeSource
@@ -277,14 +281,34 @@ private fun DetailContent(
                                     expanded = isMoreMenuExpanded,
                                     onDismissRequest = { isMoreMenuExpanded = false },
                                     offset = DpOffset(x = 0.dp, y = 0.dp),
+                                    modifier = Modifier.width(132.dp),
+                                    shape = RoundedCornerShape(10.dp),
+                                    containerColor = Sd900,
+                                    tonalElevation = 0.dp,
+                                    shadowElevation = 10.dp,
                                 ) {
                                     DropdownMenuItem(
+                                        modifier = Modifier.height(46.dp),
                                         text = {
                                             Text(
                                                 text = stringResource(id = R.string.detail_menu_delete),
-                                                color = Color.Black
+                                                style = AppTypography.p12.copy(letterSpacing = (-0.18).sp),
+                                                color = Gray050
                                             )
                                         },
+                                        trailingIcon = {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.ic_delete),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(18.dp),
+                                                tint = Gray050,
+                                            )
+                                        },
+                                        colors = MenuDefaults.itemColors(
+                                            textColor = Gray050,
+                                            trailingIconColor = Gray050,
+                                        ),
+                                        contentPadding = PaddingValues(horizontal = 14.dp),
                                         onClick = {
                                             isMoreMenuExpanded = false
                                             onDeleteClick()
