@@ -15,6 +15,7 @@ class DiaryMapper @Inject constructor() {
         return diaries.map { diary ->
             DiaryEntry(
                 diaryId = diary.diaryId,
+                diaryDate = diary.diaryDate,
                 mealType = diary.timeType.toDomain(),
                 analysisStatus = diary.analysisStatus.toDomain(),
                 createdAt = diary.createdAt,
