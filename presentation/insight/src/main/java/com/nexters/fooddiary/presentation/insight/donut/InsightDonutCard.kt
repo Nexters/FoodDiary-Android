@@ -19,22 +19,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
 import com.nexters.fooddiary.core.ui.theme.Gray050
-import com.nexters.fooddiary.core.ui.theme.Gray200
+import com.nexters.fooddiary.core.ui.theme.PrimBase
 import com.nexters.fooddiary.core.ui.theme.SdBase
-import com.nexters.fooddiary.presentation.insight.InsightHighlightCardUiModel
-import com.nexters.fooddiary.presentation.insight.InsightTextPartUiModel
+import com.nexters.fooddiary.presentation.insight.InsightChartDefaults
+import com.nexters.fooddiary.presentation.insight.InsightDonutCardUiModel
 import com.nexters.fooddiary.presentation.insight.sampleInsightReadyState
 
 private val CardShape = RoundedCornerShape(16.dp)
 private val CardBackgroundColor = Color.White.copy(alpha = 0.02f)
 
 @Composable
-internal fun InsightHighlightCard(
-    card: InsightHighlightCardUiModel,
+internal fun InsightDonutCard(
+    card: InsightDonutCardUiModel,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -52,15 +51,10 @@ internal fun InsightHighlightCard(
                     color = Gray050,
                 )
                 Text(
-                    text = buildInsightHeadline(card.headlineParts),
+                    text = buildInsightHeadline(card),
                     style = AppTypography.p15.copy(fontWeight = FontWeight.SemiBold),
                 )
             }
-            Text(
-                text = card.caption,
-                style = AppTypography.p12.copy(fontSize = 10.sp, lineHeight = 14.sp),
-                color = Gray200,
-            )
         }
 
         InsightDonutChartWithLabels(
@@ -70,25 +64,53 @@ internal fun InsightHighlightCard(
     }
 }
 
-private fun buildInsightHeadline(parts: List<InsightTextPartUiModel>): AnnotatedString = buildAnnotatedString {
-    parts.forEach { part ->
-        withStyle(SpanStyle(color = part.color)) {
-            append(part.text)
+private fun buildInsightHeadline(card: InsightDonutCardUiModel): AnnotatedString = buildAnnotatedString {
+    val previousCategory = card.previousTopCategory
+    val currentCategory = card.currentTopCategory
+
+    if (previousCategory == currentCategory) {
+        withStyle(SpanStyle(color = card.categoryColor(currentCategory))) {
+            append(currentCategory)
         }
+        withStyle(SpanStyle(color = Gray050)) {
+            append(" 이 계속 1등이에요.")
+        }
+        return@buildAnnotatedString
+    }
+
+    withStyle(SpanStyle(color = card.categoryColor(previousCategory))) {
+        append(previousCategory)
+    }
+    withStyle(SpanStyle(color = Gray050)) {
+        append(" 대신 ")
+    }
+    withStyle(SpanStyle(color = card.categoryColor(currentCategory))) {
+        append(currentCategory)
+    }
+    withStyle(SpanStyle(color = Gray050)) {
+        append(" 이 1등이에요.")
     }
 }
 
+private fun InsightDonutCardUiModel.categoryColor(category: String): Color =
+    segments.firstOrNull { it.label == category }?.color
+        ?: when (category) {
+            "양식" -> InsightChartDefaults.BlueSegmentColor
+            "한식" -> PrimBase
+            else -> Gray050
+        }
+
 @Preview(showBackground = true, backgroundColor = 0xFF191821)
 @Composable
-private fun InsightHighlightCardPreview() {
+private fun InsightDonutCardPreview() {
     FoodDiaryTheme {
         Box(
             modifier = Modifier
                 .background(SdBase)
                 .padding(16.dp),
         ) {
-            sampleInsightReadyState().highlightCard?.let { card ->
-                InsightHighlightCard(
+            sampleInsightReadyState().donutCard?.let { card ->
+                InsightDonutCard(
                     card = card,
                     modifier = Modifier.fillMaxWidth(),
                 )

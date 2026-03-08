@@ -1,6 +1,7 @@
 package com.nexters.fooddiary.presentation.insight
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,34 +13,51 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.foundation.Image
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.airbnb.mvrx.compose.collectAsStateWithLifecycle
+import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.ui.component.Header
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
 import com.nexters.fooddiary.core.ui.theme.Gray050
 import com.nexters.fooddiary.core.ui.theme.SdBase
-import androidx.compose.foundation.verticalScroll
-import com.nexters.fooddiary.presentation.insight.donut.InsightHighlightCard
+import com.nexters.fooddiary.presentation.insight.donut.InsightDonutCard
 
 @Composable
 fun InsightScreen(
     modifier: Modifier = Modifier,
-    state: InsightScreenState = InsightScreenState(),
+    onNavigateToMyPage: () -> Unit = {},
+    onBack: () -> Unit = {},
+    viewModel: InsightViewModel = mavericksViewModel(),
+) {
+    val state by viewModel.collectAsStateWithLifecycle()
+
+    InsightScreen(
+        modifier = modifier,
+        state = state,
+        onNavigateToMyPage = onNavigateToMyPage,
+        onBack = onBack,
+    )
+}
+
+@Composable
+internal fun InsightScreen(
+    modifier: Modifier = Modifier,
+    state: InsightScreenState,
     onNavigateToMyPage: () -> Unit = {},
     onBack: () -> Unit = {},
 ) {
     BackHandler(onBack = onBack)
-
-    val card = state.highlightCard
 
     Box(
         modifier = modifier
@@ -53,7 +71,7 @@ fun InsightScreen(
             onClickMyPage = onNavigateToMyPage,
         )
 
-        if (state.isReady && card != null) {
+        if (state.donutCard != null) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -61,8 +79,8 @@ fun InsightScreen(
                     .padding(top = 102.dp, bottom = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                InsightHighlightCard(
-                    card = card,
+                InsightDonutCard(
+                    card = state.donutCard,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
@@ -96,7 +114,7 @@ fun InsightScreen(
 @Composable
 private fun InsightScreenPreview() {
     FoodDiaryTheme {
-        InsightScreen()
+        InsightScreen(state = InsightScreenState())
     }
 }
 

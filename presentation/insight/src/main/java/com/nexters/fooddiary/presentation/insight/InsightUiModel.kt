@@ -1,24 +1,18 @@
 package com.nexters.fooddiary.presentation.insight
 
 import androidx.compose.ui.graphics.Color
-import com.nexters.fooddiary.core.ui.theme.Gray050
+import com.airbnb.mvrx.MavericksState
 import com.nexters.fooddiary.core.ui.theme.PrimBase
 
 data class InsightScreenState(
-    val isReady: Boolean = false,
-    val highlightCard: InsightHighlightCardUiModel? = null,
-)
+    val donutCard: InsightDonutCardUiModel? = null,
+) : MavericksState
 
-data class InsightHighlightCardUiModel(
+data class InsightDonutCardUiModel(
     val title: String,
-    val headlineParts: List<InsightTextPartUiModel>,
-    val caption: String,
+    val previousTopCategory: String,
+    val currentTopCategory: String,
     val segments: List<InsightDonutSegmentUiModel>,
-)
-
-data class InsightTextPartUiModel(
-    val text: String,
-    val color: Color,
 )
 
 data class InsightDonutSegmentUiModel(
@@ -61,16 +55,14 @@ internal object InsightChartDefaults {
 }
 
 internal fun sampleInsightReadyState(): InsightScreenState = InsightScreenState(
-    isReady = true,
-    highlightCard = InsightHighlightCardUiModel(
+    donutCard = sampleInsightDonutCard(),
+)
+
+internal fun sampleInsightDonutCard(): InsightDonutCardUiModel =
+    InsightDonutCardUiModel(
         title = "왕좌가 바뀌었어요",
-        headlineParts = listOf(
-            InsightTextPartUiModel(text = "양식", color = InsightChartDefaults.BlueSegmentColor),
-            InsightTextPartUiModel(text = " 대신 ", color = Gray050),
-            InsightTextPartUiModel(text = "한식", color = PrimBase),
-            InsightTextPartUiModel(text = " 이 1등이에요.", color = Gray050),
-        ),
-        caption = "추운 겨울, 국물음식이 더 끌리죠.",
+        previousTopCategory = "양식",
+        currentTopCategory = "한식",
         segments = listOf(
             InsightDonutSegmentUiModel(
                 label = "한식",
@@ -87,5 +79,4 @@ internal fun sampleInsightReadyState(): InsightScreenState = InsightScreenState(
                 gradient = InsightChartDefaults.BlueSegmentGradient,
             ),
         ),
-    ),
-)
+    )

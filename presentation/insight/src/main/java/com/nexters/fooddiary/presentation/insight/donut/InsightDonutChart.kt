@@ -429,7 +429,7 @@ private fun InsightDonutChartPreview() {
             contentAlignment = Alignment.Center,
         ) {
             InsightDonutChart(
-                segments = sampleInsightReadyState().highlightCard?.segments.orEmpty(),
+                segments = sampleInsightReadyState().donutCard?.segments.orEmpty(),
                 modifier = Modifier.size(InsightChartMaxSize),
             )
         }
@@ -446,7 +446,7 @@ private fun InsightDonutChartWithLabelsPreview() {
                 .padding(16.dp),
         ) {
             InsightDonutChartWithLabels(
-                segments = sampleInsightReadyState().highlightCard?.segments.orEmpty(),
+                segments = sampleInsightReadyState().donutCard?.segments.orEmpty(),
                 modifier = Modifier.fillMaxWidth(),
             )
         }
