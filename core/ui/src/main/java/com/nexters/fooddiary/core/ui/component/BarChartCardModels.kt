@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 @Immutable
 data class BarChartItem(
     val label: String,
-    val ratio: Float,
+    val percentage: Float,
     val valueText: String,
     val topColor: Color,
     val bottomColor: Color,

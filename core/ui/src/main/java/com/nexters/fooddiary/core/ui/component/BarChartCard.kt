@@ -131,14 +131,14 @@ private fun BarChartCardPreview() {
             bars = listOf(
                 BarChartItem(
                     label = "1월",
-                    ratio = 0.2f,
+                    percentage = 20f,
                     valueText = "20",
                     topColor = Color(0xFF415199),
                     bottomColor = Color(0xFF8AA6E6),
                 ),
                 BarChartItem(
                     label = "2월",
-                    ratio = 1f,
+                    percentage = 100f,
                     valueText = "140",
                     topColor = Color(0xFFFE670E),
                     bottomColor = Color(0xFFFFB183),
@@ -161,35 +161,35 @@ private fun HighlightedSubjectBarChartCardPreview() {
             bars = listOf(
                 BarChartItem(
                     label = "1주차",
-                    ratio = 0.5f,
+                    percentage = 50f,
                     valueText = "3회",
                     topColor = Color(0xFFFE670E),
                     bottomColor = Color(0xFFFFB183),
                 ),
                 BarChartItem(
                     label = "2주차",
-                    ratio = 0.6f,
+                    percentage = 60f,
                     valueText = "4회",
                     topColor = Color(0xFFFE670E),
                     bottomColor = Color(0xFFFFB183),
                 ),
                 BarChartItem(
                     label = "3주차",
-                    ratio = 0.1f,
+                    percentage = 10f,
                     valueText = "2회",
                     topColor = Color(0xFFFE670E),
                     bottomColor = Color(0xFFFFB183),
                 ),
                 BarChartItem(
                     label = "4주차",
-                    ratio = 0.9f,
+                    percentage = 90f,
                     valueText = "5회",
                     topColor = Color(0xFFFE670E),
                     bottomColor = Color(0xFFFFB183),
                 ),
                 BarChartItem(
                     label = "5주차",
-                    ratio = 1f,
+                    percentage = 100f,
                     valueText = "6회",
                     topColor = Color(0xFFFE670E),
                     bottomColor = Color(0xFFFFB183),

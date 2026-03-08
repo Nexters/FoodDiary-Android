@@ -128,15 +128,16 @@ private fun BarGraphItem(
     barMaxHeight: Dp,
 ) {
     val animatableRatio = remember(item) { Animatable(0f) }
-    val clampedRatio = item.ratio.coerceIn(0f, 1f)
+    val clampedPercentage = item.percentage.coerceIn(0f, 100f)
+    val targetRatio = clampedPercentage / 100f
 
-    LaunchedEffect(clampedRatio, item.animationDurationMillis, item.animationDelayMillis) {
+    LaunchedEffect(targetRatio, item.animationDurationMillis, item.animationDelayMillis) {
         animatableRatio.snapTo(0f)
         if (item.animationDelayMillis > 0) {
             delay(item.animationDelayMillis.toLong())
         }
         animatableRatio.animateTo(
-            targetValue = clampedRatio,
+            targetValue = targetRatio,
             animationSpec = tween(
                 durationMillis = item.animationDurationMillis,
                 easing = FastOutSlowInEasing,
