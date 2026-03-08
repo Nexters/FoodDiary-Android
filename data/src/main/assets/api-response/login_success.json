@@ -1,0 +1,5 @@
+{
+  "id": "abc12345",
+  "access_token": "mock_jwt_access_token_example",
+  "is_first": false
+}

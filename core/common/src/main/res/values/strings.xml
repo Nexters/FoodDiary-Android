@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Google Sign-In Error Messages -->
+    <string name="sign_in_error_cancelled">사용자가 로그인을 취소했습니다.</string>
+    <string name="sign_in_error_network">네트워크 연결을 확인하세요.</string>
+    <string name="sign_in_error_internal">내부 오류가 발생했습니다.</string>
+    <string name="sign_in_error_developer">SHA-1 인증서 지문이 Firebase에 등록되지 않았거나 Web Client ID가 잘못되었습니다.</string>
+    <string name="sign_in_error_developer_details">해결 방법:\n1. Firebase Console &gt; 프로젝트 설정 &gt; 일반 탭에서 SHA-1 지문 확인\n2. Google Cloud Console &gt; API 및 서비스 &gt; 사용자 인증 정보에서 Web Client ID 확인\n3. Web Client ID가 올바른 패키지명과 연결되어 있는지 확인</string>
+    <string name="sign_in_error_unknown">알 수 없는 오류가 발생했습니다.</string>
+    <string name="sign_in_error_code">에러 코드 %1$d: %2$s</string>
+    <string name="sign_in_error_unexpected">예상치 못한 오류: %1$s</string>
+    <string name="sign_in_error_intent_null">Intent is null</string>
+    <string name="sign_in_error_id_token_null">idToken is null</string>
+
+    <string name="my_page_title">마이페이지</string>
+    <string name="my_page_nick_name_description">안녕하세요,</string>
+    <string name="my_page_nick_name">%s님</string>
+    <string name="my_page_section_alert">알림</string>
+    <string name="my_page_menu_set_alarm">알림설정</string>
+    <string name="my_page_section_setting">관리</string>
+    <string name="my_page_menu_logout">로그아웃</string>
+    <string name="my_page_menu_app_version">앱 버전  %s</string>
+    <string name="my_page_menu_terms_of_service">서비스 이용약관</string>
+    <string name="my_page_menu_privacy_policy">개인정보 처리방침</string>
+    <string name="my_page_recent_login_required">보안을 위해 다시 로그인 후 탈퇴를 진행해 주세요.</string>
+    <string name="my_page_delete_in_progress">탈퇴를 진행하고 있어요…</string>
+    <string name="my_page_delete_failed">탈퇴에 실패했어요. 잠시 후 다시 시도해 주세요.</string>
+    <string name="my_page_sign_out">탈퇴</string>
+    <string name="my_page_logout_dialog_title">로그아웃</string>
+    <string name="my_page_logout_dialog_message">로그아웃을 진행하시겠습니까?</string>
+    <string name="my_page_logout_dialog_cancel">취소</string>
+    <string name="my_page_delete_dialog_title">탈퇴</string>
+    <string name="my_page_delete_dialog_message">탈퇴를 진행하시겠습니까?</string>
+    <string name="my_page_delete_dialog_warning_data_deleted">1.탈퇴 시 모든 데이터가 삭제됩니다.</string>
+    <string name="my_page_delete_dialog_warning_rejoin_blocked">2.탈퇴 시 한달동안 재가입이 어렵습니다.</string>
+    <string name="my_page_delete_dialog_agreement_guide">위 사항에 동의하시면 아래 동의해주세요.</string>
+    <string name="my_page_delete_dialog_agreement">위 사항에 동의합니다.</string>
+    <string name="my_page_delete_dialog_confirm">탈퇴하기</string>
+    <string name="my_page_delete_dialog_cancel">취소</string>
+
+    <!-- WebView URLs -->
+    <string name="webview_url_terms_of_service">https://shadow-bridge-c40.notion.site/31488bba374f80b687f7ce83edc325a4</string>
+    <string name="webview_url_privacy_policy">https://www.notion.so/enebin/311c690fca2b80bc8c89c5f7cc5cb35c</string>
+    <!-- Network error -->
+    <string name="network_error_http">HTTP %d</string>
+    <string name="network_error_timeout">요청 시간이 초과되었습니다.</string>
+    <string name="network_error_no_connection">네트워크에 연결할 수 없습니다.</string>
+    <string name="network_error_unknown">오류가 발생했습니다.</string>
+    <string name="network_error_unknown_detail">%s</string>
+
+    <!-- Home -->
+    <string name="home_description_empty">이번주 음식 사진을 기록해 보세요</string>
+    <string name="home_description_with_count">이번주 음식 사진 %1$s개</string>
+    <string name="home_sub_description">%s님의 음식 기록, \n지금 바로 쓸 수 있어요</string>
+    <string name="home_add_food_photo">오늘의 음식 사진을 추가해보세요.</string>
+    <string name="home_no_food_photo_recorded">기록 가능한 음식 사진이 없어요</string>
+    <string name="home_nav_home">홈</string>
+    <string name="home_nav_insight">인사이트</string>
+    <string name="home_button_select">선택하기</string>
+
+    <!-- Detail -->
+    <string name="detail_food_analyze">귀찮은 입력은 AI가 대신하고 있어요...</string>
+    <string name="detail_no_food_photo_recorded">기록된 음식 사진이 없어요</string>
+
+    <!-- Calendar -->
+    <string name="calendar">캘린더</string>
+</resources>

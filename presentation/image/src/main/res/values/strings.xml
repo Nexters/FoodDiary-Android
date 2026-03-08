@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="image_close">닫기</string>
+    <string name="image_load_failed">이미지를 불러올 수 없습니다</string>
+    <string name="image_model_load_failed">모델을 로드할 수 없습니다. assets 폴더에 모델 파일이 있는지 확인하세요.</string>
+    <string name="image_classifying">분류 중…</string>
+    <string name="image_select_from_album">앨범에서 선택</string>
+    <string name="image_select_another">다른 이미지 선택</string>
+    <string name="image_select_hint">앨범에서 이미지를 선택하여\n음식인지 확인하세요</string>
+    <string name="image_selected">선택한 이미지</string>
+    <string name="image_classification_error">분류 중 오류 발생: %1$s</string>
+    <string name="image_classification_food">음식입니다! (신뢰도: %1$s)</string>
+    <string name="image_classification_not_food">음식이 아닙니다. (신뢰도: %1$s)</string>
+    <string name="image_mime_type">image/*</string>
+
+    <!-- Image Picker (Home-pic-select) -->
+    <string name="image_picker_back">뒤로가기</string>
+    <string name="image_picker_icon">이미지 아이콘</string>
+    <string name="image_picker_deselect_all">모두해제</string>
+    <string name="image_picker_hint_max">10장까지 선택할 수 있어요.</string>
+    <string name="image_picker_select_count">선택하기(%d)</string>
+    <string name="image_picker_section_food">음식</string>
+    <string name="image_picker_section_all">전체</string>
+    <string name="image_picker_permission_message">이미지 접근 권한이 필요합니다</string>
+    <string name="image_picker_request_permission">권한 요청</string>
+    <string name="image_picker_loading">로딩 중…</string>
+    <string name="image_picker_empty">이미지가 없습니다</string>
+    <string name="image_picker_gallery_image">갤러리 이미지</string>
+    <string name="image_picker_selected">선택됨</string>
+    <string name="image_picker_unselected">선택 안됨</string>
+</resources>

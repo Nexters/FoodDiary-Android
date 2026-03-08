@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Login Screen -->
+    <string name="app_title">뭐먹었지</string>
+    <string name="app_mascot_description">앱 마스코트 캐릭터</string>
+    <string name="sign_in_with_google">Sign In with Google</string>
+    <string name="sign_in_with_apple">Sign In with Apple</string>
+
+    <!-- Error Messages -->
+    <string name="error_web_client_id_not_set">Web Client ID가 설정되지 않았습니다. strings.xml을 확인하세요.</string>
+    <string name="error_sign_in_failed">로그인 실패</string>
+    <string name="error_delete_account_failed">계정 삭제에 실패했습니다.</string>
+</resources>

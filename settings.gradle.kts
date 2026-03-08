@@ -1,3 +1,5 @@
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 pluginManagement {
     repositories {
         google {
@@ -20,5 +22,29 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "FoodDiary"
+
+// App
 include(":app")
- 
+
+// Core modules
+include(":core:common")
+include(":core:ui")
+include(":core:classification")
+
+// Layer modules
+include(":domain")
+include(":data")
+
+// Presentation modules
+include(":presentation:home")
+include(":presentation:widget")
+include(":presentation:auth")
+include(":presentation:image")
+include(":presentation:splash")
+include(":presentation:detail")
+include(":presentation:modify")
+include(":presentation:onboarding")
+include(":presentation:mypage")
+include(":presentation:webview")
+include(":presentation:search")
+include(":presentation:insight")

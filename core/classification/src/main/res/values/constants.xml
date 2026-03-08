@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="image_max_dimension">2048</integer>
+    <integer name="image_sample_size_multiplier">2</integer>
+</resources>
+

@@ -1,0 +1,23 @@
+{
+  "restaurants": [
+    {
+      "name": "김밥천국",
+      "road_address": "서울특별시 성동구 광나루로 4가길 12-7 1층",
+      "url": "https://place.map.kakao.com/1001"
+    },
+    {
+      "name": "김밥지옥",
+      "road_address": "서울특별시 성동구 광나루로 4가길 12-7 2층",
+      "url": "https://place.map.kakao.com/1002"
+    },
+    {
+      "name": "김밥나라",
+      "road_address": "서울특별시 성동구 광나루로 4가길 12-7 3층",
+      "url": "https://place.map.kakao.com/1003"
+    }
+  ],
+  "total_count": 3,
+  "page": 1,
+  "size": 15,
+  "is_end": true
+}

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="modify_title">수정</string>
+    <string name="modify_section_category">카테고리</string>
+    <string name="modify_section_address">주소</string>
+    <string name="modify_section_tag">태그</string>
+    <string name="modify_address_search_placeholder">주소를 검색하세요</string>
+    <string name="modify_delete">삭제</string>
+    <string name="modify_tag_add">태그 추가</string>
+    <string name="modify_tag_dialog_placeholder">태그를 입력해주세요.</string>
+    <string name="modify_tag_dialog_cancel">취소</string>
+    <string name="modify_tag_dialog_confirm">추가</string>
+    <string name="modify_save">저장</string>
+    <string name="modify_save_error">일기를 저장할 수 없습니다. 다시 시도해 주세요.</string>
+    <string name="modify_save_success">정보 수정을 완료했습니다.</string>
+</resources>
