@@ -32,6 +32,7 @@ import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
 import com.nexters.fooddiary.core.ui.theme.Gray050
 import com.nexters.fooddiary.core.ui.theme.SdBase
 import com.nexters.fooddiary.presentation.insight.donut.InsightDonutCard
+import com.nexters.fooddiary.presentation.insight.rankingbubble.InsightRankingBubbleCard
 
 @Composable
 fun InsightScreen(
@@ -71,20 +72,31 @@ internal fun InsightScreen(
             onClickMyPage = onNavigateToMyPage,
         )
 
-        if (state.donutCard != null) {
+        if (state.donutCard != null || state.rankingBubbleCard != null) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .padding(top = 102.dp, bottom = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                InsightDonutCard(
-                    card = state.donutCard,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                )
+                state.donutCard?.let { donutCard ->
+                    InsightDonutCard(
+                        card = donutCard,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                    )
+                }
+                state.rankingBubbleCard?.let { rankingBubbleCard ->
+                    InsightRankingBubbleCard(
+                        card = rankingBubbleCard,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                    )
+                }
             }
         } else {
             Column(

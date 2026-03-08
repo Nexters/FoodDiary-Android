@@ -19,7 +19,10 @@ class InsightViewModel @AssistedInject constructor(
     fun loadInsights() {
         // TODO: /me/insights 응답이 연결되면 donutCard 외 다른 카드들도 타입별 UI model 필드로 분리해 매핑한다.
         setState {
-            copy(donutCard = sampleInsightDonutCard())
+            copy(
+                donutCard = sampleInsightDonutCard(),
+                rankingBubbleCard = sampleInsightRankingBubbleCard(),
+            )
         }
     }
 
