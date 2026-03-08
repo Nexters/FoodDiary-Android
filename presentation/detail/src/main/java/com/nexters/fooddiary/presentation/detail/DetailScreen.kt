@@ -40,7 +40,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -159,9 +161,11 @@ internal fun DetailScreen(
     DetailContent(
         selectedDate = state.selectedDate,
         mealsByDate = state.mealsByDate,
+        isPullRefreshing = state.isPullRefreshing,
         onNavigateBack = onNavigateBack,
         onPreviousDay = viewModel::navigateToPreviousDay,
         onNextDay = viewModel::navigateToNextDay,
+        onPullToRefresh = viewModel::onPullToRefresh,
         onDeleteClick = viewModel::onDeleteClick,
         onAddPhoto = viewModel::onAddPhoto,
         onEditClick = viewModel::onEditClick,
@@ -171,13 +175,16 @@ internal fun DetailScreen(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DetailContent(
     selectedDate: LocalDate,
     mealsByDate: Map<LocalDate, DailyMeals>,
+    isPullRefreshing: Boolean = false,
     onNavigateBack: () -> Unit = {},
     onPreviousDay: () -> Unit = {},
     onNextDay: () -> Unit = {},
+    onPullToRefresh: () -> Unit = {},
     onDeleteClick: () -> Unit = {},
     onAddPhoto: (MealSlot, LocalDate) -> Unit = { _, _ -> },
     onEditClick: (MealSlot, LocalDate) -> Unit = { _, _ -> },
@@ -193,7 +200,6 @@ private fun DetailContent(
     val listState = rememberLazyListState()
     var dailyHeaderHeightPx by remember { mutableIntStateOf(0) }
     var isHeaderVisible by remember { mutableStateOf(true) }
-    var previousScrollPosition by remember { mutableIntStateOf(0) }
     val isInlineDailyHeaderVisible by remember {
         derivedStateOf {
             listState.layoutInfo.visibleItemsInfo.any { it.key == DailyHeaderInlineKey }
@@ -207,6 +213,7 @@ private fun DetailContent(
 
     // 스크롤 방향 감지해서 헤더 표시, 미표시
     LaunchedEffect(listState) {
+        var previousScrollPosition = 0
         snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
             .map { (index, offset) -> index * 10_000 + offset }
             .distinctUntilChanged()
@@ -232,115 +239,121 @@ private fun DetailContent(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .hazeSource(state = hazeState)
-                    .background(SdBase),
-                verticalArrangement = Arrangement.Top,
-                contentPadding = PaddingValues(bottom = 20.dp)
+            PullToRefreshBox(
+                isRefreshing = isPullRefreshing,
+                onRefresh = onPullToRefresh,
+                modifier = Modifier.fillMaxSize(),
             ) {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .hazeSource(state = hazeState)
+                        .background(SdBase),
+                    verticalArrangement = Arrangement.Top,
+                    contentPadding = PaddingValues(bottom = 20.dp)
+                ) {
 
-                item(key = DetailHeaderKey) {
-                    DetailScreenHeader(
-                        onBackButtonClick = onNavigateBack,
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
+                    item(key = DetailHeaderKey) {
+                        DetailScreenHeader(
+                            onBackButtonClick = onNavigateBack,
                         ) {
-                            Text(
-                                text = stringResource(id = R.string.detail_title),
-                                style = AppTypography.hd18,
-                                color = White,
-                                modifier = Modifier.padding(start = 4.dp)
-                            )
-                            Box(
-                                modifier = Modifier.wrapContentSize(align = Alignment.TopEnd)
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                IconButton(onClick = { isMoreMenuExpanded = true }) {
-                                    Icon(
-                                        painter = painterResource(CoreUiR.drawable.ic_more),
-                                        contentDescription = stringResource(id = R.string.detail_more),
-                                        tint = Color.White
-                                    )
-                                }
-                                DropdownMenu(
-                                    expanded = isMoreMenuExpanded,
-                                    onDismissRequest = { isMoreMenuExpanded = false },
-                                    offset = DpOffset(x = 0.dp, y = 0.dp),
+                                Text(
+                                    text = stringResource(id = R.string.detail_title),
+                                    style = AppTypography.hd18,
+                                    color = White,
+                                    modifier = Modifier.padding(start = 4.dp)
+                                )
+                                Box(
+                                    modifier = Modifier.wrapContentSize(align = Alignment.TopEnd)
                                 ) {
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                text = stringResource(id = R.string.detail_menu_delete),
-                                                color = Color.Black
-                                            )
-                                        },
-                                        onClick = {
-                                            isMoreMenuExpanded = false
-                                            onDeleteClick()
-                                        },
-                                    )
+                                    IconButton(onClick = { isMoreMenuExpanded = true }) {
+                                        Icon(
+                                            painter = painterResource(CoreUiR.drawable.ic_more),
+                                            contentDescription = stringResource(id = R.string.detail_more),
+                                            tint = Color.White
+                                        )
+                                    }
+                                    DropdownMenu(
+                                        expanded = isMoreMenuExpanded,
+                                        onDismissRequest = { isMoreMenuExpanded = false },
+                                        offset = DpOffset(x = 0.dp, y = 0.dp),
+                                    ) {
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                    text = stringResource(id = R.string.detail_menu_delete),
+                                                    color = Color.Black
+                                                )
+                                            },
+                                            onClick = {
+                                                isMoreMenuExpanded = false
+                                                onDeleteClick()
+                                            },
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                item(key = GapDetailToDailyKey) {
-                    Spacer(modifier = Modifier.height(32.dp))
-                }
+                    item(key = GapDetailToDailyKey) {
+                        Spacer(modifier = Modifier.height(32.dp))
+                    }
 
-                item(key = DailyHeaderInlineKey) {
-                    val spacerHeight = with(density) { dailyHeaderHeightPx.toDp() }
-                    AnimatedContent(
-                        targetState = isHeaderVisible,
-                        transitionSpec = {
-                            (fadeIn() + slideInVertically(initialOffsetY = { -it / 2 })) togetherWith
-                                (fadeOut() + slideOutVertically(targetOffsetY = { -it / 2 }))
-                        },
-                        label = "dailyHeaderToggle",
-                    ) { visible ->
-                        if (visible) {
-                            DailyHeader(
-                                date = selectedDate,
-                                onPreviousDay = onPreviousDay,
-                                onNextDay = onNextDay,
-                                hazeState = hazeState,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp)
-                                    .onSizeChanged { dailyHeaderHeightPx = it.height }
-                            )
-                        } else {
-                            Spacer(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(spacerHeight)
-                            )
+                    item(key = DailyHeaderInlineKey) {
+                        val spacerHeight = with(density) { dailyHeaderHeightPx.toDp() }
+                        AnimatedContent(
+                            targetState = isHeaderVisible,
+                            transitionSpec = {
+                                (fadeIn() + slideInVertically(initialOffsetY = { -it / 2 })) togetherWith
+                                    (fadeOut() + slideOutVertically(targetOffsetY = { -it / 2 }))
+                            },
+                            label = "dailyHeaderToggle",
+                        ) { visible ->
+                            if (visible) {
+                                DailyHeader(
+                                    date = selectedDate,
+                                    onPreviousDay = onPreviousDay,
+                                    onNextDay = onNextDay,
+                                    hazeState = hazeState,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp)
+                                        .onSizeChanged { dailyHeaderHeightPx = it.height }
+                                )
+                            } else {
+                                Spacer(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(spacerHeight)
+                                )
+                            }
                         }
                     }
-                }
 
-                item(key = GapAfterDailyHeaderKey) {
-                    Spacer(modifier = Modifier.height(42.dp))
-                }
-
-                itemsIndexed(mealCards, key = { _, meal -> meal.id }) { index, meal ->
-                    MealSection(
-                        meal = meal,
-                        mealLabel = meal.slot.toLabel(),
-                        onAddPhoto = { onAddPhoto(meal.slot, meal.date) },
-                        onEditClick = { onEditClick(meal.slot, meal.date) },
-                        onCopyClick = { onCopyClick(meal.mapLink) },
-                        onShareClick = { onShareClick(meal.place, meal.mapLink) },
-                    )
-
-                    if (index != mealCards.lastIndex) {
+                    item(key = GapAfterDailyHeaderKey) {
                         Spacer(modifier = Modifier.height(42.dp))
+                    }
+
+                    itemsIndexed(mealCards, key = { _, meal -> meal.id }) { index, meal ->
+                        MealSection(
+                            meal = meal,
+                            mealLabel = meal.slot.toLabel(),
+                            onAddPhoto = { onAddPhoto(meal.slot, meal.date) },
+                            onEditClick = { onEditClick(meal.slot, meal.date) },
+                            onCopyClick = { onCopyClick(meal.mapLink) },
+                            onShareClick = { onShareClick(meal.place, meal.mapLink) },
+                        )
+
+                        if (index != mealCards.lastIndex) {
+                            Spacer(modifier = Modifier.height(42.dp))
+                        }
                     }
                 }
             }

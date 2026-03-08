@@ -1,6 +1,7 @@
 package com.nexters.fooddiary.presentation.detail
 
 import com.airbnb.mvrx.Async
+import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
@@ -23,6 +24,8 @@ data class DetailState(
     val selectedDate: LocalDate = LocalDate.now(),
     val mealsByDate: Map<LocalDate, DailyMeals> = emptyMap(),
     val loadMealsRequest: Async<DailyMeals> = Uninitialized,  // 식사 데이터 로딩 상태
+    val loadingDates: Set<LocalDate> = emptySet(),
+    val isPullRefreshing: Boolean = false,
 ) : MavericksState
 
 sealed interface DetailEvent {
@@ -40,22 +43,41 @@ class DetailViewModel @AssistedInject constructor(
     private val _events = MutableSharedFlow<DetailEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<DetailEvent> = _events.asSharedFlow()
 
-    fun loadMealsForDate(date: LocalDate, forceRefresh: Boolean = false) {
+    fun loadMealsForDate(
+        date: LocalDate,
+        forceRefresh: Boolean = false,
+        isPullRefresh: Boolean = false,
+    ) {
         withState { state ->
+            if (state.loadingDates.contains(date)) return@withState
             if (!forceRefresh && state.mealsByDate.containsKey(date)) return@withState
+
+            setState {
+                copy(
+                    loadingDates = loadingDates + date,
+                    isPullRefreshing = if (isPullRefresh) true else isPullRefreshing,
+                )
+            }
 
             suspend {
                 val diary = getDiaryByDateUseCase(date)
                 diary.toDailyMeals(date)
             }.execute { result ->
                 when (result) {
+                    is Loading -> copy(loadMealsRequest = result)
                     is Success -> {
                         copy(
                             mealsByDate = putAndTrim(mealsByDate, date, result()),
                             loadMealsRequest = result,
+                            loadingDates = loadingDates - date,
+                            isPullRefreshing = if (isPullRefresh) false else isPullRefreshing,
                         )
                     }
-                    else -> copy(loadMealsRequest = result)
+                    else -> copy(
+                        loadMealsRequest = result,
+                        loadingDates = loadingDates - date,
+                        isPullRefreshing = if (isPullRefresh) false else isPullRefreshing,
+                    )
                 }
             }
         }
@@ -69,6 +91,16 @@ class DetailViewModel @AssistedInject constructor(
 
     fun refreshMealsForDate(date: LocalDate) {
         loadMealsForDate(date = date, forceRefresh = true)
+    }
+
+    fun onPullToRefresh() {
+        withState { state ->
+            loadMealsForDate(
+                date = state.selectedDate,
+                forceRefresh = true,
+                isPullRefresh = true,
+            )
+        }
     }
 
     fun syncSelectedDate(dateString: String) {
