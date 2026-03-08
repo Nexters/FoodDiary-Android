@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="insight_ready_message">인사이트를 제공하기 위해\n최소 1주일간의 데이터가 필요해요.</string>
+    <string name="insight_donut_title_changed">왕좌가 바뀌었어요</string>
+    <string name="insight_donut_title_maintained">왕좌가 유지되었어요.</string>
+    <string name="insight_donut_headline_changed_middle"> 대신 </string>
+    <string name="insight_donut_headline_suffix">이 1등이에요.</string>
 </resources>
