@@ -16,6 +16,9 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentSet
 
 sealed interface ModifyEvent {
     data object Saved : ModifyEvent
@@ -55,7 +58,8 @@ class ModifyViewModel @AssistedInject constructor(
         val normalizedAddressLines = normalizedName
             .takeIf { it.isNotBlank() }
             ?.let(::listOf)
-            ?: emptyList()
+            ?.toPersistentList()
+            ?: persistentEmptyStringList
         setState {
             copy(
                 addressSearchQuery = normalizedRoadAddress.ifBlank { normalizedName },
@@ -69,7 +73,7 @@ class ModifyViewModel @AssistedInject constructor(
     }
 
     fun removeTag(tag: String) {
-        setState { copy(tags = tags.filter { it != tag }) }
+        setState { copy(tags = tags.filter { it != tag }.toPersistentList()) }
     }
 
     fun addTag(tag: String) {
@@ -107,16 +111,18 @@ class ModifyViewModel @AssistedInject constructor(
                         val entryCategory = entry.category
                         val mergedCategories = entryCategory
                             ?.takeIf { it.isNotBlank() }
-                            ?.let { categories + it }
+                            ?.let { categories.toPersistentSet().add(it) }
                             ?: categories
                         val normalizedAddressLines = entry.restaurantName
                             ?.takeIf { it.isNotBlank() }
                             ?.let(::listOf)
-                            ?: emptyList()
+                            ?.toPersistentList()
+                            ?: persistentEmptyStringList
+                        val entryTags = entry.tags.toPersistentList()
                         val shouldKeepAddress = isAddressManuallyUpdated
                         copy(
-                            photoIds = entry.photos.map { it.photoId.toInt() },
-                            photoUrls = entry.photos.map { it.imageUrl },
+                            photoIds = entry.photos.map { it.photoId.toInt() }.toPersistentList(),
+                            photoUrls = entry.photos.map { it.imageUrl }.toPersistentList(),
                             coverPhotoId = entry.coverPhotoId.toInt(),
                             selectedCategory = entryCategory?.takeIf { it.isNotBlank() } ?: selectedCategory,
                             categories = mergedCategories,
@@ -126,7 +132,7 @@ class ModifyViewModel @AssistedInject constructor(
                             restaurantName = if (shouldKeepAddress) restaurantName else (entry.restaurantName ?: ""),
                             restaurantUrl = if (shouldKeepAddress) restaurantUrl else (entry.mapLink ?: ""),
                             note = entry.note ?: "",
-                            tags = entry.tags.ifEmpty { tags },
+                            tags = if (entryTags.isEmpty()) tags else entryTags,
                             isInitialSynced = true,
                         )
                     }
@@ -202,23 +208,23 @@ class ModifyViewModel @AssistedInject constructor(
 internal fun normalizeTag(tag: String): String? =
     tag.trim().takeIf { it.isNotBlank() }
 
-internal fun appendTagIfMissing(tags: List<String>, newTag: String): List<String>? =
-    if (newTag in tags) null else tags + newTag
+internal fun appendTagIfMissing(tags: ImmutableList<String>, newTag: String): ImmutableList<String>? =
+    if (newTag in tags) null else tags.toPersistentList().add(newTag)
 
 internal data class RemovePhotoStateResult(
-    val photoIds: List<Int>,
-    val photoUrls: List<String>,
+    val photoIds: ImmutableList<Int>,
+    val photoUrls: ImmutableList<String>,
     val coverPhotoId: Int?,
 )
 
 internal fun removePhotoAtState(
-    photoIds: List<Int>,
-    photoUrls: List<String>,
+    photoIds: ImmutableList<Int>,
+    photoUrls: ImmutableList<String>,
     coverPhotoId: Int?,
     index: Int,
 ): RemovePhotoStateResult {
-    val newPhotoIds = photoIds.filterIndexed { i, _ -> i != index }
-    val newPhotoUrls = photoUrls.filterIndexed { i, _ -> i != index }
+    val newPhotoIds = photoIds.filterIndexed { i, _ -> i != index }.toPersistentList()
+    val newPhotoUrls = photoUrls.filterIndexed { i, _ -> i != index }.toPersistentList()
     val removedPhotoId = photoIds.getOrNull(index)
     val newCoverPhotoId = when {
         removedPhotoId == null -> coverPhotoId
@@ -231,6 +237,8 @@ internal fun removePhotoAtState(
         coverPhotoId = newCoverPhotoId,
     )
 }
+
+private val persistentEmptyStringList = emptyList<String>().toPersistentList()
 
 internal fun ModifyState.toUpdateDiaryParam(): UpdateDiaryParam =
     UpdateDiaryParam(

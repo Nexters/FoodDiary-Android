@@ -30,6 +30,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -386,17 +388,17 @@ private fun ModifyScreenPreview() {
         state = ModifyState(
             diaryId = "preview",
             selectedCategory = "한식",
-            categories = setOf("한식", "일식", "중식", "양식", "카페·디저트"),
+            categories = persistentSetOf("한식", "일식", "중식", "양식", "카페·디저트"),
             addressSearchQuery = "서울 강남구",
-            addressLines = listOf("서울특별시 강남구 테헤란로 123", "역삼동 456-7"),
+            addressLines = persistentListOf("서울특별시 강남구 테헤란로 123", "역삼동 456-7"),
             roadAddress = "서울특별시 강남구 테헤란로 123",
             restaurantName = "맛있는 밥집",
             restaurantUrl = "https://example.com/restaurant",
             note = "점심에 친구들이랑 같이 왔어요. 김치찌개가 특히 맛있었습니다!",
-            photoIds = listOf(1, 2),
-            photoUrls = listOf(PLACEHOLDER_IMAGE_URL, PLACEHOLDER_IMAGE_URL),
+            photoIds = persistentListOf(1, 2),
+            photoUrls = persistentListOf(PLACEHOLDER_IMAGE_URL, PLACEHOLDER_IMAGE_URL),
             coverPhotoId = 1,
-            tags = listOf("맛집", "친구모임", "점심"),
+            tags = persistentListOf("맛집", "친구모임", "점심"),
         ),
         onRemovePhotoAt = {},
     )
