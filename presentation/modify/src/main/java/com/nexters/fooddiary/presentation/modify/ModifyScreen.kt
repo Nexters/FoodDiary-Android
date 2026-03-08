@@ -7,20 +7,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -42,18 +38,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import coil3.compose.AsyncImage
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.ui.R.drawable
 import com.nexters.fooddiary.core.ui.alert.DialogData
 import com.nexters.fooddiary.core.ui.alert.SnackBarData
+import com.nexters.fooddiary.core.ui.component.CommonCircleButton
 import com.nexters.fooddiary.core.ui.component.DetailScreenHeader
+import com.nexters.fooddiary.core.ui.component.EditableKeywordChipGroup
+import com.nexters.fooddiary.core.ui.component.KeywordChipGroup
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.Gray050
 import com.nexters.fooddiary.core.ui.theme.Gray200
-import com.nexters.fooddiary.core.ui.theme.Gray400
+import com.nexters.fooddiary.core.ui.theme.Gray300
 import com.nexters.fooddiary.core.ui.theme.Gray600
 import com.nexters.fooddiary.core.ui.theme.Sd800
 import com.nexters.fooddiary.core.ui.theme.Sd900
@@ -64,9 +62,7 @@ import com.nexters.fooddiary.presentation.modify.navigation.ModifySearchResult
 private const val PLACEHOLDER_IMAGE_URL = "https://picsum.photos/200/300"
 
 private val SectionTitleColor = Gray050
-private val ChipInactiveBg = Sd800
 private val InputBg = Sd900
-private val ChipShape = RoundedCornerShape(999.dp)
 private val InputShape = RoundedCornerShape(10.dp)
 
 @Composable
@@ -156,6 +152,8 @@ private fun ModifyScreenContent(
     val sectionCategory = stringResource(R.string.modify_section_category)
     val sectionAddress = stringResource(R.string.modify_section_address)
     val sectionTag = stringResource(R.string.modify_section_tag)
+    val deleteContentDesc = stringResource(R.string.modify_delete)
+    val addTagContentDesc = stringResource(R.string.modify_tag_add)
 
     Scaffold(
         modifier = modifier,
@@ -204,10 +202,11 @@ private fun ModifyScreenContent(
                 Section(
                     sectionTitle = sectionCategory,
                 ) {
-                    CommonChips(
-                        categories = state.categories,
-                        selectedCategory = state.selectedCategory,
-                        onSelect = onSelect,
+                    KeywordChipGroup(
+                        keywords = state.categories,
+                        selectedKeywords = setOf(state.selectedCategory),
+                        onKeywordClick = onSelect,
+                        unselectedContentColor = Gray300,
                     )
                 }
             }
@@ -226,10 +225,12 @@ private fun ModifyScreenContent(
                 Section(
                     sectionTitle = sectionTag,
                 ) {
-                    TagChips(
-                        tags = state.tags,
-                        onRemove = onRemoveTag,
-                        onAddChip = onAddChip
+                    EditableKeywordChipGroup(
+                        keywords = state.tags,
+                        onKeywordRemove = onRemoveTag,
+                        onAddClick = onAddChip,
+                        removeContentDescription = deleteContentDesc,
+                        addContentDescription = addTagContentDesc,
                     )
                 }
             }
@@ -335,77 +336,6 @@ private fun AddressLineItem(line: String) {
             text = line,
             style = AppTypography.p15,
             color = Gray600,
-        )
-    }
-}
-
-@Composable
-private fun TagChips(
-    tags: List<String>,
-    onRemove: (String) -> Unit,
-    onAddChip: () -> Unit = {},
-) {
-    val deleteContentDesc = stringResource(R.string.modify_delete)
-    val addTagContentDesc = stringResource(R.string.modify_tag_add)
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        tags.forEach { tag ->
-            key(tag) {
-                TagChipItem(
-                    tag = tag,
-                    onRemove = onRemove,
-                    deleteContentDesc = deleteContentDesc,
-                )
-            }
-        }
-        Box(
-            modifier = Modifier
-                .clip(ChipShape)
-                .background(ChipInactiveBg)
-                .clickable {
-                    onAddChip()
-                }
-                .size(34.dp)
-                .padding(10.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = addTagContentDesc,
-                tint = Gray400,
-            )
-        }
-    }
-}
-
-@Composable
-private fun TagChipItem(
-    tag: String,
-    onRemove: (String) -> Unit,
-    deleteContentDesc: String,
-) {
-    Row(
-        modifier = Modifier
-            .clip(ChipShape)
-            .background(ChipInactiveBg)
-            .padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Text(
-            text = tag,
-            style = AppTypography.p14,
-            color = Gray400,
-        )
-        Image(
-            painter = painterResource(drawable.ic_circle_close),
-            contentDescription = deleteContentDesc,
-            modifier = Modifier
-                .size(18.dp)
-                .clickable { onRemove(tag) },
         )
     }
 }
