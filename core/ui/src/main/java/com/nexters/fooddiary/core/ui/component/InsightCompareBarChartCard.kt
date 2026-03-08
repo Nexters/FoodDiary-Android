@@ -1,5 +1,6 @@
 package com.nexters.fooddiary.core.ui.component
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -13,21 +14,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
-import androidx.compose.animation.core.Animatable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -40,55 +38,71 @@ import com.nexters.fooddiary.core.ui.theme.Gray200
 import com.nexters.fooddiary.core.ui.theme.PrimBase
 import com.nexters.fooddiary.core.ui.theme.Sd800
 import com.nexters.fooddiary.core.ui.theme.White
+import com.nexters.fooddiary.core.ui.theme.horizontalGridLinesFromBottom
 import kotlinx.coroutines.delay
 
+private val DefaultChartHeight = 182.dp
+private val DefaultCompareBarSpacing = 60.dp
+private val DefaultFrequentBarSpacing = 10.dp
+private const val ChartLineCount = 5
+private val BarWidth = 42.dp
+private val BarTopRadius = 2.dp
+private val ValueTopPadding = 8.dp
 private val BarLabelSpacing = 10.dp
 private val BarLabelLineHeight = 14.sp
+private val MinChartAreaHeight = 120.dp
 private val BarLabelTextStyle = AppTypography.p12.copy(
     fontSize = 10.sp,
-    lineHeight = BarLabelLineHeight,
+    lineHeight = 14.sp,
     letterSpacing = (-0.15).sp,
     platformStyle = PlatformTextStyle(includeFontPadding = false),
 )
+private val CardTitleTextStyle = AppTypography.p15.copy(
+    fontWeight = FontWeight.SemiBold,
+    lineHeight = 21.sp,
+    letterSpacing = (-0.225).sp,
+)
 
 @Immutable
-data class InsightCompareBarItem(
+data class BarItem(
     val label: String,
-    val value: Int,
-    val valueText: String = value.toString(),
+    val ratio: Float,
+    val valueText: String,
     val topColor: Color,
     val bottomColor: Color,
     val animationDurationMillis: Int = 900,
     val animationDelayMillis: Int = 0,
 )
 
-fun List<InsightCompareBarItem>.withStaggeredAnimation(
+fun List<BarItem>.withStaggeredAnimation(
     delayStepMillis: Int = 100,
     startDelayMillis: Int = 0,
-): List<InsightCompareBarItem> = mapIndexed { index, item ->
+): List<BarItem> {
+    if (isEmpty() || (delayStepMillis == 0 && startDelayMillis == 0)) return this
+    return mapIndexed { index, item ->
     item.copy(animationDelayMillis = startDelayMillis + (index * delayStepMillis))
+}
 }
 
 @Composable
-fun InsightCompareBarChartCard(
+fun BarChartCard(
     title: String,
     descriptionPrefix: String,
     highlightText: String,
     descriptionSuffix: String,
-    bars: List<InsightCompareBarItem>,
+    bars: List<BarItem>,
     modifier: Modifier = Modifier,
+    barSpacing: Dp = DefaultCompareBarSpacing,
+    chartHeight: Dp = DefaultChartHeight,
 ) {
-    val titleStyle = AppTypography.p15.copy(
-        fontWeight = FontWeight.SemiBold,
-        lineHeight = 21.sp,
-        letterSpacing = (-0.225).sp,
-    )
+    val titleStyle = CardTitleTextStyle
     val highlightStyle = titleStyle.copy(color = PrimBase)
 
-    InsightBarChartCard(
+    BaseBarChartCard(
         bars = bars,
         modifier = modifier,
-        barSpacing = 60.dp,
+        barSpacing = barSpacing,
+        chartHeight = chartHeight,
         headerContent = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
@@ -115,7 +129,7 @@ fun InsightCompareBarChartCard(
                             append(descriptionSuffix)
                         }
                     },
-                    style = AppTypography.p12,
+                    style = BarLabelTextStyle,
                 )
             }
         },
@@ -126,21 +140,20 @@ fun InsightCompareBarChartCard(
 fun InsightFrequentFoodBarChartCard(
     title: String,
     description: String,
+    highlightPrefixText: String,
     highlightFoodName: String,
-    bars: List<InsightCompareBarItem>,
+    bars: List<BarItem>,
     modifier: Modifier = Modifier,
+    barSpacing: Dp = DefaultFrequentBarSpacing,
+    chartHeight: Dp = DefaultChartHeight,
 ) {
-    val titleStyle = AppTypography.p15.copy(
-        fontWeight = FontWeight.SemiBold,
-        lineHeight = 21.sp,
-        letterSpacing = (-0.225).sp,
-    )
-    val subtitleStyle = titleStyle
+    val titleStyle = CardTitleTextStyle
 
-    InsightBarChartCard(
+    BaseBarChartCard(
         bars = bars,
         modifier = modifier,
-        barSpacing = 10.dp,
+        barSpacing = barSpacing,
+        chartHeight = chartHeight,
         headerContent = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -152,22 +165,18 @@ fun InsightFrequentFoodBarChartCard(
                     Text(
                         text = buildAnnotatedString {
                             withStyle(SpanStyle(color = Gray050)) {
-                                append("음식은 ")
+                                append(highlightPrefixText)
                             }
                             withStyle(SpanStyle(color = PrimBase)) {
                                 append(highlightFoodName)
                             }
                         },
-                        style = subtitleStyle,
+                        style = titleStyle,
                     )
                 }
                 Text(
                     text = description,
-                    style = AppTypography.p12.copy(
-                        fontSize = 10.sp,
-                        lineHeight = 14.sp,
-                        letterSpacing = (-0.15).sp,
-                    ),
+                    style = BarLabelTextStyle,
                     color = Gray200,
                 )
             }
@@ -176,15 +185,14 @@ fun InsightFrequentFoodBarChartCard(
 }
 
 @Composable
-private fun InsightBarChartCard(
-    bars: List<InsightCompareBarItem>,
+private fun BaseBarChartCard(
+    bars: List<BarItem>,
     modifier: Modifier = Modifier,
     headerChartSpacing: Dp = 32.dp,
-    barSpacing: Dp = 60.dp,
+    barSpacing: Dp,
+    chartHeight: Dp,
     headerContent: @Composable () -> Unit,
 ) {
-    val maxValue = bars.maxOfOrNull { it.value }?.coerceAtLeast(1) ?: 1
-
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -196,8 +204,8 @@ private fun InsightBarChartCard(
 
         BarChart(
             bars = bars,
-            maxValue = maxValue,
             barSpacing = barSpacing,
+            chartHeight = chartHeight,
             modifier = Modifier.fillMaxWidth(),
         )
     }
@@ -205,25 +213,25 @@ private fun InsightBarChartCard(
 
 @Composable
 private fun BarChart(
-    bars: List<InsightCompareBarItem>,
-    maxValue: Int,
+    bars: List<BarItem>,
     barSpacing: Dp,
+    chartHeight: Dp,
     modifier: Modifier = Modifier,
 ) {
-    val chartAreaHeight = 146.dp
     val labelAreaHeight = BarLabelSpacing + BarLabelLineHeight.value.dp
+    val chartAreaHeight = (chartHeight - labelAreaHeight).coerceAtLeast(MinChartAreaHeight)
 
     Box(
-        modifier = modifier.height(182.dp),
+        modifier = modifier.height(chartHeight),
         contentAlignment = Alignment.BottomCenter,
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(182.dp)
+                .height(chartHeight)
                 .align(Alignment.BottomCenter)
                 .horizontalGridLinesFromBottom(
-                    lineCount = 5,
+                    lineCount = ChartLineCount,
                     lineColor = Sd800,
                     chartAreaHeight = chartAreaHeight,
                     bottomReservedHeight = labelAreaHeight,
@@ -238,9 +246,8 @@ private fun BarChart(
             ),
         ) {
             bars.forEach { item ->
-                BarItem(
+                BarGraphItem(
                     item = item,
-                    ratio = item.value / maxValue.toFloat(),
                     barMaxHeight = chartAreaHeight,
                 )
             }
@@ -249,13 +256,13 @@ private fun BarChart(
 }
 
 @Composable
-private fun BarItem(
-    item: InsightCompareBarItem,
-    ratio: Float,
-    barMaxHeight: androidx.compose.ui.unit.Dp,
+private fun BarGraphItem(
+    item: BarItem,
+    barMaxHeight: Dp,
 ) {
-    val animatableRatio = remember(item.label) { Animatable(0f) }
-    val clampedRatio = ratio.coerceIn(0f, 1f)
+    val animatableRatio = remember(item) { Animatable(0f) }
+    val clampedRatio = item.ratio.coerceIn(0f, 1f)
+
     LaunchedEffect(clampedRatio, item.animationDurationMillis, item.animationDelayMillis) {
         animatableRatio.snapTo(0f)
         if (item.animationDelayMillis > 0) {
@@ -269,9 +276,9 @@ private fun BarItem(
             ),
         )
     }
-    val animatedRatio = animatableRatio.value
+
     val minBarHeight = 12.dp
-    val barHeight = (barMaxHeight * animatedRatio).coerceAtLeast(minBarHeight)
+    val barHeight = (barMaxHeight * animatableRatio.value).coerceAtLeast(minBarHeight)
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -283,19 +290,19 @@ private fun BarItem(
         ) {
             Box(
                 modifier = Modifier
-                    .width(42.dp)
+                    .width(BarWidth)
                     .height(barHeight)
                     .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(item.topColor, item.bottomColor),
                         ),
-                        shape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp),
+                        shape = RoundedCornerShape(topStart = BarTopRadius, topEnd = BarTopRadius),
                     ),
                 contentAlignment = Alignment.TopCenter,
             ) {
                 Text(
                     text = item.valueText,
-                    modifier = Modifier.padding(top = 8.dp),
+                    modifier = Modifier.padding(top = ValueTopPadding),
                     style = BarLabelTextStyle,
                     color = White,
                 )
@@ -316,83 +323,31 @@ private fun Modifier.insightCardContainer(): Modifier = background(
     shape = RoundedCornerShape(16.dp),
 )
 
-private fun Modifier.horizontalGridLinesFromBottom(
-    lineCount: Int,
-    lineColor: Color,
-    chartAreaHeight: androidx.compose.ui.unit.Dp,
-    bottomReservedHeight: androidx.compose.ui.unit.Dp,
-): Modifier = drawBehind {
-    val chartAreaPx = chartAreaHeight.toPx()
-    val bottomReservedPx = bottomReservedHeight.toPx()
-    val zeroAxisY = size.height - bottomReservedPx
-    val lineGap = chartAreaPx / lineCount
-
-    repeat(lineCount + 1) { index ->
-        val y = zeroAxisY - (lineGap * index)
-        drawLine(
-            color = lineColor,
-            start = Offset(0f, y),
-            end = Offset(size.width, y),
-            strokeWidth = 1.dp.toPx(),
-        )
-    }
-}
-
 @Preview
 @Composable
-private fun InsightCompareBarChartCardPreview() {
+private fun BarChartCardPreview() {
     FoodDiaryTheme {
-        InsightCompareBarChartCard(
+        BarChartCard(
             title = "먹기 전에\n카메라부터 찾았네요.",
             descriptionPrefix = "지난 달 대비 기록된 사진이 ",
             highlightText = "70%",
             descriptionSuffix = " 증가했어요.",
             bars = listOf(
-                InsightCompareBarItem(
+                BarItem(
                     label = "1월",
-                    value = 20,
+                    ratio = 20f / 140f,
+                    valueText = "20",
                     topColor = Color(0xFF415199),
                     bottomColor = Color(0xFF8AA6E6),
-                    animationDelayMillis = 0,
                 ),
-                InsightCompareBarItem(
+                BarItem(
                     label = "2월",
-                    value = 140,
+                    ratio = 1f,
+                    valueText = "140",
                     topColor = Color(0xFFFE670E),
                     bottomColor = Color(0xFFFFB183),
-                    animationDelayMillis = 180,
                 ),
-            ),
-            modifier = Modifier.padding(16.dp),
-        )
-    }
-}
-
-@Preview
-@Composable
-private fun InsightCompareBarChartCardSmallGapPreview() {
-    FoodDiaryTheme {
-        InsightCompareBarChartCard(
-            title = "사진 기록 습관이\n조금 늘었어요.",
-            descriptionPrefix = "지난 주 대비 기록된 사진이 ",
-            highlightText = "12%",
-            descriptionSuffix = " 증가했어요.",
-            bars = listOf(
-                InsightCompareBarItem(
-                    label = "이번 주",
-                    value = 76,
-                    topColor = Color(0xFF415199),
-                    bottomColor = Color(0xFF8AA6E6),
-                    animationDelayMillis = 0,
-                ),
-                InsightCompareBarItem(
-                    label = "지난 주",
-                    value = 68,
-                    topColor = Color(0xFFFE670E),
-                    bottomColor = Color(0xFFFFB183),
-                    animationDelayMillis = 180,
-                ),
-            ),
+            ).withStaggeredAnimation(delayStepMillis = 90),
             modifier = Modifier.padding(16.dp),
         )
     }
@@ -405,44 +360,45 @@ private fun InsightFrequentFoodBarChartCardPreview() {
         InsightFrequentFoodBarChartCard(
             title = "가장 자주 먹은",
             description = "고민은 길었고, 메뉴는 늘 비슷했어요.",
+            highlightPrefixText = "음식은 ",
             highlightFoodName = "마라샹궈",
             bars = listOf(
-                InsightCompareBarItem(
+                BarItem(
                     label = "1주차",
-                    value = 3,
+                    ratio = 0.5f,
                     valueText = "3회",
                     topColor = Color(0xFFFE670E),
                     bottomColor = Color(0xFFFFB183),
                 ),
-                InsightCompareBarItem(
+                BarItem(
                     label = "2주차",
-                    value = 4,
+                    ratio = 0.6f,
                     valueText = "4회",
                     topColor = Color(0xFFFE670E),
                     bottomColor = Color(0xFFFFB183),
                 ),
-                InsightCompareBarItem(
+                BarItem(
                     label = "3주차",
-                    value = 2,
+                    ratio = 0.1f,
                     valueText = "2회",
                     topColor = Color(0xFFFE670E),
                     bottomColor = Color(0xFFFFB183),
                 ),
-                InsightCompareBarItem(
+                BarItem(
                     label = "4주차",
-                    value = 5,
+                    ratio = 0.9f,
                     valueText = "5회",
                     topColor = Color(0xFFFE670E),
                     bottomColor = Color(0xFFFFB183),
                 ),
-                InsightCompareBarItem(
+                BarItem(
                     label = "5주차",
-                    value = 6,
+                    ratio = 1f,
                     valueText = "6회",
                     topColor = Color(0xFFFE670E),
                     bottomColor = Color(0xFFFFB183),
                 ),
-            ).withStaggeredAnimation(delayStepMillis = 80),
+            ).withStaggeredAnimation(delayStepMillis = 70),
             modifier = Modifier.padding(16.dp),
         )
     }
