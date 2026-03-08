@@ -115,6 +115,8 @@ fun EditableKeywordChipGroup(
     horizontalSpacing: Int = 8,
     verticalSpacing: Int = 4,
 ) {
+    val removePainter = painterResource(drawable.ic_circle_close)
+
     FlowRow(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(horizontalSpacing.dp),
@@ -126,7 +128,7 @@ fun EditableKeywordChipGroup(
                     text = keyword,
                     trailingContent = {
                         Image(
-                            painter = painterResource(drawable.ic_circle_close),
+                            painter = removePainter,
                             contentDescription = removeContentDescription,
                             modifier = Modifier
                                 .size(18.dp)

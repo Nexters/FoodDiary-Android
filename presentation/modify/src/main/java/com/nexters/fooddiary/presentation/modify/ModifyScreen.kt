@@ -154,6 +154,12 @@ private fun ModifyScreenContent(
     val sectionTag = stringResource(R.string.modify_section_tag)
     val deleteContentDesc = stringResource(R.string.modify_delete)
     val addTagContentDesc = stringResource(R.string.modify_tag_add)
+    val selectedCategories = remember(state.selectedCategory) {
+        state.selectedCategory
+            .takeIf { it.isNotBlank() }
+            ?.let { setOf(it) }
+            ?: emptySet()
+    }
 
     Scaffold(
         modifier = modifier,
@@ -204,7 +210,7 @@ private fun ModifyScreenContent(
                 ) {
                     KeywordChipGroup(
                         keywords = state.categories,
-                        selectedKeywords = setOf(state.selectedCategory),
+                        selectedKeywords = selectedCategories,
                         onKeywordClick = onSelect,
                         unselectedContentColor = Gray300,
                     )
