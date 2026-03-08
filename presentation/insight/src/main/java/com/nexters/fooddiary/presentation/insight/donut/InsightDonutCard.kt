@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -26,6 +27,7 @@ import com.nexters.fooddiary.core.ui.theme.PrimBase
 import com.nexters.fooddiary.core.ui.theme.SdBase
 import com.nexters.fooddiary.presentation.insight.InsightChartDefaults
 import com.nexters.fooddiary.presentation.insight.InsightDonutCardUiModel
+import com.nexters.fooddiary.presentation.insight.R
 import com.nexters.fooddiary.presentation.insight.sampleInsightReadyState
 
 private val CardShape = RoundedCornerShape(16.dp)
@@ -36,6 +38,11 @@ internal fun InsightDonutCard(
     card: InsightDonutCardUiModel,
     modifier: Modifier = Modifier,
 ) {
+    val changedTitle = stringResource(R.string.insight_donut_title_changed)
+    val maintainedTitle = stringResource(R.string.insight_donut_title_maintained)
+    val changedMiddle = stringResource(R.string.insight_donut_headline_changed_middle)
+    val headlineSuffix = stringResource(R.string.insight_donut_headline_suffix)
+
     Column(
         modifier = modifier
             .clip(CardShape)
@@ -46,12 +53,20 @@ internal fun InsightDonutCard(
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(
-                    text = card.title,
+                    text = buildInsightTitle(
+                        card = card,
+                        changedTitle = changedTitle,
+                        maintainedTitle = maintainedTitle,
+                    ),
                     style = AppTypography.p15.copy(fontWeight = FontWeight.SemiBold),
                     color = Gray050,
                 )
                 Text(
-                    text = buildInsightHeadline(card),
+                    text = buildInsightHeadline(
+                        card = card,
+                        changedMiddle = changedMiddle,
+                        suffix = headlineSuffix,
+                    ),
                     style = AppTypography.p15.copy(fontWeight = FontWeight.SemiBold),
                 )
             }
@@ -64,7 +79,21 @@ internal fun InsightDonutCard(
     }
 }
 
-private fun buildInsightHeadline(card: InsightDonutCardUiModel): AnnotatedString = buildAnnotatedString {
+internal fun buildInsightTitle(
+    card: InsightDonutCardUiModel,
+    changedTitle: String,
+    maintainedTitle: String,
+): String = if (card.previousTopCategory == card.currentTopCategory) {
+    maintainedTitle
+} else {
+    changedTitle
+}
+
+internal fun buildInsightHeadline(
+    card: InsightDonutCardUiModel,
+    changedMiddle: String,
+    suffix: String,
+): AnnotatedString = buildAnnotatedString {
     val previousCategory = card.previousTopCategory
     val currentCategory = card.currentTopCategory
 
@@ -73,7 +102,7 @@ private fun buildInsightHeadline(card: InsightDonutCardUiModel): AnnotatedString
             append(currentCategory)
         }
         withStyle(SpanStyle(color = Gray050)) {
-            append(" 이 계속 1등이에요.")
+            append(suffix)
         }
         return@buildAnnotatedString
     }
@@ -82,13 +111,13 @@ private fun buildInsightHeadline(card: InsightDonutCardUiModel): AnnotatedString
         append(previousCategory)
     }
     withStyle(SpanStyle(color = Gray050)) {
-        append(" 대신 ")
+        append(changedMiddle)
     }
     withStyle(SpanStyle(color = card.categoryColor(currentCategory))) {
         append(currentCategory)
     }
     withStyle(SpanStyle(color = Gray050)) {
-        append(" 이 1등이에요.")
+        append(suffix)
     }
 }
 

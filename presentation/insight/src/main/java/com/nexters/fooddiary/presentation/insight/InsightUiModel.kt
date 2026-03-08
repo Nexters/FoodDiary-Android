@@ -10,7 +10,6 @@ data class InsightScreenState(
 ) : MavericksState
 
 data class InsightDonutCardUiModel(
-    val title: String,
     val previousTopCategory: String,
     val currentTopCategory: String,
     val segments: List<InsightDonutSegmentUiModel>,
@@ -72,7 +71,6 @@ internal fun sampleInsightReadyState(): InsightScreenState = InsightScreenState(
 
 internal fun sampleInsightDonutCard(): InsightDonutCardUiModel =
     InsightDonutCardUiModel(
-        title = "왕좌가 바뀌었어요",
         previousTopCategory = "양식",
         currentTopCategory = "한식",
         segments = listOf(
