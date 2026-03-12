@@ -9,6 +9,7 @@ data class DiaryDetail(
 
 data class DiaryEntry(
     val diaryId: Long,
+    val diaryDate: String,
     val mealType: MealType,
     val analysisStatus: AnalysisStatus,
     val createdAt: String?,

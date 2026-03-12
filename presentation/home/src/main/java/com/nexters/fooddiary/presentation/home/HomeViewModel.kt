@@ -282,7 +282,7 @@ internal fun shouldLoadWeek(
 private fun DiaryDetail.toHomeFoodImageStatesByUrl(): Map<String, FoodImageState> {
     return diaries.flatMap { diary ->
         val state = FoodImageState.Ready(
-            timeText = diary.createdAt.toLocalTimeText(),
+            timeText = diary.diaryDate.toLocalTimeText(),
             locationText = diary.location.orEmpty(),
         )
         diary.photos.map { photo -> photo.imageUrl to state }
