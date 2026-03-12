@@ -27,21 +27,14 @@ fun NavGraphBuilder.detailScreen(
         val refreshDiaryDateString by backStackEntry.savedStateHandle
             .getStateFlow<String?>(SyncConstants.DIARY_REFRESH_DATE, null)
             .collectAsStateWithLifecycle()
-        val uploadPendingDateString by backStackEntry.savedStateHandle
-            .getStateFlow<String?>(SyncConstants.DIARY_UPLOAD_PENDING_DATE, null)
-            .collectAsStateWithLifecycle()
 
         DetailScreen(
             initialDateString = route.dateString,
-            uploadPendingDateString = uploadPendingDateString,
             refreshDiaryDateString = refreshDiaryDateString,
             onRefreshDiaryConsumed = {
                 backStackEntry.savedStateHandle.remove<String>(SyncConstants.DIARY_REFRESH_DATE)
             },
             onDeleteSuccess = onDeleteSuccess,
-            onUploadPendingConsumed = {
-                backStackEntry.savedStateHandle.remove<String>(SyncConstants.DIARY_UPLOAD_PENDING_DATE)
-            },
             onNavigateBack = onNavigateBack,
             onNavigateToImagePicker = onNavigateToImagePicker,
             onNavigateToModify = onNavigateToModify,

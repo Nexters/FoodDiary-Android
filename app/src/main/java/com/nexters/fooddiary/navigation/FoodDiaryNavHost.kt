@@ -367,7 +367,7 @@ fun FoodDiaryNavHost(
                         if (previousIsDetail) {
                             navController.previousBackStackEntry
                                 ?.savedStateHandle
-                                ?.set(SyncConstants.DIARY_UPLOAD_PENDING_DATE, uploadedDate.toString())
+                                ?.set(SyncConstants.DIARY_REFRESH_DATE, uploadedDate.toString())
                         }
                         navController.popBackStack()
                         if (previousIsHome) {
