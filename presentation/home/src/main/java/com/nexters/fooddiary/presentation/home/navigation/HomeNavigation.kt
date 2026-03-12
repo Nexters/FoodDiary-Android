@@ -24,21 +24,14 @@ fun NavGraphBuilder.homeScreen(
         val refreshDiaryDateString by backStackEntry.savedStateHandle
             .getStateFlow<String?>(SyncConstants.DIARY_REFRESH_DATE, null)
             .collectAsState()
-        val diaryUploadPendingDateString by backStackEntry.savedStateHandle
-            .getStateFlow<String?>(SyncConstants.DIARY_UPLOAD_PENDING_DATE, null)
-            .collectAsState()
         HomeScreen(
             onNavigateToImagePicker = onNavigateToImagePicker,
             onNavigateToDetail = onNavigateToDetail,
             onNavigateToMyPage = onNavigateToMyPage,
             isMonthlyCalendarView = isMonthlyCalendarView(),
             refreshDiaryDateString = refreshDiaryDateString,
-            diaryUploadPendingDateString = diaryUploadPendingDateString,
             onRefreshDiaryConsumed = {
                 backStackEntry.savedStateHandle.remove<String>(SyncConstants.DIARY_REFRESH_DATE)
-            },
-            onDiaryUploadPendingConsumed = {
-                backStackEntry.savedStateHandle.remove<String>(SyncConstants.DIARY_UPLOAD_PENDING_DATE)
             },
             onShowSnackBar = onShowSnackBar,
         )

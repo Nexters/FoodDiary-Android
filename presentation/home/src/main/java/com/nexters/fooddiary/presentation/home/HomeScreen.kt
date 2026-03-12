@@ -61,9 +61,7 @@ internal fun HomeScreen(
     onNavigateToMyPage: () -> Unit = {},
     isMonthlyCalendarView: Boolean = false,
     refreshDiaryDateString: String? = null,
-    diaryUploadPendingDateString: String? = null,
     onRefreshDiaryConsumed: () -> Unit = {},
-    onDiaryUploadPendingConsumed: () -> Unit = {},
     onShowSnackBar: (SnackBarData) -> Unit = {},
     viewModel: HomeViewModel = mavericksViewModel(),
 ) {
@@ -123,14 +121,6 @@ internal fun HomeScreen(
         onRefreshDiaryConsumed()
     }
 
-    LaunchedEffect(diaryUploadPendingDateString) {
-        val dateString = diaryUploadPendingDateString ?: return@LaunchedEffect
-        runCatching { LocalDate.parse(dateString) }
-            .getOrNull()
-            ?.let(viewModel::onDiaryUploadPending)
-        onDiaryUploadPendingConsumed()
-    }
-
     HomeScreen(
         state = state,
         isMonthlyCalendarView = isMonthlyCalendarView,
@@ -142,8 +132,8 @@ internal fun HomeScreen(
         selectedDateImageUrls = selectedDateImageUrls(
             weeklyPhotosByDate = state.weeklyPhotosByDate,
             selectedDate = state.selectedDate,
+            selectedDateImageStatesByUrl = state.selectedDateImageStatesByUrl,
         ),
-        isSelectedDatePending = state.pendingDates.contains(state.selectedDate),
         onShowSnackBar = onShowSnackBar,
         onMonthChanged = viewModel::loadPhotosForMonth,
         photoCountByDate = photoCountByDate,
@@ -155,7 +145,9 @@ internal fun HomeScreen(
 internal fun selectedDateImageUrls(
     weeklyPhotosByDate: Map<LocalDate, List<String>>,
     selectedDate: LocalDate,
+    selectedDateImageStatesByUrl: Map<String, FoodImageState>,
 ): List<String> = weeklyPhotosByDate[selectedDate].orEmpty()
+    .ifEmpty { selectedDateImageStatesByUrl.keys.toList() }
 
 @Composable
 private fun HomeScreen(
@@ -168,7 +160,6 @@ private fun HomeScreen(
     onNavigateToDetail: (LocalDate) -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
     selectedDateImageUrls: List<String> = emptyList(),
-    isSelectedDatePending: Boolean = false,
     onShowSnackBar: (SnackBarData) -> Unit = {},
     onMonthChanged: (YearMonth) -> Unit = {},
     photoCountByDate: Map<LocalDate, Int> = emptyMap(),
@@ -233,15 +224,6 @@ private fun HomeScreen(
                             state = state.selectedDateImageState,
                             stateByImageUrl = state.selectedDateImageStatesByUrl,
                             onCardClick = onCardStackClick,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 20.dp)
-                                .aspectRatio(1f),
-                        )
-                    } else if (isSelectedDatePending) {
-                        FoodImageCard(
-                            imageUrl = "",
-                            state = FoodImageState.Pending,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 20.dp)
