@@ -150,6 +150,7 @@ class DetailViewModel @AssistedInject constructor(
                         copy(deleteRequest = result)
                     }
                     is Fail -> {
+                        refreshMealsForDate(selectedDate)
                         _events.tryEmit(DetailEvent.DeleteFailed)
                         copy(deleteRequest = result)
                     }
