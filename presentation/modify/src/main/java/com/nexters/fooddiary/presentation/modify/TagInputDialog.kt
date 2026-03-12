@@ -26,10 +26,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.nexters.fooddiary.core.ui.component.CommonCircleButton
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.Gray050
 import com.nexters.fooddiary.core.ui.theme.Gray200
-import com.nexters.fooddiary.core.ui.theme.Gray600
 import com.nexters.fooddiary.core.ui.theme.Sd800
 import com.nexters.fooddiary.core.ui.theme.SdBase
 
