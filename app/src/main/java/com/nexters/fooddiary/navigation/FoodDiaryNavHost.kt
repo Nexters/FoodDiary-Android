@@ -5,7 +5,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.os.SystemClock
 import android.provider.Settings
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.EnterTransition
@@ -21,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -111,7 +114,19 @@ fun FoodDiaryNavHost(
     val isLoginRoute =
         currentDestination?.hierarchy?.any { it.hasRoute(LoginRoute::class) } == true
     val shouldShowHomeInsightBottomBar = isHomeRoute || isInsightRoute
+    val shouldHandleAppExitBack = isHomeRoute || isInsightRoute
     val selectedTab = if (isInsightRoute) HomeInsightTab.INSIGHT else HomeInsightTab.HOME
+    var lastExitBackPressedAt by remember { mutableLongStateOf(0L) }
+
+    val handleAppExitBackPress: () -> Unit = {
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastExitBackPressedAt <= EXIT_CONFIRMATION_WINDOW_MILLIS) {
+            onFinish()
+        } else {
+            lastExitBackPressedAt = now
+            onShowToast(context.getString(R.string.exit_confirm_toast_message))
+        }
+    }
 
     val navigateToPendingDetailIfNeeded: () -> Unit = {
         pendingDetailDate?.let { detailDate ->
@@ -136,6 +151,12 @@ fun FoodDiaryNavHost(
     LaunchedEffect(authUiState?.signInError) {
         authUiState?.signInError?.let { error ->
             onShowToast(error)
+        }
+    }
+
+    LaunchedEffect(shouldHandleAppExitBack) {
+        if (!shouldHandleAppExitBack) {
+            lastExitBackPressedAt = 0L
         }
     }
 
@@ -213,6 +234,10 @@ fun FoodDiaryNavHost(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
+        BackHandler(enabled = isHomeRoute) {
+            handleAppExitBackPress()
+        }
+
         Scaffold(
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
             bottomBar = {
@@ -310,7 +335,7 @@ fun FoodDiaryNavHost(
 
                 insightScreen(
                     onNavigateToMyPage = { navController.navigate(MyPageRoute) },
-                    onBack = onFinish,
+                    onBack = handleAppExitBackPress,
                 )
 
                 detailScreen(
@@ -461,3 +486,5 @@ private fun Uri?.getDetailDateOrNull(): String? {
     return getQueryParameter(NavigationConstants.DEEP_LINK_QUERY_DATE)
         ?.takeIf { it.isNotBlank() }
 }
+
+private const val EXIT_CONFIRMATION_WINDOW_MILLIS = 2_000L

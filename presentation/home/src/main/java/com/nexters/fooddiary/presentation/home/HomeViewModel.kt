@@ -282,7 +282,7 @@ private fun DiaryDetail.toHomeFoodImageStatesByUrl(): Map<String, FoodImageState
             AnalysisStatus.PROCESSING -> FoodImageState.Processing
             AnalysisStatus.DONE,
             AnalysisStatus.FAILED -> FoodImageState.Ready(
-                timeText = diary.createdAt.toLocalTimeText(),
+                timeText = diary.diaryDate.toLocalTimeText(),
                 locationText = diary.location.orEmpty(),
             )
         }
