@@ -3,7 +3,7 @@ name: Firebase App Distribution
 on:
   push:
     branches:
-      - develop
+      - main
   workflow_dispatch:  # 수동 실행 가능
 
 jobs:
