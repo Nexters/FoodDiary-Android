@@ -8,6 +8,7 @@ data class ImagePickerState(
     val foodImageUris: List<Uri> = emptyList(),
     val allImageUris: List<Uri> = emptyList(),
     val isLoading: Boolean = false,
+    val isUploading: Boolean = false,
     val hasPermission: Boolean = false,
     val selectedUris: Set<Uri> = emptySet(),
     val filterDate: LocalDate? = null,

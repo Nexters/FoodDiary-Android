@@ -15,6 +15,7 @@ import androidx.work.WorkerParameters
 import com.nexters.fooddiary.domain.usecase.BatchUploadPhotosUseCase
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
+import java.util.UUID
 
 class ImageUploadWorker(
     appContext: Context,
@@ -52,7 +53,7 @@ class ImageUploadWorker(
             context: Context,
             targetDate: LocalDate,
             uriStrings: List<String>,
-        ) {
+        ): UUID {
             val input = Data.Builder()
                 .putString(KEY_DATE, targetDate.toString())
                 .putStringArray(KEY_URIS, uriStrings.toTypedArray())
@@ -68,6 +69,7 @@ class ImageUploadWorker(
                 .build()
 
             WorkManager.getInstance(context).enqueue(request)
+            return request.id
         }
     }
 }

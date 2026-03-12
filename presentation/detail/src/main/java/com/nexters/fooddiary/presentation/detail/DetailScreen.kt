@@ -103,9 +103,11 @@ private val DetailFloatingButtonGlassStyle = GlassmorphismStyle(
 @Composable
 internal fun DetailScreen(
     initialDateString: String = LocalDate.now().toString(),
+    uploadPendingDateString: String? = null,
     refreshDiaryDateString: String? = null,
     onRefreshDiaryConsumed: () -> Unit = {},
     viewModel: DetailViewModel = mavericksViewModel(),
+    onUploadPendingConsumed: () -> Unit = {},
     onDeleteSuccess: (LocalDate) -> Unit = {},
     onNavigateBack: () -> Unit = {},
     onNavigateToImagePicker: (LocalDate) -> Unit = {},
@@ -132,6 +134,15 @@ internal fun DetailScreen(
             viewModel.refreshMealsForDate(syncDate)
         }
         onRefreshDiaryConsumed()
+    }
+
+    LaunchedEffect(uploadPendingDateString) {
+        if (uploadPendingDateString == null) return@LaunchedEffect
+        val uploadDate = runCatching { LocalDate.parse(uploadPendingDateString) }.getOrNull()
+        if (uploadDate != null && uploadDate == state.selectedDate) {
+            viewModel.refreshMealsForDate(uploadDate)
+        }
+        onUploadPendingConsumed()
     }
 
     LaunchedEffect(viewModel) {

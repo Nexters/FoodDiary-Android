@@ -364,12 +364,13 @@ fun FoodDiaryNavHost(
                                 ?.savedStateHandle
                                 ?.set(SyncConstants.DIARY_UPLOAD_PENDING_DATE, uploadedDate.toString())
                         }
-                        navController.popBackStack()
                         if (previousIsDetail) {
-                            navController.navigate(DetailRoute(dateString = uploadedDate.toString())) {
-                                launchSingleTop = true
-                            }
-                        } else if (!previousIsHome) {
+                            navController.previousBackStackEntry
+                                ?.savedStateHandle
+                                ?.set(SyncConstants.DIARY_UPLOAD_PENDING_DATE, uploadedDate.toString())
+                        }
+                        navController.popBackStack()
+                        if (!previousIsHome && !previousIsDetail) {
                             navController.navigate(HomeRoute) {
                                 launchSingleTop = true
                             }
