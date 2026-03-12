@@ -167,7 +167,7 @@ private fun InsightRankingBubble(
 ) {
     var shouldAnimate by remember(region.rank) { mutableStateOf(false) }
     LaunchedEffect(region.rank) {
-        delay((region.rank - 1) * RankingBubbleAppearStaggerMillis)
+        delay((region.rank - 1).coerceAtLeast(0) * RankingBubbleAppearStaggerMillis)
         shouldAnimate = true
     }
     val animatedScale by animateFloatAsState(
