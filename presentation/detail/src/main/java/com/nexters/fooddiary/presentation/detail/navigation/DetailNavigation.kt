@@ -5,7 +5,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.nexters.fooddiary.core.common.push.PushSyncConstants
+import com.nexters.fooddiary.core.common.navigation.SyncConstants
 import com.nexters.fooddiary.presentation.detail.DetailScreen
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
@@ -16,6 +16,7 @@ data class DetailRoute(
 )
 
 fun NavGraphBuilder.detailScreen(
+    onDeleteSuccess: (LocalDate) -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateToImagePicker: (LocalDate) -> Unit,
     onNavigateToModify: (String) -> Unit,
@@ -23,16 +24,17 @@ fun NavGraphBuilder.detailScreen(
 ) {
     composable<DetailRoute> { backStackEntry ->
         val route = backStackEntry.toRoute<DetailRoute>()
-        val pushSyncDateString by backStackEntry.savedStateHandle
-            .getStateFlow<String?>(PushSyncConstants.PUSH_SYNC_DIARY_DATE, null)
+        val refreshDiaryDateString by backStackEntry.savedStateHandle
+            .getStateFlow<String?>(SyncConstants.DIARY_REFRESH_DATE, null)
             .collectAsStateWithLifecycle()
 
         DetailScreen(
             initialDateString = route.dateString,
-            pushSyncDateString = pushSyncDateString,
-            onPushSyncConsumed = {
-                backStackEntry.savedStateHandle.remove<String>(PushSyncConstants.PUSH_SYNC_DIARY_DATE)
+            refreshDiaryDateString = refreshDiaryDateString,
+            onRefreshDiaryConsumed = {
+                backStackEntry.savedStateHandle.remove<String>(SyncConstants.DIARY_REFRESH_DATE)
             },
+            onDeleteSuccess = onDeleteSuccess,
             onNavigateBack = onNavigateBack,
             onNavigateToImagePicker = onNavigateToImagePicker,
             onNavigateToModify = onNavigateToModify,

@@ -35,6 +35,7 @@ sealed interface DetailEvent {
     data object ShareLinkEmpty : DetailEvent
     data object NavigateToImagePicker : DetailEvent
     data class NavigateToModify(val diaryId: String) : DetailEvent
+    data class DeleteSuccess(val date: LocalDate) : DetailEvent
     data object DeleteEmpty : DetailEvent
     data object DeleteFailed : DetailEvent
 }
@@ -145,6 +146,7 @@ class DetailViewModel @AssistedInject constructor(
                 when (result) {
                     is Success -> {
                         refreshMealsForDate(selectedDate)
+                        _events.tryEmit(DetailEvent.DeleteSuccess(selectedDate))
                         copy(deleteRequest = result)
                     }
                     is Fail -> {

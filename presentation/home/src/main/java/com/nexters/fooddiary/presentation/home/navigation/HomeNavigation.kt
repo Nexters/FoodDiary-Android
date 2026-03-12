@@ -4,7 +4,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.nexters.fooddiary.core.common.push.PushSyncConstants
+import com.nexters.fooddiary.core.common.navigation.SyncConstants
 import com.nexters.fooddiary.core.ui.alert.SnackBarData
 import com.nexters.fooddiary.presentation.home.HomeScreen
 import kotlinx.serialization.Serializable
@@ -21,24 +21,24 @@ fun NavGraphBuilder.homeScreen(
     onShowSnackBar: (SnackBarData) -> Unit,
 ) {
     composable<HomeRoute> { backStackEntry ->
-        val pushSyncDateString by backStackEntry.savedStateHandle
-            .getStateFlow<String?>(PushSyncConstants.PUSH_SYNC_DIARY_DATE, null)
+        val refreshDiaryDateString by backStackEntry.savedStateHandle
+            .getStateFlow<String?>(SyncConstants.DIARY_REFRESH_DATE, null)
             .collectAsState()
-        val uploadPendingDateString by backStackEntry.savedStateHandle
-            .getStateFlow<String?>(PushSyncConstants.UPLOAD_PENDING_DIARY_DATE, null)
+        val diaryUploadPendingDateString by backStackEntry.savedStateHandle
+            .getStateFlow<String?>(SyncConstants.DIARY_UPLOAD_PENDING_DATE, null)
             .collectAsState()
         HomeScreen(
             onNavigateToImagePicker = onNavigateToImagePicker,
             onNavigateToDetail = onNavigateToDetail,
             onNavigateToMyPage = onNavigateToMyPage,
             isMonthlyCalendarView = isMonthlyCalendarView(),
-            pushSyncDateString = pushSyncDateString,
-            uploadPendingDateString = uploadPendingDateString,
-            onPushSyncConsumed = {
-                backStackEntry.savedStateHandle.remove<String>(PushSyncConstants.PUSH_SYNC_DIARY_DATE)
+            refreshDiaryDateString = refreshDiaryDateString,
+            diaryUploadPendingDateString = diaryUploadPendingDateString,
+            onRefreshDiaryConsumed = {
+                backStackEntry.savedStateHandle.remove<String>(SyncConstants.DIARY_REFRESH_DATE)
             },
-            onUploadPendingConsumed = {
-                backStackEntry.savedStateHandle.remove<String>(PushSyncConstants.UPLOAD_PENDING_DIARY_DATE)
+            onDiaryUploadPendingConsumed = {
+                backStackEntry.savedStateHandle.remove<String>(SyncConstants.DIARY_UPLOAD_PENDING_DATE)
             },
             onShowSnackBar = onShowSnackBar,
         )

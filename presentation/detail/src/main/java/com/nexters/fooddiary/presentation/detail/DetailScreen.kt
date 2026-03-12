@@ -103,9 +103,10 @@ private val DetailFloatingButtonGlassStyle = GlassmorphismStyle(
 @Composable
 internal fun DetailScreen(
     initialDateString: String = LocalDate.now().toString(),
-    pushSyncDateString: String? = null,
-    onPushSyncConsumed: () -> Unit = {},
+    refreshDiaryDateString: String? = null,
+    onRefreshDiaryConsumed: () -> Unit = {},
     viewModel: DetailViewModel = mavericksViewModel(),
+    onDeleteSuccess: (LocalDate) -> Unit = {},
     onNavigateBack: () -> Unit = {},
     onNavigateToImagePicker: (LocalDate) -> Unit = {},
     onNavigateToModify: (String) -> Unit = {},
@@ -124,13 +125,13 @@ internal fun DetailScreen(
         viewModel.loadMealsForDate(state.selectedDate)
     }
 
-    LaunchedEffect(pushSyncDateString) {
-        if (pushSyncDateString == null) return@LaunchedEffect
-        val syncDate = runCatching { LocalDate.parse(pushSyncDateString) }.getOrNull()
+    LaunchedEffect(refreshDiaryDateString) {
+        if (refreshDiaryDateString == null) return@LaunchedEffect
+        val syncDate = runCatching { LocalDate.parse(refreshDiaryDateString) }.getOrNull()
         if (syncDate != null && syncDate == state.selectedDate) {
             viewModel.refreshMealsForDate(syncDate)
         }
-        onPushSyncConsumed()
+        onRefreshDiaryConsumed()
     }
 
     LaunchedEffect(viewModel) {
@@ -155,6 +156,9 @@ internal fun DetailScreen(
                 }
                 is DetailEvent.NavigateToModify -> {
                     onNavigateToModify(event.diaryId)
+                }
+                is DetailEvent.DeleteSuccess -> {
+                    onDeleteSuccess(event.date)
                 }
                 DetailEvent.DeleteEmpty -> {
                     currentOnShowToast(currentContext.getString(R.string.detail_delete_empty))

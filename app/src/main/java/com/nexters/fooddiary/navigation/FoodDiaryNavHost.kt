@@ -35,7 +35,7 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.nexters.fooddiary.R
-import com.nexters.fooddiary.core.common.push.PushSyncConstants
+import com.nexters.fooddiary.core.common.navigation.SyncConstants
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.nexters.fooddiary.core.ui.alert.AppDialogData
@@ -146,7 +146,7 @@ fun FoodDiaryNavHost(
                 destination.hasRoute(HomeRoute::class) || destination.hasRoute(DetailRoute::class)
             } == true
             if (isSyncTarget) {
-                currentEntry.savedStateHandle[PushSyncConstants.PUSH_SYNC_DIARY_DATE] = event.diaryDate
+                currentEntry.savedStateHandle[SyncConstants.DIARY_REFRESH_DATE] = event.diaryDate
             }
             onShowSnackBar(
                 SnackBarData(
@@ -314,6 +314,11 @@ fun FoodDiaryNavHost(
                 )
 
                 detailScreen(
+                    onDeleteSuccess = { deletedDate ->
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(SyncConstants.DIARY_REFRESH_DATE, deletedDate.toString())
+                    },
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToImagePicker = { dateString ->
                         navController.navigate(ImagePickerRoute(dateString = dateString.toString()))
@@ -357,7 +362,7 @@ fun FoodDiaryNavHost(
                         if (previousIsHome) {
                             navController.previousBackStackEntry
                                 ?.savedStateHandle
-                                ?.set(PushSyncConstants.UPLOAD_PENDING_DIARY_DATE, uploadedDate.toString())
+                                ?.set(SyncConstants.DIARY_UPLOAD_PENDING_DATE, uploadedDate.toString())
                         }
                         navController.popBackStack()
                         if (previousIsDetail) {
