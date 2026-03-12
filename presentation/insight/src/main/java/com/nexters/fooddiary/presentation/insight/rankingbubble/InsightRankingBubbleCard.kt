@@ -87,7 +87,10 @@ internal fun InsightRankingBubbleCard(
     card: InsightRankingBubbleCardUiModel,
     modifier: Modifier = Modifier,
 ) {
-    val topRegion = card.topRegions.firstOrNull()
+    val sortedTopRegions = remember(card.topRegions) {
+        card.topRegions.sortedBy { it.rank }.take(3)
+    }
+    val topRegion = sortedTopRegions.firstOrNull()
 
     Column(
         modifier = modifier
@@ -130,7 +133,7 @@ internal fun InsightRankingBubbleCard(
             contentAlignment = Alignment.Center,
         ) {
             InsightRankingBubbleChart(
-                topRegions = card.topRegions,
+                topRegions = sortedTopRegions,
                 modifier = Modifier.width(RankingBubbleChartWidth),
             )
         }
@@ -147,7 +150,7 @@ private fun InsightRankingBubbleChart(
             .height(RankingBubbleChartHeight),
         contentAlignment = Alignment.Center,
     ) {
-        topRegions.sortedBy { it.rank }.take(3).forEach { region ->
+        topRegions.forEach { region ->
             InsightRankingBubble(
                 region = region,
                 modifier = Modifier
