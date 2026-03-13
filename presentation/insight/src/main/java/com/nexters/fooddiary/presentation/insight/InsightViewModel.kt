@@ -4,12 +4,14 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
+import com.nexters.fooddiary.domain.usecase.GetUserInsightsUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 
 class InsightViewModel @AssistedInject constructor(
     @Assisted initialState: InsightScreenState,
+    private val getUserInsightsUseCase: GetUserInsightsUseCase,
 ) : MavericksViewModel<InsightScreenState>(initialState) {
 
     init {
@@ -17,13 +19,10 @@ class InsightViewModel @AssistedInject constructor(
     }
 
     fun loadInsights() {
-        // TODO: /me/insights 응답이 연결되면 donutCard 외 다른 카드들도 타입별 UI model 필드로 분리해 매핑한다.
-        setState {
-            copy(
-                donutCard = sampleInsightDonutCard(),
-                rankingBubbleCard = sampleInsightRankingBubbleCard(),
-            )
-        }
+        suspend { getUserInsightsUseCase() }
+            .execute { async ->
+                async.invoke()?.toInsightScreenState() ?: InsightScreenState()
+            }
     }
 
     @AssistedFactory

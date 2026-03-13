@@ -30,11 +30,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.nexters.fooddiary.core.ui.theme.AppTypography
+import com.nexters.fooddiary.core.ui.theme.Blue400
+import com.nexters.fooddiary.core.ui.theme.Blue700
 import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
 import com.nexters.fooddiary.core.ui.theme.Gray050
+import com.nexters.fooddiary.core.ui.theme.PrimBase
+import com.nexters.fooddiary.core.ui.theme.Prim300
 import com.nexters.fooddiary.core.ui.theme.SdBase
 import com.nexters.fooddiary.presentation.insight.InsightDonutSegmentUiModel
-import com.nexters.fooddiary.presentation.insight.InsightSegmentGradientUiModel
 import com.nexters.fooddiary.presentation.insight.sampleInsightReadyState
 import kotlin.math.PI
 import kotlin.math.abs
@@ -61,6 +64,25 @@ private const val InsightChartLabelOutwardBiasRange = 140f
 private const val InsightChartRevealDurationMillis = 1100
 private const val InsightChartLabelFadeStartProgress = 0.72f
 private const val InsightChartRevealRotationDegrees = 120f
+
+private object InsightDonutVisualDefaults {
+    val FirstGradient = DonutSegmentGradient(
+        colors = listOf(
+            PrimBase,
+            Prim300,
+        ),
+        start = GradientPoint(xFraction = 0.5f, yFraction = 0f),
+        end = GradientPoint(xFraction = 0.5f, yFraction = 1f),
+    )
+    val SecondGradient = DonutSegmentGradient(
+        colors = listOf(
+            Blue400,
+            Blue700,
+        ),
+        start = GradientPoint(xFraction = 0.5f, yFraction = 1f),
+        end = GradientPoint(xFraction = 0.5f, yFraction = 0f),
+    )
+}
 
 @Composable
 internal fun InsightDonutChart(
@@ -113,7 +135,7 @@ internal fun InsightDonutChart(
 
             geometries.forEachIndexed { index, geometry ->
                 drawArc(
-                    brush = validSegments[index].gradient.toBrush(size = brushBounds),
+                    brush = index.toSegmentGradient().toBrush(size = brushBounds),
                     startAngle = geometry.startAngle - animatedRotationOffset,
                     sweepAngle = geometry.sweepAngle * clampedProgress,
                     useCenter = false,
@@ -144,6 +166,13 @@ internal fun InsightDonutChart(
                 }
             }
         }
+    }
+}
+
+private fun Int.toSegmentGradient(): DonutSegmentGradient {
+    return when (this) {
+        0 -> InsightDonutVisualDefaults.FirstGradient
+        else -> InsightDonutVisualDefaults.SecondGradient
     }
 }
 
@@ -401,7 +430,7 @@ private fun polarOffset(
     )
 }
 
-private fun InsightSegmentGradientUiModel.toBrush(size: Size): Brush {
+private fun DonutSegmentGradient.toBrush(size: Size): Brush {
     if (colors.size <= 1) {
         return Brush.linearGradient(colors = colors.ifEmpty { listOf(Gray050) })
     }
@@ -418,6 +447,17 @@ private fun InsightSegmentGradientUiModel.toBrush(size: Size): Brush {
         ),
     )
 }
+
+private data class DonutSegmentGradient(
+    val colors: List<Color>,
+    val start: GradientPoint,
+    val end: GradientPoint,
+)
+
+private data class GradientPoint(
+    val xFraction: Float,
+    val yFraction: Float,
+)
 
 @Preview(showBackground = true, backgroundColor = 0xFF191821)
 @Composable

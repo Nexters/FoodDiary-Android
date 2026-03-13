@@ -48,14 +48,8 @@ private val MealTimeStyle = AppTypography.hd24.copy(
 fun InsightMealTimeCard(
     highlightText: String,
     descriptionText: String,
-    introText: String? = null,
-    highlightSuffixText: String? = null,
-    emphasizedText: String = highlightText,
     modifier: Modifier = Modifier,
 ) {
-    val resolvedIntroText = introText ?: stringResource(id = R.string.insight_highlight_summary_intro)
-    val resolvedHighlightSuffixText = highlightSuffixText ?: stringResource(id = R.string.insight_highlight_summary_suffix)
-
     Column(
         modifier = modifier
             .background(
@@ -71,11 +65,6 @@ fun InsightMealTimeCard(
             Column(
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                Text(
-                    text = resolvedIntroText,
-                    style = MealTitleStyle,
-                    color = Gray050,
-                )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -86,7 +75,7 @@ fun InsightMealTimeCard(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = resolvedHighlightSuffixText,
+                        text = stringResource(id = R.string.insight_highlight_summary_suffix),
                         style = MealTitleStyle,
                         color = Gray050,
                     )
@@ -103,7 +92,7 @@ fun InsightMealTimeCard(
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = emphasizedText,
+                text = highlightText,
                 style = MealTimeStyle,
                 color = PrimBase,
             )

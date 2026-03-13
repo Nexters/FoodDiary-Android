@@ -81,31 +81,29 @@ internal fun InsightScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(top = 102.dp, bottom = 24.dp),
+                    .padding(start = 16.dp, end = 16.dp, top = 102.dp, bottom = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 uiState.donutCard?.let { donutCard ->
                     InsightDonutCard(
                         card = donutCard,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
 
-                InsightMealTimeCard(
-                    highlightText = uiState.peakMealTime,
-                    descriptionText = stringResource(id = R.string.insight_meal_time_description),
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                uiState.mealTimeCard?.let { mealTimeCard ->
+                    InsightMealTimeCard(
+                        highlightText = mealTimeCard.peakMealTime,
+                        descriptionText = stringResource(id = R.string.insight_meal_time_description),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
 
                 uiState.rankingBubbleCard?.let { rankingBubbleCard ->
                     InsightRankingBubbleCard(
                         card = rankingBubbleCard,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }

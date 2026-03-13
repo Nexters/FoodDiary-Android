@@ -21,17 +21,18 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nexters.fooddiary.core.ui.theme.AppTypography
+import com.nexters.fooddiary.core.ui.theme.Blue500
 import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
 import com.nexters.fooddiary.core.ui.theme.Gray050
 import com.nexters.fooddiary.core.ui.theme.PrimBase
 import com.nexters.fooddiary.core.ui.theme.SdBase
-import com.nexters.fooddiary.presentation.insight.InsightChartDefaults
 import com.nexters.fooddiary.presentation.insight.InsightDonutCardUiModel
 import com.nexters.fooddiary.presentation.insight.R
 import com.nexters.fooddiary.presentation.insight.sampleInsightReadyState
 
 private val CardShape = RoundedCornerShape(16.dp)
 private val CardBackgroundColor = Color.White.copy(alpha = 0.02f)
+private val DonutSecondCategoryColor = Blue500
 
 @Composable
 internal fun InsightDonutCard(
@@ -111,7 +112,7 @@ internal fun buildInsightHeadline(
         append(previousCategory)
     }
     withStyle(SpanStyle(color = Gray050)) {
-        append(changedMiddle)
+        append(" $changedMiddle ")
     }
     withStyle(SpanStyle(color = card.categoryColor(currentCategory))) {
         append(currentCategory)
@@ -122,12 +123,11 @@ internal fun buildInsightHeadline(
 }
 
 private fun InsightDonutCardUiModel.categoryColor(category: String): Color =
-    segments.firstOrNull { it.label == category }?.color
-        ?: when (category) {
-            "양식" -> InsightChartDefaults.BlueSegmentColor
-            "한식" -> PrimBase
-            else -> Gray050
-        }
+    when (category) {
+        currentTopCategory -> PrimBase
+        previousTopCategory -> DonutSecondCategoryColor
+        else -> Gray050
+    }
 
 @Preview(showBackground = true, backgroundColor = 0xFF191821)
 @Composable

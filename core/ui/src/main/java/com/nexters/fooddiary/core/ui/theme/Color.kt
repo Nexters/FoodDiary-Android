@@ -3,6 +3,11 @@ package com.nexters.fooddiary.core.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val PrimBase = Color(0xFFFE670E)
+val Prim300 = Color(0xFFFFB183)
+
+val Blue400 = Color(0xFF8AA6E6)
+val Blue500 = Color(0xFF6581C4)
+val Blue700 = Color(0xFF415199)
 
 // Secondary - 배경
 val SdBase: Color = Color(0xFF191821)
