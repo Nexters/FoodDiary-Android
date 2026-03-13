@@ -86,6 +86,7 @@ private data class BubbleOffset(
 internal fun InsightRankingBubbleCard(
     card: InsightRankingBubbleCardUiModel,
     modifier: Modifier = Modifier,
+    startAnimation: Boolean = true,
 ) {
     val sortedTopRegions = remember(card.topRegions) {
         card.topRegions.sortedBy { it.rank }.take(3)
@@ -135,6 +136,7 @@ internal fun InsightRankingBubbleCard(
             InsightRankingBubbleChart(
                 topRegions = sortedTopRegions,
                 modifier = Modifier.width(RankingBubbleChartWidth),
+                startAnimation = startAnimation,
             )
         }
     }
@@ -144,6 +146,7 @@ internal fun InsightRankingBubbleCard(
 private fun InsightRankingBubbleChart(
     topRegions: List<InsightRankingBubbleItemUiModel>,
     modifier: Modifier = Modifier,
+    startAnimation: Boolean = true,
 ) {
     Box(
         modifier = modifier
@@ -153,6 +156,7 @@ private fun InsightRankingBubbleChart(
         topRegions.forEach { region ->
             InsightRankingBubble(
                 region = region,
+                startAnimation = startAnimation,
                 modifier = Modifier
                     .offset(
                         x = region.bubbleOffsetX(),
@@ -166,10 +170,15 @@ private fun InsightRankingBubbleChart(
 @Composable
 private fun InsightRankingBubble(
     region: InsightRankingBubbleItemUiModel,
+    startAnimation: Boolean,
     modifier: Modifier = Modifier,
 ) {
     var shouldAnimate by remember(region.rank) { mutableStateOf(false) }
-    LaunchedEffect(region.rank) {
+    LaunchedEffect(region.rank, startAnimation) {
+        if (!startAnimation) {
+            shouldAnimate = false
+            return@LaunchedEffect
+        }
         delay((region.rank - 1).coerceAtLeast(0) * RankingBubbleAppearStaggerMillis)
         shouldAnimate = true
     }
@@ -256,12 +265,10 @@ private fun InsightRankingBubbleCardPreview() {
                 .background(SdBase)
                 .padding(16.dp),
         ) {
-            sampleInsightReadyState().rankingBubbleCard?.let { card ->
-                InsightRankingBubbleCard(
-                    card = card,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
+            InsightRankingBubbleCard(
+                card = sampleInsightReadyState().rankingBubbleCard,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }

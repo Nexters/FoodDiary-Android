@@ -180,12 +180,16 @@ private fun Int.toSegmentGradient(): DonutSegmentGradient {
 internal fun InsightDonutChartWithLabels(
     segments: List<InsightDonutSegmentUiModel>,
     modifier: Modifier = Modifier,
+    startAnimation: Boolean = true,
 ) {
     val validSegments = remember(segments) {
         segments.filter { it.value > 0f }
     }
     val textMeasurer = rememberTextMeasurer()
-    val animationProgress = rememberInsightChartRevealProgress(validSegments)
+    val animationProgress = rememberInsightChartRevealProgress(
+        segments = validSegments,
+        startAnimation = startAnimation,
+    )
 
     BoxWithConstraints(
         modifier = modifier.fillMaxWidth(),
@@ -289,14 +293,18 @@ private fun InsightDonutChartLabels(
 @Composable
 private fun rememberInsightChartRevealProgress(
     segments: List<InsightDonutSegmentUiModel>,
+    startAnimation: Boolean,
 ): Float {
     val progress = remember { Animatable(0f) }
     val animationKey = remember(segments) {
         segments.map { "${it.label}:${it.value}:${it.valueText}" }
     }
 
-    LaunchedEffect(animationKey) {
+    LaunchedEffect(animationKey, startAnimation) {
         progress.snapTo(0f)
+        if (!startAnimation) {
+            return@LaunchedEffect
+        }
 
         if (segments.isNotEmpty()) {
             progress.animateTo(
@@ -470,7 +478,7 @@ private fun InsightDonutChartPreview() {
             contentAlignment = Alignment.Center,
         ) {
             InsightDonutChart(
-                segments = sampleInsightReadyState().donutCard?.segments.orEmpty(),
+                segments = sampleInsightReadyState().donutCard.segments,
                 modifier = Modifier.size(InsightChartMaxSize),
             )
         }
@@ -487,7 +495,7 @@ private fun InsightDonutChartWithLabelsPreview() {
                 .padding(16.dp),
         ) {
             InsightDonutChartWithLabels(
-                segments = sampleInsightReadyState().donutCard?.segments.orEmpty(),
+                segments = sampleInsightReadyState().donutCard.segments,
                 modifier = Modifier.fillMaxWidth(),
             )
         }

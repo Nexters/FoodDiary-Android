@@ -17,8 +17,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -96,11 +102,16 @@ internal fun InsightScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                PhotoStatsInsightCard(
-                    month = uiState.month,
-                    card = uiState.photoStatsCard,
+                AnimatedOnFirstVisible(
                     modifier = Modifier.fillMaxWidth(),
-                )
+                ) { startAnimation, animatedModifier ->
+                    PhotoStatsInsightCard(
+                        month = uiState.month,
+                        card = uiState.photoStatsCard,
+                        startAnimation = startAnimation,
+                        modifier = animatedModifier,
+                    )
+                }
 
                 if (uiState.tagStatsCard.tags.isNotEmpty()) {
                     TasteKeywordSection(
@@ -111,17 +122,27 @@ internal fun InsightScreen(
                 }
 
                 if (uiState.donutCard.segments.isNotEmpty()) {
-                    InsightDonutCard(
-                        card = uiState.donutCard,
+                    AnimatedOnFirstVisible(
                         modifier = Modifier.fillMaxWidth(),
-                    )
+                    ) { startAnimation, animatedModifier ->
+                        InsightDonutCard(
+                            card = uiState.donutCard,
+                            startAnimation = startAnimation,
+                            modifier = animatedModifier,
+                        )
+                    }
                 }
 
                 if (uiState.weeklyStatsCard.weeklyCounts.isNotEmpty()) {
-                    WeeklyStatsInsightCard(
-                        card = uiState.weeklyStatsCard,
+                    AnimatedOnFirstVisible(
                         modifier = Modifier.fillMaxWidth(),
-                    )
+                    ) { startAnimation, animatedModifier ->
+                        WeeklyStatsInsightCard(
+                            card = uiState.weeklyStatsCard,
+                            startAnimation = startAnimation,
+                            modifier = animatedModifier,
+                        )
+                    }
                 }
 
                 if (uiState.mealTimeCard.peakMealTime.isNotBlank()) {
@@ -133,10 +154,15 @@ internal fun InsightScreen(
                 }
 
                 if (uiState.rankingBubbleCard.topRegions.isNotEmpty()) {
-                    InsightRankingBubbleCard(
-                        card = uiState.rankingBubbleCard,
+                    AnimatedOnFirstVisible(
                         modifier = Modifier.fillMaxWidth(),
-                    )
+                    ) { startAnimation, animatedModifier ->
+                        InsightRankingBubbleCard(
+                            card = uiState.rankingBubbleCard,
+                            startAnimation = startAnimation,
+                            modifier = animatedModifier,
+                        )
+                    }
                 }
             }
         } else {
@@ -165,9 +191,10 @@ internal fun InsightScreen(
 
 @Composable
 private fun PhotoStatsInsightCard(
-    month: String?,
+    month: String,
     card: InsightPhotoStatsCardUiModel,
     modifier: Modifier = Modifier,
+    startAnimation: Boolean = true,
 ) {
     val isDecrease = card.previousMonthCount > card.currentMonthCount
     val isEqual = card.previousMonthCount == card.currentMonthCount
@@ -214,6 +241,7 @@ private fun PhotoStatsInsightCard(
         ).withStaggeredAnimation(delayStepMillis = 90),
         barSpacing = 60.dp,
         chartHeight = 182.dp,
+        startAnimation = startAnimation,
         modifier = modifier,
     )
 }
@@ -222,6 +250,7 @@ private fun PhotoStatsInsightCard(
 private fun WeeklyStatsInsightCard(
     card: InsightWeeklyStatsCardUiModel,
     modifier: Modifier = Modifier,
+    startAnimation: Boolean = true,
 ) {
     val maxCount = card.weeklyCounts.maxOfOrNull(InsightWeeklyCountUiModel::count) ?: 0
 
@@ -247,17 +276,41 @@ private fun WeeklyStatsInsightCard(
             )
         }.withStaggeredAnimation(delayStepMillis = 70),
         barSpacing = 10.dp,
+        startAnimation = startAnimation,
         modifier = modifier,
     )
 }
 
 @Composable
+private fun AnimatedOnFirstVisible(
+    modifier: Modifier = Modifier,
+    content: @Composable (startAnimation: Boolean, modifier: Modifier) -> Unit,
+) {
+    val view = LocalView.current
+    var hasEnteredViewport by remember { mutableStateOf(false) }
+
+    val animatedModifier = modifier.onGloballyPositioned { coordinates ->
+        if (hasEnteredViewport) {
+            return@onGloballyPositioned
+        }
+
+        val bounds = coordinates.boundsInWindow()
+        val viewportHeight = view.height.toFloat()
+        if (bounds.bottom > 0f && bounds.top < viewportHeight) {
+            hasEnteredViewport = true
+        }
+    }
+
+    content(hasEnteredViewport, animatedModifier)
+}
+
+@Composable
 private fun rememberMonthLabels(
-    month: String?,
+    month: String,
     previousFallback: String,
     currentFallback: String,
 ): MonthLabels {
-    val currentMonth = runCatching { month?.let(YearMonth::parse) }.getOrNull()
+    val currentMonth = runCatching { YearMonth.parse(month) }.getOrNull()
     return if (currentMonth == null) {
         MonthLabels(
             previousMonthLabel = previousFallback,

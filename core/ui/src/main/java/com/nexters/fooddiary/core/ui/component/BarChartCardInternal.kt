@@ -56,6 +56,7 @@ internal fun BaseBarChartCard(
     headerChartSpacing: Dp = 32.dp,
     barSpacing: Dp,
     chartHeight: Dp,
+    startAnimation: Boolean = true,
     headerContent: @Composable () -> Unit,
 ) {
     Column(
@@ -71,6 +72,7 @@ internal fun BaseBarChartCard(
             bars = bars,
             barSpacing = barSpacing,
             chartHeight = chartHeight,
+            startAnimation = startAnimation,
             modifier = Modifier.fillMaxWidth(),
         )
     }
@@ -81,6 +83,7 @@ private fun BarChart(
     bars: List<BarChartItem>,
     barSpacing: Dp,
     chartHeight: Dp,
+    startAnimation: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val labelAreaHeight =
@@ -116,6 +119,7 @@ private fun BarChart(
                 BarGraphItem(
                     item = item,
                     barMaxHeight = chartAreaHeight,
+                    startAnimation = startAnimation,
                 )
             }
         }
@@ -126,13 +130,22 @@ private fun BarChart(
 private fun BarGraphItem(
     item: BarChartItem,
     barMaxHeight: Dp,
+    startAnimation: Boolean,
 ) {
     val animatableRatio = remember(item) { Animatable(0f) }
     val clampedPercentage = item.percentage.coerceIn(0f, 100f)
     val targetRatio = clampedPercentage / 100f
 
-    LaunchedEffect(targetRatio, item.animationDurationMillis, item.animationDelayMillis) {
+    LaunchedEffect(
+        startAnimation,
+        targetRatio,
+        item.animationDurationMillis,
+        item.animationDelayMillis,
+    ) {
         animatableRatio.snapTo(0f)
+        if (!startAnimation) {
+            return@LaunchedEffect
+        }
         if (item.animationDelayMillis > 0) {
             delay(item.animationDelayMillis.toLong())
         }

@@ -29,6 +29,7 @@ fun BarChartCard(
     modifier: Modifier = Modifier,
     barSpacing: Dp = BarChartCardDefaults.CompareBarSpacing,
     chartHeight: Dp = BarChartCardDefaults.ChartHeight,
+    startAnimation: Boolean = true,
 ) {
     val titleStyle = BarChartTitleTextStyle
     val highlightStyle = titleStyle.copy(color = PrimBase)
@@ -38,6 +39,7 @@ fun BarChartCard(
         modifier = modifier,
         barSpacing = barSpacing,
         chartHeight = chartHeight,
+        startAnimation = startAnimation,
         headerContent = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
@@ -81,6 +83,7 @@ fun HighlightedSubjectBarChartCard(
     modifier: Modifier = Modifier,
     barSpacing: Dp = BarChartCardDefaults.FrequentBarSpacing,
     chartHeight: Dp = BarChartCardDefaults.ChartHeight,
+    startAnimation: Boolean = true,
 ) {
     val titleStyle = BarChartTitleTextStyle
 
@@ -89,6 +92,7 @@ fun HighlightedSubjectBarChartCard(
         modifier = modifier,
         barSpacing = barSpacing,
         chartHeight = chartHeight,
+        startAnimation = startAnimation,
         headerContent = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {

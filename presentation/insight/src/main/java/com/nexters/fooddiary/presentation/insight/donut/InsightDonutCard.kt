@@ -38,6 +38,7 @@ private val DonutSecondCategoryColor = Blue500
 internal fun InsightDonutCard(
     card: InsightDonutCardUiModel,
     modifier: Modifier = Modifier,
+    startAnimation: Boolean = true,
 ) {
     val changedTitle = stringResource(R.string.insight_donut_title_changed)
     val maintainedTitle = stringResource(R.string.insight_donut_title_maintained)
@@ -76,6 +77,7 @@ internal fun InsightDonutCard(
         InsightDonutChartWithLabels(
             segments = card.segments,
             modifier = Modifier.fillMaxWidth(),
+            startAnimation = startAnimation,
         )
     }
 }
@@ -138,12 +140,10 @@ private fun InsightDonutCardPreview() {
                 .background(SdBase)
                 .padding(16.dp),
         ) {
-            sampleInsightReadyState().donutCard?.let { card ->
-                InsightDonutCard(
-                    card = card,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
+            InsightDonutCard(
+                card = sampleInsightReadyState().donutCard,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }
