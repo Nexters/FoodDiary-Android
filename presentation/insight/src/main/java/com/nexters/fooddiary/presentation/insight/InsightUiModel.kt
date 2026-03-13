@@ -6,6 +6,7 @@ import com.nexters.fooddiary.core.ui.theme.PrimBase
 
 data class InsightScreenState(
     val donutCard: InsightDonutCardUiModel? = null,
+    val peakMealTime: String = "19:00",
 ) : MavericksState
 
 data class InsightDonutCardUiModel(

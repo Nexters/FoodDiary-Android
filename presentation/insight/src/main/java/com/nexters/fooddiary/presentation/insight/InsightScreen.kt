@@ -32,6 +32,8 @@ import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
 import com.nexters.fooddiary.core.ui.theme.Gray050
 import com.nexters.fooddiary.core.ui.theme.SdBase
 import com.nexters.fooddiary.presentation.insight.donut.InsightDonutCard
+import com.nexters.fooddiary.presentation.insight.component.InsightMealTimeCard
+import com.nexters.fooddiary.core.ui.R as coreR
 
 @Composable
 fun InsightScreen(
@@ -40,11 +42,11 @@ fun InsightScreen(
     onBack: () -> Unit = {},
     viewModel: InsightViewModel = mavericksViewModel(),
 ) {
-    val state by viewModel.collectAsStateWithLifecycle()
+    val uiState by viewModel.collectAsStateWithLifecycle()
 
     InsightScreen(
+        uiState = uiState,
         modifier = modifier,
-        state = state,
         onNavigateToMyPage = onNavigateToMyPage,
         onBack = onBack,
     )
@@ -53,7 +55,7 @@ fun InsightScreen(
 @Composable
 internal fun InsightScreen(
     modifier: Modifier = Modifier,
-    state: InsightScreenState,
+    uiState: InsightScreenState,
     onNavigateToMyPage: () -> Unit = {},
     onBack: () -> Unit = {},
 ) {
@@ -68,10 +70,12 @@ internal fun InsightScreen(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(start = 20.dp, top = 38.dp, end = 20.dp),
+            leftIconResId = coreR.drawable.ic_app_icon,
+            leftIconColorFilter = null,
             onClickMyPage = onNavigateToMyPage,
         )
 
-        if (state.donutCard != null) {
+        if (uiState.donutCard != null) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -80,10 +84,16 @@ internal fun InsightScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 InsightDonutCard(
-                    card = state.donutCard,
+                    card = uiState.donutCard,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
+                )
+
+                InsightMealTimeCard(
+                    highlightText = uiState.peakMealTime,
+                    descriptionText = stringResource(id = R.string.insight_meal_time_description),
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         } else {
@@ -114,7 +124,7 @@ internal fun InsightScreen(
 @Composable
 private fun InsightScreenPreview() {
     FoodDiaryTheme {
-        InsightScreen(state = InsightScreenState())
+        InsightScreen(uiState = InsightScreenState())
     }
 }
 
@@ -122,6 +132,6 @@ private fun InsightScreenPreview() {
 @Composable
 private fun InsightScreenReadyPreview() {
     FoodDiaryTheme {
-        InsightScreen(state = sampleInsightReadyState())
+        InsightScreen(uiState = sampleInsightReadyState())
     }
 }

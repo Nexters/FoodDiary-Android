@@ -46,7 +46,7 @@ internal fun MealSlot.toMealUiModel(
         .map { it.trim() }
         .filter { it.isNotEmpty() }
         .map { tag -> if (tag.startsWith("#")) tag else "#$tag" }
-    val mealTimeText = diary.createdAt.toLocalTimeText()
+    val mealTimeText = diary.diaryDate.toLocalTimeText()
 
     return MealCardUiModel(
         id = "${date}_${name.lowercase()}",

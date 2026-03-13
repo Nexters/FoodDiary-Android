@@ -7,20 +7,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -34,6 +30,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,18 +40,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import coil3.compose.AsyncImage
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.ui.R.drawable
 import com.nexters.fooddiary.core.ui.alert.DialogData
 import com.nexters.fooddiary.core.ui.alert.SnackBarData
+import com.nexters.fooddiary.core.ui.component.CommonCircleButton
 import com.nexters.fooddiary.core.ui.component.DetailScreenHeader
+import com.nexters.fooddiary.core.ui.component.EditableKeywordChipGroup
+import com.nexters.fooddiary.core.ui.component.KeywordChipGroup
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.Gray050
 import com.nexters.fooddiary.core.ui.theme.Gray200
-import com.nexters.fooddiary.core.ui.theme.Gray400
+import com.nexters.fooddiary.core.ui.theme.Gray300
 import com.nexters.fooddiary.core.ui.theme.Gray600
 import com.nexters.fooddiary.core.ui.theme.Sd800
 import com.nexters.fooddiary.core.ui.theme.Sd900
@@ -64,9 +64,7 @@ import com.nexters.fooddiary.presentation.modify.navigation.ModifySearchResult
 private const val PLACEHOLDER_IMAGE_URL = "https://picsum.photos/200/300"
 
 private val SectionTitleColor = Gray050
-private val ChipInactiveBg = Sd800
 private val InputBg = Sd900
-private val ChipShape = RoundedCornerShape(999.dp)
 private val InputShape = RoundedCornerShape(10.dp)
 
 @Composable
@@ -156,6 +154,14 @@ private fun ModifyScreenContent(
     val sectionCategory = stringResource(R.string.modify_section_category)
     val sectionAddress = stringResource(R.string.modify_section_address)
     val sectionTag = stringResource(R.string.modify_section_tag)
+    val deleteContentDesc = stringResource(R.string.modify_delete)
+    val addTagContentDesc = stringResource(R.string.modify_tag_add)
+    val selectedCategories = remember(state.selectedCategory) {
+        state.selectedCategory
+            .takeIf { it.isNotBlank() }
+            ?.let { setOf(it) }
+            ?: emptySet()
+    }
 
     Scaffold(
         modifier = modifier,
@@ -204,10 +210,11 @@ private fun ModifyScreenContent(
                 Section(
                     sectionTitle = sectionCategory,
                 ) {
-                    CommonChips(
-                        categories = state.categories,
-                        selectedCategory = state.selectedCategory,
-                        onSelect = onSelect,
+                    KeywordChipGroup(
+                        keywords = state.categories,
+                        selectedKeywords = selectedCategories,
+                        onKeywordClick = onSelect,
+                        unselectedContentColor = Gray300,
                     )
                 }
             }
@@ -226,10 +233,12 @@ private fun ModifyScreenContent(
                 Section(
                     sectionTitle = sectionTag,
                 ) {
-                    TagChips(
-                        tags = state.tags,
-                        onRemove = onRemoveTag,
-                        onAddChip = onAddChip
+                    EditableKeywordChipGroup(
+                        keywords = state.tags,
+                        onKeywordRemove = onRemoveTag,
+                        onAddClick = onAddChip,
+                        removeContentDescription = deleteContentDesc,
+                        addContentDescription = addTagContentDesc,
                     )
                 }
             }
@@ -340,77 +349,6 @@ private fun AddressLineItem(line: String) {
 }
 
 @Composable
-private fun TagChips(
-    tags: List<String>,
-    onRemove: (String) -> Unit,
-    onAddChip: () -> Unit = {},
-) {
-    val deleteContentDesc = stringResource(R.string.modify_delete)
-    val addTagContentDesc = stringResource(R.string.modify_tag_add)
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        tags.forEach { tag ->
-            key(tag) {
-                TagChipItem(
-                    tag = tag,
-                    onRemove = onRemove,
-                    deleteContentDesc = deleteContentDesc,
-                )
-            }
-        }
-        Box(
-            modifier = Modifier
-                .clip(ChipShape)
-                .background(ChipInactiveBg)
-                .clickable {
-                    onAddChip()
-                }
-                .size(34.dp)
-                .padding(10.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = addTagContentDesc,
-                tint = Gray400,
-            )
-        }
-    }
-}
-
-@Composable
-private fun TagChipItem(
-    tag: String,
-    onRemove: (String) -> Unit,
-    deleteContentDesc: String,
-) {
-    Row(
-        modifier = Modifier
-            .clip(ChipShape)
-            .background(ChipInactiveBg)
-            .padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Text(
-            text = tag,
-            style = AppTypography.p14,
-            color = Gray400,
-        )
-        Image(
-            painter = painterResource(drawable.ic_circle_close),
-            contentDescription = deleteContentDesc,
-            modifier = Modifier
-                .size(18.dp)
-                .clickable { onRemove(tag) },
-        )
-    }
-}
-
-@Composable
 private fun ModifyBottomButtons(
     onDelete: () -> Unit,
     onSave: () -> Unit,
@@ -450,17 +388,17 @@ private fun ModifyScreenPreview() {
         state = ModifyState(
             diaryId = "preview",
             selectedCategory = "한식",
-            categories = setOf("한식", "일식", "중식", "양식", "카페·디저트"),
+            categories = persistentSetOf("한식", "일식", "중식", "양식", "카페·디저트"),
             addressSearchQuery = "서울 강남구",
-            addressLines = listOf("서울특별시 강남구 테헤란로 123", "역삼동 456-7"),
+            addressLines = persistentListOf("서울특별시 강남구 테헤란로 123", "역삼동 456-7"),
             roadAddress = "서울특별시 강남구 테헤란로 123",
             restaurantName = "맛있는 밥집",
             restaurantUrl = "https://example.com/restaurant",
             note = "점심에 친구들이랑 같이 왔어요. 김치찌개가 특히 맛있었습니다!",
-            photoIds = listOf(1, 2),
-            photoUrls = listOf(PLACEHOLDER_IMAGE_URL, PLACEHOLDER_IMAGE_URL),
+            photoIds = persistentListOf(1, 2),
+            photoUrls = persistentListOf(PLACEHOLDER_IMAGE_URL, PLACEHOLDER_IMAGE_URL),
             coverPhotoId = 1,
-            tags = listOf("맛집", "친구모임", "점심"),
+            tags = persistentListOf("맛집", "친구모임", "점심"),
         ),
         onRemovePhotoAt = {},
     )

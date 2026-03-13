@@ -60,10 +60,10 @@ internal fun HomeScreen(
     onNavigateToDetail: (LocalDate) -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
     isMonthlyCalendarView: Boolean = false,
-    pushSyncDateString: String? = null,
-    uploadPendingDateString: String? = null,
-    onPushSyncConsumed: () -> Unit = {},
-    onUploadPendingConsumed: () -> Unit = {},
+    refreshDiaryDateString: String? = null,
+    diaryUploadPendingDateString: String? = null,
+    onRefreshDiaryConsumed: () -> Unit = {},
+    onDiaryUploadPendingConsumed: () -> Unit = {},
     onShowSnackBar: (SnackBarData) -> Unit = {},
     viewModel: HomeViewModel = mavericksViewModel(),
 ) {
@@ -114,21 +114,21 @@ internal fun HomeScreen(
         }
     }
 
-    LaunchedEffect(pushSyncDateString) {
-        if (pushSyncDateString == null) return@LaunchedEffect
-        val syncDate = runCatching { LocalDate.parse(pushSyncDateString) }.getOrNull()
+    LaunchedEffect(refreshDiaryDateString) {
+        if (refreshDiaryDateString == null) return@LaunchedEffect
+        val syncDate = runCatching { LocalDate.parse(refreshDiaryDateString) }.getOrNull()
         if (syncDate != null) {
             viewModel.onDiaryUpdated(syncDate)
         }
-        onPushSyncConsumed()
+        onRefreshDiaryConsumed()
     }
 
-    LaunchedEffect(uploadPendingDateString) {
-        val dateString = uploadPendingDateString ?: return@LaunchedEffect
+    LaunchedEffect(diaryUploadPendingDateString) {
+        val dateString = diaryUploadPendingDateString ?: return@LaunchedEffect
         runCatching { LocalDate.parse(dateString) }
             .getOrNull()
             ?.let(viewModel::onDiaryUploadPending)
-        onUploadPendingConsumed()
+        onDiaryUploadPendingConsumed()
     }
 
     HomeScreen(
