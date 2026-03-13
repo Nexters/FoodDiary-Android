@@ -141,7 +141,7 @@ private fun InsightScreenPreview() {
     }
 }
 
-@Preview
+@Preview(heightDp = 2000)
 @Composable
 private fun InsightScreenReadyPreview() {
     FoodDiaryTheme {
