@@ -48,7 +48,7 @@ fun BarChartCard(
                 Text(
                     text = buildAnnotatedString {
                         withStyle(SpanStyle(color = Gray200, fontSize = 10.sp)) {
-                            append(descriptionPrefix)
+                            append("$descriptionPrefix ")
                         }
                         withStyle(
                             SpanStyle(
@@ -61,7 +61,7 @@ fun BarChartCard(
                             append(highlightText)
                         }
                         withStyle(SpanStyle(color = Gray200, fontSize = 10.sp)) {
-                            append(descriptionSuffix)
+                            append(" $descriptionSuffix")
                         }
                     },
                     style = BarChartLabelTextStyle,

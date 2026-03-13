@@ -5,6 +5,15 @@
     <string name="insight_donut_title_maintained">왕좌가 유지되었어요.</string>
     <string name="insight_donut_headline_changed_middle">대신</string>
     <string name="insight_donut_headline_suffix">이 1등이에요.</string>
+    <string name="insight_photo_stats_title_increase">먹기 전에\n카메라부터 찾았네요.</string>
+    <string name="insight_photo_stats_title_decrease">이번 달엔\n음식에 더 집중하셨네요.</string>
+    <string name="insight_photo_stats_title_equal">지난 달만큼\n꾸준히 기록했네요.</string>
+    <string name="insight_photo_stats_description_prefix">지난 달 대비 기록된 사진이</string>
+    <string name="insight_photo_stats_description_suffix_increase">증가했어요.</string>
+    <string name="insight_photo_stats_description_suffix_decrease">감소했어요.</string>
+    <string name="insight_photo_stats_description_suffix_equal">유지됐어요.</string>
+    <string name="insight_photo_stats_previous_month_fallback">지난달</string>
+    <string name="insight_photo_stats_current_month_fallback">이번달</string>
     <string name="insight_highlight_summary_intro">식사는 늘</string>
     <string name="insight_highlight_summary_suffix">이 제일 많았어요</string>
     <string name="insight_meal_time_description">이 시간대에 음식 사진이 가장 많이 남았어요.</string>
