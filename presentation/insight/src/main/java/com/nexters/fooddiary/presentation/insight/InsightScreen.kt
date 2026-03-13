@@ -34,6 +34,7 @@ import com.nexters.fooddiary.core.ui.theme.SdBase
 import com.nexters.fooddiary.presentation.insight.donut.InsightDonutCard
 import com.nexters.fooddiary.presentation.insight.component.InsightMealTimeCard
 import com.nexters.fooddiary.core.ui.R as coreR
+import com.nexters.fooddiary.presentation.insight.rankingbubble.InsightRankingBubbleCard
 
 @Composable
 fun InsightScreen(
@@ -75,26 +76,38 @@ internal fun InsightScreen(
             onClickMyPage = onNavigateToMyPage,
         )
 
-        if (uiState.donutCard != null) {
+        if (uiState.donutCard != null  || uiState.rankingBubbleCard != null) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .padding(top = 102.dp, bottom = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                InsightDonutCard(
-                    card = uiState.donutCard,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                )
+                uiState.donutCard?.let { donutCard ->
+                    InsightDonutCard(
+                        card = donutCard,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                    )
+                }
 
                 InsightMealTimeCard(
                     highlightText = uiState.peakMealTime,
                     descriptionText = stringResource(id = R.string.insight_meal_time_description),
                     modifier = Modifier.fillMaxWidth(),
                 )
+
+                uiState.rankingBubbleCard?.let { rankingBubbleCard ->
+                    InsightRankingBubbleCard(
+                        card = rankingBubbleCard,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                    )
+                }
             }
         } else {
             Column(

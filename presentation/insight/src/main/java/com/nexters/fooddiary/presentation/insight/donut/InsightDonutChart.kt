@@ -123,15 +123,16 @@ internal fun InsightDonutChart(
                 )
             }
 
-            if (clampedProgress >= 0.999f && geometries.size > 1 && dividerStrokeWidth > 0f) {
+            if (clampedProgress > 0f && geometries.size > 1 && dividerStrokeWidth > 0f) {
                 geometries.forEach { geometry ->
+                    val dividerAngle = geometry.startAngle - animatedRotationOffset
                     val start = center + polarOffset(
                         radius = innerRadius,
-                        angleInDegrees = geometry.startAngle,
+                        angleInDegrees = dividerAngle,
                     )
                     val end = center + polarOffset(
                         radius = outerRadius,
-                        angleInDegrees = geometry.startAngle,
+                        angleInDegrees = dividerAngle,
                     )
                     drawLine(
                         color = dividerColor,

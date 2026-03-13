@@ -7,6 +7,7 @@ import com.nexters.fooddiary.core.ui.theme.PrimBase
 data class InsightScreenState(
     val donutCard: InsightDonutCardUiModel? = null,
     val peakMealTime: String = "19:00",
+    val rankingBubbleCard: InsightRankingBubbleCardUiModel? = null,
 ) : MavericksState
 
 data class InsightDonutCardUiModel(
@@ -34,6 +35,16 @@ data class InsightGradientPointUiModel(
     val yFraction: Float,
 )
 
+data class InsightRankingBubbleCardUiModel(
+    val topRegions: List<InsightRankingBubbleItemUiModel>,
+)
+
+data class InsightRankingBubbleItemUiModel(
+    val rank: Int,
+    val regionName: String,
+    val visitCount: Int,
+)
+
 internal object InsightChartDefaults {
     val BlueSegmentColor = Color(0xFF6581C4)
     val BlueSegmentGradient = InsightSegmentGradientUiModel(
@@ -56,6 +67,7 @@ internal object InsightChartDefaults {
 
 internal fun sampleInsightReadyState(): InsightScreenState = InsightScreenState(
     donutCard = sampleInsightDonutCard(),
+    rankingBubbleCard = sampleInsightRankingBubbleCard(),
 )
 
 internal fun sampleInsightDonutCard(): InsightDonutCardUiModel =
@@ -76,6 +88,27 @@ internal fun sampleInsightDonutCard(): InsightDonutCardUiModel =
                 color = InsightChartDefaults.BlueSegmentColor,
                 valueText = "20회",
                 gradient = InsightChartDefaults.BlueSegmentGradient,
+            ),
+        ),
+    )
+
+internal fun sampleInsightRankingBubbleCard(): InsightRankingBubbleCardUiModel =
+    InsightRankingBubbleCardUiModel(
+        topRegions = listOf(
+            InsightRankingBubbleItemUiModel(
+                rank = 1,
+                regionName = "합정동",
+                visitCount = 99,
+            ),
+            InsightRankingBubbleItemUiModel(
+                rank = 2,
+                regionName = "성수동",
+                visitCount = 40,
+            ),
+            InsightRankingBubbleItemUiModel(
+                rank = 3,
+                regionName = "연남동",
+                visitCount = 30,
             ),
         ),
     )
