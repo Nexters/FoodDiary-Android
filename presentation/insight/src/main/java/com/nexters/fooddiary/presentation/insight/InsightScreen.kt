@@ -92,7 +92,7 @@ internal fun InsightScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(start = 16.dp, end = 16.dp, top = 102.dp, bottom = 24.dp),
+                    .padding(start = 16.dp, end = 16.dp, top = 102.dp, bottom = 144.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
