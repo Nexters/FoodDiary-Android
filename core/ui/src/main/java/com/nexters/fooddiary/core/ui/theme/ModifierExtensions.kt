@@ -39,3 +39,26 @@ fun Modifier.neonShadow(
         )
     }
 }
+
+
+fun Modifier.horizontalGridLinesFromBottom(
+    lineCount: Int,
+    lineColor: Color,
+    chartAreaHeight: Dp,
+    bottomReservedHeight: Dp,
+): Modifier = drawBehind {
+    val chartAreaPx = chartAreaHeight.toPx()
+    val bottomReservedPx = bottomReservedHeight.toPx()
+    val zeroAxisY = size.height - bottomReservedPx
+    val lineGap = chartAreaPx / lineCount
+
+    repeat(lineCount + 1) { index ->
+        val y = zeroAxisY - (lineGap * index)
+        drawLine(
+            color = lineColor,
+            start = Offset(0f, y),
+            end = Offset(size.width, y),
+            strokeWidth = 1.dp.toPx(),
+        )
+    }
+}
