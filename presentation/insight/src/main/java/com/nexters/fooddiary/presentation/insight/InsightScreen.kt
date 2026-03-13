@@ -30,6 +30,7 @@ import com.nexters.fooddiary.core.ui.component.BarChartCard
 import com.nexters.fooddiary.core.ui.component.BarChartItem
 import com.nexters.fooddiary.core.ui.component.Header
 import com.nexters.fooddiary.core.ui.component.HighlightedSubjectBarChartCard
+import com.nexters.fooddiary.core.ui.component.TasteKeywordSection
 import com.nexters.fooddiary.core.ui.component.withStaggeredAnimation
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.Blue400
@@ -99,6 +100,14 @@ internal fun InsightScreen(
                     PhotoStatsInsightCard(
                         month = uiState.month,
                         card = photoStatsCard,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+
+                uiState.tagStatsCard?.let { tagStatsCard ->
+                    TasteKeywordSection(
+                        title = stringResource(id = R.string.insight_tag_stats_title),
+                        keywords = tagStatsCard.tags.toDisplayKeywords(),
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -283,6 +292,13 @@ private data class MonthLabels(
     val previousMonthLabel: String,
     val currentMonthLabel: String,
 )
+
+private fun List<InsightTagSummaryItemUiModel>.toDisplayKeywords(): List<String> {
+    return map { tag ->
+        val trimmed = tag.keyword.trim()
+        if (trimmed.startsWith("#")) trimmed else "#$trimmed"
+    }
+}
 
 @Preview
 @Composable

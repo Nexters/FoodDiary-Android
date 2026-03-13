@@ -18,6 +18,7 @@
     <string name="insight_weekly_stats_highlight_prefix">주차는 </string>
     <string name="insight_weekly_stats_label">%1$d주차</string>
     <string name="insight_weekly_stats_description">음식 사진이 가장 많이 업데이트 되었어요.</string>
+    <string name="insight_tag_stats_title">나의 입맛과\n가장 잘 어울리는 키워드</string>
     <string name="insight_highlight_summary_intro">식사는 늘</string>
     <string name="insight_highlight_summary_suffix">이 제일 많았어요</string>
     <string name="insight_meal_time_description">이 시간대에 음식 사진이 가장 많이 남았어요.</string>
