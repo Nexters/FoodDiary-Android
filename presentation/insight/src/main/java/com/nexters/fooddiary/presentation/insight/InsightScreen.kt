@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -33,6 +34,7 @@ import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
 import com.nexters.fooddiary.core.ui.theme.Gray050
 import com.nexters.fooddiary.core.ui.theme.SdBase
 import com.nexters.fooddiary.presentation.insight.component.AnimatedOnFirstVisible
+import com.nexters.fooddiary.presentation.insight.component.InsightHeaderSection
 import com.nexters.fooddiary.presentation.insight.component.InsightPhotoStatsCard
 import com.nexters.fooddiary.presentation.insight.component.InsightWeeklyStatsCard
 import com.nexters.fooddiary.presentation.insight.donut.InsightDonutCard
@@ -74,6 +76,7 @@ internal fun InsightScreen(
         Header(
             modifier = Modifier
                 .align(Alignment.TopCenter)
+                .zIndex(1f)
                 .padding(start = 20.dp, top = 38.dp, end = 20.dp),
             leftIconResId = coreR.drawable.ic_app_icon,
             leftIconColorFilter = null,
@@ -89,6 +92,13 @@ internal fun InsightScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
+                Spacer(modifier = Modifier)
+                InsightHeaderSection(
+                    month = uiState.month,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(modifier = Modifier)
+
                 AnimatedOnFirstVisible(
                     modifier = Modifier.fillMaxWidth(),
                 ) { startAnimation, animatedModifier ->
