@@ -103,7 +103,7 @@ fun HighlightedSubjectBarChartCard(
                                 append(highlightPrefixText)
                             }
                             withStyle(SpanStyle(color = PrimBase)) {
-                                append(highlightedText)
+                                append(" $highlightedText")
                             }
                         },
                         style = titleStyle,

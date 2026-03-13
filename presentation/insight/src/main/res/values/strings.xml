@@ -14,6 +14,10 @@
     <string name="insight_photo_stats_description_suffix_equal">유지됐어요.</string>
     <string name="insight_photo_stats_previous_month_fallback">지난달</string>
     <string name="insight_photo_stats_current_month_fallback">이번달</string>
+    <string name="insight_weekly_stats_title">이번달 가장 많이 기록한</string>
+    <string name="insight_weekly_stats_highlight_prefix">주차는 </string>
+    <string name="insight_weekly_stats_label">%1$d주차</string>
+    <string name="insight_weekly_stats_description">음식 사진이 가장 많이 업데이트 되었어요.</string>
     <string name="insight_highlight_summary_intro">식사는 늘</string>
     <string name="insight_highlight_summary_suffix">이 제일 많았어요</string>
     <string name="insight_meal_time_description">이 시간대에 음식 사진이 가장 많이 남았어요.</string>

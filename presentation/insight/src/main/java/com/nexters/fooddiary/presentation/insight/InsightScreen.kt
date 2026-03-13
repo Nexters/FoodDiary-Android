@@ -29,6 +29,7 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.ui.component.BarChartCard
 import com.nexters.fooddiary.core.ui.component.BarChartItem
 import com.nexters.fooddiary.core.ui.component.Header
+import com.nexters.fooddiary.core.ui.component.HighlightedSubjectBarChartCard
 import com.nexters.fooddiary.core.ui.component.withStaggeredAnimation
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.Blue400
@@ -105,6 +106,13 @@ internal fun InsightScreen(
                 uiState.donutCard?.let { donutCard ->
                     InsightDonutCard(
                         card = donutCard,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+
+                uiState.weeklyStatsCard?.let { weeklyStatsCard ->
+                    WeeklyStatsInsightCard(
+                        card = weeklyStatsCard,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -199,6 +207,39 @@ private fun PhotoStatsInsightCard(
         ).withStaggeredAnimation(delayStepMillis = 90),
         barSpacing = 60.dp,
         chartHeight = 182.dp,
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun WeeklyStatsInsightCard(
+    card: InsightWeeklyStatsCardUiModel,
+    modifier: Modifier = Modifier,
+) {
+    val maxCount = card.weeklyCounts.maxOfOrNull(InsightWeeklyCountUiModel::count) ?: 0
+
+    HighlightedSubjectBarChartCard(
+        title = stringResource(id = R.string.insight_weekly_stats_title),
+        description = stringResource(id = R.string.insight_weekly_stats_description),
+        highlightPrefixText = stringResource(id = R.string.insight_weekly_stats_highlight_prefix),
+        highlightedText = stringResource(
+            id = R.string.insight_weekly_stats_label,
+            card.mostActiveWeek,
+        ),
+        bars = card.weeklyCounts.mapIndexed { index, weeklyCount ->
+            BarChartItem(
+                label = stringResource(
+                    id = R.string.insight_weekly_stats_label,
+                    weeklyCount.week,
+                ),
+                percentage = weeklyCount.count.toChartPercentage(other = maxCount),
+                valueText = weeklyCount.count.toString(),
+                topColor = PrimBase,
+                bottomColor = Prim300,
+                animationDurationMillis = 520 + (index * 60),
+            )
+        }.withStaggeredAnimation(delayStepMillis = 70),
+        barSpacing = 10.dp,
         modifier = modifier,
     )
 }

@@ -145,7 +145,7 @@ private fun BarGraphItem(
         )
     }
 
-    val minBarHeight = 12.dp
+    val minBarHeight = 24.dp
     val barHeight = (barMaxHeight * animatableRatio.value).coerceAtLeast(minBarHeight)
 
     Column(
