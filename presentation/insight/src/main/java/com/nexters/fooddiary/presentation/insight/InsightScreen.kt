@@ -87,7 +87,7 @@ internal fun InsightScreen(
             onClickMyPage = onNavigateToMyPage,
         )
 
-        if (uiState.photoStatsCard != null || uiState.donutCard != null || uiState.rankingBubbleCard != null) {
+        if (uiState.hasInsights) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -96,47 +96,45 @@ internal fun InsightScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                uiState.photoStatsCard?.let { photoStatsCard ->
-                    PhotoStatsInsightCard(
-                        month = uiState.month,
-                        card = photoStatsCard,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
+                PhotoStatsInsightCard(
+                    month = uiState.month,
+                    card = uiState.photoStatsCard,
+                    modifier = Modifier.fillMaxWidth(),
+                )
 
-                uiState.tagStatsCard?.let { tagStatsCard ->
+                if (uiState.tagStatsCard.tags.isNotEmpty()) {
                     TasteKeywordSection(
                         title = stringResource(id = R.string.insight_tag_stats_title),
-                        keywords = tagStatsCard.tags.toDisplayKeywords(),
+                        keywords = uiState.tagStatsCard.tags.toDisplayKeywords(),
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
 
-                uiState.donutCard?.let { donutCard ->
+                if (uiState.donutCard.segments.isNotEmpty()) {
                     InsightDonutCard(
-                        card = donutCard,
+                        card = uiState.donutCard,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
 
-                uiState.weeklyStatsCard?.let { weeklyStatsCard ->
+                if (uiState.weeklyStatsCard.weeklyCounts.isNotEmpty()) {
                     WeeklyStatsInsightCard(
-                        card = weeklyStatsCard,
+                        card = uiState.weeklyStatsCard,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
 
-                uiState.mealTimeCard?.let { mealTimeCard ->
+                if (uiState.mealTimeCard.peakMealTime.isNotBlank()) {
                     InsightMealTimeCard(
-                        highlightText = mealTimeCard.peakMealTime,
+                        highlightText = uiState.mealTimeCard.peakMealTime,
                         descriptionText = stringResource(id = R.string.insight_meal_time_description),
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
 
-                uiState.rankingBubbleCard?.let { rankingBubbleCard ->
+                if (uiState.rankingBubbleCard.topRegions.isNotEmpty()) {
                     InsightRankingBubbleCard(
-                        card = rankingBubbleCard,
+                        card = uiState.rankingBubbleCard,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }

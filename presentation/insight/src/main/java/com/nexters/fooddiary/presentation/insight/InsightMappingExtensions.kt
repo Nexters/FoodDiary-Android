@@ -6,6 +6,7 @@ import com.nexters.fooddiary.domain.model.UserInsights
 
 internal fun UserInsights.toInsightScreenState(): InsightScreenState {
     return InsightScreenState(
+        hasInsights = true,
         month = month,
         photoStatsCard = InsightPhotoStatsCardUiModel(
             currentMonthCount = photoStats.currentMonthCount,
@@ -37,11 +38,11 @@ internal fun UserInsights.toInsightScreenState(): InsightScreenState {
     )
 }
 
-private fun UserInsights.toDonutCardUiModel(): InsightDonutCardUiModel? {
+private fun UserInsights.toDonutCardUiModel(): InsightDonutCardUiModel {
     val segments = categoryStats.currentMonthCounts.toDonutSegments(
         preferredTopCategory = categoryStats.currentMonth.topCategory,
     )
-    if (segments.isEmpty()) return null
+    if (segments.isEmpty()) return InsightDonutCardUiModel()
 
     return InsightDonutCardUiModel(
         previousTopCategory = categoryStats.previousMonth.topCategory.toInsightCategoryLabel(),
@@ -75,7 +76,7 @@ private fun InsightCategoryCounts.toDonutSegments(
         }
 }
 
-private fun List<InsightLocationStat>.toRankingBubbleCardUiModel(): InsightRankingBubbleCardUiModel? {
+private fun List<InsightLocationStat>.toRankingBubbleCardUiModel(): InsightRankingBubbleCardUiModel {
     val topRegions = sortedByDescending { it.count }
         .take(3)
         .mapIndexed { index, location ->
@@ -86,8 +87,7 @@ private fun List<InsightLocationStat>.toRankingBubbleCardUiModel(): InsightRanki
             )
         }
 
-    return topRegions.takeIf { it.isNotEmpty() }
-        ?.let { InsightRankingBubbleCardUiModel(topRegions = it) }
+    return InsightRankingBubbleCardUiModel(topRegions = topRegions)
 }
 
 private data class CategorySegmentSource(

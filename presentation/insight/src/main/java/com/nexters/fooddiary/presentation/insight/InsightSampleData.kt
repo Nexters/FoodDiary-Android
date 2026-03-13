@@ -1,6 +1,7 @@
 package com.nexters.fooddiary.presentation.insight
 
 internal fun sampleInsightReadyState(): InsightScreenState = InsightScreenState(
+    hasInsights = true,
     month = "2024-01",
     photoStatsCard = InsightPhotoStatsCardUiModel(
         currentMonthCount = 45,

@@ -3,19 +3,20 @@ package com.nexters.fooddiary.presentation.insight
 import com.airbnb.mvrx.MavericksState
 
 data class InsightScreenState(
-    val month: String? = null,
-    val photoStatsCard: InsightPhotoStatsCardUiModel? = null,
-    val donutCard: InsightDonutCardUiModel? = null,
-    val weeklyStatsCard: InsightWeeklyStatsCardUiModel? = null,
-    val mealTimeCard: InsightMealTimeCardUiModel? = null,
-    val tagStatsCard: InsightTagStatsCardUiModel? = null,
-    val rankingBubbleCard: InsightRankingBubbleCardUiModel? = null,
+    val hasInsights: Boolean = false,
+    val month: String = "",
+    val photoStatsCard: InsightPhotoStatsCardUiModel = InsightPhotoStatsCardUiModel(),
+    val donutCard: InsightDonutCardUiModel = InsightDonutCardUiModel(),
+    val weeklyStatsCard: InsightWeeklyStatsCardUiModel = InsightWeeklyStatsCardUiModel(),
+    val mealTimeCard: InsightMealTimeCardUiModel = InsightMealTimeCardUiModel(),
+    val tagStatsCard: InsightTagStatsCardUiModel = InsightTagStatsCardUiModel(),
+    val rankingBubbleCard: InsightRankingBubbleCardUiModel = InsightRankingBubbleCardUiModel(),
 ) : MavericksState
 
 data class InsightDonutCardUiModel(
-    val previousTopCategory: String,
-    val currentTopCategory: String,
-    val segments: List<InsightDonutSegmentUiModel>,
+    val previousTopCategory: String = "",
+    val currentTopCategory: String = "",
+    val segments: List<InsightDonutSegmentUiModel> = emptyList(),
 )
 
 data class InsightDonutSegmentUiModel(
@@ -25,11 +26,11 @@ data class InsightDonutSegmentUiModel(
 )
 
 data class InsightMealTimeCardUiModel(
-    val peakMealTime: String,
+    val peakMealTime: String = "",
 )
 
 data class InsightRankingBubbleCardUiModel(
-    val topRegions: List<InsightRankingBubbleItemUiModel>,
+    val topRegions: List<InsightRankingBubbleItemUiModel> = emptyList(),
 )
 
 data class InsightRankingBubbleItemUiModel(
@@ -39,14 +40,14 @@ data class InsightRankingBubbleItemUiModel(
 )
 
 data class InsightPhotoStatsCardUiModel(
-    val currentMonthCount: Int,
-    val previousMonthCount: Int,
-    val changeRate: Double,
+    val currentMonthCount: Int = 0,
+    val previousMonthCount: Int = 0,
+    val changeRate: Double = 0.0,
 )
 
 data class InsightWeeklyStatsCardUiModel(
-    val mostActiveWeek: Int,
-    val weeklyCounts: List<InsightWeeklyCountUiModel>,
+    val mostActiveWeek: Int = 0,
+    val weeklyCounts: List<InsightWeeklyCountUiModel> = emptyList(),
 )
 
 data class InsightWeeklyCountUiModel(
@@ -60,5 +61,5 @@ data class InsightTagSummaryItemUiModel(
 )
 
 data class InsightTagStatsCardUiModel(
-    val tags: List<InsightTagSummaryItemUiModel>,
+    val tags: List<InsightTagSummaryItemUiModel> = emptyList(),
 )
