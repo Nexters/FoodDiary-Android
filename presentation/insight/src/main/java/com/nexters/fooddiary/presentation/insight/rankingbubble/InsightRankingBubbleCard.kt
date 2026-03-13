@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -45,6 +46,7 @@ import com.nexters.fooddiary.core.ui.theme.Gray050
 import com.nexters.fooddiary.core.ui.theme.SdBase
 import com.nexters.fooddiary.presentation.insight.InsightRankingBubbleCardUiModel
 import com.nexters.fooddiary.presentation.insight.InsightRankingBubbleItemUiModel
+import com.nexters.fooddiary.presentation.insight.R
 import com.nexters.fooddiary.presentation.insight.sampleInsightReadyState
 import kotlinx.coroutines.delay
 
@@ -92,6 +94,9 @@ internal fun InsightRankingBubbleCard(
         card.topRegions.sortedBy { it.rank }.take(3)
     }
     val topRegion = sortedTopRegions.firstOrNull()
+    val title = stringResource(id = R.string.insight_ranking_bubble_title)
+    val description = stringResource(id = R.string.insight_ranking_bubble_description)
+    val headlinePrefix = stringResource(id = R.string.insight_ranking_bubble_headline_prefix)
 
     Column(
         modifier = modifier
@@ -105,18 +110,21 @@ internal fun InsightRankingBubbleCard(
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(RankingBubbleHeadlineSectionSpacing)) {
             Text(
-                text = "이번 달 가장 많이 간 지역은",
+                text = title,
                 style = AppTypography.p15.copy(fontWeight = FontWeight.SemiBold),
                 color = Gray050,
             )
             topRegion?.let { region ->
                 Text(
-                    text = buildRankingBubbleHeadline(region),
+                    text = buildRankingBubbleHeadline(
+                        topRegion = region,
+                        headlinePrefix = headlinePrefix,
+                    ),
                     style = AppTypography.p15.copy(fontWeight = FontWeight.SemiBold),
                 )
             }
             Text(
-                text = "밖에서 먹은 날이 더 많았어요.",
+                text = description,
                 style = AppTypography.p12.copy(fontSize = 12.sp),
                 color = Gray050.copy(alpha = 0.6f),
             )
@@ -212,7 +220,10 @@ private fun InsightRankingBubble(
                 textAlign = TextAlign.Center,
             )
             Text(
-                text = "(${region.visitCount}회)",
+                text = stringResource(
+                    id = R.string.insight_ranking_bubble_visit_count,
+                    region.visitCount,
+                ),
                 style = AppTypography.p15.copy(fontWeight = FontWeight.SemiBold),
                 color = Gray050,
                 textAlign = TextAlign.Center,
@@ -223,9 +234,10 @@ private fun InsightRankingBubble(
 
 private fun buildRankingBubbleHeadline(
     topRegion: InsightRankingBubbleItemUiModel,
+    headlinePrefix: String,
 ): AnnotatedString = buildAnnotatedString {
     withStyle(SpanStyle(color = Gray050)) {
-        append("총 ${topRegion.visitCount}회 방문한 ")
+        append(headlinePrefix.format(topRegion.visitCount))
     }
     withStyle(SpanStyle(color = InsightRankingBubbleDefaults.FirstColor)) {
         append(topRegion.regionName)
