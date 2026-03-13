@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="insight_ready_message">인사이트를 제공하기 위해\n최소 1주일간의 데이터가 필요해요.</string>
+    <string name="insight_highlight_summary_intro">식사는 늘</string>
+    <string name="insight_highlight_summary_suffix">이 제일 많았어요</string>
+    <string name="insight_meal_time_description">이 시간대에 음식 사진이 가장 많이 남았어요.</string>
 </resources>
