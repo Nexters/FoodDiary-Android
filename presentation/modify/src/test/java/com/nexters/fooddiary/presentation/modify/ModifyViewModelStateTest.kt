@@ -9,10 +9,11 @@ import org.junit.Test
 class ModifyViewModelStateTest {
 
     @Test
-    fun `toUpdateDiaryParam 은 addressLines 두번째 줄을 addressName 으로 매핑한다`() {
+    fun `toUpdateDiaryParam 은 상태의 roadAddress addressName 을 직접 매핑한다`() {
         val state = ModifyState(
             selectedCategory = "한식",
-            addressLines = persistentListOf("서울 강남구 테헤란로 123", "서울 강남구 역삼동 123-4"),
+            roadAddress = "서울 강남구 테헤란로 123",
+            addressName = "서울 강남구 역삼동 123-4",
             restaurantName = "맛집",
             restaurantUrl = "https://example.com",
             tags = persistentListOf("점심"),
@@ -24,6 +25,7 @@ class ModifyViewModelStateTest {
         val param = state.toUpdateDiaryParam()
 
         assertEquals("서울 강남구 역삼동 123-4", param.addressName)
+        assertEquals("서울 강남구 테헤란로 123", param.roadAddress)
         assertEquals("한식", param.category)
         assertEquals("맛집", param.restaurantName)
         assertTrue(param.photoIds?.isNotEmpty() == true)
@@ -32,12 +34,13 @@ class ModifyViewModelStateTest {
     @Test
     fun `toUpdateDiaryParam 은 두번째 줄이 없으면 addressName 을 null 로 둔다`() {
         val state = ModifyState(
-            addressLines = persistentListOf("서울 강남구 테헤란로 123"),
+            roadAddress = "서울 강남구 테헤란로 123",
         )
 
         val param = state.toUpdateDiaryParam()
 
         assertNull(param.addressName)
+        assertEquals("서울 강남구 테헤란로 123", param.roadAddress)
     }
 
     @Test

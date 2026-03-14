@@ -11,6 +11,7 @@ import com.nexters.fooddiary.data.remote.diary.model.DiarySummaryResponse
 import com.nexters.fooddiary.data.remote.diary.model.DiarySummaryByDateItemResponse
 import com.nexters.fooddiary.domain.model.AnalysisStatus
 import com.nexters.fooddiary.domain.model.MealType
+import com.nexters.fooddiary.domain.model.UpdateDiaryParam
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -199,6 +200,52 @@ class DiaryRepositoryImplTest {
 
         // Then
         assertEquals("서울시 강남구 테헤란로 123", result.diaries.first().location)
+    }
+
+    @Test
+    fun `수정_요청시_address_name과_road_address를_서로_치환하지_않고_그대로_전달한다`() = runTest {
+        // Given
+        val repository = DiaryRepositoryImpl(
+            diaryApi = diaryApi,
+            diaryMapper = DiaryMapper(),
+            isDebug = true,
+        )
+        val param = UpdateDiaryParam(
+            category = "한식",
+            restaurantName = "식당",
+            restaurantUrl = "https://example.com",
+            addressName = "대전 서구 둔산동 1005",
+            roadAddress = "대전 서구 둔산로31번길 52",
+            tags = listOf("점심"),
+            note = "메모",
+            coverPhotoId = 10,
+            photoIds = listOf(10),
+        )
+
+        coEvery {
+            diaryApi.updateDiary(any(), any())
+        } returns diarySummary(
+            diaryId = 1L,
+            diaryDate = "2026-02-25T12:00:00",
+            timeType = DiaryMealTypeResponse.LUNCH,
+            analysisStatus = DiaryAnalysisStatusResponse.DONE,
+            addressName = "대전 서구 둔산동 1005",
+            roadAddress = "대전 서구 둔산로31번길 52",
+        )
+
+        // When
+        repository.updateDiary(diaryId = 1, param = param)
+
+        // Then
+        coVerify(exactly = 1) {
+            diaryApi.updateDiary(
+                diaryId = 1,
+                request = match {
+                    it.addressName == "대전 서구 둔산동 1005" &&
+                        it.roadAddress == "대전 서구 둔산로31번길 52"
+                }
+            )
+        }
     }
 
     private fun diarySummary(
