@@ -18,7 +18,6 @@ data class ModifyState(
     val isAddressManuallyUpdated: Boolean = false,
     val addressSearchQuery: String = "",
     val addressLines: ImmutableList<String> = persistentListOf(),
-    val roadAddress: String = "",
     val restaurantName: String = "",
     val restaurantUrl: String = "",
     val note: String = "",

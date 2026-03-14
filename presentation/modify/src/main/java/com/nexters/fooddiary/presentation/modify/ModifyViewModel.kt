@@ -69,7 +69,6 @@ class ModifyViewModel @AssistedInject constructor(
                     .ifBlank { normalizedAddressName }
                     .ifBlank { normalizedName },
                 addressLines = normalizedAddressLines,
-                roadAddress = normalizedRoadAddress,
                 restaurantName = normalizedName,
                 restaurantUrl = normalizedUrl,
                 isAddressManuallyUpdated = true,
@@ -118,8 +117,8 @@ class ModifyViewModel @AssistedInject constructor(
                             ?.takeIf { it.isNotBlank() }
                             ?.let { categories.toPersistentSet().add(it) }
                             ?: categories
-                        val normalizedAddressLines = listOf(entry.roadAddress, entry.addressName)
-                            .filterNotNull()
+                        val normalizedAddressLines =
+                            listOfNotNull(entry.roadAddress, entry.addressName)
                             .map { it.trim() }
                             .filter { it.isNotBlank() }
                             .distinct()
@@ -139,11 +138,6 @@ class ModifyViewModel @AssistedInject constructor(
                                 addressSearchQuery
                             } else {
                                 (entry.roadAddress ?: entry.addressName ?: "")
-                            },
-                            roadAddress = if (shouldKeepAddress) {
-                                roadAddress
-                            } else {
-                                (entry.roadAddress ?: "")
                             },
                             restaurantName = if (shouldKeepAddress) restaurantName else (entry.restaurantName ?: ""),
                             restaurantUrl = if (shouldKeepAddress) restaurantUrl else (entry.mapLink ?: ""),
@@ -261,13 +255,10 @@ internal fun ModifyState.toUpdateDiaryParam(): UpdateDiaryParam =
         addressName = addressLines
             .drop(1)
             .firstOrNull()
-            ?.takeIf { it.isNotBlank() }
-            ?: roadAddress.takeIf { it.isNotBlank() },
+            ?.takeIf { it.isNotBlank() },
         category = selectedCategory.takeIf { it.isNotBlank() },
         restaurantName = restaurantName.takeIf { it.isNotBlank() },
         restaurantUrl = restaurantUrl.takeIf { it.isNotBlank() },
-        roadAddress = roadAddress.takeIf { it.isNotBlank() }
-            ?: addressLines.firstOrNull()?.takeIf { it.isNotBlank() },
         tags = tags.takeIf { it.isNotEmpty() },
         note = note.takeIf { it.isNotBlank() },
         coverPhotoId = coverPhotoId ?: photoIds.firstOrNull(),
