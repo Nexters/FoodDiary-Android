@@ -2,6 +2,7 @@ package com.nexters.fooddiary.domain.model
 
 data class RestaurantItem(
     val name: String,
+    val addressName: String? = null,
     val roadAddress: String,
     val url: String,
 )

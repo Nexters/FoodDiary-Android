@@ -11,6 +11,7 @@ import com.nexters.fooddiary.data.remote.diary.model.DiarySummaryResponse
 import com.nexters.fooddiary.data.remote.diary.model.DiarySummaryByDateItemResponse
 import com.nexters.fooddiary.domain.model.AnalysisStatus
 import com.nexters.fooddiary.domain.model.MealType
+import com.nexters.fooddiary.domain.model.UpdateDiaryParam
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -170,11 +171,90 @@ class DiaryRepositoryImplTest {
         assertTrue(result.containsKey(LocalDate.parse("2026-02-26")))
     }
 
+    @Test
+    fun `일별_조회시_address_name이_있으면_location으로_우선_매핑한다`() = runTest {
+        // Given
+        val repository = DiaryRepositoryImpl(
+            diaryApi = diaryApi,
+            diaryMapper = DiaryMapper(),
+            isDebug = true,
+        )
+        val requestedDate = LocalDate.parse("2026-02-25")
+        coEvery {
+            diaryApi.getDiary("2026-02-25", "2026-02-25", true)
+        } returns DiaryDetailResponse(
+            diaries = listOf(
+                diarySummary(
+                    diaryId = 125L,
+                    diaryDate = "2026-02-25T00:00:00",
+                    timeType = DiaryMealTypeResponse.LUNCH,
+                    analysisStatus = DiaryAnalysisStatusResponse.DONE,
+                    addressName = "서울시 강남구 테헤란로 123",
+                    roadAddress = "서울시 강남구 테헤란로 999",
+                ),
+            )
+        )
+
+        // When
+        val result = repository.getDiary(requestedDate)
+
+        // Then
+        assertEquals("서울시 강남구 테헤란로 123", result.diaries.first().location)
+    }
+
+    @Test
+    fun `수정_요청시_address_name과_road_address를_서로_치환하지_않고_그대로_전달한다`() = runTest {
+        // Given
+        val repository = DiaryRepositoryImpl(
+            diaryApi = diaryApi,
+            diaryMapper = DiaryMapper(),
+            isDebug = true,
+        )
+        val param = UpdateDiaryParam(
+            category = "한식",
+            restaurantName = "식당",
+            restaurantUrl = "https://example.com",
+            addressName = "대전 서구 둔산동 1005",
+            roadAddress = "대전 서구 둔산로31번길 52",
+            tags = listOf("점심"),
+            note = "메모",
+            coverPhotoId = 10,
+            photoIds = listOf(10),
+        )
+
+        coEvery {
+            diaryApi.updateDiary(any(), any())
+        } returns diarySummary(
+            diaryId = 1L,
+            diaryDate = "2026-02-25T12:00:00",
+            timeType = DiaryMealTypeResponse.LUNCH,
+            analysisStatus = DiaryAnalysisStatusResponse.DONE,
+            addressName = "대전 서구 둔산동 1005",
+            roadAddress = "대전 서구 둔산로31번길 52",
+        )
+
+        // When
+        repository.updateDiary(diaryId = 1, param = param)
+
+        // Then
+        coVerify(exactly = 1) {
+            diaryApi.updateDiary(
+                diaryId = 1,
+                request = match {
+                    it.addressName == "대전 서구 둔산동 1005" &&
+                        it.roadAddress == "대전 서구 둔산로31번길 52"
+                }
+            )
+        }
+    }
+
     private fun diarySummary(
         diaryId: Long,
         diaryDate: String,
         timeType: DiaryMealTypeResponse,
         analysisStatus: DiaryAnalysisStatusResponse,
+        addressName: String? = null,
+        roadAddress: String? = null,
     ): DiarySummaryResponse {
         return DiarySummaryResponse(
             diaryId = diaryId,
@@ -183,9 +263,10 @@ class DiaryRepositoryImplTest {
             analysisStatus = analysisStatus,
             restaurantName = "식당",
             restaurantUrl = null,
+            addressName = addressName,
             category = "한식",
             note = null,
-            roadAddress = null,
+            roadAddress = roadAddress,
             tags = emptyList(),
             coverPhotoUrl = "https://example.com/$diaryId.jpg",
             userId = "user-$diaryId",

@@ -21,6 +21,8 @@ data class RestaurantSearchResponse(
 data class RestaurantResponseItem(
     @SerialName("name")
     val name: String,
+    @SerialName("address_name")
+    val addressName: String? = null,
     @SerialName("road_address")
     val roadAddress: String,
     @SerialName("url")

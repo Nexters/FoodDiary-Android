@@ -88,6 +88,7 @@ class DiaryRepositoryImpl @Inject constructor(
             category = param.category,
             restaurantName = param.restaurantName,
             restaurantUrl = param.restaurantUrl,
+            addressName = param.addressName,
             roadAddress = param.roadAddress,
             tags = param.tags,
             note = param.note,
