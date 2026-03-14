@@ -24,17 +24,17 @@ internal fun AnimatedOnFirstVisible(
     val view = LocalView.current
     var hasEnteredViewport by remember { mutableStateOf(false) }
 
-    val animatedModifier = modifier.onGloballyPositioned { coordinates ->
-        if (hasEnteredViewport) {
-            return@onGloballyPositioned
+    val viewportModifier = if (!hasEnteredViewport) {
+        Modifier.onGloballyPositioned { coordinates ->
+            val bounds = coordinates.boundsInWindow()
+            val viewportHeight = view.height.toFloat()
+            if (bounds.bottom > 0f && bounds.top < viewportHeight) {
+                hasEnteredViewport = true
+            }
         }
-
-        val bounds = coordinates.boundsInWindow()
-        val viewportHeight = view.height.toFloat()
-        if (bounds.bottom > 0f && bounds.top < viewportHeight) {
-            hasEnteredViewport = true
-        }
+    } else {
+        Modifier
     }
 
-    content(hasEnteredViewport, animatedModifier)
+    content(hasEnteredViewport, modifier.then(viewportModifier))
 }
