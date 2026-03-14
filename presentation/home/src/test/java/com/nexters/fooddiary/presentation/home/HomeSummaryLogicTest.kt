@@ -1,5 +1,6 @@
 package com.nexters.fooddiary.presentation.home
 
+import com.nexters.fooddiary.core.ui.food.FoodImageState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -41,8 +42,28 @@ class HomeSummaryLogicTest {
             LocalDate.parse("2026-02-23") to listOf("c"),
         )
 
-        val result = selectedDateImageUrls(map, selectedDate)
+        val result = selectedDateImageUrls(
+            weeklyPhotosByDate = map,
+            selectedDate = selectedDate,
+            selectedDateImageStatesByUrl = emptyMap(),
+        )
 
         assertEquals(listOf("a", "b"), result)
+    }
+
+    @Test
+    fun `summary 이미지가 없어도 detail 이미지로 fallback 한다`() {
+        val selectedDate = LocalDate.parse("2026-02-22")
+
+        val result = selectedDateImageUrls(
+            weeklyPhotosByDate = emptyMap(),
+            selectedDate = selectedDate,
+            selectedDateImageStatesByUrl = linkedMapOf(
+                "processing-a" to FoodImageState.Processing,
+                "processing-b" to FoodImageState.Processing,
+            ),
+        )
+
+        assertEquals(listOf("processing-a", "processing-b"), result)
     }
 }

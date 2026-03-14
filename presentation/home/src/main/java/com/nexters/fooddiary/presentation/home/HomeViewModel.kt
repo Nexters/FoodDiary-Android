@@ -9,6 +9,7 @@ import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import com.nexters.fooddiary.core.common.permission.PermissionUtil
 import com.nexters.fooddiary.core.common.toLocalTimeText
 import com.nexters.fooddiary.core.ui.food.FoodImageState
+import com.nexters.fooddiary.domain.model.AnalysisStatus
 import com.nexters.fooddiary.domain.model.DiaryDetail
 import com.nexters.fooddiary.domain.usecase.GetDiaryByDateUseCase
 import com.nexters.fooddiary.domain.usecase.GetDiarySummaryUseCase
@@ -146,7 +147,6 @@ class HomeViewModel @AssistedInject constructor(
     }
 
     fun onDiaryUpdated(date: LocalDate) {
-        setState { copy(pendingDates = pendingDates - date) }
         withState { state ->
             if (YearMonth.from(state.selectedDate) == YearMonth.from(date)) {
                 loadPhotosForMonth(YearMonth.from(state.selectedDate))
@@ -155,13 +155,10 @@ class HomeViewModel @AssistedInject constructor(
                 loadSummaryForSelectedWeek(forceRefresh = true)
             }
             if (state.selectedDate == date) {
+                loadSelectedDateImageState(state.selectedDate)
                 loadAddableImageStateForSelectedDate(state.selectedDate)
             }
         }
-    }
-
-    fun onDiaryUploadPending(date: LocalDate) {
-        setState { copy(pendingDates = pendingDates + date) }
     }
 
     fun onCardStackClicked() {
@@ -281,10 +278,14 @@ internal fun shouldLoadWeek(
 
 private fun DiaryDetail.toHomeFoodImageStatesByUrl(): Map<String, FoodImageState> {
     return diaries.flatMap { diary ->
-        val state = FoodImageState.Ready(
-            timeText = diary.diaryDate.toLocalTimeText(),
-            locationText = diary.location.orEmpty(),
-        )
+        val state = when (diary.analysisStatus) {
+            AnalysisStatus.PROCESSING -> FoodImageState.Processing
+            AnalysisStatus.DONE,
+            AnalysisStatus.FAILED -> FoodImageState.Ready(
+                timeText = diary.diaryDate.toLocalTimeText(),
+                locationText = diary.location.orEmpty(),
+            )
+        }
         diary.photos.map { photo -> photo.imageUrl to state }
     }.toMap()
 }

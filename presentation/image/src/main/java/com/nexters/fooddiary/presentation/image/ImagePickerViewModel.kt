@@ -2,6 +2,8 @@ package com.nexters.fooddiary.presentation.image
 
 import android.content.Context
 import android.net.Uri
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
@@ -13,9 +15,12 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
+import java.util.UUID
 
 internal fun nextSelectionAfterToggle(current: Set<Uri>, uri: Uri, maxCount: Int): Set<Uri> =
     if (current.contains(uri)) current - uri
@@ -27,6 +32,7 @@ class ImagePickerViewModel @AssistedInject constructor(
     @ApplicationContext private val context: Context,
     private val getFoodPhotosUseCase: GetFoodPhotosUseCase,
 ) : MavericksViewModel<ImagePickerState>(initialState) {
+    private val workManager by lazy { WorkManager.getInstance(context) }
 
     init {
         updatePermissionState()
@@ -47,6 +53,7 @@ class ImagePickerViewModel @AssistedInject constructor(
                 allImageUris = emptyList(),
                 foodImageUris = emptyList(),
                 isLoading = true,
+                isUploading = false,
                 uploadSucceededDate = null,
             )
         }
@@ -95,9 +102,10 @@ class ImagePickerViewModel @AssistedInject constructor(
             val state = awaitState()
             val urisToUpload = state.selectedUris.map { it.toString() }
             val targetDate = state.filterDate ?: LocalDate.now()
-            if (urisToUpload.isEmpty()) {
+            if (urisToUpload.isEmpty() || state.isUploading) {
                 return@launch
             }
+            setState { copy(isUploading = true) }
 
             val result = withContext(Dispatchers.Default) {
                 runCatching {
@@ -110,8 +118,8 @@ class ImagePickerViewModel @AssistedInject constructor(
             }
 
             result
-                .onSuccess { setState { copy(uploadSucceededDate = targetDate) } }
-                .onFailure { /* enqueue 실패 시 화면 유지 */ }
+                .onSuccess { requestId -> observeUploadCompletion(requestId, targetDate) }
+                .onFailure { setState { copy(isUploading = false) } }
         }
     }
 
@@ -126,6 +134,29 @@ class ImagePickerViewModel @AssistedInject constructor(
 
     companion object : MavericksViewModelFactory<ImagePickerViewModel, ImagePickerState> by hiltMavericksViewModelFactory() {
         const val MAX_SELECTION_COUNT = 10
+    }
+
+    private fun observeUploadCompletion(requestId: UUID, targetDate: LocalDate) {
+        viewModelScope.launch {
+            val workInfo = workManager
+                .getWorkInfoByIdFlow(requestId)
+                .filterNotNull()
+                .first { it.state.isFinished }
+
+            when (workInfo.state) {
+                WorkInfo.State.SUCCEEDED -> {
+                    setState {
+                        copy(
+                            isUploading = false,
+                            uploadSucceededDate = targetDate,
+                        )
+                    }
+                }
+                else -> {
+                    setState { copy(isUploading = false) }
+                }
+            }
+        }
     }
 
     private fun applyEmptyResult() {
