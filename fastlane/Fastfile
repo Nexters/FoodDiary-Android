@@ -15,7 +15,7 @@ platform :android do
       # Get PR titles from merge commits
       # %b = commit body (contains PR title for GitHub merge commits)
       pr_titles = sh(
-        "git log --first-parent origin/develop --merges --pretty=format:'%b' -10 2>/dev/null | grep -v '^$' | head -5",
+        "git log --first-parent origin/main --merges --pretty=format:'%b' -10 2>/dev/null | grep -v '^$' | head -5",
         log: false
       ).strip
 
