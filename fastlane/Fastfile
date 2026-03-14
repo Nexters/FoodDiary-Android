@@ -3,6 +3,8 @@
 default_platform(:android)
 
 platform :android do
+  RELEASE_AAB_PATH = File.expand_path("app/build/outputs/bundle/release/app-release.aab", Dir.pwd)
+
   # ============================================================================
   # Helper Methods
   # ============================================================================
@@ -13,7 +15,7 @@ platform :android do
       # Get PR titles from merge commits
       # %b = commit body (contains PR title for GitHub merge commits)
       pr_titles = sh(
-        "git log --first-parent origin/develop --merges --pretty=format:'%b' -10 2>/dev/null | grep -v '^$' | head -5",
+        "git log --first-parent origin/main --merges --pretty=format:'%b' -10 2>/dev/null | grep -v '^$' | head -5",
         log: false
       ).strip
 
@@ -40,8 +42,8 @@ platform :android do
       if success
         # Success notification
         embed = {
-          title: "🚀 FoodDiary DebugRelease Build ##{version_code}",
-          description: "새로운 DebugRelease 빌드가 Firebase App Distribution에 배포되었습니다.",
+          title: "🚀 FoodDiary Release AAB ##{version_code}",
+          description: "새로운 Release AAB 빌드가 Firebase App Distribution에 배포되었습니다.",
           color: 5763719, # Green
           fields: [
             {
@@ -50,8 +52,8 @@ platform :android do
               inline: true
             },
             {
-              name: "🏗️ Build Type",
-              value: "DebugRelease",
+              name: "📦 Artifact",
+              value: "Release AAB",
               inline: true
             }
           ],
@@ -154,7 +156,7 @@ platform :android do
   # Main Lanes
   # ============================================================================
 
-  desc "Build release APK with version code injection"
+  desc "Build release AAB with version code injection"
   lane :build do
     # Get version code from environment (set by CI)
     version_code = ENV['VERSION_CODE']
@@ -163,17 +165,17 @@ platform :android do
       UI.user_error!("VERSION_CODE environment variable is not set")
     end
 
-    UI.message("Building release APK with version code: #{version_code}")
+    UI.message("Building release AAB with version code: #{version_code}")
 
-    # Build release APK with version code
+    # Build release AAB with version code
     gradle(
-      task: "assembleRelease",
+      task: "bundleRelease",
       properties: {
         "versionCode" => version_code
       }
     )
 
-    UI.success("Release APK built successfully with version code: #{version_code}")
+    UI.success("Release AAB built successfully with version code: #{version_code}")
   end
 
   desc "Deploy to Firebase App Distribution"
@@ -205,14 +207,20 @@ platform :android do
     UI.message("  App ID: #{app_id[0..20]}... (truncated)")
     UI.message("  Token: #{firebase_token ? 'SET' : 'NOT SET'}")
     UI.message("  Version Code: #{version_code}")
-    UI.message("  APK Path: app/build/outputs/apk/release/app-release.apk")
+    UI.message("  Artifact Type: AAB")
+    UI.message("  AAB Path: #{RELEASE_AAB_PATH}")
     UI.message("  Groups: #{tester_groups}")
+
+    unless File.exist?(RELEASE_AAB_PATH)
+      UI.user_error!("AAB not found at #{RELEASE_AAB_PATH}. Run the build lane first.")
+    end
 
     # Upload to Firebase App Distribution
     firebase_app_distribution(
       app: app_id,
       firebase_cli_token: firebase_token,
-      apk_path: "app/build/outputs/apk/release/app-release.apk",
+      android_artifact_type: "AAB",
+      android_artifact_path: RELEASE_AAB_PATH,
       groups: tester_groups,
       release_notes: release_notes
     )
@@ -230,7 +238,7 @@ platform :android do
     end
 
     begin
-      # Build APK
+      # Build AAB
       build
 
       # Extract release notes before deployment
