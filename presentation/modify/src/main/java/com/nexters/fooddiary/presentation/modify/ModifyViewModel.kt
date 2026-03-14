@@ -38,15 +38,6 @@ class ModifyViewModel @AssistedInject constructor(
         setState { copy(selectedCategory = category) }
     }
 
-    fun updateAddressSearch(query: String) {
-        setState {
-            copy(
-                addressSearchQuery = query,
-                isAddressManuallyUpdated = true,
-            )
-        }
-    }
-
     fun applySearchResult(
         name: String,
         addressName: String,
@@ -57,18 +48,10 @@ class ModifyViewModel @AssistedInject constructor(
         val normalizedAddressName = addressName.trim()
         val normalizedRoadAddress = roadAddress.trim()
         val normalizedUrl = url.trim()
-        val normalizedAddressLines = listOf(normalizedRoadAddress, normalizedAddressName)
-            .filter { it.isNotBlank() }
-            .distinct()
-            .takeIf { it.isNotEmpty() }
-            ?.toPersistentList()
-            ?: persistentEmptyStringList
         setState {
             copy(
-                addressSearchQuery = normalizedRoadAddress
-                    .ifBlank { normalizedAddressName }
-                    .ifBlank { normalizedName },
-                addressLines = normalizedAddressLines,
+                roadAddress = normalizedRoadAddress,
+                addressName = normalizedAddressName,
                 restaurantName = normalizedName,
                 restaurantUrl = normalizedUrl,
                 isAddressManuallyUpdated = true,
@@ -117,32 +100,20 @@ class ModifyViewModel @AssistedInject constructor(
                             ?.takeIf { it.isNotBlank() }
                             ?.let { categories.toPersistentSet().add(it) }
                             ?: categories
-                        val normalizedAddressLines =
-                            listOfNotNull(entry.roadAddress, entry.addressName)
-                            .map { it.trim() }
-                            .filter { it.isNotBlank() }
-                            .distinct()
-                            .takeIf { it.isNotEmpty() }
-                            ?.toPersistentList()
-                            ?: persistentEmptyStringList
                         val entryTags = entry.tags.toPersistentList()
                         val shouldKeepAddress = isAddressManuallyUpdated
                         copy(
                             photoIds = entry.photos.map { it.photoId.toInt() }.toPersistentList(),
                             photoUrls = entry.photos.map { it.imageUrl }.toPersistentList(),
                             coverPhotoId = entry.coverPhotoId.toInt(),
-                            selectedCategory = entryCategory?.takeIf { it.isNotBlank() } ?: selectedCategory,
+                            selectedCategory = entryCategory?.takeIf { it.isNotBlank() }.orEmpty(),
                             categories = mergedCategories,
-                            addressLines = if (shouldKeepAddress) addressLines else normalizedAddressLines,
-                            addressSearchQuery = if (shouldKeepAddress) {
-                                addressSearchQuery
-                            } else {
-                                (entry.roadAddress ?: entry.addressName ?: "")
-                            },
+                            roadAddress = if (shouldKeepAddress) roadAddress else (entry.roadAddress ?: ""),
+                            addressName = if (shouldKeepAddress) addressName else (entry.addressName ?: ""),
                             restaurantName = if (shouldKeepAddress) restaurantName else (entry.restaurantName ?: ""),
                             restaurantUrl = if (shouldKeepAddress) restaurantUrl else (entry.mapLink ?: ""),
                             note = entry.note ?: "",
-                            tags = if (entryTags.isEmpty()) tags else entryTags,
+                            tags = entryTags,
                             isInitialSynced = true,
                         )
                     }
@@ -248,14 +219,10 @@ internal fun removePhotoAtState(
     )
 }
 
-private val persistentEmptyStringList = emptyList<String>().toPersistentList()
-
 internal fun ModifyState.toUpdateDiaryParam(): UpdateDiaryParam =
     UpdateDiaryParam(
-        addressName = addressLines
-            .drop(1)
-            .firstOrNull()
-            ?.takeIf { it.isNotBlank() },
+        addressName = addressName.takeIf { it.isNotBlank() },
+        roadAddress = roadAddress.takeIf { it.isNotBlank() },
         category = selectedCategory.takeIf { it.isNotBlank() },
         restaurantName = restaurantName.takeIf { it.isNotBlank() },
         restaurantUrl = restaurantUrl.takeIf { it.isNotBlank() },

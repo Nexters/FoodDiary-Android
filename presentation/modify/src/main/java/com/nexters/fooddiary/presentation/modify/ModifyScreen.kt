@@ -226,7 +226,8 @@ private fun ModifyScreenContent(
                     AddressSection(
                         searchQuery = state.restaurantName,
                         onSearchClick = onSearchClick,
-                        addressLines = state.addressLines,
+                        roadAddress = state.roadAddress,
+                        addressName = state.addressName,
                     )
                 }
             }
@@ -299,11 +300,12 @@ private fun SelectBox(
 private fun AddressSection(
     searchQuery: String,
     onSearchClick: (String) -> Unit,
-    addressLines: List<String>,
+    roadAddress: String,
+    addressName: String,
 ) {
     val searchPlaceholder = stringResource(R.string.modify_address_search_placeholder)
-    val normalizedAddressLines = remember(addressLines) {
-        addressLines
+    val normalizedAddressLines = remember(roadAddress, addressName) {
+        listOf(roadAddress, addressName)
             .map { it.trim() }
             .filter { it.isNotBlank() }
             .distinct()
@@ -394,8 +396,8 @@ private fun ModifyScreenPreview() {
             diaryId = "preview",
             selectedCategory = "한식",
             categories = persistentSetOf("한식", "일식", "중식", "양식", "카페·디저트"),
-            addressSearchQuery = "서울 강남구",
-            addressLines = persistentListOf("서울특별시 강남구 테헤란로 123", "역삼동 456-7"),
+            roadAddress = "서울특별시 강남구 테헤란로 123",
+            addressName = "역삼동 456-7",
             restaurantName = "맛있는 밥집",
             restaurantUrl = "https://example.com/restaurant",
             note = "점심에 친구들이랑 같이 왔어요. 김치찌개가 특히 맛있었습니다!",
