@@ -108,6 +108,7 @@ fun ModifyScreen(
         searchResult?.let { result ->
             viewModel.applySearchResult(
                 name = result.name,
+                addressName = result.addressName,
                 roadAddress = result.roadAddress,
                 url = result.url,
             )
@@ -301,6 +302,12 @@ private fun AddressSection(
     addressLines: List<String>,
 ) {
     val searchPlaceholder = stringResource(R.string.modify_address_search_placeholder)
+    val normalizedAddressLines = remember(addressLines) {
+        addressLines
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .distinct()
+    }
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Box(
             modifier = Modifier
@@ -323,10 +330,11 @@ private fun AddressSection(
                 },
             )
         }
-        addressLines.forEachIndexed { index, line ->
-            key(index) {
-                AddressLineItem(line = line)
-            }
+        normalizedAddressLines.firstOrNull()?.let { roadAddress ->
+            AddressLineItem(line = roadAddress)
+        }
+        normalizedAddressLines.drop(1).firstOrNull()?.let { addressName ->
+            AddressLineItem(line = addressName)
         }
     }
 }

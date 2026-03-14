@@ -62,6 +62,7 @@ import com.nexters.fooddiary.presentation.mypage.navigation.MyPageRoute
 import com.nexters.fooddiary.presentation.mypage.navigation.WebViewPage
 import com.nexters.fooddiary.presentation.mypage.navigation.myPageScreen
 import com.nexters.fooddiary.presentation.modify.navigation.ModifyRoute
+import com.nexters.fooddiary.presentation.modify.navigation.MODIFY_SEARCH_RESULT_ADDRESS_NAME
 import com.nexters.fooddiary.presentation.modify.navigation.MODIFY_SEARCH_RESULT_NAME
 import com.nexters.fooddiary.presentation.modify.navigation.MODIFY_SEARCH_RESULT_ROAD_ADDRESS
 import com.nexters.fooddiary.presentation.modify.navigation.MODIFY_SEARCH_RESULT_URL
@@ -416,6 +417,10 @@ fun FoodDiaryNavHost(
                         navController.previousBackStackEntry?.savedStateHandle?.set(
                             MODIFY_SEARCH_RESULT_ROAD_ADDRESS,
                             restaurant.roadAddress,
+                        )
+                        navController.previousBackStackEntry?.savedStateHandle?.set(
+                            MODIFY_SEARCH_RESULT_ADDRESS_NAME,
+                            restaurant.addressName.orEmpty(),
                         )
                         navController.previousBackStackEntry?.savedStateHandle?.set(
                             MODIFY_SEARCH_RESULT_URL,

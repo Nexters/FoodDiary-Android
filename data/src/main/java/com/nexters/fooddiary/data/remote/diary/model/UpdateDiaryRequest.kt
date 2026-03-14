@@ -11,6 +11,8 @@ data class UpdateDiaryRequest(
     val restaurantName: String? = null,
     @SerialName("restaurant_url")
     val restaurantUrl: String? = null,
+    @SerialName("address_name")
+    val addressName: String? = null,
     @SerialName("road_address")
     val roadAddress: String? = null,
     @SerialName("tags")

@@ -23,6 +23,8 @@ data class DiarySummaryResponse(
     val restaurantName: String?,
     @SerialName("restaurant_url")
     val restaurantUrl: String? = null,
+    @SerialName("address_name")
+    val addressName: String? = null,
     @SerialName("category")
     val category: String?,
     @SerialName("note")

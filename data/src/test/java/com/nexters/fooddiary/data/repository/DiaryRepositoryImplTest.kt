@@ -170,11 +170,44 @@ class DiaryRepositoryImplTest {
         assertTrue(result.containsKey(LocalDate.parse("2026-02-26")))
     }
 
+    @Test
+    fun `일별_조회시_address_name이_있으면_location으로_우선_매핑한다`() = runTest {
+        // Given
+        val repository = DiaryRepositoryImpl(
+            diaryApi = diaryApi,
+            diaryMapper = DiaryMapper(),
+            isDebug = true,
+        )
+        val requestedDate = LocalDate.parse("2026-02-25")
+        coEvery {
+            diaryApi.getDiary("2026-02-25", "2026-02-25", true)
+        } returns DiaryDetailResponse(
+            diaries = listOf(
+                diarySummary(
+                    diaryId = 125L,
+                    diaryDate = "2026-02-25T00:00:00",
+                    timeType = DiaryMealTypeResponse.LUNCH,
+                    analysisStatus = DiaryAnalysisStatusResponse.DONE,
+                    addressName = "서울시 강남구 테헤란로 123",
+                    roadAddress = "서울시 강남구 테헤란로 999",
+                ),
+            )
+        )
+
+        // When
+        val result = repository.getDiary(requestedDate)
+
+        // Then
+        assertEquals("서울시 강남구 테헤란로 123", result.diaries.first().location)
+    }
+
     private fun diarySummary(
         diaryId: Long,
         diaryDate: String,
         timeType: DiaryMealTypeResponse,
         analysisStatus: DiaryAnalysisStatusResponse,
+        addressName: String? = null,
+        roadAddress: String? = null,
     ): DiarySummaryResponse {
         return DiarySummaryResponse(
             diaryId = diaryId,
@@ -183,9 +216,10 @@ class DiaryRepositoryImplTest {
             analysisStatus = analysisStatus,
             restaurantName = "식당",
             restaurantUrl = null,
+            addressName = addressName,
             category = "한식",
             note = null,
-            roadAddress = null,
+            roadAddress = roadAddress,
             tags = emptyList(),
             coverPhotoUrl = "https://example.com/$diaryId.jpg",
             userId = "user-$diaryId",

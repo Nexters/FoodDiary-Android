@@ -4,6 +4,7 @@ data class UpdateDiaryParam(
     val category: String? = null,
     val restaurantName: String? = null,
     val restaurantUrl: String? = null,
+    val addressName: String? = null,
     val roadAddress: String? = null,
     val tags: List<String>? = null,
     val note: String? = null,

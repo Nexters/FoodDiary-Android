@@ -49,20 +49,25 @@ class ModifyViewModel @AssistedInject constructor(
 
     fun applySearchResult(
         name: String,
+        addressName: String,
         roadAddress: String,
         url: String,
     ) {
         val normalizedName = name.trim()
+        val normalizedAddressName = addressName.trim()
         val normalizedRoadAddress = roadAddress.trim()
         val normalizedUrl = url.trim()
-        val normalizedAddressLines = normalizedName
-            .takeIf { it.isNotBlank() }
-            ?.let(::listOf)
+        val normalizedAddressLines = listOf(normalizedRoadAddress, normalizedAddressName)
+            .filter { it.isNotBlank() }
+            .distinct()
+            .takeIf { it.isNotEmpty() }
             ?.toPersistentList()
             ?: persistentEmptyStringList
         setState {
             copy(
-                addressSearchQuery = normalizedRoadAddress.ifBlank { normalizedName },
+                addressSearchQuery = normalizedRoadAddress
+                    .ifBlank { normalizedAddressName }
+                    .ifBlank { normalizedName },
                 addressLines = normalizedAddressLines,
                 roadAddress = normalizedRoadAddress,
                 restaurantName = normalizedName,
@@ -113,9 +118,12 @@ class ModifyViewModel @AssistedInject constructor(
                             ?.takeIf { it.isNotBlank() }
                             ?.let { categories.toPersistentSet().add(it) }
                             ?: categories
-                        val normalizedAddressLines = entry.restaurantName
-                            ?.takeIf { it.isNotBlank() }
-                            ?.let(::listOf)
+                        val normalizedAddressLines = listOf(entry.roadAddress, entry.addressName)
+                            .filterNotNull()
+                            .map { it.trim() }
+                            .filter { it.isNotBlank() }
+                            .distinct()
+                            .takeIf { it.isNotEmpty() }
                             ?.toPersistentList()
                             ?: persistentEmptyStringList
                         val entryTags = entry.tags.toPersistentList()
@@ -127,8 +135,16 @@ class ModifyViewModel @AssistedInject constructor(
                             selectedCategory = entryCategory?.takeIf { it.isNotBlank() } ?: selectedCategory,
                             categories = mergedCategories,
                             addressLines = if (shouldKeepAddress) addressLines else normalizedAddressLines,
-                            addressSearchQuery = if (shouldKeepAddress) addressSearchQuery else (entry.location ?: ""),
-                            roadAddress = if (shouldKeepAddress) roadAddress else (entry.location ?: ""),
+                            addressSearchQuery = if (shouldKeepAddress) {
+                                addressSearchQuery
+                            } else {
+                                (entry.roadAddress ?: entry.addressName ?: "")
+                            },
+                            roadAddress = if (shouldKeepAddress) {
+                                roadAddress
+                            } else {
+                                (entry.roadAddress ?: "")
+                            },
                             restaurantName = if (shouldKeepAddress) restaurantName else (entry.restaurantName ?: ""),
                             restaurantUrl = if (shouldKeepAddress) restaurantUrl else (entry.mapLink ?: ""),
                             note = entry.note ?: "",
@@ -242,6 +258,11 @@ private val persistentEmptyStringList = emptyList<String>().toPersistentList()
 
 internal fun ModifyState.toUpdateDiaryParam(): UpdateDiaryParam =
     UpdateDiaryParam(
+        addressName = addressLines
+            .drop(1)
+            .firstOrNull()
+            ?.takeIf { it.isNotBlank() }
+            ?: roadAddress.takeIf { it.isNotBlank() },
         category = selectedCategory.takeIf { it.isNotBlank() },
         restaurantName = restaurantName.takeIf { it.isNotBlank() },
         restaurantUrl = restaurantUrl.takeIf { it.isNotBlank() },

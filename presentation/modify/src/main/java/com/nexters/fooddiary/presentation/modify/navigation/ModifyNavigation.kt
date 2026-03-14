@@ -14,11 +14,13 @@ import kotlinx.serialization.Serializable
 data class ModifyRoute(val diaryId: String)
 
 const val MODIFY_SEARCH_RESULT_NAME = "modify_search_result_name"
+const val MODIFY_SEARCH_RESULT_ADDRESS_NAME = "modify_search_result_address_name"
 const val MODIFY_SEARCH_RESULT_ROAD_ADDRESS = "modify_search_result_road_address"
 const val MODIFY_SEARCH_RESULT_URL = "modify_search_result_url"
 
 data class ModifySearchResult(
     val name: String,
+    val addressName: String,
     val roadAddress: String,
     val url: String,
 )
@@ -37,12 +39,16 @@ fun NavGraphBuilder.modifyScreen(
         val resultRoadAddress by backStackEntry.savedStateHandle
             .getStateFlow<String?>(MODIFY_SEARCH_RESULT_ROAD_ADDRESS, null)
             .collectAsState()
+        val resultAddressName by backStackEntry.savedStateHandle
+            .getStateFlow<String?>(MODIFY_SEARCH_RESULT_ADDRESS_NAME, null)
+            .collectAsState()
         val resultUrl by backStackEntry.savedStateHandle
             .getStateFlow<String?>(MODIFY_SEARCH_RESULT_URL, null)
             .collectAsState()
         val searchResult = if (resultName != null && resultRoadAddress != null && resultUrl != null) {
             ModifySearchResult(
                 name = resultName.orEmpty(),
+                addressName = resultAddressName.orEmpty(),
                 roadAddress = resultRoadAddress.orEmpty(),
                 url = resultUrl.orEmpty(),
             )
@@ -56,6 +62,7 @@ fun NavGraphBuilder.modifyScreen(
             searchResult = searchResult,
             onSearchResultConsumed = {
                 backStackEntry.savedStateHandle.remove<String>(MODIFY_SEARCH_RESULT_NAME)
+                backStackEntry.savedStateHandle.remove<String>(MODIFY_SEARCH_RESULT_ADDRESS_NAME)
                 backStackEntry.savedStateHandle.remove<String>(MODIFY_SEARCH_RESULT_ROAD_ADDRESS)
                 backStackEntry.savedStateHandle.remove<String>(MODIFY_SEARCH_RESULT_URL)
             },

@@ -363,6 +363,15 @@ private fun RestaurantRow(
                 style = AppTypography.p12,
                 color = Gray400,
             )
+            restaurant.addressName
+                ?.takeIf { it.isNotBlank() && it != restaurant.roadAddress }
+                ?.let { addressName ->
+                    Text(
+                        text = addressName,
+                        style = AppTypography.p12,
+                        color = Gray400,
+                    )
+                }
         }
 
         Text(

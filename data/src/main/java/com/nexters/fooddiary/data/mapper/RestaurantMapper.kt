@@ -8,6 +8,7 @@ import com.nexters.fooddiary.domain.model.RestaurantSearchResult
 internal fun RestaurantResponseItem.toDomainModel(): RestaurantItem {
     return RestaurantItem(
         name = name,
+        addressName = addressName,
         roadAddress = roadAddress,
         url = url,
     )

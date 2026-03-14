@@ -2,12 +2,17 @@ package com.nexters.fooddiary.data.remote.diary
 
 import com.nexters.fooddiary.data.mock.BaseMockServerTest
 import com.nexters.fooddiary.data.remote.diary.model.CreateDiaryRequest
+import com.nexters.fooddiary.data.remote.diary.model.UpdateDiaryRequest
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.mockwebserver.Dispatcher
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.RecordedRequest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import retrofit2.Retrofit
@@ -100,5 +105,70 @@ class DiaryApiTest : BaseMockServerTest() {
             "/diaries/summary?start_date=2026-02-22&end_date=2026-02-28&test_mode=true",
             recordedRequest.path,
         )
+    }
+
+    @Test
+    fun `다이어리_수정시_address_name을_요청_바디에_포함한다`() = runTest {
+        // Given
+        val fallbackDispatcher = mockWebServer.dispatcher
+        mockWebServer.dispatcher = object : Dispatcher() {
+            override fun dispatch(request: RecordedRequest): MockResponse {
+                return if (request.method == "PATCH" && request.path == "/diaries/42") {
+                    MockResponse()
+                        .setResponseCode(200)
+                        .setHeader("Content-Type", "application/json")
+                        .setBody(
+                            """
+                            {
+                              "id": 42,
+                              "diary_date": "2026-03-12T15:09:52.066Z",
+                              "time_type": "lunch",
+                              "analysis_status": "done",
+                              "restaurant_name": "식당",
+                              "restaurant_url": "https://example.com",
+                              "address_name": "서울시 강남구 테헤란로 123",
+                              "road_address": "서울시 강남구 테헤란로 123",
+                              "category": "한식",
+                              "note": "노트",
+                              "tags": ["점심"],
+                              "cover_photo_url": "https://example.com/cover.jpg",
+                              "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                              "cover_photo_id": 100,
+                              "created_at": "2026-03-12T15:09:52.066Z",
+                              "updated_at": "2026-03-12T15:09:52.066Z",
+                              "photo_count": 1,
+                              "photos": [
+                                { "photo_id": 100, "image_url": "https://example.com/cover.jpg" }
+                              ]
+                            }
+                            """.trimIndent()
+                        )
+                } else {
+                    fallbackDispatcher.dispatch(request)
+                }
+            }
+        }
+
+        val request = UpdateDiaryRequest(
+            category = "한식",
+            restaurantName = "식당",
+            restaurantUrl = "https://example.com",
+            addressName = "서울시 강남구 테헤란로 123",
+            roadAddress = "서울시 강남구 테헤란로 123",
+            tags = listOf("점심"),
+            note = "노트",
+            coverPhotoId = 100,
+            photoIds = listOf(100),
+        )
+
+        // When
+        diaryApi.updateDiary(diaryId = 42, request = request)
+
+        // Then
+        val recordedRequest = mockWebServer.takeRequest()
+        assertEquals("PATCH", recordedRequest.method)
+        assertEquals("/diaries/42", recordedRequest.path)
+        val body = recordedRequest.body.readUtf8()
+        assertTrue(body.contains("\"address_name\":\"서울시 강남구 테헤란로 123\""))
     }
 }
