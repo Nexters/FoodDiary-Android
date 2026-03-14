@@ -388,14 +388,17 @@ fun FoodDiaryNavHost(
                         if (previousIsHome) {
                             navController.previousBackStackEntry
                                 ?.savedStateHandle
-                                ?.set(SyncConstants.DIARY_UPLOAD_PENDING_DATE, uploadedDate.toString())
+                                ?.set(SyncConstants.DIARY_REFRESH_DATE, uploadedDate.toString())
+                        }
+                        if (previousIsDetail) {
+                            navController.previousBackStackEntry
+                                ?.savedStateHandle
+                                ?.set(SyncConstants.DIARY_REFRESH_DATE, uploadedDate.toString())
                         }
                         navController.popBackStack()
-                        if (previousIsDetail) {
-                            navController.navigate(DetailRoute(dateString = uploadedDate.toString())) {
-                                launchSingleTop = true
-                            }
-                        } else if (!previousIsHome) {
+                        if (previousIsHome) {
+                            navController.navigate(DetailRoute(dateString = uploadedDate.toString()))
+                        } else if (!previousIsDetail) {
                             navController.navigate(HomeRoute) {
                                 launchSingleTop = true
                             }

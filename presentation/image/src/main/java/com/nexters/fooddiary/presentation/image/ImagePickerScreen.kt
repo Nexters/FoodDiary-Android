@@ -135,6 +135,7 @@ fun ImagePickerScreen(
         foodImageUris = state.foodImageUris,
         allImageUris = state.allImageUris,
         isLoading = state.isLoading,
+        isUploading = state.isUploading,
         hasPermission = state.hasPermission,
         selectedUris = state.selectedUris,
         onImageClick = { uri -> viewModel.toggleImageSelection(uri) },
@@ -153,6 +154,7 @@ fun ImagePickerContent(
     foodImageUris: List<Uri> = emptyList(),
     allImageUris: List<Uri> = emptyList(),
     isLoading: Boolean = false,
+    isUploading: Boolean = false,
     hasPermission: Boolean = true,
     selectedUris: Set<Uri> = emptySet(),
     onImageClick: (Uri) -> Unit = {},
@@ -214,6 +216,7 @@ fun ImagePickerContent(
 
         ImagePickerDoneButton(
             selectedCount = selectedUris.size,
+            enabled = !isUploading,
             onClick = onDone,
             modifier = Modifier.align(Alignment.BottomCenter)
         )
@@ -474,6 +477,7 @@ private fun Modifier.doneButtonSurface(): Modifier = this
 @Composable
 private fun ImagePickerDoneButton(
     selectedCount: Int,
+    enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -484,6 +488,7 @@ private fun ImagePickerDoneButton(
     ) {
         Button(
             onClick = onClick,
+            enabled = enabled,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(999.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),

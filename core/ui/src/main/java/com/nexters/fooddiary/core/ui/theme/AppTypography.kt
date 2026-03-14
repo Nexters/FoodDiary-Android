@@ -14,6 +14,14 @@ object AppTypography {
         letterSpacing = 0.sp,
     )
 
+    val hd20 = TextStyle(
+        fontFamily = PretendardFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp,
+        lineHeight = (20 * 1.3f).sp,
+        letterSpacing = 0.sp,
+    )
+
     val hd18 = TextStyle(
         fontFamily = PretendardFontFamily,
         fontWeight = FontWeight.Bold,

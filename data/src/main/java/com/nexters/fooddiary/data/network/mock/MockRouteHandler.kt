@@ -9,6 +9,7 @@ object MockRouteHandler {
     private const val PATH_DIARIES = "/diaries"
     private const val PATH_PHOTOS = "/photos"
     private const val PATH_RESTAURANT_SEARCH = "/restaurant/search"
+    private const val PATH_ME_INSIGHTS = "/me/insights"
     private const val PATH_USERS_ME = "/users/me"
 
     // Regex Patterns
@@ -28,6 +29,7 @@ object MockRouteHandler {
     private const val MOCK_GET_ANALYSIS_RESULT = "get_analysis_result.json"
     private const val MOCK_CONFIRM_PHOTO_SUCCESS = "confirm_photo_success.json"
     private const val MOCK_GET_FINAL_RECORD = "get_final_record.json"
+    private const val MOCK_GET_ME_INSIGHTS = "get_me_insights.json"
     private const val MOCK_USERS_ME = "users_me.json"
     private const val MOCK_GET_RESTAURANT_SEARCH = "get_restaurant_search.json"
 
@@ -47,6 +49,7 @@ object MockRouteHandler {
 //            path == PATH_DIARIES && method == "GET" -> MOCK_GET_DIARY_20260117
 
             // User
+//            path == PATH_ME_INSIGHTS && method == "GET" -> MOCK_GET_ME_INSIGHTS
             path == PATH_USERS_ME && method == "GET" -> MOCK_USERS_ME
 
             // Photo
