@@ -34,6 +34,7 @@ dependencies {
     // Modules
     implementation(projects.core.common)
     implementation(projects.core.ui)
+    implementation(projects.domain)
 
     // Kotlin
     implementation(libs.androidx.core.ktx)
@@ -47,6 +48,11 @@ dependencies {
     implementation(libs.haze)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
+    // Mavericks
+    implementation(libs.mavericks)
+    implementation(libs.mavericks.compose)
+    implementation(libs.mavericks.hilt)
+
     // Navigation
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.core)
@@ -55,10 +61,6 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
-
-    // Mavericks
-    implementation(libs.mavericks.compose)
-    implementation(libs.mavericks.hilt)
 
     // Testing
     testImplementation(libs.junit)

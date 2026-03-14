@@ -1,0 +1,92 @@
+{
+  "month": "2024-01",
+  "photo_stats": {
+    "current_month_count": 45,
+    "previous_month_count": 30,
+    "change_rate": 50.0
+  },
+  "category_stats": {
+    "current_month": {
+      "top_category": "korean",
+      "count": 12
+    },
+    "previous_month": {
+      "top_category": "western",
+      "count": 8
+    },
+    "current_month_counts": {
+      "korean": 12,
+      "chinese": 3,
+      "japanese": 5,
+      "western": 2,
+      "etc": 1,
+      "home_cooked": 0
+    }
+  },
+  "weekly_stats": {
+    "most_active_week": 2,
+    "weekly_counts": [
+      {
+        "week": 1,
+        "count": 3
+      },
+      {
+        "week": 2,
+        "count": 8
+      },
+      {
+        "week": 3,
+        "count": 5
+      },
+      {
+        "week": 4,
+        "count": 6
+      }
+    ]
+  },
+  "diary_time_stats": {
+    "most_active_time": "21:00",
+    "distribution": [
+      {
+        "time": "09:00",
+        "count": 2
+      },
+      {
+        "time": "12:00",
+        "count": 5
+      },
+      {
+        "time": "12:30",
+        "count": 3
+      },
+      {
+        "time": "18:30",
+        "count": 8
+      },
+      {
+        "time": "21:00",
+        "count": 15
+      }
+    ]
+  },
+  "tag_stats": [
+    {
+      "keyword": "칼국수",
+      "count": 4
+    },
+    {
+      "keyword": "라멘",
+      "count": 3
+    }
+  ],
+  "location_stats": [
+    {
+      "dong": "연남동",
+      "count": 5
+    },
+    {
+      "dong": "역삼동",
+      "count": 3
+    }
+  ]
+}

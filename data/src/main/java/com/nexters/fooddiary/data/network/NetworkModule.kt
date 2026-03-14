@@ -5,6 +5,7 @@ import com.nexters.fooddiary.data.BuildConfig
 import com.nexters.fooddiary.data.network.mock.MockApiInterceptor
 import com.nexters.fooddiary.data.remote.auth.AuthApi
 import com.nexters.fooddiary.data.remote.diary.DiaryApi
+import com.nexters.fooddiary.data.remote.insight.InsightApi
 import com.nexters.fooddiary.data.remote.photo.PhotoApi
 import com.nexters.fooddiary.data.remote.user.UserApi
 import com.nexters.fooddiary.data.remote.restaurant.RestaurantApi
@@ -75,6 +76,11 @@ object NetworkModule {
     @Singleton
     fun providePhotoApi(retrofit: Retrofit): PhotoApi =
         retrofit.create(PhotoApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideInsightApi(retrofit: Retrofit): InsightApi =
+        retrofit.create(InsightApi::class.java)
 
     @Provides
     @Singleton
