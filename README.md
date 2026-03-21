@@ -1,6 +1,6 @@
 <div align="center">
-    <img src="Assets/appicon.png" alt="icon" width="150"/><br>
-    <img src="Assets/logo.png" alt="뭐먹었지" width="200"/>
+    <img src="assets/appicon.png" alt="icon" width="150"/><br>
+    <img src="assets/logo.png" alt="뭐먹었지" width="200"/>
     <br>
     <a href="https://play.google.com/store/apps/details?id=com.nexters.fooddiary">Google Play에서 보기</a>
 </div>
@@ -33,8 +33,8 @@ AI 기반 음식 분석으로 기록 과정을 더 빠르고 편하게 이어갈
 ## 🎞️ Interaction
 
 <div align="center">
-    <img src="Assets/home-screen-record.gif" alt="Home screen interaction" width="320"/>
-    <img src="Assets/insight-screen-record.gif" alt="Insight screen interaction" width="320"/>
+    <img src="assets/home-screen-record.gif" alt="Home screen interaction" width="320"/>
+    <img src="assets/insight-screen-record.gif" alt="Insight screen interaction" width="320"/>
 </div>
 
 ## 💻 Environment
@@ -111,7 +111,7 @@ FoodDiary-Android
 ## 🧩 Module Architecture
 
 <div align="center">
-    <img src="Assets/module-architecture.png" alt="FoodDiary Android module architecture" width="900"/>
+    <img src="assets/module-architecture.png" alt="FoodDiary Android module architecture" width="900"/>
 </div>
 
 ## 🚀 Getting Started
