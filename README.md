@@ -43,6 +43,39 @@ AI 기반 음식 분석으로 기록 과정을 더 빠르고 편하게 이어갈
 - JDK 17 ~
 - Kotlin 2.2.21 ~
 
+## 🧩 Module Architecture
+
+<div align="center">
+    <img src="assets/module-architecture.png" alt="FoodDiary Android module architecture" width="900"/>
+</div>
+
+
+## 🗂️ Project Structure
+
+```text
+FoodDiary-Android
+├── app
+├── core
+│   ├── common
+│   ├── ui
+│   └── classification
+├── data
+├── domain
+└── presentation
+    ├── auth
+    ├── detail
+    ├── home
+    ├── image
+    ├── insight
+    ├── modify
+    ├── mypage
+    ├── onboarding
+    ├── search
+    ├── splash
+    ├── webview
+    └── widget
+```
+
 ## ⚒️ Tech Spec
 
 ### Architecture
@@ -81,38 +114,6 @@ AI 기반 음식 분석으로 기록 과정을 더 빠르고 편하게 이어갈
 
 - LiteRT
 - ExifInterface
-
-## 🗂️ Project Structure
-
-```text
-FoodDiary-Android
-├── app
-├── core
-│   ├── common
-│   ├── ui
-│   └── classification
-├── data
-├── domain
-└── presentation
-    ├── auth
-    ├── detail
-    ├── home
-    ├── image
-    ├── insight
-    ├── modify
-    ├── mypage
-    ├── onboarding
-    ├── search
-    ├── splash
-    ├── webview
-    └── widget
-```
-
-## 🧩 Module Architecture
-
-<div align="center">
-    <img src="assets/module-architecture.png" alt="FoodDiary Android module architecture" width="900"/>
-</div>
 
 ## 🚀 Getting Started
 
