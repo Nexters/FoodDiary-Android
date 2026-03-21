@@ -173,7 +173,12 @@ internal fun DetailScreen(
                     currentOnShowToast(currentContext.getString(R.string.detail_delete_empty))
                 }
                 DetailEvent.DeleteFailed -> {
-                    currentOnShowToast(currentContext.getString(R.string.detail_delete_failed))
+                    currentOnShowSnackBar(
+                        SnackBarData(
+                            message = currentContext.getString(R.string.detail_delete_failed),
+                            iconRes = CoreUiR.drawable.ic_fail,
+                        )
+                    )
                 }
             }
         }
