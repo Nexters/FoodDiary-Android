@@ -352,6 +352,7 @@ fun FoodDiaryNavHost(
                     onNavigateToModify = { diaryId ->
                         navController.navigate(ModifyRoute(diaryId = diaryId))
                     },
+                    onShowSnackBar = onShowSnackBar,
                     onShowToast = onShowToast,
                 )
 
