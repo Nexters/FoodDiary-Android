@@ -33,7 +33,7 @@ sealed interface DetailEvent {
     data class CopyMapLink(val mapLink: String) : DetailEvent
     data class ShareMapLink(val place: String, val mapLink: String) : DetailEvent
     data object ShareLinkEmpty : DetailEvent
-    data object NavigateToImagePicker : DetailEvent
+    data class NavigateToImagePicker(val date: LocalDate) : DetailEvent
     data class NavigateToModify(val diaryId: String) : DetailEvent
     data class DeleteSuccess(val date: LocalDate) : DetailEvent
     data object DeleteEmpty : DetailEvent
@@ -105,7 +105,7 @@ class DetailViewModel @AssistedInject constructor(
     }
 
     fun onAddPhoto(slot: MealSlot, date: LocalDate) {
-        _events.tryEmit(DetailEvent.NavigateToImagePicker)
+        _events.tryEmit(DetailEvent.NavigateToImagePicker(date))
     }
 
     fun onEditClick(slot: MealSlot, date: LocalDate) {

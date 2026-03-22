@@ -52,6 +52,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -119,9 +120,14 @@ internal fun DetailScreen(
     val currentContext by rememberUpdatedState(context)
     val currentOnShowSnackBar by rememberUpdatedState(onShowSnackBar)
     val currentOnShowToast by rememberUpdatedState(onShowToast)
+    var initialDateToSync by rememberSaveable(initialDateString) {
+        mutableStateOf<String?>(initialDateString)
+    }
 
-    LaunchedEffect(initialDateString) {
-        viewModel.syncSelectedDate(initialDateString)
+    LaunchedEffect(initialDateToSync) {
+        val dateString = initialDateToSync ?: return@LaunchedEffect
+        viewModel.syncSelectedDate(dateString)
+        initialDateToSync = null
     }
 
     LaunchedEffect(state.selectedDate) {
@@ -154,8 +160,8 @@ internal fun DetailScreen(
                 DetailEvent.ShareLinkEmpty -> {
                     currentOnShowToast(currentContext.getString(R.string.detail_share_map_link_empty))
                 }
-                DetailEvent.NavigateToImagePicker -> {
-                    onNavigateToImagePicker(state.selectedDate)
+                is DetailEvent.NavigateToImagePicker -> {
+                    onNavigateToImagePicker(event.date)
                 }
                 is DetailEvent.NavigateToModify -> {
                     onNavigateToModify(event.diaryId)
