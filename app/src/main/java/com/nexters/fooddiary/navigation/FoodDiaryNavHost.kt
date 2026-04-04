@@ -300,7 +300,9 @@ fun FoodDiaryNavHost(
                         navController.navigate(LoginRoute) {
                             popUpTo(SplashRoute) { inclusive = true }
                         }
-                    }
+                    },
+                    onShowDialog = onShowDialog,
+                    onShowToast = onShowToast,
                 )
 
                 loginScreen(

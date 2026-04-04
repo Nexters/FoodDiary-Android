@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="in_app_update_complete_title">업데이트를 적용할까요?</string>
+    <string name="in_app_update_complete_message">업데이트 다운로드가 완료됐어요. 앱을 다시 시작하면 바로 적용할 수 있어요.</string>
+    <string name="in_app_update_complete_confirm">지금 적용</string>
+    <string name="in_app_update_complete_dismiss">나중에</string>
+    <string name="in_app_update_check_failed">업데이트를 확인하지 못했어요. 잠시 후 다시 시도해 주세요.</string>
+    <string name="in_app_update_postponed">업데이트를 나중에 진행할 수 있어요.</string>
+    <string name="in_app_update_failed">업데이트를 진행하지 못했어요. 잠시 후 다시 시도해 주세요.</string>
+</resources>
