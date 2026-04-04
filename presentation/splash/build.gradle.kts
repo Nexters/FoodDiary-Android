@@ -38,8 +38,10 @@ dependencies {
 
     // Kotlin
     implementation(libs.androidx.core.ktx)
+    implementation(libs.kotlinx.coroutines.play.services)
 
     // Compose
+    implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
@@ -59,6 +61,8 @@ dependencies {
     // Mavericks
     implementation(libs.mavericks.compose)
     implementation(libs.mavericks.hilt)
+    implementation(libs.play.app.update)
+    implementation(libs.play.app.update.ktx)
 
     // Testing
     testImplementation(libs.junit)
