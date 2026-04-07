@@ -68,6 +68,8 @@ internal fun SplashScreen(
                 message = context.getString(R.string.in_app_update_complete_message),
                 confirmText = context.getString(R.string.in_app_update_complete_confirm),
                 dismissText = context.getString(R.string.in_app_update_complete_dismiss),
+                dismissOnOutsideTouch = false,
+                dismissOnBackPress = false,
                 onConfirm = {
                     coroutineScope.launch {
                         val result = inAppUpdateCoordinator.completeFlexibleUpdate()

@@ -7,6 +7,8 @@ data class DialogData(
     val message: String,
     val confirmText: String = "확인",
     val dismissText: String? = null,
+    val dismissOnOutsideTouch: Boolean = true,
+    val dismissOnBackPress: Boolean = true,
     val onConfirm: (() -> Unit)? = null,
     val onDismiss: (() -> Unit)? = null
 ) : AppDialogData
