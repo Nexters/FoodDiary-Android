@@ -53,9 +53,10 @@ internal fun SplashScreen(
     val inAppUpdateCoordinator = remember(context.applicationContext.packageName) {
         PlayInAppUpdateCoordinator(context = context.applicationContext)
     }
+    var hasCheckedForUpdate by rememberSaveable { mutableStateOf(false) }
     var isNavigationGateOpen by rememberSaveable { mutableStateOf(false) }
     var isWaitingForImmediateResult by rememberSaveable { mutableStateOf(false) }
-    var isShowingFlexibleCompletionDialog by rememberSaveable { mutableStateOf(false) }
+    var isShowingFlexibleCompletionDialog by remember { mutableStateOf(false) }
 
     fun showCompleteFlexibleUpdateDialog() {
         if (isShowingFlexibleCompletionDialog) return
@@ -122,9 +123,12 @@ internal fun SplashScreen(
     }
 
     LaunchedEffect(Unit) {
+        if (hasCheckedForUpdate) return@LaunchedEffect
+
         runCatching {
             inAppUpdateCoordinator.checkForUpdate(inAppUpdateLauncher)
         }.onSuccess { decision ->
+            hasCheckedForUpdate = true
             when (decision) {
                 InAppUpdateDecision.None,
                 is InAppUpdateDecision.Flexible -> {
@@ -141,6 +145,7 @@ internal fun SplashScreen(
                 }
             }
         }.onFailure {
+            hasCheckedForUpdate = true
             isNavigationGateOpen = true
             if (it.cause is InstallException) //스토어 외의 경로로 설치 시 Install Error(-10) 발생
                 onShowToast(context.getString(R.string.in_app_update_check_failed))
