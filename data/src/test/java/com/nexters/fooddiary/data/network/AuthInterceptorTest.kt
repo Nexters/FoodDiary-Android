@@ -72,6 +72,68 @@ class AuthInterceptorTest {
     }
 
     @Test
+    fun `detail 문자열 응답이면 detail 메시지를 전달한다`() {
+        every { tokenStore.getCachedToken() } returns null
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(401)
+                .setHeader("Content-Type", "application/json")
+                .setBody("""{"detail":"유효하지 않은 토큰입니다"}""")
+        )
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor(AuthInterceptor(tokenStore, notifier))
+            .build()
+
+        val response = client.newCall(
+            Request.Builder()
+                .url(mockWebServer.url("/auth/verify"))
+                .build()
+        ).execute()
+
+        assertEquals(401, response.code)
+        val error = notifier.captured.single().error as NetworkError.Http
+        assertEquals("유효하지 않은 토큰입니다", error.message)
+    }
+
+    @Test
+    fun `detail 배열 응답이면 첫 msg를 전달한다`() {
+        every { tokenStore.getCachedToken() } returns null
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(422)
+                .setHeader("Content-Type", "application/json")
+                .setBody(
+                    """
+                    {
+                      "detail": [
+                        {
+                          "loc": ["body", "id_token"],
+                          "msg": "Field required",
+                          "type": "missing"
+                        }
+                      ]
+                    }
+                    """.trimIndent()
+                )
+        )
+
+        val client = OkHttpClient.Builder()
+            .addInterceptor(AuthInterceptor(tokenStore, notifier))
+            .build()
+
+        val response = client.newCall(
+            Request.Builder()
+                .url(mockWebServer.url("/auth/login"))
+                .build()
+        ).execute()
+
+        assertEquals(422, response.code)
+        val error = notifier.captured.single().error as NetworkError.Http
+        assertEquals("Field required", error.message)
+    }
+
+    @Test
     fun `네트워크 IOException이면 notifier로 NoConnection 에러를 전달한다`() {
         every { tokenStore.getCachedToken() } returns null
         mockWebServer.enqueue(

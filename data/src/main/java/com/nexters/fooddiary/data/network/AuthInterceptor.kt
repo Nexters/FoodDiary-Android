@@ -4,10 +4,13 @@ import com.nexters.fooddiary.core.common.network.AppErrorEvent
 import com.nexters.fooddiary.core.common.network.AppErrorNotifier
 import com.nexters.fooddiary.core.common.network.NetworkError
 import com.nexters.fooddiary.data.local.TokenStore
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.Interceptor
 import okhttp3.Response
 import java.util.concurrent.CancellationException
@@ -84,14 +87,27 @@ private fun Response.extractServerErrorMessage(): String? {
 
     val parsed = runCatching {
         val bodyObject = Json.parseToJsonElement(rawBody).jsonObject
-        val messageKeys = listOf("message", "error", "detail", "errorMessage")
-        messageKeys.firstNotNullOfOrNull { key ->
-            bodyObject[key]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() }
-        }
+        bodyObject.extractOpenApiDetailMessage()
+            ?: bodyObject.extractOpenApiMessage()
     }.getOrNull()
 
     return parsed ?: rawBody.take(MAX_ERROR_MESSAGE_LENGTH)
 }
+
+private fun JsonObject.extractOpenApiDetailMessage(): String? =
+    this["detail"]?.asOpenApiDetailMessage()
+
+private fun JsonObject.extractOpenApiMessage(): String? =
+    this["message"].asNonBlankString()
+
+private fun JsonElement.asOpenApiDetailMessage(): String? = when (this) {
+    is JsonPrimitive -> contentOrNull?.takeIf { it.isNotBlank() }
+    is JsonObject -> this["msg"].asNonBlankString()
+    is JsonArray -> firstNotNullOfOrNull { it.asOpenApiDetailMessage() }
+}
+
+private fun JsonElement?.asNonBlankString(): String? =
+    (this as? JsonPrimitive)?.contentOrNull?.takeIf { it.isNotBlank() }
 
 private const val MAX_ERROR_BODY_BYTES = 64L * 1024L
 private const val MAX_ERROR_MESSAGE_LENGTH = 300
