@@ -17,7 +17,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.ui.platform.LocalContext
+import com.nexters.fooddiary.core.common.network.AppErrorNotifier
+import com.nexters.fooddiary.core.common.network.defaultMessage
+import com.nexters.fooddiary.core.common.resource.ResourceProvider
 import com.nexters.fooddiary.core.ui.alert.AppDialogData
 import com.nexters.fooddiary.core.ui.alert.DeleteAccountDialogData
 import com.nexters.fooddiary.core.ui.alert.DialogData
@@ -31,10 +33,18 @@ import com.nexters.fooddiary.navigation.NavigationConstants
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject
+    lateinit var errorNotifier: AppErrorNotifier
+
+    @Inject
+    lateinit var resourceProvider: ResourceProvider
+
     private var launchDeepLink: Uri? by mutableStateOf(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +62,15 @@ class MainActivity : ComponentActivity() {
                 val delayMillis = customSnackBarData?.delayMillis ?: 2_000L
                 delay(delayMillis)
                 customSnackBarData = null
+            }
+
+            LaunchedEffect(Unit) {
+                errorNotifier.events.collect { event ->
+                    if (dialogData != null) return@collect
+                    dialogData = DialogData(
+                        message = event.error.defaultMessage(resourceProvider)
+                    )
+                }
             }
 
             FoodDiaryTheme {
