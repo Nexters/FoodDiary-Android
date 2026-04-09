@@ -3,6 +3,7 @@ package com.nexters.fooddiary
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.SystemClock
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -17,7 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.ui.platform.LocalContext
+import com.nexters.fooddiary.core.common.network.AppErrorNotifier
+import com.nexters.fooddiary.core.common.network.defaultMessage
+import com.nexters.fooddiary.core.common.resource.ResourceProvider
 import com.nexters.fooddiary.core.ui.alert.AppDialogData
 import com.nexters.fooddiary.core.ui.alert.DeleteAccountDialogData
 import com.nexters.fooddiary.core.ui.alert.DialogData
@@ -26,15 +29,25 @@ import com.nexters.fooddiary.core.ui.component.FoodDiaryDeleteAccountDialog
 import com.nexters.fooddiary.core.ui.component.FoodDiaryDialog
 import com.nexters.fooddiary.core.ui.component.FoodDiarySnackBar
 import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
+import com.nexters.fooddiary.error.DialogEmission
+import com.nexters.fooddiary.error.suppressDuplicateWithin
 import com.nexters.fooddiary.navigation.FoodDiaryNavHost
 import com.nexters.fooddiary.navigation.NavigationConstants
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject
+    lateinit var errorNotifier: AppErrorNotifier
+    @Inject
+    lateinit var resourceProvider: ResourceProvider
+
     private var launchDeepLink: Uri? by mutableStateOf(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +65,23 @@ class MainActivity : ComponentActivity() {
                 val delayMillis = customSnackBarData?.delayMillis ?: 2_000L
                 delay(delayMillis)
                 customSnackBarData = null
+            }
+
+            LaunchedEffect(Unit) {
+                errorNotifier.events
+                    .map { event ->
+                        val message = event.error.defaultMessage(resourceProvider)
+                        DialogEmission(
+                            key = "${event.error::class.simpleName}:$message",
+                            dialog = DialogData(message = message),
+                        )
+                    }
+                    .suppressDuplicateWithin(SERVER_ERROR_DIALOG_SUPPRESS_WINDOW_MILLIS)
+                    .collect { emission ->
+                        // 기존 다이얼로그 흐름(예: 회원탈퇴 확인)을 네트워크 에러가 덮어쓰지 않도록 보호.
+                        if (dialogData != null) return@collect
+                        dialogData = emission.dialog
+                    }
             }
 
             FoodDiaryTheme {
@@ -146,5 +176,6 @@ class MainActivity : ComponentActivity() {
         private const val PUSH_TYPE_EXTRA = "push_type"
         private const val PUSH_DIARY_DATE_EXTRA = "push_diary_date"
         private const val PUSH_TYPE_ANALYSIS_COMPLETE = "analysis_complete"
+        private const val SERVER_ERROR_DIALOG_SUPPRESS_WINDOW_MILLIS = 2_000L
     }
 }
