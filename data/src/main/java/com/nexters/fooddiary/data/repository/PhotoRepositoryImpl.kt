@@ -2,6 +2,8 @@ package com.nexters.fooddiary.data.repository
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
+import androidx.exifinterface.media.ExifInterface
 import com.nexters.fooddiary.data.local.upload.PhotoUploadDao
 import com.nexters.fooddiary.data.local.upload.PhotoUploadEntity
 import com.nexters.fooddiary.data.local.upload.UploadStatus
@@ -17,6 +19,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.ByteArrayInputStream
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -128,6 +131,7 @@ internal class PhotoRepositoryImpl @Inject constructor(
     ): MultipartBody.Part? = try {
         resolver.openInputStream(uri)?.use { inputStream ->
             val bytes = inputStream.readBytes()
+            logExifIfDebug(uri, bytes)
             val contentType = resolver.getType(uri) ?: MIME_TYPE_IMAGE_JPEG
             val body = bytes.toRequestBody(contentType.toMediaTypeOrNull(), 0, bytes.size)
             MultipartBody.Part.createFormData(MULTIPART_FIELD_PHOTOS, "photo_$index.jpg", body)
@@ -136,12 +140,33 @@ internal class PhotoRepositoryImpl @Inject constructor(
         null
     }
 
+    private fun logExifIfDebug(uri: Uri, bytes: ByteArray) {
+        if (!isDebug) return
+
+        runCatching {
+            ByteArrayInputStream(bytes).use { stream ->
+                val exif = ExifInterface(stream)
+                val latLong = exif.latLong
+                Log.d(
+                    TAG,
+                    "EXIF uri=$uri, dateTimeOriginal=${exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL)}, " +
+                        "dateTimeDigitized=${exif.getAttribute(ExifInterface.TAG_DATETIME_DIGITIZED)}, " +
+                        "dateTime=${exif.getAttribute(ExifInterface.TAG_DATETIME)}, " +
+                        "latitude=${latLong?.getOrNull(0)}, longitude=${latLong?.getOrNull(1)}"
+                )
+            }
+        }.onFailure { error ->
+            Log.w(TAG, "Failed to read EXIF for uri=$uri", error)
+        }
+    }
+
     private sealed class PartsResult {
         data class Success(val parts: List<MultipartBody.Part>) : PartsResult()
         data class Failure(val error: Exception) : PartsResult()
     }
 }
 
+private const val TAG = "PhotoRepository"
 private const val MEDIA_TYPE_TEXT_PLAIN = "text/plain"
 private const val MIME_TYPE_IMAGE_JPEG = "image/jpeg"
 private const val MULTIPART_FIELD_PHOTOS = "photos"
