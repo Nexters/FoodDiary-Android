@@ -60,6 +60,13 @@ class MainActivity : ComponentActivity() {
             var lastErrorDialogKey by remember { mutableStateOf<String?>(null) }
             var lastErrorDialogAtMillis by remember { mutableStateOf(0L) }
 
+            val dismissDialog: () -> Unit = {
+                dialogData = null
+                // User dismissed the dialog; allow same error to be shown again on next action.
+                lastErrorDialogKey = null
+                lastErrorDialogAtMillis = 0L
+            }
+
             LaunchedEffect(snackBarRequestId) {
                 if (snackBarRequestId == 0) return@LaunchedEffect
                 val delayMillis = customSnackBarData?.delayMillis ?: 2_000L
@@ -118,14 +125,14 @@ class MainActivity : ComponentActivity() {
                                 is DialogData -> {
                                     FoodDiaryDialog(
                                         dialogData = data,
-                                        onDismissRequest = { dialogData = null }
+                                        onDismissRequest = dismissDialog
                                     )
                                 }
 
                                 is DeleteAccountDialogData -> {
                                     FoodDiaryDeleteAccountDialog(
                                         dialogData = data,
-                                        onDismissRequest = { dialogData = null }
+                                        onDismissRequest = dismissDialog
                                     )
                                 }
                             }
