@@ -6,6 +6,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.nexters.fooddiary.core.common.navigation.SyncConstants
+import com.nexters.fooddiary.core.ui.alert.SnackBarData
 import com.nexters.fooddiary.presentation.detail.DetailScreen
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
@@ -20,6 +21,7 @@ fun NavGraphBuilder.detailScreen(
     onNavigateBack: () -> Unit,
     onNavigateToImagePicker: (LocalDate) -> Unit,
     onNavigateToModify: (String) -> Unit,
+    onShowSnackBar: (SnackBarData) -> Unit,
     onShowToast: (String) -> Unit,
 ) {
     composable<DetailRoute> { backStackEntry ->
@@ -38,6 +40,7 @@ fun NavGraphBuilder.detailScreen(
             onNavigateBack = onNavigateBack,
             onNavigateToImagePicker = onNavigateToImagePicker,
             onNavigateToModify = onNavigateToModify,
+            onShowSnackBar = onShowSnackBar,
             onShowToast = onShowToast,
         )
     }

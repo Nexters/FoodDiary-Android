@@ -71,6 +71,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
+import com.nexters.fooddiary.core.ui.alert.SnackBarData
 import com.nexters.fooddiary.core.ui.R as CoreUiR
 import com.nexters.fooddiary.core.ui.component.AddPhotoBox
 import com.nexters.fooddiary.core.ui.component.AddPhotoBoxMode
@@ -110,11 +111,13 @@ internal fun DetailScreen(
     onNavigateBack: () -> Unit = {},
     onNavigateToImagePicker: (LocalDate) -> Unit = {},
     onNavigateToModify: (String) -> Unit = {},
+    onShowSnackBar: (SnackBarData) -> Unit = {},
     onShowToast: (String) -> Unit = {},
 ) {
     val state by viewModel.collectAsState()
     val context = LocalContext.current
     val currentContext by rememberUpdatedState(context)
+    val currentOnShowSnackBar by rememberUpdatedState(onShowSnackBar)
     val currentOnShowToast by rememberUpdatedState(onShowToast)
 
     LaunchedEffect(initialDateString) {
@@ -158,13 +161,24 @@ internal fun DetailScreen(
                     onNavigateToModify(event.diaryId)
                 }
                 is DetailEvent.DeleteSuccess -> {
+                    currentOnShowSnackBar(
+                        SnackBarData(
+                            message = currentContext.getString(R.string.detail_delete_success),
+                            iconRes = CoreUiR.drawable.ic_check_circle,
+                        )
+                    )
                     onDeleteSuccess(event.date)
                 }
                 DetailEvent.DeleteEmpty -> {
                     currentOnShowToast(currentContext.getString(R.string.detail_delete_empty))
                 }
                 DetailEvent.DeleteFailed -> {
-                    currentOnShowToast(currentContext.getString(R.string.detail_delete_failed))
+                    currentOnShowSnackBar(
+                        SnackBarData(
+                            message = currentContext.getString(R.string.detail_delete_failed),
+                            iconRes = CoreUiR.drawable.ic_fail,
+                        )
+                    )
                 }
             }
         }
