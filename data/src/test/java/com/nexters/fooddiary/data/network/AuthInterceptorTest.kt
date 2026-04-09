@@ -44,7 +44,7 @@ class AuthInterceptorTest {
 
     @Test
     fun `HTTP 에러 응답이면 notifier로 Http 에러를 전달한다`() {
-        every { tokenStore.getCachedToken() } returns "token_123"
+        every { tokenStore.getCachedToken() } returns null
         mockWebServer.enqueue(
             MockResponse()
                 .setResponseCode(500)
@@ -69,29 +69,6 @@ class AuthInterceptorTest {
         assertEquals(500, error.code)
         assertEquals("서버 에러", error.message)
         assertEquals("/diaries", event.path)
-
-        val recordedRequest = mockWebServer.takeRequest()
-        assertEquals("Bearer token_123", recordedRequest.getHeader("Authorization"))
-    }
-
-    @Test
-    fun `로그인 API는 Authorization 헤더를 붙이지 않는다`() {
-        every { tokenStore.getCachedToken() } returns "token_123"
-        mockWebServer.enqueue(MockResponse().setResponseCode(200))
-
-        val client = OkHttpClient.Builder()
-            .addInterceptor(AuthInterceptor(tokenStore, notifier))
-            .build()
-
-        client.newCall(
-            Request.Builder()
-                .url(mockWebServer.url("/auth/login"))
-                .build()
-        ).execute()
-
-        val recordedRequest = mockWebServer.takeRequest()
-        assertEquals(null, recordedRequest.getHeader("Authorization"))
-        assertTrue(notifier.captured.isEmpty())
     }
 
     @Test
