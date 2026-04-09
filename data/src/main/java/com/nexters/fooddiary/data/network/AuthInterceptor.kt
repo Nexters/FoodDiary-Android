@@ -25,21 +25,32 @@ class AuthInterceptor @Inject constructor(
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
-        val requestWithAuth = if (originalRequest.url.encodedPath == LOGIN_PATH) {
-            originalRequest
-        } else {
-            val token = tokenStore.getCachedToken()
-            if (token.isNullOrBlank()) {
-                originalRequest
-            } else {
-                originalRequest.newBuilder()
-                    .header(HEADER_AUTHORIZATION, "Bearer $token")
-                    .build()
-            }
+        val path = originalRequest.url.encodedPath
+
+        if (path == LOGIN_PATH) {
+            return proceedWithNotify(chain, originalRequest, path)
         }
 
+        val token = tokenStore.getCachedToken()
+
+        if (token.isNullOrBlank()) {
+            return proceedWithNotify(chain, originalRequest, path)
+        }
+
+        val authenticatedRequest = originalRequest.newBuilder()
+            .header(HEADER_AUTHORIZATION, "Bearer $token")
+            .build()
+
+        return proceedWithNotify(chain, authenticatedRequest, path)
+    }
+
+    private fun proceedWithNotify(
+        chain: Interceptor.Chain,
+        request: okhttp3.Request,
+        path: String?,
+    ): Response {
         return try {
-            val response = chain.proceed(requestWithAuth)
+            val response = chain.proceed(request)
             if (!response.isSuccessful) {
                 errorNotifier.notify(
                     AppErrorEvent(
@@ -47,7 +58,7 @@ class AuthInterceptor @Inject constructor(
                             code = response.code,
                             message = response.extractServerErrorMessage(),
                         ),
-                        path = originalRequest.url.encodedPath,
+                        path = path,
                     )
                 )
             }
@@ -57,7 +68,7 @@ class AuthInterceptor @Inject constructor(
             errorNotifier.notify(
                 AppErrorEvent(
                     error = throwable.toNetworkError(),
-                    path = originalRequest.url.encodedPath,
+                    path = path,
                 )
             )
             throw throwable
