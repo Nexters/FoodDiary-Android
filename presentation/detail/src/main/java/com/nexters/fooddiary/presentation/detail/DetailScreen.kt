@@ -121,10 +121,11 @@ internal fun DetailScreen(
         mutableStateOf<String?>(initialDateString)
     }
 
-    LaunchedEffect(initialDateToSync) {
-        val dateString = initialDateToSync ?: return@LaunchedEffect
-        viewModel.syncSelectedDate(dateString)
-        initialDateToSync = null
+    initialDateToSync?.let { dateString ->
+        LaunchedEffect(dateString) {
+            viewModel.syncSelectedDate(dateString)
+            initialDateToSync = null
+        }
     }
 
     LaunchedEffect(state.selectedDate) {
