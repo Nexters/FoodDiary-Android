@@ -3,6 +3,7 @@ package com.nexters.fooddiary
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.SystemClock
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -56,6 +57,8 @@ class MainActivity : ComponentActivity() {
             var customSnackBarData by remember { mutableStateOf<SnackBarData?>(null) }
             var snackBarRequestId by remember { mutableStateOf(0) }
             var dialogData by remember { mutableStateOf<AppDialogData?>(null) }
+            var lastErrorDialogKey by remember { mutableStateOf<String?>(null) }
+            var lastErrorDialogAtMillis by remember { mutableStateOf(0L) }
 
             LaunchedEffect(snackBarRequestId) {
                 if (snackBarRequestId == 0) return@LaunchedEffect
@@ -67,8 +70,17 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(Unit) {
                 errorNotifier.events.collect { event ->
                     if (dialogData != null) return@collect
+                    val message = event.error.defaultMessage(resourceProvider)
+                    val key = "${event.error::class.simpleName}:$message"
+                    val now = SystemClock.elapsedRealtime()
+                    val isDuplicateInWindow = key == lastErrorDialogKey &&
+                        now - lastErrorDialogAtMillis <= ERROR_DIALOG_SUPPRESS_WINDOW_MILLIS
+                    if (isDuplicateInWindow) return@collect
+
+                    lastErrorDialogKey = key
+                    lastErrorDialogAtMillis = now
                     dialogData = DialogData(
-                        message = event.error.defaultMessage(resourceProvider)
+                        message = message
                     )
                 }
             }
@@ -165,5 +177,6 @@ class MainActivity : ComponentActivity() {
         private const val PUSH_TYPE_EXTRA = "push_type"
         private const val PUSH_DIARY_DATE_EXTRA = "push_diary_date"
         private const val PUSH_TYPE_ANALYSIS_COMPLETE = "analysis_complete"
+        private const val ERROR_DIALOG_SUPPRESS_WINDOW_MILLIS = 2_000L
     }
 }
