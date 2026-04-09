@@ -78,7 +78,6 @@ class MainActivity : ComponentActivity() {
                     }
                     .suppressDuplicateWithin(SERVER_ERROR_DIALOG_SUPPRESS_WINDOW_MILLIS)
                     .collect { emission ->
-                        // 기존 다이얼로그 흐름(예: 회원탈퇴 확인)을 네트워크 에러가 덮어쓰지 않도록 보호.
                         if (dialogData != null) return@collect
                         dialogData = emission.dialog
                     }
