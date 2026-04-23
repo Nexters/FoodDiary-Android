@@ -43,6 +43,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.nexters.fooddiary.core.ui.alert.AppDialogData
 import com.nexters.fooddiary.core.ui.alert.SnackBarData
+import com.nexters.fooddiary.push.DailyRecordReminderScheduler
 import com.nexters.fooddiary.push.PushSyncEventBus
 import com.nexters.fooddiary.presentation.auth.AuthUiState
 import com.nexters.fooddiary.presentation.auth.navigation.LoginRoute
@@ -95,6 +96,7 @@ fun FoodDiaryNavHost(
     var authUiState by remember { mutableStateOf<AuthUiState?>(null) }
     var deleteAccountRequestId by remember { mutableIntStateOf(0) }
     var onboardingCompleteEventId by remember { mutableIntStateOf(0) }
+    var pendingHomeDeepLink by remember { mutableStateOf(initialDeepLink.isHomeDeepLink()) }
     var pendingDetailDate by remember { mutableStateOf(initialDeepLink.getDetailDateOrNull()) }
     var isHomeMonthlyCalendarView by rememberSaveable { mutableStateOf(false) }
     var hasNavigatedFromSplash by remember { mutableStateOf(false) }
@@ -114,6 +116,8 @@ fun FoodDiaryNavHost(
         currentDestination?.hierarchy?.any { it.hasRoute(InsightRoute::class) } == true
     val isLoginRoute =
         currentDestination?.hierarchy?.any { it.hasRoute(LoginRoute::class) } == true
+    val isOnboardingRoute =
+        currentDestination?.hierarchy?.any { it.hasRoute(OnboardingRoute::class) } == true
     val shouldShowHomeInsightBottomBar = isHomeRoute || isInsightRoute
     val shouldHandleAppExitBack = isHomeRoute || isInsightRoute
     val selectedTab = if (isInsightRoute) HomeInsightTab.INSIGHT else HomeInsightTab.HOME
@@ -136,11 +140,28 @@ fun FoodDiaryNavHost(
         }
     }
 
+    val navigateToPendingHomeIfNeeded: () -> Unit = {
+        val canNavigateToHome = !isLoginRoute && authUiState?.isAuthenticated != false
+        if (pendingHomeDeepLink && canNavigateToHome) {
+            navController.navigate(HomeRoute) {
+                popUpTo(0) { inclusive = false }
+                launchSingleTop = true
+            }
+            pendingHomeDeepLink = false
+        }
+    }
+
     fun navigateToImagePicker(dateString: String?) {
         navController.navigate(ImagePickerRoute(dateString = dateString))
     }
 
     LaunchedEffect(initialDeepLink) {
+        if (initialDeepLink.isHomeDeepLink()) {
+            pendingHomeDeepLink = true
+            if (hasNavigatedFromSplash) {
+                navigateToPendingHomeIfNeeded()
+            }
+        }
         initialDeepLink.getDetailDateOrNull()?.let { date ->
             pendingDetailDate = date
             if (hasNavigatedFromSplash) {
@@ -158,6 +179,24 @@ fun FoodDiaryNavHost(
     LaunchedEffect(shouldHandleAppExitBack) {
         if (!shouldHandleAppExitBack) {
             lastExitBackPressedAt = 0L
+        }
+    }
+
+    LaunchedEffect(
+        isHomeRoute,
+        isLoginRoute,
+        isOnboardingRoute,
+        authUiState?.isAuthenticated
+    ) {
+        val shouldEnableDailyRecordReminder = when {
+            isHomeRoute -> authUiState?.isAuthenticated != false
+            isOnboardingRoute -> false
+            isLoginRoute -> authUiState?.isAuthenticated == true
+            else -> null
+        }
+
+        shouldEnableDailyRecordReminder?.let { enabled ->
+            DailyRecordReminderScheduler.setReminderEnabled(context, enabled)
         }
     }
 
@@ -228,6 +267,7 @@ fun FoodDiaryNavHost(
                     launchSingleTop = true
                 }
                 if (destination == HomeRoute) {
+                    pendingHomeDeepLink = false
                     navigateToPendingDetailIfNeeded()
                 }
             }
@@ -293,6 +333,7 @@ fun FoodDiaryNavHost(
                         navController.navigate(HomeRoute) {
                             popUpTo(SplashRoute) { inclusive = true }
                         }
+                        pendingHomeDeepLink = false
                         navigateToPendingDetailIfNeeded()
                     },
                     onNavigateToLogin = {
@@ -318,6 +359,7 @@ fun FoodDiaryNavHost(
                             popUpTo(OnboardingRoute) { inclusive = true }
                             launchSingleTop = true
                         }
+                        pendingHomeDeepLink = false
                         navigateToPendingDetailIfNeeded()
                     }
                 )
@@ -491,6 +533,10 @@ private fun Uri?.getDetailDateOrNull(): String? {
     if (this?.host != NavigationConstants.DEEP_LINK_HOST_DETAIL) return null
     return getQueryParameter(NavigationConstants.DEEP_LINK_QUERY_DATE)
         ?.takeIf { it.isNotBlank() }
+}
+
+private fun Uri?.isHomeDeepLink(): Boolean {
+    return this?.host == NavigationConstants.DEEP_LINK_HOST_HOME
 }
 
 private const val EXIT_CONFIRMATION_WINDOW_MILLIS = 2_000L

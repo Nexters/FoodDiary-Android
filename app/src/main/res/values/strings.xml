@@ -13,5 +13,7 @@
     <string name="push_analysis_complete_body">%1$s사진을 AI가 기록을 완료했어요.</string>
     <string name="push_analysis_complete_body_no_date">음식 사진 분석이 완료됐어요.</string>
     <string name="push_analysis_complete_snackbar">AI가 기록을 완료했습니다.</string>
+    <string name="push_daily_record_reminder_title">오늘 먹은 음식, 기록해볼까요?</string>
+    <string name="push_daily_record_reminder_body">하루가 끝나기 전에 오늘의 식사를 남겨보세요.</string>
     <string name="exit_confirm_toast_message">\'뒤로\'버튼 한번 더 누르시면 종료됩니다.</string>
 </resources>
