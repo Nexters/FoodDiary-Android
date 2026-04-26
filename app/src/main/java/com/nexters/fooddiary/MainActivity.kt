@@ -17,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.ui.platform.LocalContext
 import com.nexters.fooddiary.core.ui.alert.AppDialogData
 import com.nexters.fooddiary.core.ui.alert.DeleteAccountDialogData
 import com.nexters.fooddiary.core.ui.alert.DialogData
@@ -28,6 +27,8 @@ import com.nexters.fooddiary.core.ui.component.FoodDiarySnackBar
 import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
 import com.nexters.fooddiary.navigation.FoodDiaryNavHost
 import com.nexters.fooddiary.navigation.NavigationConstants
+import com.nexters.fooddiary.push.FoodDiaryPushExtras
+import com.nexters.fooddiary.push.FoodDiaryPushTypes
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import dagger.hilt.android.AndroidEntryPoint
@@ -127,24 +128,28 @@ class MainActivity : ComponentActivity() {
             return directDeepLink
         }
 
-        val pushType = intent?.getStringExtra(PUSH_TYPE_EXTRA).orEmpty()
-        val pushDiaryDate = intent?.getStringExtra(PUSH_DIARY_DATE_EXTRA).orEmpty()
-        if (pushType != PUSH_TYPE_ANALYSIS_COMPLETE || pushDiaryDate.isBlank()) {
-            return null
+        val pushType = intent?.getStringExtra(FoodDiaryPushExtras.PUSH_TYPE).orEmpty()
+        val pushDiaryDate = intent?.getStringExtra(FoodDiaryPushExtras.PUSH_DIARY_DATE).orEmpty()
+        return when {
+            pushType == FoodDiaryPushTypes.DAILY_RECORD_REMINDER -> {
+                intent?.removeExtra(FoodDiaryPushExtras.PUSH_TYPE)
+                Uri.Builder()
+                    .scheme(NavigationConstants.DEEP_LINK_SCHEME)
+                    .authority(NavigationConstants.DEEP_LINK_HOST_HOME)
+                    .build()
+            }
+
+            pushType == FoodDiaryPushTypes.ANALYSIS_COMPLETE && pushDiaryDate.isNotBlank() -> {
+                intent?.removeExtra(FoodDiaryPushExtras.PUSH_TYPE)
+                intent?.removeExtra(FoodDiaryPushExtras.PUSH_DIARY_DATE)
+                Uri.Builder()
+                    .scheme(NavigationConstants.DEEP_LINK_SCHEME)
+                    .authority(NavigationConstants.DEEP_LINK_HOST_DETAIL)
+                    .appendQueryParameter(NavigationConstants.DEEP_LINK_QUERY_DATE, pushDiaryDate)
+                    .build()
+            }
+
+            else -> null
         }
-
-        intent?.removeExtra(PUSH_TYPE_EXTRA)
-        intent?.removeExtra(PUSH_DIARY_DATE_EXTRA)
-        return Uri.Builder()
-            .scheme("fooddiary")
-            .authority(NavigationConstants.DEEP_LINK_HOST_DETAIL)
-            .appendQueryParameter(NavigationConstants.DEEP_LINK_QUERY_DATE, pushDiaryDate)
-            .build()
-    }
-
-    companion object {
-        private const val PUSH_TYPE_EXTRA = "push_type"
-        private const val PUSH_DIARY_DATE_EXTRA = "push_diary_date"
-        private const val PUSH_TYPE_ANALYSIS_COMPLETE = "analysis_complete"
     }
 }
