@@ -12,7 +12,7 @@ import javax.inject.Named
 object AppModule {
     @Provides
     @Named("isDebug")
-    fun provideIsDebug(): Boolean = BuildConfig.DEBUG
+    fun provideIsDebug(): Boolean = false
 
     @Provides
     @Named("useMockApi")

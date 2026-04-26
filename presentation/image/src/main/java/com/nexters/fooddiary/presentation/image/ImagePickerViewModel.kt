@@ -2,6 +2,7 @@ package com.nexters.fooddiary.presentation.image
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.airbnb.mvrx.MavericksViewModel
@@ -10,6 +11,8 @@ import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import com.nexters.fooddiary.core.common.permission.PermissionUtil
 import com.nexters.fooddiary.domain.usecase.GetFoodPhotosUseCase
+import com.nexters.fooddiary.domain.usecase.MarkInAppReviewRequestedUseCase
+import com.nexters.fooddiary.domain.usecase.ShouldRequestInAppReviewUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -31,6 +34,8 @@ class ImagePickerViewModel @AssistedInject constructor(
     @Assisted initialState: ImagePickerState,
     @ApplicationContext private val context: Context,
     private val getFoodPhotosUseCase: GetFoodPhotosUseCase,
+    private val shouldRequestInAppReviewUseCase: ShouldRequestInAppReviewUseCase,
+    private val markInAppReviewRequestedUseCase: MarkInAppReviewRequestedUseCase,
 ) : MavericksViewModel<ImagePickerState>(initialState) {
     private val workManager by lazy { WorkManager.getInstance(context) }
 
@@ -55,6 +60,7 @@ class ImagePickerViewModel @AssistedInject constructor(
                 isLoading = true,
                 isUploading = false,
                 uploadSucceededDate = null,
+                shouldRequestReview = false,
             )
         }
         withState { state ->
@@ -127,6 +133,14 @@ class ImagePickerViewModel @AssistedInject constructor(
         setState { copy(uploadSucceededDate = null) }
     }
 
+    fun markInAppReviewRequested() {
+        viewModelScope.launch {
+            runCatching { markInAppReviewRequestedUseCase() }
+                .onFailure { Log.w(TAG, "Failed to mark in-app review requested", it) }
+            setState { copy(shouldRequestReview = false) }
+        }
+    }
+
     @AssistedFactory
     interface Factory : AssistedViewModelFactory<ImagePickerViewModel, ImagePickerState> {
         override fun create(state: ImagePickerState): ImagePickerViewModel
@@ -134,6 +148,7 @@ class ImagePickerViewModel @AssistedInject constructor(
 
     companion object : MavericksViewModelFactory<ImagePickerViewModel, ImagePickerState> by hiltMavericksViewModelFactory() {
         const val MAX_SELECTION_COUNT = 10
+        private const val TAG = "ImagePickerViewModel"
     }
 
     private fun observeUploadCompletion(requestId: UUID, targetDate: LocalDate) {
@@ -145,10 +160,17 @@ class ImagePickerViewModel @AssistedInject constructor(
 
             when (workInfo.state) {
                 WorkInfo.State.SUCCEEDED -> {
+                    val shouldRequestReview = runCatching {
+                        shouldRequestInAppReviewUseCase()
+                    }.onFailure {
+                        Log.w(TAG, "Failed to check in-app review eligibility", it)
+                    }.getOrDefault(false)
+                    Log.d(TAG, "Upload succeeded. shouldRequestReview=$shouldRequestReview")
                     setState {
                         copy(
                             isUploading = false,
                             uploadSucceededDate = targetDate,
+                            shouldRequestReview = shouldRequestReview,
                         )
                     }
                 }
