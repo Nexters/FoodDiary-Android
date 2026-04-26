@@ -48,6 +48,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.kotlinx.coroutines.play.services)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
@@ -58,6 +59,9 @@ dependencies {
 
     // ExifInterface for image rotation
     implementation(libs.androidx.exifinterface)
+
+    // Google Play In-App Review
+    implementation(libs.play.review.ktx)
 
     // Coil for image loading
     implementation(libs.coil.compose)

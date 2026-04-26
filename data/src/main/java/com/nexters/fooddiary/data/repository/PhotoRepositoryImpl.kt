@@ -2,6 +2,7 @@ package com.nexters.fooddiary.data.repository
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import com.nexters.fooddiary.data.local.upload.PhotoUploadDao
 import com.nexters.fooddiary.data.local.upload.PhotoUploadEntity
 import com.nexters.fooddiary.data.local.upload.UploadStatus
@@ -11,6 +12,7 @@ import com.nexters.fooddiary.core.common.resource.ResourceProvider
 import com.nexters.fooddiary.data.network.toNetworkError
 import com.nexters.fooddiary.data.remote.photo.model.response.BatchUploadDiaryItem
 import com.nexters.fooddiary.domain.repository.PhotoRepository
+import com.nexters.fooddiary.domain.usecase.RecordReviewPromptSuccessUseCase
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -29,6 +31,7 @@ internal class PhotoRepositoryImpl @Inject constructor(
     private val photoUploadDao: PhotoUploadDao,
     private val resourceProvider: ResourceProvider,
     private val loginDeviceInfoProvider: LoginDeviceInfoProvider,
+    private val recordReviewPromptSuccessUseCase: RecordReviewPromptSuccessUseCase,
     @Named("isDebug") private val isDebug: Boolean,
     @ApplicationContext private val context: Context,
 ) : PhotoRepository {
@@ -67,6 +70,8 @@ internal class PhotoRepositoryImpl @Inject constructor(
                 photos = parts
             )
             recordPendingUploads(response.diaries, uploadDateStr)
+            runCatching { recordReviewPromptSuccessUseCase() }
+                .onFailure { Log.w(TAG, "Failed to record review prompt success", it) }
             Result.success(Unit)
         } catch (e: Exception) {
             recordUploadFailure(uploadDateStr, e)
@@ -143,6 +148,7 @@ internal class PhotoRepositoryImpl @Inject constructor(
 }
 
 private const val MEDIA_TYPE_TEXT_PLAIN = "text/plain"
+private const val TAG = "PhotoRepositoryImpl"
 private const val MIME_TYPE_IMAGE_JPEG = "image/jpeg"
 private const val MULTIPART_FIELD_PHOTOS = "photos"
 private const val ERROR_NO_PHOTOS = "No photos to upload"
