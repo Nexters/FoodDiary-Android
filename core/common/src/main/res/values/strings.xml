@@ -17,6 +17,12 @@
     <string name="my_page_nick_name">%s님</string>
     <string name="my_page_section_alert">알림</string>
     <string name="my_page_menu_set_alarm">알림설정</string>
+    <string name="my_page_alarm_status_on">ON</string>
+    <string name="my_page_alarm_status_off">OFF</string>
+    <string name="my_page_alarm_state_enabled">알림 켜짐</string>
+    <string name="my_page_alarm_state_disabled">알림 꺼짐</string>
+    <string name="my_page_alarm_settings_dialog_message">알림을 끄면 분석 완료 알림을 받을 수 없어요.</string>
+    <string name="my_page_alarm_settings_dialog_confirm">설정으로 이동</string>
     <string name="my_page_section_setting">관리</string>
     <string name="my_page_menu_logout">로그아웃</string>
     <string name="my_page_menu_app_version">앱 버전  %s</string>
