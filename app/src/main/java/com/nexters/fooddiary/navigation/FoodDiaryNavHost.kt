@@ -32,12 +32,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.nexters.fooddiary.R
+import com.nexters.fooddiary.core.common.permission.PermissionUtil
 import com.nexters.fooddiary.core.common.navigation.SyncConstants
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
@@ -50,7 +54,9 @@ import com.nexters.fooddiary.presentation.auth.navigation.loginScreen
 import com.nexters.fooddiary.presentation.detail.navigation.DetailRoute
 import com.nexters.fooddiary.presentation.detail.navigation.detailScreen
 import com.nexters.fooddiary.presentation.home.HomeCoachmarkOverlay
+import com.nexters.fooddiary.presentation.home.navigation.HomePermissionGuideRoute
 import com.nexters.fooddiary.presentation.home.navigation.HomeRoute
+import com.nexters.fooddiary.presentation.home.navigation.homePermissionGuideScreen
 import com.nexters.fooddiary.presentation.home.navigation.homeScreen
 import com.nexters.fooddiary.presentation.insight.navigation.InsightRoute
 import com.nexters.fooddiary.presentation.insight.navigation.insightScreen
@@ -75,6 +81,7 @@ import com.nexters.fooddiary.presentation.splash.navigation.SplashRoute
 import com.nexters.fooddiary.presentation.splash.navigation.splashScreen
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
+import androidx.compose.runtime.DisposableEffect
 import com.nexters.fooddiary.core.common.R as CommonR
 import com.nexters.fooddiary.core.ui.R as CoreUiR
 
@@ -88,6 +95,7 @@ fun FoodDiaryNavHost(
     onShowToast: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = {}
@@ -100,6 +108,9 @@ fun FoodDiaryNavHost(
     var hasNavigatedFromSplash by remember { mutableStateOf(false) }
     val bottomBarHazeState = rememberHazeState()
     var showHomeCoachmarkOnEntry by rememberSaveable { mutableStateOf(false) }
+    var hasFullMediaPermission by remember {
+        mutableStateOf(PermissionUtil.hasMediaPermission(context))
+    }
 
     val startDestination = if (initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_IMAGE) {
         ImagePickerRoute(dateString = null)
@@ -114,10 +125,22 @@ fun FoodDiaryNavHost(
         currentDestination?.hierarchy?.any { it.hasRoute(InsightRoute::class) } == true
     val isLoginRoute =
         currentDestination?.hierarchy?.any { it.hasRoute(LoginRoute::class) } == true
-    val shouldShowHomeInsightBottomBar = isHomeRoute || isInsightRoute
+    val shouldShowHomeInsightBottomBar = isInsightRoute || (isHomeRoute && hasFullMediaPermission)
     val shouldHandleAppExitBack = isHomeRoute || isInsightRoute
     val selectedTab = if (isInsightRoute) HomeInsightTab.INSIGHT else HomeInsightTab.HOME
     var lastExitBackPressedAt by remember { mutableLongStateOf(0L) }
+
+    DisposableEffect(lifecycleOwner, context) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                hasFullMediaPermission = PermissionUtil.hasMediaPermission(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     val handleAppExitBackPress: () -> Unit = {
         val now = SystemClock.elapsedRealtime()
@@ -329,9 +352,25 @@ fun FoodDiaryNavHost(
                     onNavigateToDetail = { date ->
                         navController.navigate(DetailRoute(dateString = date.toString()))
                     },
+                    onNavigateToPermissionGuide = {
+                        navController.navigate(HomePermissionGuideRoute)
+                    },
                     onNavigateToMyPage = { navController.navigate(MyPageRoute) },
                     isMonthlyCalendarView = { isHomeMonthlyCalendarView },
                     onShowSnackBar = onShowSnackBar,
+                )
+
+                homePermissionGuideScreen(
+                    onOpenSettings = {
+                        context.startActivity(
+                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = Uri.fromParts("package", context.packageName, null)
+                            }
+                        )
+                    },
+                    onPermissionGranted = {
+                        navController.popBackStack()
+                    },
                 )
 
                 insightScreen(
