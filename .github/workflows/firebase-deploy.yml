@@ -75,16 +75,17 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      - name: Compute CI version code
+        run: |
+          echo "VERSION_CODE=$((100000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
+
       - name: Build AAB (PR preview)
         if: github.event_name == 'pull_request'
-        env:
-          VERSION_CODE: ${{ github.run_number }}
         run: |
           bundle exec fastlane build
 
       - name: Deploy to Firebase App Distribution
         env:
-          VERSION_CODE: ${{ github.run_number }}
           FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID_RELEASE }}
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
           FIREBASE_TESTER_GROUPS: mumuk
