@@ -32,22 +32,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.nexters.fooddiary.R
-import com.nexters.fooddiary.core.common.permission.PermissionUtil
 import com.nexters.fooddiary.core.common.navigation.SyncConstants
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.nexters.fooddiary.core.ui.alert.AppDialogData
 import com.nexters.fooddiary.core.ui.alert.SnackBarData
-import com.nexters.fooddiary.push.DailyRecordReminderScheduler
 import com.nexters.fooddiary.push.PushSyncEventBus
 import com.nexters.fooddiary.presentation.auth.AuthUiState
 import com.nexters.fooddiary.presentation.auth.navigation.LoginRoute
@@ -55,9 +50,7 @@ import com.nexters.fooddiary.presentation.auth.navigation.loginScreen
 import com.nexters.fooddiary.presentation.detail.navigation.DetailRoute
 import com.nexters.fooddiary.presentation.detail.navigation.detailScreen
 import com.nexters.fooddiary.presentation.home.HomeCoachmarkOverlay
-import com.nexters.fooddiary.presentation.home.navigation.HomePermissionGuideRoute
 import com.nexters.fooddiary.presentation.home.navigation.HomeRoute
-import com.nexters.fooddiary.presentation.home.navigation.homePermissionGuideScreen
 import com.nexters.fooddiary.presentation.home.navigation.homeScreen
 import com.nexters.fooddiary.presentation.insight.navigation.InsightRoute
 import com.nexters.fooddiary.presentation.insight.navigation.insightScreen
@@ -82,7 +75,6 @@ import com.nexters.fooddiary.presentation.splash.navigation.SplashRoute
 import com.nexters.fooddiary.presentation.splash.navigation.splashScreen
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import androidx.compose.runtime.DisposableEffect
 import com.nexters.fooddiary.core.common.R as CommonR
 import com.nexters.fooddiary.core.ui.R as CoreUiR
 
@@ -96,7 +88,6 @@ fun FoodDiaryNavHost(
     onShowToast: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = {}
@@ -104,15 +95,11 @@ fun FoodDiaryNavHost(
     var authUiState by remember { mutableStateOf<AuthUiState?>(null) }
     var deleteAccountRequestId by remember { mutableIntStateOf(0) }
     var onboardingCompleteEventId by remember { mutableIntStateOf(0) }
-    var pendingHomeDeepLink by remember { mutableStateOf(initialDeepLink.isHomeDeepLink()) }
     var pendingDetailDate by remember { mutableStateOf(initialDeepLink.getDetailDateOrNull()) }
     var isHomeMonthlyCalendarView by rememberSaveable { mutableStateOf(false) }
     var hasNavigatedFromSplash by remember { mutableStateOf(false) }
     val bottomBarHazeState = rememberHazeState()
     var showHomeCoachmarkOnEntry by rememberSaveable { mutableStateOf(false) }
-    var hasFullMediaPermission by remember {
-        mutableStateOf(PermissionUtil.hasMediaPermission(context))
-    }
 
     val startDestination = if (initialDeepLink?.host == NavigationConstants.DEEP_LINK_HOST_IMAGE) {
         ImagePickerRoute(dateString = null)
@@ -127,24 +114,10 @@ fun FoodDiaryNavHost(
         currentDestination?.hierarchy?.any { it.hasRoute(InsightRoute::class) } == true
     val isLoginRoute =
         currentDestination?.hierarchy?.any { it.hasRoute(LoginRoute::class) } == true
-    val shouldShowHomeInsightBottomBar = isInsightRoute || (isHomeRoute && hasFullMediaPermission)
-    val isOnboardingRoute =
-        currentDestination?.hierarchy?.any { it.hasRoute(OnboardingRoute::class) } == true
+    val shouldShowHomeInsightBottomBar = isHomeRoute || isInsightRoute
     val shouldHandleAppExitBack = isHomeRoute || isInsightRoute
     val selectedTab = if (isInsightRoute) HomeInsightTab.INSIGHT else HomeInsightTab.HOME
     var lastExitBackPressedAt by remember { mutableLongStateOf(0L) }
-
-    DisposableEffect(lifecycleOwner, context) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                hasFullMediaPermission = PermissionUtil.hasMediaPermission(context)
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
 
     val handleAppExitBackPress: () -> Unit = {
         val now = SystemClock.elapsedRealtime()
@@ -163,28 +136,11 @@ fun FoodDiaryNavHost(
         }
     }
 
-    val navigateToPendingHomeIfNeeded: () -> Unit = {
-        val canNavigateToHome = !isLoginRoute && authUiState?.isAuthenticated != false
-        if (pendingHomeDeepLink && canNavigateToHome) {
-            navController.navigate(HomeRoute) {
-                popUpTo(0) { inclusive = false }
-                launchSingleTop = true
-            }
-            pendingHomeDeepLink = false
-        }
-    }
-
     fun navigateToImagePicker(dateString: String?) {
         navController.navigate(ImagePickerRoute(dateString = dateString))
     }
 
     LaunchedEffect(initialDeepLink) {
-        if (initialDeepLink.isHomeDeepLink()) {
-            pendingHomeDeepLink = true
-            if (hasNavigatedFromSplash) {
-                navigateToPendingHomeIfNeeded()
-            }
-        }
         initialDeepLink.getDetailDateOrNull()?.let { date ->
             pendingDetailDate = date
             if (hasNavigatedFromSplash) {
@@ -202,24 +158,6 @@ fun FoodDiaryNavHost(
     LaunchedEffect(shouldHandleAppExitBack) {
         if (!shouldHandleAppExitBack) {
             lastExitBackPressedAt = 0L
-        }
-    }
-
-    LaunchedEffect(
-        isHomeRoute,
-        isLoginRoute,
-        isOnboardingRoute,
-        authUiState?.isAuthenticated
-    ) {
-        val shouldEnableDailyRecordReminder = when {
-            isHomeRoute -> authUiState?.isAuthenticated != false
-            isOnboardingRoute -> false
-            isLoginRoute -> authUiState?.isAuthenticated == true
-            else -> null
-        }
-
-        shouldEnableDailyRecordReminder?.let { enabled ->
-            DailyRecordReminderScheduler.setReminderEnabled(context, enabled)
         }
     }
 
@@ -290,7 +228,6 @@ fun FoodDiaryNavHost(
                     launchSingleTop = true
                 }
                 if (destination == HomeRoute) {
-                    pendingHomeDeepLink = false
                     navigateToPendingDetailIfNeeded()
                 }
             }
@@ -356,7 +293,6 @@ fun FoodDiaryNavHost(
                         navController.navigate(HomeRoute) {
                             popUpTo(SplashRoute) { inclusive = true }
                         }
-                        pendingHomeDeepLink = false
                         navigateToPendingDetailIfNeeded()
                     },
                     onNavigateToLogin = {
@@ -382,7 +318,6 @@ fun FoodDiaryNavHost(
                             popUpTo(OnboardingRoute) { inclusive = true }
                             launchSingleTop = true
                         }
-                        pendingHomeDeepLink = false
                         navigateToPendingDetailIfNeeded()
                     }
                 )
@@ -394,25 +329,9 @@ fun FoodDiaryNavHost(
                     onNavigateToDetail = { date ->
                         navController.navigate(DetailRoute(dateString = date.toString()))
                     },
-                    onNavigateToPermissionGuide = {
-                        navController.navigate(HomePermissionGuideRoute)
-                    },
                     onNavigateToMyPage = { navController.navigate(MyPageRoute) },
                     isMonthlyCalendarView = { isHomeMonthlyCalendarView },
                     onShowSnackBar = onShowSnackBar,
-                )
-
-                homePermissionGuideScreen(
-                    onOpenSettings = {
-                        context.startActivity(
-                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                data = Uri.fromParts("package", context.packageName, null)
-                            }
-                        )
-                    },
-                    onPermissionGranted = {
-                        navController.popBackStack()
-                    },
                 )
 
                 insightScreen(
@@ -572,10 +491,6 @@ private fun Uri?.getDetailDateOrNull(): String? {
     if (this?.host != NavigationConstants.DEEP_LINK_HOST_DETAIL) return null
     return getQueryParameter(NavigationConstants.DEEP_LINK_QUERY_DATE)
         ?.takeIf { it.isNotBlank() }
-}
-
-private fun Uri?.isHomeDeepLink(): Boolean {
-    return this?.host == NavigationConstants.DEEP_LINK_HOST_HOME
 }
 
 private const val EXIT_CONFIRMATION_WINDOW_MILLIS = 2_000L

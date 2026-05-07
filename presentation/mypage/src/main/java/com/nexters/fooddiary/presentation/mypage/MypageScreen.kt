@@ -4,10 +4,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -20,15 +18,10 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,18 +29,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.NotificationManagerCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.compose.collectAsStateWithLifecycle
@@ -61,9 +48,6 @@ import com.nexters.fooddiary.core.ui.R.drawable
 import com.nexters.fooddiary.core.ui.component.DetailScreenHeader
 import com.nexters.fooddiary.core.ui.theme.Color363347
 import com.nexters.fooddiary.core.ui.theme.Gray050
-import com.nexters.fooddiary.core.ui.theme.Gray300
-import com.nexters.fooddiary.core.ui.theme.Gray700
-import com.nexters.fooddiary.core.ui.theme.PrimBase
 import com.nexters.fooddiary.core.ui.theme.SdBase
 import com.nexters.fooddiary.domain.model.DeleteAccountError
 import com.nexters.fooddiary.domain.model.DeleteAccountException
@@ -158,23 +142,11 @@ internal fun MyPageScreen(
     onBack: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
     val scrollState = rememberScrollState()
-    var isAlarmEnabled by remember {
-        mutableStateOf(NotificationManagerCompat.from(context).areNotificationsEnabled())
-    }
     val logoutDialogTitle = stringResource(string.my_page_logout_dialog_title)
     val logoutDialogMessage = stringResource(string.my_page_logout_dialog_message)
     val logoutDialogCancel = stringResource(string.my_page_logout_dialog_cancel)
     val logoutText = stringResource(string.my_page_menu_logout)
-    val alarmStatusText = stringResource(
-        if (isAlarmEnabled) string.my_page_alarm_status_on else string.my_page_alarm_status_off
-    )
-    val alarmStateDescription = stringResource(
-        if (isAlarmEnabled) string.my_page_alarm_state_enabled else string.my_page_alarm_state_disabled
-    )
-    val alarmSettingsDialogMessage = stringResource(string.my_page_alarm_settings_dialog_message)
-    val alarmSettingsDialogConfirm = stringResource(string.my_page_alarm_settings_dialog_confirm)
     val deleteDialogTitle = stringResource(string.my_page_delete_dialog_title)
     val deleteDialogMessage = stringResource(string.my_page_delete_dialog_message)
     val deleteDialogWarningDataDeleted =
@@ -185,18 +157,6 @@ internal fun MyPageScreen(
     val deleteDialogAgreement = stringResource(string.my_page_delete_dialog_agreement)
     val deleteDialogConfirm = stringResource(string.my_page_delete_dialog_confirm)
     val deleteDialogCancel = stringResource(string.my_page_delete_dialog_cancel)
-
-    DisposableEffect(lifecycleOwner, context) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                isAlarmEnabled = NotificationManagerCompat.from(context).areNotificationsEnabled()
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
 
     Column(
         modifier = Modifier
@@ -223,22 +183,7 @@ internal fun MyPageScreen(
         ) {
             MyPageSubMenu(
                 menuName = stringResource(string.my_page_menu_set_alarm),
-                statusText = alarmStatusText,
-                stateDescription = alarmStateDescription,
-                onClick = {
-                    if (isAlarmEnabled) {
-                        onShowDialog(
-                            DialogData(
-                                message = alarmSettingsDialogMessage,
-                                confirmText = alarmSettingsDialogConfirm,
-                                dismissText = deleteDialogCancel,
-                                onConfirm = onNavigateToAlarmSettings
-                            )
-                        )
-                    } else {
-                        onNavigateToAlarmSettings()
-                    }
-                }
+                onClick = onNavigateToAlarmSettings
             )
         }
         MyPageSection(
@@ -376,51 +321,18 @@ internal fun MyPageSection(
 internal fun MyPageSubMenu(
     modifier: Modifier = Modifier,
     menuName: String = "",
-    statusText: String? = null,
-    stateDescription: String? = null,
     onClick: () -> Unit = {}
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .background(color = Color363347)
-            .semantics {
-                stateDescription?.let { this.stateDescription = it }
-            }
             .clickable { onClick() }
             .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = menuName, color = Gray050)
-            statusText?.let { AlarmStatusBadge(statusText = it) }
-        }
+        Text(text = menuName, color = Gray050)
         Image(painter = painterResource(drawable.ic_next), contentDescription = "next_button")
-    }
-}
-
-@Composable
-private fun RowScope.AlarmStatusBadge(statusText: String) {
-    val isEnabled = statusText == stringResource(string.my_page_alarm_status_on)
-    Surface(
-        shape = RoundedCornerShape(999.dp),
-        color = if (isEnabled) PrimBase else Gray700
-    ) {
-        Box(
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = statusText,
-                color = if (isEnabled) Gray050 else Gray300,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
     }
 }
 

@@ -7,13 +7,10 @@
     
     <!-- 미디어 접근 권한 -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
         android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:name=".FoodDiaryApplication"
@@ -48,29 +45,8 @@
                 <data android:host="image" />
                 <data android:scheme="fooddiary" />
                 <data android:host="detail" />
-                <data android:scheme="fooddiary" />
-                <data android:host="home" />
             </intent-filter>
         </activity>
-
-        <receiver
-            android:name=".push.DailyRecordReminderReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.nexters.fooddiary.action.DAILY_RECORD_REMINDER" />
-            </intent-filter>
-        </receiver>
-
-        <receiver
-            android:name=".push.DailyRecordReminderSystemReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
-                <action android:name="android.intent.action.TIME_SET" />
-            </intent-filter>
-        </receiver>
 
         <service
             android:name=".push.FoodDiaryFirebaseMessagingService"

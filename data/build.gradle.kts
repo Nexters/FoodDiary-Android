@@ -144,7 +144,6 @@ dependencies {
 
     // DataStore
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.exifinterface)
 
     // Room
     implementation(libs.androidx.room.runtime)

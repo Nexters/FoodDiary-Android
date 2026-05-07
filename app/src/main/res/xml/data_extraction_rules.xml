@@ -7,9 +7,11 @@
     <cloud-backup>
         <exclude domain="file" path="datastore/token_prefs.preferences_pb" />
         <exclude domain="file" path="datastore/encryption_key_prefs.preferences_pb" />
+        <exclude domain="file" path="datastore/review_prompt_prefs.preferences_pb" />
     </cloud-backup>
     <device-transfer>
         <exclude domain="file" path="datastore/token_prefs.preferences_pb" />
         <exclude domain="file" path="datastore/encryption_key_prefs.preferences_pb" />
+        <exclude domain="file" path="datastore/review_prompt_prefs.preferences_pb" />
     </device-transfer>
 </data-extraction-rules>
