@@ -10,6 +10,7 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
+import com.nexters.fooddiary.domain.usecase.GetShareStoreLinkUseCase
 import com.nexters.fooddiary.domain.usecase.GetDiaryByDateUseCase
 import com.nexters.fooddiary.domain.usecase.diary.DeleteDiaryUseCase
 import com.nexters.fooddiary.presentation.detail.util.toDailyMeals
@@ -31,7 +32,7 @@ data class DetailState(
 
 sealed interface DetailEvent {
     data class CopyMapLink(val mapLink: String) : DetailEvent
-    data class ShareMapLink(val place: String, val mapLink: String) : DetailEvent
+    data class ShareMapLink(val place: String, val mapLink: String, val storeLink: String?) : DetailEvent
     data object ShareLinkEmpty : DetailEvent
     data class NavigateToImagePicker(val date: LocalDate) : DetailEvent
     data class NavigateToModify(val diaryId: String) : DetailEvent
@@ -44,6 +45,7 @@ class DetailViewModel @AssistedInject constructor(
     @Assisted initialState: DetailState,
     private val getDiaryByDateUseCase: GetDiaryByDateUseCase,
     private val deleteDiaryUseCase: DeleteDiaryUseCase,
+    private val getShareStoreLinkUseCase: GetShareStoreLinkUseCase,
 ) : MavericksViewModel<DetailState>(initialState) {
     private val _events = MutableSharedFlow<DetailEvent>(extraBufferCapacity = 1)
     val events: SharedFlow<DetailEvent> = _events.asSharedFlow()
@@ -170,7 +172,13 @@ class DetailViewModel @AssistedInject constructor(
             _events.tryEmit(DetailEvent.ShareLinkEmpty)
             return
         }
-        _events.tryEmit(DetailEvent.ShareMapLink(place = place, mapLink = mapLink))
+        _events.tryEmit(
+            DetailEvent.ShareMapLink(
+                place = place,
+                mapLink = mapLink,
+                storeLink = getShareStoreLinkUseCase(),
+            )
+        )
     }
 
     private fun putAndTrim(
