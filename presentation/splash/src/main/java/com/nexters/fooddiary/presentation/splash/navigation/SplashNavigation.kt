@@ -12,6 +12,7 @@ object SplashRoute
 fun NavGraphBuilder.splashScreen(
     onNavigateToHome: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    onFinish: () -> Unit,
     onShowDialog: (AppDialogData) -> Unit = {},
     onShowToast: (String) -> Unit = {},
 ) {
@@ -19,6 +20,7 @@ fun NavGraphBuilder.splashScreen(
         SplashScreen(
             onNavigateToHome = onNavigateToHome,
             onNavigateToLogin = onNavigateToLogin,
+            onFinish = onFinish,
             onShowDialog = onShowDialog,
             onShowToast = onShowToast,
         )

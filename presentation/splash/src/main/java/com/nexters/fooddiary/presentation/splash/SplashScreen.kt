@@ -44,6 +44,7 @@ internal fun SplashScreen(
     splashViewModel: SplashViewModel = mavericksViewModel(),
     onNavigateToHome: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    onFinish: () -> Unit,
     onShowDialog: (AppDialogData) -> Unit = {},
     onShowToast: (String) -> Unit = {},
 ) {
@@ -55,7 +56,8 @@ internal fun SplashScreen(
     }
     var hasCheckedForUpdate by rememberSaveable { mutableStateOf(false) }
     var isNavigationGateOpen by rememberSaveable { mutableStateOf(false) }
-    var isWaitingForImmediateResult by rememberSaveable { mutableStateOf(false) }
+    var isWaitingForUpdateFlowResult by rememberSaveable { mutableStateOf(false) }
+    var isImmediateUpdateFlow by rememberSaveable { mutableStateOf(false) }
     var isShowingFlexibleCompletionDialog by remember { mutableStateOf(false) }
 
     fun showCompleteFlexibleUpdateDialog() {
@@ -93,12 +95,17 @@ internal fun SplashScreen(
         contract = ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            isWaitingForImmediateResult = false
+            isWaitingForUpdateFlowResult = false
             isNavigationGateOpen = true
             return@rememberLauncherForActivityResult
         }
 
-        isWaitingForImmediateResult = false
+        isWaitingForUpdateFlowResult = false
+        val wasImmediateUpdateFlow = isImmediateUpdateFlow
+        if (wasImmediateUpdateFlow) {
+            onFinish()
+            return@rememberLauncherForActivityResult
+        }
         isNavigationGateOpen = true
         val message = if (
             result.resultCode ==
@@ -130,32 +137,40 @@ internal fun SplashScreen(
         runCatching {
             inAppUpdateCoordinator.checkForUpdate(inAppUpdateLauncher)
         }.onSuccess { decision ->
-            hasCheckedForUpdate = true
             when (decision) {
-                InAppUpdateDecision.None,
-                is InAppUpdateDecision.Flexible -> {
+                InAppUpdateDecision.None -> {
+                    isWaitingForUpdateFlowResult = false
+                    isImmediateUpdateFlow = false
                     isNavigationGateOpen = true
                 }
 
-                InAppUpdateDecision.CompleteFlexible -> {
-                    showCompleteFlexibleUpdateDialog()
+                is InAppUpdateDecision.Flexible -> {
+                    isWaitingForUpdateFlowResult = true
+                    isImmediateUpdateFlow = false
+                    isNavigationGateOpen = true
                 }
 
                 is InAppUpdateDecision.Immediate -> {
-                    isWaitingForImmediateResult = true
+                    isWaitingForUpdateFlowResult = true
+                    isImmediateUpdateFlow = true
                     isNavigationGateOpen = false
+                }
+
+                InAppUpdateDecision.CompleteFlexible -> {
+                    isImmediateUpdateFlow = false
+                    showCompleteFlexibleUpdateDialog()
                 }
             }
         }.onFailure {
-            hasCheckedForUpdate = true
+            isImmediateUpdateFlow = false
             isNavigationGateOpen = true
             if (it.cause is InstallException) //스토어 외의 경로로 설치 시 Install Error(-10) 발생
                 onShowToast(context.getString(R.string.in_app_update_check_failed))
         }
     }
 
-    LaunchedEffect(uiState.navigationDestination, isNavigationGateOpen, isWaitingForImmediateResult) {
-        if (!isNavigationGateOpen || isWaitingForImmediateResult) return@LaunchedEffect
+    LaunchedEffect(uiState.navigationDestination, isNavigationGateOpen, isWaitingForUpdateFlowResult) {
+        if (!isNavigationGateOpen || isWaitingForUpdateFlowResult) return@LaunchedEffect
         uiState.navigationDestination?.let { destination ->
             when (destination) {
                 NavigationDestination.Home -> onNavigateToHome()

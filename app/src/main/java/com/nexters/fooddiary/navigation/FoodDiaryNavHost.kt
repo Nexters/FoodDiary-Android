@@ -301,6 +301,7 @@ fun FoodDiaryNavHost(
                             popUpTo(SplashRoute) { inclusive = true }
                         }
                     },
+                    onFinish = onFinish,
                     onShowDialog = onShowDialog,
                     onShowToast = onShowToast,
                 )
