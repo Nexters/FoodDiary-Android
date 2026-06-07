@@ -95,8 +95,12 @@ internal fun SplashScreen(
         contract = ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            isWaitingForUpdateFlowResult = false
-            isNavigationGateOpen = true
+            // 즉시 업데이트는 Play 플로우가 끝나면 진행해도 되지만, 선택 업데이트는 다운로드 완료까지 기다려야 한다.
+            if (isImmediateUpdateFlow) {
+                isWaitingForUpdateFlowResult = false
+                isImmediateUpdateFlow = false
+                isNavigationGateOpen = true
+            }
             return@rememberLauncherForActivityResult
         }
 
@@ -137,6 +141,7 @@ internal fun SplashScreen(
         runCatching {
             inAppUpdateCoordinator.checkForUpdate(inAppUpdateLauncher)
         }.onSuccess { decision ->
+            hasCheckedForUpdate = true
             when (decision) {
                 InAppUpdateDecision.None -> {
                     isWaitingForUpdateFlowResult = false
@@ -147,7 +152,7 @@ internal fun SplashScreen(
                 is InAppUpdateDecision.Flexible -> {
                     isWaitingForUpdateFlowResult = true
                     isImmediateUpdateFlow = false
-                    isNavigationGateOpen = true
+                    isNavigationGateOpen = false
                 }
 
                 is InAppUpdateDecision.Immediate -> {
@@ -157,11 +162,14 @@ internal fun SplashScreen(
                 }
 
                 InAppUpdateDecision.CompleteFlexible -> {
+                    isWaitingForUpdateFlowResult = false
                     isImmediateUpdateFlow = false
                     showCompleteFlexibleUpdateDialog()
                 }
             }
         }.onFailure {
+            hasCheckedForUpdate = true
+            isWaitingForUpdateFlowResult = false
             isImmediateUpdateFlow = false
             isNavigationGateOpen = true
             if (it.cause is InstallException) //스토어 외의 경로로 설치 시 Install Error(-10) 발생
