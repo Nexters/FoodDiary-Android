@@ -148,6 +148,7 @@ firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-installations = { group = "com.google.firebase", name = "firebase-installations" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
+firebase-remote-config = { group = "com.google.firebase", name = "firebase-config" }
 androidx-ui-tooling-preview-android = { group = "androidx.compose.ui", name = "ui-tooling-preview-android", version.ref = "uiToolingPreviewAndroid" }
 
 # Coil
