@@ -3,7 +3,6 @@ package com.nexters.fooddiary.data.remote.auth
 import com.nexters.fooddiary.data.remote.auth.model.request.LoginRequest
 import com.nexters.fooddiary.data.remote.auth.model.request.UpdateDeviceRequest
 import com.nexters.fooddiary.data.remote.auth.model.response.LoginResponse
-import com.nexters.fooddiary.data.remote.auth.model.response.VerifyTokenResponse
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -17,7 +16,7 @@ interface AuthApi {
     suspend fun updateMyDevice(@Body request: UpdateDeviceRequest)
 
     @GET("/auth/verify")
-    suspend fun verifyToken(): VerifyTokenResponse
+    suspend fun verifyToken()
 
     @DELETE("/users/me")
     suspend fun deleteMe()

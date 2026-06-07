@@ -2,6 +2,8 @@ package com.nexters.fooddiary.data.repository
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
+import androidx.exifinterface.media.ExifInterface
 import com.nexters.fooddiary.data.local.upload.PhotoUploadDao
 import com.nexters.fooddiary.data.local.upload.PhotoUploadEntity
 import com.nexters.fooddiary.data.local.upload.UploadStatus
@@ -11,12 +13,14 @@ import com.nexters.fooddiary.core.common.resource.ResourceProvider
 import com.nexters.fooddiary.data.network.toNetworkError
 import com.nexters.fooddiary.data.remote.photo.model.response.BatchUploadDiaryItem
 import com.nexters.fooddiary.domain.repository.PhotoRepository
+import com.nexters.fooddiary.domain.usecase.RecordReviewPromptSuccessUseCase
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.ByteArrayInputStream
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -29,6 +33,7 @@ internal class PhotoRepositoryImpl @Inject constructor(
     private val photoUploadDao: PhotoUploadDao,
     private val resourceProvider: ResourceProvider,
     private val loginDeviceInfoProvider: LoginDeviceInfoProvider,
+    private val recordReviewPromptSuccessUseCase: RecordReviewPromptSuccessUseCase,
     @Named("isDebug") private val isDebug: Boolean,
     @ApplicationContext private val context: Context,
 ) : PhotoRepository {
@@ -67,6 +72,8 @@ internal class PhotoRepositoryImpl @Inject constructor(
                 photos = parts
             )
             recordPendingUploads(response.diaries, uploadDateStr)
+            runCatching { recordReviewPromptSuccessUseCase() }
+                .onFailure { Log.w(TAG, "Failed to record review prompt success", it) }
             Result.success(Unit)
         } catch (e: Exception) {
             recordUploadFailure(uploadDateStr, e)
@@ -128,12 +135,31 @@ internal class PhotoRepositoryImpl @Inject constructor(
     ): MultipartBody.Part? = try {
         resolver.openInputStream(uri)?.use { inputStream ->
             val bytes = inputStream.readBytes()
+            logExifIfDebug(uri, bytes)
             val contentType = resolver.getType(uri) ?: MIME_TYPE_IMAGE_JPEG
             val body = bytes.toRequestBody(contentType.toMediaTypeOrNull(), 0, bytes.size)
             MultipartBody.Part.createFormData(MULTIPART_FIELD_PHOTOS, "photo_$index.jpg", body)
         }
     } catch (e: Exception) {
         null
+    }
+
+    private fun logExifIfDebug(uri: Uri, bytes: ByteArray) {
+        if (!isDebug) return
+
+        runCatching {
+            ByteArrayInputStream(bytes).use { stream ->
+                val exif = ExifInterface(stream)
+                Log.d(
+                    TAG,
+                    "EXIF uri=$uri, dateTimeOriginal=${exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL)}, " +
+                        "dateTimeDigitized=${exif.getAttribute(ExifInterface.TAG_DATETIME_DIGITIZED)}, " +
+                        "dateTime=${exif.getAttribute(ExifInterface.TAG_DATETIME)}"
+                )
+            }
+        }.onFailure { error ->
+            Log.w(TAG, "Failed to read EXIF for uri=$uri", error)
+        }
     }
 
     private sealed class PartsResult {
@@ -143,6 +169,7 @@ internal class PhotoRepositoryImpl @Inject constructor(
 }
 
 private const val MEDIA_TYPE_TEXT_PLAIN = "text/plain"
+private const val TAG = "PhotoRepositoryImpl"
 private const val MIME_TYPE_IMAGE_JPEG = "image/jpeg"
 private const val MULTIPART_FIELD_PHOTOS = "photos"
 private const val ERROR_NO_PHOTOS = "No photos to upload"

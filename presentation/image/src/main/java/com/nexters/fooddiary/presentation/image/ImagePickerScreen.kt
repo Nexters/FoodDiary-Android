@@ -35,6 +35,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import androidx.compose.ui.Alignment
@@ -101,6 +102,8 @@ fun ImagePickerScreen(
 ) {
     val state by viewModel.collectAsState()
     val currentOnUploadSuccess by rememberUpdatedState(onUploadSuccess)
+    val context = LocalContext.current
+    val inAppReviewLauncher = remember(context) { GooglePlayInAppReviewLauncher(context) }
 
     BackHandler(onBack = onClose)
 
@@ -125,6 +128,11 @@ fun ImagePickerScreen(
 
     LaunchedEffect(state.uploadSucceededDate) {
         state.uploadSucceededDate?.let { uploadedDate ->
+            if (state.shouldRequestReview) {
+                if (inAppReviewLauncher.launch().isSuccess) {
+                    viewModel.markInAppReviewRequested()
+                }
+            }
             currentOnUploadSuccess(uploadedDate)
             viewModel.consumeUploadSuccess()
         }

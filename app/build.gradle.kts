@@ -50,7 +50,6 @@ val hasReleaseSigningConfig = listOf(
     releaseKeyPassword
 ).all { it.isNotBlank() }
 val sentryAuthToken = localOrEnv(listOf("sentry.auth.token"), "SENTRY_AUTH_TOKEN")
-
 android {
     namespace = "com.nexters.fooddiary"
     compileSdk = libs.versions.compileSdk.get().toInt()
@@ -59,8 +58,10 @@ android {
         applicationId = "com.nexters.fooddiary"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = project.findProperty("versionCode")?.toString()?.toInt() ?: 1
-        versionName = "1.3.0"
+        versionCode = localProperties.getProperty("versionCode", "")
+            .ifBlank { project.findProperty("versionCode")?.toString().orEmpty() }
+            .toIntOrNull() ?: 1
+        versionName = "1.3.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

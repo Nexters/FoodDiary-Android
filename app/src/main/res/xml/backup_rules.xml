@@ -8,4 +8,5 @@
 <full-backup-content>
     <exclude domain="file" path="datastore/token_prefs.preferences_pb" />
     <exclude domain="file" path="datastore/encryption_key_prefs.preferences_pb" />
+    <exclude domain="file" path="datastore/review_prompt_prefs.preferences_pb" />
 </full-backup-content>
