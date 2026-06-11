@@ -300,3 +300,14 @@ private fun HomeScreenPreview() {
         ),
     )
 }
+
+@Preview
+@Composable
+private fun HomeScreenTodayShortcutPreview() {
+    HomeScreen(
+        state = HomeScreenState(
+            userName = "소연",
+            selectedDate = LocalDate.now().minusDays(1),
+        ),
+    )
+}
