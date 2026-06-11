@@ -30,11 +30,9 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.kizitonwose.calendar.compose.WeekCalendar
 import com.kizitonwose.calendar.compose.weekcalendar.WeekCalendarState
 import com.kizitonwose.calendar.compose.weekcalendar.rememberWeekCalendarState
@@ -62,6 +60,7 @@ fun WeeklyCalendar(
     photoCountByDate: Map<LocalDate, Int> = emptyMap(),
     today: LocalDate = LocalDate.now(),
     onHeaderBoundsChanged: (Rect) -> Unit = {},
+    onTodayClick: () -> Unit = {},
 ) {
     val coroutineScope = rememberCoroutineScope()
     val visibleMonth = remember(calendarState) {
@@ -143,8 +142,6 @@ private fun CalendarHeader(
         Text(
             modifier = Modifier.weight(1f),
             text = "${yearMonth.year}년 ${yearMonth.monthValue}월",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
             color = colors.headerText,
             textAlign = TextAlign.Center,
         )
