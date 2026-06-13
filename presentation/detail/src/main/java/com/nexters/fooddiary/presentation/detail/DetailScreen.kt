@@ -155,7 +155,17 @@ internal fun DetailScreen(
                         currentContext.getString(R.string.detail_share_place_fallback)
                     }
                     val prefixText = currentContext.getString(R.string.detail_share_prefix, placeText)
-                    val shareMessage = "$prefixText\n${event.mapLink}"
+                    val shareMessage = buildString {
+                        append(prefixText)
+                        append('\n')
+                        append(event.mapLink)
+                        event.storeLink?.takeIf { it.isNotBlank() }?.let { storeLink ->
+                            append('\n')
+                            append(currentContext.getString(R.string.detail_share_store_cta))
+                            append('\n')
+                            append(storeLink)
+                        }
+                    }
                     shareText(currentContext, shareMessage, currentContext.getString(R.string.detail_share))
                 }
                 DetailEvent.ShareLinkEmpty -> {

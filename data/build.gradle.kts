@@ -30,23 +30,38 @@ android {
 
         val apiBaseUrl = localOrEnv("api.base.url", "API_BASE_URL")
             .ifEmpty { "https://api.example.com/" }
+        val webBaseUrl = localOrEnv("web.base.url", "WEB_BASE_URL")
+            .ifEmpty { "https://mumuk.ai.kr/" }
 
         buildConfigField(
             "String",
             "API_BASE_URL",
             "\"$apiBaseUrl\""
         )
+        buildConfigField(
+            "String",
+            "WEB_BASE_URL",
+            "\"$webBaseUrl\""
+        )
     }
 
     buildTypes {
         release {
             val apiBaseUrl = localOrEnv("api.base.url", "API_BASE_URL")
+            val webBaseUrl = localOrEnv("web.base.url", "WEB_BASE_URL")
 
             if (apiBaseUrl.isNotBlank()) {
                 buildConfigField(
                     "String",
                     "API_BASE_URL",
                     "\"$apiBaseUrl\""
+                )
+            }
+            if (webBaseUrl.isNotBlank()) {
+                buildConfigField(
+                    "String",
+                    "WEB_BASE_URL",
+                    "\"$webBaseUrl\""
                 )
             }
         }
@@ -138,6 +153,7 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.installations)
     implementation(libs.firebase.messaging)
+    implementation(libs.firebase.remote.config)
 
     // Google Sign-In
     implementation(libs.play.services.auth)

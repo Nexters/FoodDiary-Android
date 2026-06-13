@@ -1,11 +1,13 @@
 package com.nexters.fooddiary.data.di
 
 import com.google.firebase.auth.FirebaseAuth
+import com.nexters.fooddiary.data.BuildConfig
 import com.nexters.fooddiary.data.auth.GoogleSignInHelper
 import com.nexters.fooddiary.data.firebase.AndroidLoginDeviceInfoProvider
 import com.nexters.fooddiary.data.firebase.LoginDeviceInfoProvider
 import com.nexters.fooddiary.data.firebase.LoginFirebaseTokenProvider
 import com.nexters.fooddiary.data.firebase.LoginFirebaseTokenProviderImpl
+import com.nexters.fooddiary.data.remoteconfig.FirebaseShareConfigRepository
 import com.nexters.fooddiary.data.repository.DiaryRepositoryImpl
 import com.nexters.fooddiary.data.repository.ReviewPromptRepositoryImpl
 import com.nexters.fooddiary.data.repository.AuthRepositoryImpl
@@ -16,12 +18,14 @@ import com.nexters.fooddiary.core.common.resource.AndroidResourceProvider
 import com.nexters.fooddiary.domain.repository.AuthRepository
 import com.nexters.fooddiary.domain.repository.DiaryRepository
 import com.nexters.fooddiary.domain.repository.ReviewPromptRepository
+import com.nexters.fooddiary.domain.repository.ShareConfigRepository
 import com.nexters.fooddiary.domain.repository.UserRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -76,9 +80,19 @@ abstract class DataModule {
         androidResourceProvider: AndroidResourceProvider
     ): ResourceProvider
 
+    @Binds
+    @Singleton
+    abstract fun bindShareConfigRepository(
+        firebaseShareConfigRepository: FirebaseShareConfigRepository
+    ): ShareConfigRepository
+
     companion object {
         @Provides
         @Singleton
         fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
+
+        @Provides
+        @Named("shareBaseUrl")
+        fun provideShareBaseUrl(): String = BuildConfig.WEB_BASE_URL
     }
 }

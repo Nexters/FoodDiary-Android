@@ -206,6 +206,7 @@ dependencies {
     // Firebase Cloud Messaging
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
+    implementation(libs.firebase.remote.config)
 
     implementation(libs.sentry.android)
 
