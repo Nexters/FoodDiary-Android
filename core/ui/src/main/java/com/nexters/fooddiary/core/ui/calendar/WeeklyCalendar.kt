@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,17 +32,19 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.kizitonwose.calendar.compose.WeekCalendar
 import com.kizitonwose.calendar.compose.weekcalendar.WeekCalendarState
 import com.kizitonwose.calendar.compose.weekcalendar.rememberWeekCalendarState
+import com.nexters.fooddiary.core.common.R.string
 import com.nexters.fooddiary.core.ui.R.drawable
 import com.nexters.fooddiary.core.ui.calendar.theme.CalendarColors
 import com.nexters.fooddiary.core.ui.calendar.theme.calendarColors
+import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.Gray700
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
@@ -50,6 +54,7 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 internal val CalendarContainerShape = RoundedCornerShape(16.dp)
+private val TodayShortcutBorderColor = Color(0xFFFE670E)
 
 @Composable
 fun WeeklyCalendar(
@@ -62,6 +67,7 @@ fun WeeklyCalendar(
     photoCountByDate: Map<LocalDate, Int> = emptyMap(),
     today: LocalDate = LocalDate.now(),
     onHeaderBoundsChanged: (Rect) -> Unit = {},
+    onTodayClick: () -> Unit = {},
 ) {
     val coroutineScope = rememberCoroutineScope()
     val visibleMonth = remember(calendarState) {
@@ -75,8 +81,8 @@ fun WeeklyCalendar(
                 onHeaderBoundsChanged(coordinates.boundsInRoot())
             },
             yearMonth = visibleMonth.value,
-            locale = locale,
             colors = colors,
+            onTodayClick = onTodayClick,
             onPreviousClick = {
                 coroutineScope.launch {
                     val targetDate = calendarState.firstVisibleWeek.days.first().date.minusWeeks(1)
@@ -121,8 +127,8 @@ fun WeeklyCalendar(
 @Composable
 private fun CalendarHeader(
     yearMonth: YearMonth,
-    locale: Locale,
     colors: CalendarColors,
+    onTodayClick: () -> Unit,
     onPreviousClick: () -> Unit,
     onNextClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -132,31 +138,58 @@ private fun CalendarHeader(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Image(
-            modifier = Modifier
-                .size(24.dp)
-                .clickable { onPreviousClick() },
-            painter = painterResource(drawable.ic_back),
-            colorFilter = ColorFilter.tint(Color.White),
-            contentDescription = "Previous",
-        )
-        Text(
+        Row(
             modifier = Modifier.weight(1f),
-            text = "${yearMonth.year}년 ${yearMonth.monthValue}월",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = colors.headerText,
-            textAlign = TextAlign.Center,
-        )
-        Image(
-            modifier = Modifier
-                .size(24.dp)
-                .clickable { onNextClick() },
-            painter = painterResource(drawable.ic_next),
-            colorFilter = ColorFilter.tint(Color.White),
-            contentDescription = "Next",
-        )
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = "${yearMonth.year}년 ${yearMonth.monthValue}월",
+                style = AppTypography.hd20,
+                color = colors.headerText,
+                textAlign = TextAlign.Start,
+            )
+            TodayShortcutButton(onClick = onTodayClick)
+        }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(28.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Image(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clickable { onPreviousClick() },
+                painter = painterResource(drawable.ic_back),
+                colorFilter = ColorFilter.tint(Color.White),
+                contentDescription = "Previous",
+            )
+            Image(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clickable { onNextClick() },
+                painter = painterResource(drawable.ic_next),
+                colorFilter = ColorFilter.tint(Color.White),
+                contentDescription = "Next",
+            )
+        }
     }
+}
+
+@Composable
+private fun TodayShortcutButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = stringResource(string.home_calendar_go_to_today),
+        modifier = modifier
+            .clip(CircleShape)
+            .border(width = 1.dp, color = TodayShortcutBorderColor, shape = CircleShape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        style = AppTypography.p12,
+        color = TodayShortcutBorderColor,
+    )
 }
 
 @Composable

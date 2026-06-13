@@ -19,6 +19,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -49,6 +50,7 @@ import com.nexters.fooddiary.core.ui.theme.SdBase
 import com.nexters.fooddiary.core.ui.R as coreR
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collectLatest
 import java.time.LocalDate
 import java.time.YearMonth
@@ -167,9 +169,19 @@ private fun HomeScreen(
 ) {
     val screenHazeState = rememberHazeState()
     val scrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
     val weeklyCalendarState = rememberWeeklyCalendarState(selectedDate = state.selectedDate)
     val monthlyCalendarState = rememberMonthCalendarState(selectedDate = state.selectedDate)
     val canShowAddPhoto = state.hasAddableImagesForSelectedDate
+    val today = LocalDate.now()
+
+    fun focusToday() {
+        onDateSelected(today)
+        coroutineScope.launch {
+            if (isMonthlyCalendarView) monthlyCalendarState.animateScrollToMonth(YearMonth.from(today))
+            else weeklyCalendarState.animateScrollToWeek(today)
+        }
+    }
 
     Box(
         modifier = modifier
@@ -216,6 +228,7 @@ private fun HomeScreen(
                         selectedDate = state.selectedDate,
                         onDateSelected = onDateSelected,
                         photoCountByDate = state.diaryCountByDate,
+                        onTodayClick = ::focusToday,
                     )
                     Spacer(modifier = Modifier.height(43.dp))
                     if (selectedDateImageUrls.isNotEmpty()) {
@@ -284,6 +297,17 @@ private fun HomeScreenPreview() {
     HomeScreen(
         state = HomeScreenState(
             userName = "소연"
+        ),
+    )
+}
+
+@Preview
+@Composable
+private fun HomeScreenTodayShortcutPreview() {
+    HomeScreen(
+        state = HomeScreenState(
+            userName = "소연",
+            selectedDate = LocalDate.now().minusDays(1),
         ),
     )
 }
