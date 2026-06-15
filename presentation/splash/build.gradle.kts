@@ -26,6 +26,7 @@ android {
     }
 
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 }
@@ -63,6 +64,7 @@ dependencies {
     implementation(libs.mavericks.hilt)
     implementation(libs.play.app.update)
     implementation(libs.play.app.update.ktx)
+    implementation(libs.sentry.android)
 
     // Testing
     testImplementation(libs.junit)

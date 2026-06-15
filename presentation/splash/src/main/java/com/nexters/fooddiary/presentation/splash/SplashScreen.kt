@@ -36,8 +36,11 @@ import com.nexters.fooddiary.core.ui.alert.DialogData
 import com.nexters.fooddiary.presentation.splash.inappupdate.FlexibleInstallStateDecision
 import com.nexters.fooddiary.presentation.splash.inappupdate.InitialInAppUpdateDecision
 import com.nexters.fooddiary.presentation.splash.inappupdate.PlayInAppUpdateCoordinator
+import io.sentry.Sentry
 import kotlinx.coroutines.launch
 import com.nexters.fooddiary.core.ui.R as CoreR
+
+private const val PLAY_CORE_FAILED_TO_BIND_SERVICE_MESSAGE = "Failed to bind to the service."
 
 @Composable
 internal fun SplashScreen(
@@ -174,6 +177,7 @@ internal fun SplashScreen(
             )
         }.onFailure {
             updateUiState = GooglePlayUpdateState.ReadyToNavigate
+            captureInAppUpdateCheckFailure(it)
             if (it is InstallException || it.cause is InstallException) //스토어 외의 경로로 설치 시 Install Error(-10) 발생
                 onShowToast(context.getString(R.string.in_app_update_check_failed))
         }
@@ -191,6 +195,40 @@ internal fun SplashScreen(
     }
 
     SplashContent(modifier = modifier)
+}
+
+private fun captureInAppUpdateCheckFailure(throwable: Throwable) {
+    val installException = throwable.findInstallException()
+
+    if (BuildConfig.DEBUG) return
+    if (installException?.errorCode == -10) return
+
+    //relate https://stackoverflow.com/questions/58637981/failed-to-bind-to-the-service
+    if (throwable.hasMessage(PLAY_CORE_FAILED_TO_BIND_SERVICE_MESSAGE)) return
+
+    Sentry.withScope { scope ->
+        scope.setTag("feature", "in_app_update")
+        scope.setTag("step", "check_for_update")
+        Sentry.captureException(throwable)
+    }
+}
+
+private fun Throwable.findInstallException(): InstallException? {
+    var current: Throwable? = this
+    while (current != null) {
+        if (current is InstallException) return current
+        current = current.cause
+    }
+    return null
+}
+
+private fun Throwable.hasMessage(message: String): Boolean {
+    var current: Throwable? = this
+    while (current != null) {
+        if (current.message?.contains(message, ignoreCase = true) == true) return true
+        current = current.cause
+    }
+    return false
 }
 
 private fun handleInitialUpdateDecision(
