@@ -33,7 +33,8 @@ import com.google.android.play.core.install.InstallException
 import com.google.android.play.core.install.model.ActivityResult
 import com.nexters.fooddiary.core.ui.alert.AppDialogData
 import com.nexters.fooddiary.core.ui.alert.DialogData
-import com.nexters.fooddiary.presentation.splash.inappupdate.InAppUpdateDecision
+import com.nexters.fooddiary.presentation.splash.inappupdate.FlexibleInstallStateDecision
+import com.nexters.fooddiary.presentation.splash.inappupdate.InitialInAppUpdateDecision
 import com.nexters.fooddiary.presentation.splash.inappupdate.PlayInAppUpdateCoordinator
 import kotlinx.coroutines.launch
 import com.nexters.fooddiary.core.ui.R as CoreR
@@ -54,131 +55,132 @@ internal fun SplashScreen(
     val inAppUpdateCoordinator = remember(context.applicationContext.packageName) {
         PlayInAppUpdateCoordinator(context = context.applicationContext)
     }
-    var hasCheckedForUpdate by rememberSaveable { mutableStateOf(false) }
-    var isNavigationGateOpen by rememberSaveable { mutableStateOf(false) }
-    var isWaitingForUpdateFlowResult by rememberSaveable { mutableStateOf(false) }
-    var isImmediateUpdateFlow by rememberSaveable { mutableStateOf(false) }
-    var isShowingFlexibleCompletionDialog by remember { mutableStateOf(false) }
-
-    fun showCompleteFlexibleUpdateDialog() {
-        if (isShowingFlexibleCompletionDialog) return
-        isShowingFlexibleCompletionDialog = true
-        isNavigationGateOpen = false
-        onShowDialog(
-            DialogData(
-                title = context.getString(R.string.in_app_update_complete_title),
-                message = context.getString(R.string.in_app_update_complete_message),
-                confirmText = context.getString(R.string.in_app_update_complete_confirm),
-                dismissText = context.getString(R.string.in_app_update_complete_dismiss),
-                dismissOnOutsideTouch = false,
-                dismissOnBackPress = false,
-                onConfirm = {
-                    coroutineScope.launch {
-                        val result = inAppUpdateCoordinator.completeFlexibleUpdate()
-                        isShowingFlexibleCompletionDialog = false
-                        if (result.isFailure) {
-                            onShowToast(context.getString(R.string.in_app_update_failed))
-                        }
-                        isNavigationGateOpen = true
-                    }
-                },
-                onDismiss = {
-                    isShowingFlexibleCompletionDialog = false
-                    isNavigationGateOpen = true
-                    onShowToast(context.getString(R.string.in_app_update_postponed))
-                }
-            )
-        )
+    var updateUiState by rememberSaveable(stateSaver = GooglePlayUpdateStateSaver) {
+        mutableStateOf(GooglePlayUpdateState.Checking)
     }
 
-    val inAppUpdateLauncher = rememberLauncherForActivityResult(
+    fun requestCompleteFlexibleUpdateDialog() {
+        if (updateUiState != GooglePlayUpdateState.ShowingFlexibleCompletionDialog) {
+            updateUiState = GooglePlayUpdateState.ShowingFlexibleCompletionDialog
+        }
+    }
+
+    LaunchedEffect(updateUiState) {
+        when (updateUiState) {
+            GooglePlayUpdateState.ImmediateUpdateFailed,
+            GooglePlayUpdateState.ImmediateUpdateCanceled -> {
+                onFinish()
+            }
+
+            GooglePlayUpdateState.ShowingFlexibleCompletionDialog -> {
+                onShowDialog(
+                    DialogData(
+                        title = context.getString(R.string.in_app_update_complete_title),
+                        message = context.getString(R.string.in_app_update_complete_message),
+                        confirmText = context.getString(R.string.in_app_update_complete_confirm),
+                        dismissText = context.getString(R.string.in_app_update_complete_dismiss),
+                        dismissOnOutsideTouch = false,
+                        dismissOnBackPress = false,
+                        onConfirm = {
+                            coroutineScope.launch {
+                                val result = inAppUpdateCoordinator.completeFlexibleUpdate()
+                                if (result.isFailure) {
+                                    onShowToast(context.getString(R.string.in_app_update_failed))
+                                }
+                                updateUiState = GooglePlayUpdateState.ReadyToNavigate
+                            }
+                        },
+                        onDismiss = {
+                            updateUiState = GooglePlayUpdateState.ReadyToNavigate
+                            onShowToast(context.getString(R.string.in_app_update_postponed))
+                        }
+                    )
+                )
+            }
+
+            else -> Unit
+        }
+    }
+
+    val inAppUpdateFlowLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            // 즉시 업데이트는 Play 플로우가 끝나면 진행해도 되지만, 선택 업데이트는 다운로드 완료까지 기다려야 한다.
-            if (isImmediateUpdateFlow) {
-                isWaitingForUpdateFlowResult = false
-                isImmediateUpdateFlow = false
-                isNavigationGateOpen = true
+        // Play 업데이트 UI 화면이 어떻게 닫혔는지 받음
+        when {
+            //immediate 처리
+            result.resultCode == Activity.RESULT_OK -> {
+                if (updateUiState == GooglePlayUpdateState.WaitingImmediateResult) {
+                    updateUiState = GooglePlayUpdateState.ReadyToNavigate
+                }
             }
-            return@rememberLauncherForActivityResult
-        }
 
-        isWaitingForUpdateFlowResult = false
-        val wasImmediateUpdateFlow = isImmediateUpdateFlow
-        if (wasImmediateUpdateFlow) {
-            onFinish()
-            return@rememberLauncherForActivityResult
+            updateUiState == GooglePlayUpdateState.WaitingImmediateResult -> {
+                updateUiState = if (result.resultCode == ActivityResult.RESULT_IN_APP_UPDATE_FAILED) {
+                    GooglePlayUpdateState.ImmediateUpdateFailed
+                } else {
+                    GooglePlayUpdateState.ImmediateUpdateCanceled
+                }
+            }
+
+            //flexible 처리
+            result.resultCode == ActivityResult.RESULT_IN_APP_UPDATE_FAILED -> {
+                updateUiState = GooglePlayUpdateState.ReadyToNavigate
+                onShowToast(context.getString(R.string.in_app_update_failed))
+            }
+
+            else -> {
+                updateUiState = GooglePlayUpdateState.ReadyToNavigate
+                onShowToast(context.getString(R.string.in_app_update_postponed))
+            }
         }
-        isNavigationGateOpen = true
-        val message = if (
-            result.resultCode ==
-            ActivityResult.RESULT_IN_APP_UPDATE_FAILED
-        ) {
-            context.getString(R.string.in_app_update_failed)
-        } else {
-            context.getString(R.string.in_app_update_postponed)
-        }
-        onShowToast(message)
     }
 
     DisposableEffect(inAppUpdateCoordinator) {
-        val listener: (InAppUpdateDecision) -> Unit = { decision ->
-            if (decision == InAppUpdateDecision.CompleteFlexible) {
-                showCompleteFlexibleUpdateDialog()
+        val flexibleInstallStateDecisionListener: (FlexibleInstallStateDecision) -> Unit = { decision ->
+            // flexible 업데이트가 수락된 뒤 다운로드/설치 상태를 받음
+            when (decision) {
+                FlexibleInstallStateDecision.Downloaded -> {
+                    requestCompleteFlexibleUpdateDialog()
+                }
+
+                FlexibleInstallStateDecision.Canceled -> {
+                    updateUiState = GooglePlayUpdateState.ReadyToNavigate
+                    onShowToast(context.getString(R.string.in_app_update_postponed))
+                }
+
+                FlexibleInstallStateDecision.Failed -> {
+                    updateUiState = GooglePlayUpdateState.ReadyToNavigate
+                    onShowToast(context.getString(R.string.in_app_update_failed))
+                }
             }
         }
 
-        inAppUpdateCoordinator.registerListener(listener)
+        inAppUpdateCoordinator.registerFlexibleInstallStateListener(flexibleInstallStateDecisionListener)
         onDispose {
-            inAppUpdateCoordinator.unregisterListener()
+            inAppUpdateCoordinator.unregisterFlexibleInstallStateListener()
         }
     }
 
     LaunchedEffect(Unit) {
-        if (hasCheckedForUpdate) return@LaunchedEffect
+        if (updateUiState != GooglePlayUpdateState.Checking) return@LaunchedEffect
 
         runCatching {
-            inAppUpdateCoordinator.checkForUpdate(inAppUpdateLauncher)
+            inAppUpdateCoordinator.checkForUpdate(inAppUpdateFlowLauncher)
         }.onSuccess { decision ->
-            hasCheckedForUpdate = true
-            when (decision) {
-                InAppUpdateDecision.None -> {
-                    isWaitingForUpdateFlowResult = false
-                    isImmediateUpdateFlow = false
-                    isNavigationGateOpen = true
-                }
-
-                is InAppUpdateDecision.Flexible -> {
-                    isWaitingForUpdateFlowResult = true
-                    isImmediateUpdateFlow = false
-                    isNavigationGateOpen = false
-                }
-
-                is InAppUpdateDecision.Immediate -> {
-                    isWaitingForUpdateFlowResult = true
-                    isImmediateUpdateFlow = true
-                    isNavigationGateOpen = false
-                }
-
-                InAppUpdateDecision.CompleteFlexible -> {
-                    isWaitingForUpdateFlowResult = false
-                    isImmediateUpdateFlow = false
-                    showCompleteFlexibleUpdateDialog()
-                }
-            }
+            handleInitialUpdateDecision(
+                decision = decision,
+                requestCompleteFlexibleUpdateDialog = ::requestCompleteFlexibleUpdateDialog,
+                updateUiState = { updateUiState = it },
+            )
         }.onFailure {
-            hasCheckedForUpdate = true
-            isWaitingForUpdateFlowResult = false
-            isImmediateUpdateFlow = false
-            isNavigationGateOpen = true
-            if (it.cause is InstallException) //스토어 외의 경로로 설치 시 Install Error(-10) 발생
+            updateUiState = GooglePlayUpdateState.ReadyToNavigate
+            if (it is InstallException || it.cause is InstallException) //스토어 외의 경로로 설치 시 Install Error(-10) 발생
                 onShowToast(context.getString(R.string.in_app_update_check_failed))
         }
     }
 
-    LaunchedEffect(uiState.navigationDestination, isNavigationGateOpen, isWaitingForUpdateFlowResult) {
-        if (!isNavigationGateOpen || isWaitingForUpdateFlowResult) return@LaunchedEffect
+    LaunchedEffect(uiState.navigationDestination, updateUiState) {
+        if (updateUiState != GooglePlayUpdateState.ReadyToNavigate) return@LaunchedEffect
         uiState.navigationDestination?.let { destination ->
             when (destination) {
                 NavigationDestination.Home -> onNavigateToHome()
@@ -189,6 +191,30 @@ internal fun SplashScreen(
     }
 
     SplashContent(modifier = modifier)
+}
+
+private fun handleInitialUpdateDecision(
+    decision: InitialInAppUpdateDecision,
+    requestCompleteFlexibleUpdateDialog: () -> Unit,
+    updateUiState: (GooglePlayUpdateState) -> Unit,
+) {
+    when (decision) {
+        InitialInAppUpdateDecision.None -> {
+            updateUiState(GooglePlayUpdateState.ReadyToNavigate)
+        }
+
+        is InitialInAppUpdateDecision.Flexible -> {
+            updateUiState(GooglePlayUpdateState.WaitingFlexibleDownload)
+        }
+
+        is InitialInAppUpdateDecision.Immediate -> {
+            updateUiState(GooglePlayUpdateState.WaitingImmediateResult)
+        }
+
+        InitialInAppUpdateDecision.CompleteFlexible -> {
+            requestCompleteFlexibleUpdateDialog()
+        }
+    }
 }
 
 @Composable

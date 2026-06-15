@@ -21,21 +21,21 @@ class PlayInAppUpdateCoordinator(
 
     override suspend fun checkForUpdate(
         launcher: ActivityResultLauncher<IntentSenderRequest>
-    ): InAppUpdateDecision {
+    ): InitialInAppUpdateDecision {
         val appUpdateInfo = appUpdateManager.appUpdateInfo.await()
         return when (InAppUpdatePolicy.decide(appUpdateInfo.toPolicyInput())) {
             InAppUpdateAction.IMMEDIATE -> {
                 startUpdate(appUpdateInfo, launcher, AppUpdateType.IMMEDIATE)
-                InAppUpdateDecision.Immediate(appUpdateInfo)
+                InitialInAppUpdateDecision.Immediate(appUpdateInfo)
             }
 
             InAppUpdateAction.FLEXIBLE -> {
                 startUpdate(appUpdateInfo, launcher, AppUpdateType.FLEXIBLE)
-                InAppUpdateDecision.Flexible(appUpdateInfo)
+                InitialInAppUpdateDecision.Flexible(appUpdateInfo)
             }
 
-            InAppUpdateAction.COMPLETE_FLEXIBLE -> InAppUpdateDecision.CompleteFlexible
-            InAppUpdateAction.NONE -> InAppUpdateDecision.None
+            InAppUpdateAction.COMPLETE_FLEXIBLE -> InitialInAppUpdateDecision.CompleteFlexible
+            InAppUpdateAction.NONE -> InitialInAppUpdateDecision.None
         }
     }
 
@@ -43,18 +43,32 @@ class PlayInAppUpdateCoordinator(
         appUpdateManager.completeUpdate().await()
     }
 
-    override fun registerListener(onDecision: (InAppUpdateDecision) -> Unit) {
+    override fun registerFlexibleInstallStateListener(onDecision: (FlexibleInstallStateDecision) -> Unit) {
         if (installStateListener != null) return
 
         installStateListener = InstallStateUpdatedListener { state ->
-            if (state.installStatus() == InstallStatus.DOWNLOADED) {
-                onDecision(InAppUpdateDecision.CompleteFlexible)
+            when (state.installStatus()) {
+                InstallStatus.DOWNLOADED -> {
+                    onDecision(FlexibleInstallStateDecision.Downloaded)
+                }
+
+                InstallStatus.FAILED -> {
+                    onDecision(FlexibleInstallStateDecision.Failed)
+                }
+
+                InstallStatus.CANCELED -> {
+                    onDecision(FlexibleInstallStateDecision.Canceled)
+                }
+
+                else -> {
+                    // no-op
+                }
             }
         }
         appUpdateManager.registerListener(requireNotNull(installStateListener))
     }
 
-    override fun unregisterListener() {
+    override fun unregisterFlexibleInstallStateListener() {
         installStateListener?.let(appUpdateManager::unregisterListener)
         installStateListener = null
     }

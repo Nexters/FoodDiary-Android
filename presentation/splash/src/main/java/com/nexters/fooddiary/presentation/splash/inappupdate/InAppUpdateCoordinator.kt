@@ -6,11 +6,11 @@ import androidx.activity.result.IntentSenderRequest
 interface InAppUpdateCoordinator {
     suspend fun checkForUpdate(
         launcher: ActivityResultLauncher<IntentSenderRequest>
-    ): InAppUpdateDecision
+    ): InitialInAppUpdateDecision
 
     suspend fun completeFlexibleUpdate(): Result<Unit>
 
-    fun registerListener(onDecision: (InAppUpdateDecision) -> Unit)
+    fun registerFlexibleInstallStateListener(onDecision: (FlexibleInstallStateDecision) -> Unit)
 
-    fun unregisterListener()
+    fun unregisterFlexibleInstallStateListener()
 }
