@@ -2,6 +2,7 @@ package com.nexters.fooddiary.presentation.splash.navigation
 
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.nexters.fooddiary.core.ui.alert.AppDialogData
 import com.nexters.fooddiary.presentation.splash.SplashScreen
 import kotlinx.serialization.Serializable
 
@@ -10,12 +11,18 @@ object SplashRoute
 
 fun NavGraphBuilder.splashScreen(
     onNavigateToHome: () -> Unit,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    onFinish: () -> Unit,
+    onShowDialog: (AppDialogData) -> Unit = {},
+    onShowToast: (String) -> Unit = {},
 ) {
     composable<SplashRoute> {
         SplashScreen(
             onNavigateToHome = onNavigateToHome,
-            onNavigateToLogin = onNavigateToLogin
+            onNavigateToLogin = onNavigateToLogin,
+            onFinish = onFinish,
+            onShowDialog = onShowDialog,
+            onShowToast = onShowToast,
         )
     }
 }
