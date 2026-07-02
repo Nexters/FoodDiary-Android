@@ -4,6 +4,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.shadow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -37,12 +39,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.airbnb.mvrx.compose.collectAsStateWithLifecycle
 import com.airbnb.mvrx.compose.mavericksViewModel
-import com.nexters.fooddiary.core.ui.theme.Gray540
+import com.nexters.fooddiary.core.ui.theme.Gray100
+import com.nexters.fooddiary.core.ui.theme.PrimBase
 import com.nexters.fooddiary.presentation.auth.R as AuthR
 import com.nexters.fooddiary.core.ui.R as CoreR
 
-private val LoginBackgroundColor = Color(0xFF191821)
+private val LoginBackgroundColor = Color.White
 private val GoogleButtonColor = Color.White
+private val GoogleButtonTextColor = Color(0xFF2C2C2C)
 
 @Composable
 internal fun LoginScreen(
@@ -128,7 +132,7 @@ internal fun LoginScreen(
         ) {
             if (uiState.isLoading) {
                 CircularProgressIndicator(
-                    color = Color.White,
+                    color = PrimBase,
                     modifier = Modifier.size(36.dp)
                 )
             } else {
@@ -137,12 +141,23 @@ internal fun LoginScreen(
                     onClick = onGoogleSignInClick,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(54.dp),
+                        .height(54.dp)
+                        .shadow(
+                            elevation = 12.dp,
+                            shape = RoundedCornerShape(10.dp),
+                            ambientColor = Color(0x1A191821),
+                            spotColor = Color(0x1A191821),
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = Gray100,
+                            shape = RoundedCornerShape(10.dp)
+                        ),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = GoogleButtonColor,
                         contentColor = Color.Black
                     ),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(10.dp)
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.Center,
@@ -159,7 +174,7 @@ internal fun LoginScreen(
                             fontFamily = FontFamily.Default,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
-                            color = Gray540,
+                            color = GoogleButtonTextColor,
                         )
                     }
                 }
@@ -182,6 +197,15 @@ private fun LoginScreenPreview() {
 private fun LoginScreenLoadingPreview() {
     LoginScreen(
         uiState = AuthUiState(isLoading = true),
+        onGoogleSignInClick = {},
+    )
+}
+
+@Preview(showBackground = true, fontScale = 1.3f)
+@Composable
+private fun LoginScreenLargeFontPreview() {
+    LoginScreen(
+        uiState = AuthUiState(),
         onGoogleSignInClick = {},
     )
 }

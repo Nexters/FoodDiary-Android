@@ -49,5 +49,18 @@ val White = Color(0xFFFFFFFF)
 
 val Color363347 = Color(0xFF363347)
 
-
 val TimeLocationBg = Color(0xB2191821)
+
+// App theme semantic colors
+val AppBackground = Color(0xFFFFFFFF)
+val AppSurface = Color(0xFFFBFBFB)
+val AppSurfaceVariant = Color(0xFFE9E9E9)
+val AppTextPrimary = Color(0xFF191821)
+val AppTextSecondary = Gray600
+val AppSurfaceOverlay = Color(0x0D191821)
+val AppSurfaceOverlayStrong = Color(0x14191821)
+val AppStroke = Color(0x1F191821)
+val AppDivider = Color(0xFFE0E0E0)
+
+val Color191821 = Color(0xFF191821)
+

@@ -38,6 +38,7 @@ import com.nexters.fooddiary.presentation.splash.inappupdate.InitialInAppUpdateD
 import com.nexters.fooddiary.presentation.splash.inappupdate.PlayInAppUpdateCoordinator
 import io.sentry.Sentry
 import kotlinx.coroutines.launch
+import com.nexters.fooddiary.core.ui.theme.AppBackground
 import com.nexters.fooddiary.core.ui.R as CoreR
 
 private const val PLAY_CORE_FAILED_TO_BIND_SERVICE_MESSAGE = "Failed to bind to the service."
@@ -262,7 +263,7 @@ private fun SplashContent(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF191821)),
+            .background(AppBackground),
         contentAlignment = Alignment.Center
     ) {
         Column(

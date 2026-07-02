@@ -15,7 +15,7 @@ import com.nexters.fooddiary.core.ui.component.withStaggeredAnimation
 import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
 import com.nexters.fooddiary.core.ui.theme.Prim300
 import com.nexters.fooddiary.core.ui.theme.PrimBase
-import com.nexters.fooddiary.core.ui.theme.SdBase
+import com.nexters.fooddiary.core.ui.theme.AppBackground
 import com.nexters.fooddiary.presentation.insight.InsightWeeklyCountUiModel
 import com.nexters.fooddiary.presentation.insight.InsightWeeklyStatsCardUiModel
 import com.nexters.fooddiary.presentation.insight.R
@@ -61,13 +61,13 @@ private fun Int.toChartPercentage(other: Int): Float {
     return (toFloat() / maxValue.toFloat()) * 100f
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF191821)
+@Preview(showBackground = true)
 @Composable
 private fun InsightWeeklyStatsCardPreview() {
     FoodDiaryTheme {
         Box(
             modifier = Modifier
-                .background(SdBase)
+                .background(AppBackground)
                 .padding(16.dp),
         ) {
             InsightWeeklyStatsCard(

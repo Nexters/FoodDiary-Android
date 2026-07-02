@@ -17,9 +17,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
-import com.nexters.fooddiary.core.ui.theme.Gray050
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
 import com.nexters.fooddiary.core.ui.theme.PrimBase
-import com.nexters.fooddiary.core.ui.theme.SdBase
+import com.nexters.fooddiary.core.ui.theme.AppBackground
 import com.nexters.fooddiary.presentation.insight.R
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -36,14 +36,14 @@ internal fun InsightHeaderSection(
         Text(
             text = month.toInsightHeaderMonth(),
             style = AppTypography.p12,
-            color = Gray050,
+            color = AppTextPrimary,
         )
         Text(
             text = buildAnnotatedString {
                 withStyle(SpanStyle(color = PrimBase)) {
                     append(stringResource(id = R.string.insight_header_highlight_title))
                 }
-                withStyle(SpanStyle(color = Gray050)) {
+                withStyle(SpanStyle(color = AppTextPrimary)) {
                     append(" ${stringResource(id = R.string.insight_header_title_suffix)}")
                 }
             },
@@ -57,13 +57,13 @@ private fun String.toInsightHeaderMonth(): String {
     return yearMonth?.format(DateTimeFormatter.ofPattern("yyyy.MM")) ?: replace("-", ".")
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF191821)
+@Preview(showBackground = true)
 @Composable
 private fun InsightHeaderSectionPreview() {
     FoodDiaryTheme {
         Box(
             modifier = Modifier
-                .background(SdBase)
+                .background(AppBackground)
                 .padding(16.dp),
         ) {
             InsightHeaderSection(

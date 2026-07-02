@@ -17,6 +17,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nexters.fooddiary.core.ui.R
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
 
 private const val HeaderHeightDp = 32
 
@@ -24,7 +25,7 @@ private const val HeaderHeightDp = 32
 fun Header(
     modifier: Modifier = Modifier,
     leftIconResId: Int = R.drawable.ic_txt_logo,
-    leftIconColorFilter: ColorFilter? = ColorFilter.tint(Color.White),
+    leftIconColorFilter: ColorFilter? = ColorFilter.tint(AppTextPrimary),
     onClickMyPage: () -> Unit = { },
 ) {
     Row(
@@ -52,7 +53,7 @@ fun Header(
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_my_page),
-                colorFilter = ColorFilter.tint(Color.White),
+                colorFilter = ColorFilter.tint(AppTextPrimary),
                 contentDescription = "Mypage Icon",
             )
         }

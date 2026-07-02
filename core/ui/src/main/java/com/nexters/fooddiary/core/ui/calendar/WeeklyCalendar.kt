@@ -160,7 +160,7 @@ private fun CalendarHeader(
                     .size(24.dp)
                     .clickable { onPreviousClick() },
                 painter = painterResource(drawable.ic_back),
-                colorFilter = ColorFilter.tint(Color.White),
+                colorFilter = ColorFilter.tint(colors.iconTint),
                 contentDescription = "Previous",
             )
             Image(
@@ -168,7 +168,7 @@ private fun CalendarHeader(
                     .size(24.dp)
                     .clickable { onNextClick() },
                 painter = painterResource(drawable.ic_next),
-                colorFilter = ColorFilter.tint(Color.White),
+                colorFilter = ColorFilter.tint(colors.iconTint),
                 contentDescription = "Next",
             )
         }

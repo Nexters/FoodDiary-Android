@@ -313,8 +313,7 @@ private fun recycleTargetAlpha(size: Int): Float = when (size) {
 
 @Preview(
     name = "Stack View",
-    showBackground = true,
-    backgroundColor = 0xFF191821
+    showBackground = true
 )
 @Composable
 private fun FoodImageStackViewPreview() {

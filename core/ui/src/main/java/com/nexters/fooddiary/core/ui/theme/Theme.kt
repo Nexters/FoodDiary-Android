@@ -13,10 +13,10 @@ private val FoodDiaryColorScheme = lightColorScheme(
     onTertiary = White,
     error = RnBase,
     onError = White,
-    background = GrayBase,
-    onBackground = White,
-    surface = GrayBase,
-    onSurface = White,
+    background = AppBackground,
+    onBackground = AppTextPrimary,
+    surface = AppBackground,
+    onSurface = AppTextPrimary,
 )
 
 @Composable
@@ -29,4 +29,3 @@ fun FoodDiaryTheme(
         content = content
     )
 }
-

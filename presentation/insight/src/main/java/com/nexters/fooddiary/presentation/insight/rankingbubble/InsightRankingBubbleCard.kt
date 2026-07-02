@@ -42,8 +42,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
-import com.nexters.fooddiary.core.ui.theme.Gray050
-import com.nexters.fooddiary.core.ui.theme.SdBase
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
+import com.nexters.fooddiary.core.ui.theme.AppBackground
+import com.nexters.fooddiary.core.ui.theme.AppSurfaceOverlay
 import com.nexters.fooddiary.presentation.insight.InsightRankingBubbleCardUiModel
 import com.nexters.fooddiary.presentation.insight.InsightRankingBubbleItemUiModel
 import com.nexters.fooddiary.presentation.insight.R
@@ -53,7 +54,7 @@ import kotlinx.coroutines.delay
 private val RankingBubbleCardHorizontalPadding = 16.dp
 private val RankingBubbleCardVerticalPadding = 24.dp
 private val RankingBubbleCardShape = RoundedCornerShape(16.dp)
-private val RankingBubbleCardBackgroundColor = Color.White.copy(alpha = 0.02f)
+private val RankingBubbleCardBackgroundColor = AppSurfaceOverlay
 private val RankingBubbleChartHeight = 320.dp
 private val RankingBubbleChartWidth = 300.dp
 private val RankingBubbleFirstSize = 160.dp
@@ -112,7 +113,7 @@ internal fun InsightRankingBubbleCard(
             Text(
                 text = title,
                 style = AppTypography.p15.copy(fontWeight = FontWeight.SemiBold),
-                color = Gray050,
+                color = AppTextPrimary,
             )
             topRegion?.let { region ->
                 Text(
@@ -126,7 +127,7 @@ internal fun InsightRankingBubbleCard(
             Text(
                 text = description,
                 style = AppTypography.p12.copy(fontSize = 12.sp),
-                color = Gray050.copy(alpha = 0.6f),
+                color = AppTextPrimary.copy(alpha = 0.6f),
             )
         }
 
@@ -216,7 +217,7 @@ private fun InsightRankingBubble(
             Text(
                 text = region.regionName,
                 style = AppTypography.p15.copy(fontWeight = FontWeight.SemiBold),
-                color = Gray050,
+                color = AppTextPrimary,
                 textAlign = TextAlign.Center,
             )
             Text(
@@ -225,7 +226,7 @@ private fun InsightRankingBubble(
                     region.visitCount,
                 ),
                 style = AppTypography.p15.copy(fontWeight = FontWeight.SemiBold),
-                color = Gray050,
+                color = AppTextPrimary,
                 textAlign = TextAlign.Center,
             )
         }
@@ -236,7 +237,7 @@ private fun buildRankingBubbleHeadline(
     topRegion: InsightRankingBubbleItemUiModel,
     headlinePrefix: String,
 ): AnnotatedString = buildAnnotatedString {
-    withStyle(SpanStyle(color = Gray050)) {
+    withStyle(SpanStyle(color = AppTextPrimary)) {
         append(headlinePrefix.format(topRegion.visitCount))
     }
     withStyle(SpanStyle(color = InsightRankingBubbleDefaults.FirstColor)) {
@@ -268,13 +269,13 @@ private fun InsightRankingBubbleItemUiModel.bubbleOffsetY(): Dp = when (rank) {
     else -> InsightRankingBubblePlacementDefaults.ThirdOffset.y
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF191821)
+@Preview(showBackground = true)
 @Composable
 private fun InsightRankingBubbleCardPreview() {
     FoodDiaryTheme {
         Box(
             modifier = Modifier
-                .background(SdBase)
+                .background(AppBackground)
                 .padding(16.dp),
         ) {
             InsightRankingBubbleCard(

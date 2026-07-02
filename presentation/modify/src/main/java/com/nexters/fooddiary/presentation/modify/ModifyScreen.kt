@@ -51,20 +51,20 @@ import com.nexters.fooddiary.core.ui.component.DetailScreenHeader
 import com.nexters.fooddiary.core.ui.component.EditableKeywordChipGroup
 import com.nexters.fooddiary.core.ui.component.KeywordChipGroup
 import com.nexters.fooddiary.core.ui.theme.AppTypography
-import com.nexters.fooddiary.core.ui.theme.Gray050
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
 import com.nexters.fooddiary.core.ui.theme.Gray200
 import com.nexters.fooddiary.core.ui.theme.Gray300
 import com.nexters.fooddiary.core.ui.theme.Gray600
-import com.nexters.fooddiary.core.ui.theme.Sd800
-import com.nexters.fooddiary.core.ui.theme.Sd900
-import com.nexters.fooddiary.core.ui.theme.SdBase
+import com.nexters.fooddiary.core.ui.theme.AppSurfaceVariant
+import com.nexters.fooddiary.core.ui.theme.AppSurface
+import com.nexters.fooddiary.core.ui.theme.AppBackground
 import com.nexters.fooddiary.core.ui.theme.White
 import com.nexters.fooddiary.presentation.modify.navigation.ModifySearchResult
 
 private const val PLACEHOLDER_IMAGE_URL = "https://picsum.photos/200/300"
 
-private val SectionTitleColor = Gray050
-private val InputBg = Sd900
+private val SectionTitleColor = AppTextPrimary
+private val InputBg = AppSurface
 private val InputShape = RoundedCornerShape(10.dp)
 
 @Composable
@@ -166,7 +166,7 @@ private fun ModifyScreenContent(
 
     Scaffold(
         modifier = modifier,
-        containerColor = SdBase,
+        containerColor = AppBackground,
         topBar = {
             DetailScreenHeader(
                 onBackButtonClick = onBack,
@@ -174,7 +174,7 @@ private fun ModifyScreenContent(
                 Text(
                     text = modifyTitle,
                     style = AppTypography.p15,
-                    color = Gray050,
+                    color = AppTextPrimary,
                     modifier = Modifier.padding(start = 8.dp),
                 )
             }
@@ -275,7 +275,7 @@ private fun SelectBox(
         modifier = Modifier
             .size(104.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(Sd800),
+            .background(AppSurfaceVariant),
     ) {
         AsyncImage(
             model = imageUrl,
@@ -327,7 +327,7 @@ private fun AddressSection(
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = null,
-                        tint = White,
+                        tint = AppTextPrimary,
                     )
                 },
             )
@@ -373,9 +373,9 @@ private fun ModifyBottomButtons(
             onClick = onDelete,
             buttonColors = ButtonDefaults.buttonColors(
                 contentColor = Gray200,
-                containerColor = SdBase,
+                containerColor = AppBackground,
             ),
-            border = BorderStroke(1.dp, Sd800),
+            border = BorderStroke(1.dp, AppSurfaceVariant),
             buttonText = deleteText,
             contentColor = Gray200,
         )
