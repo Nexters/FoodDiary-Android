@@ -447,7 +447,7 @@ private fun DetailContent(
                 Icon(
                     painter = painterResource(id = CoreUiR.drawable.ic_add),
                     contentDescription = null,
-                    tint = Color.Black,
+                    tint = Color.White,
                 )
             }
         }
