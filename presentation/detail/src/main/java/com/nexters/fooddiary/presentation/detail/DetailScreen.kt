@@ -101,6 +101,11 @@ private const val DailyHeaderInlineKey = "daily_header_inline"
 private const val GapAfterDailyHeaderKey = "gap_after_daily_header"
 private val DetailMealCardBackground = Color(0xFFF4F6FA)
 private val DetailMealNoteIconBackground = Color(0xFFFFF2E9)
+private val DetailFloatingButtonSize = 60.dp
+private val DetailFloatingButtonBottomPadding = 24.dp
+private val DetailListBottomPadding =
+    DetailFloatingButtonBottomPadding + DetailFloatingButtonSize + 20.dp
+
 @Composable
 internal fun DetailScreen(
     initialDateString: String = LocalDate.now().toString(),
@@ -283,7 +288,7 @@ private fun DetailContent(
                     .hazeSource(state = hazeState)
                     .background(AppBackground),
                 verticalArrangement = Arrangement.Top,
-                contentPadding = PaddingValues(bottom = 20.dp)
+                contentPadding = PaddingValues(bottom = DetailListBottomPadding)
             ) {
 
                 item(key = DetailHeaderKey) {
@@ -432,8 +437,8 @@ private fun DetailContent(
             IconButton(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 20.dp, bottom = 24.dp)
-                    .size(60.dp)
+                    .padding(end = 20.dp, bottom = DetailFloatingButtonBottomPadding)
+                    .size(DetailFloatingButtonSize)
                     .background(color = Color.White, shape = CircleShape),
                 onClick = onAddFloatingPhotoClick,
                 shape = CircleShape,
