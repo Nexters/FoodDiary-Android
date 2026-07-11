@@ -96,7 +96,6 @@ fun FoodDiaryNavHost(
     var deleteAccountRequestId by remember { mutableIntStateOf(0) }
     var onboardingCompleteEventId by remember { mutableIntStateOf(0) }
     var pendingDetailDate by remember { mutableStateOf(initialDeepLink.getDetailDateOrNull()) }
-    var isHomeMonthlyCalendarView by rememberSaveable { mutableStateOf(false) }
     var hasNavigatedFromSplash by remember { mutableStateOf(false) }
     val bottomBarHazeState = rememberHazeState()
     var showHomeCoachmarkOnEntry by rememberSaveable { mutableStateOf(false) }
@@ -245,14 +244,8 @@ fun FoodDiaryNavHost(
                 if (shouldShowHomeInsightBottomBar) {
                     HomeInsightBottomBar(
                         selectedTab = selectedTab,
-                        isMonthlyCalendarView = isHomeMonthlyCalendarView,
-                        showCalendarToggle = isHomeRoute,
-                        onToggleClick = {
-                            if (selectedTab == HomeInsightTab.HOME) {
-                                navController.navigate(InsightRoute) {
-                                    launchSingleTop = true
-                                }
-                            } else {
+                        onHomeClick = {
+                            if (selectedTab != HomeInsightTab.HOME) {
                                 val movedBackToHome = navController.popBackStack()
                                 if (!movedBackToHome) {
                                     navController.navigate(HomeRoute) {
@@ -261,9 +254,11 @@ fun FoodDiaryNavHost(
                                 }
                             }
                         },
-                        onCalendarViewToggle = {
-                            if (isHomeRoute) {
-                                isHomeMonthlyCalendarView = !isHomeMonthlyCalendarView
+                        onInsightClick = {
+                            if (selectedTab != HomeInsightTab.INSIGHT) {
+                                navController.navigate(InsightRoute) {
+                                    launchSingleTop = true
+                                }
                             }
                         },
                         hazeState = bottomBarHazeState,
@@ -333,7 +328,7 @@ fun FoodDiaryNavHost(
                         navController.navigate(DetailRoute(dateString = date.toString()))
                     },
                     onNavigateToMyPage = { navController.navigate(MyPageRoute) },
-                    isMonthlyCalendarView = { isHomeMonthlyCalendarView },
+                    isMonthlyCalendarView = { true },
                     onShowSnackBar = onShowSnackBar,
                 )
 

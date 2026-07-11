@@ -32,7 +32,9 @@ import androidx.compose.ui.unit.dp
 import com.nexters.fooddiary.core.common.R.string
 import com.nexters.fooddiary.core.ui.R.drawable
 import com.nexters.fooddiary.core.ui.theme.AppTypography
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
 import com.nexters.fooddiary.core.ui.theme.Gray900
+import com.nexters.fooddiary.core.ui.theme.AppSurfaceOverlay
 import com.nexters.fooddiary.core.ui.theme.White
 
 enum class AddPhotoBoxMode {
@@ -64,7 +66,7 @@ fun AddPhotoBox(
     Box(
         modifier = modifier
             .heightIn(min = 200.dp)
-            .background(color = White.copy(alpha = 0.02f), shape = RoundedCornerShape(16.dp))
+            .background(color = AppSurfaceOverlay, shape = RoundedCornerShape(16.dp))
             .graphicsLayer { clip = false }
             .drawBehind {
                 val path = Path().apply {
@@ -109,7 +111,7 @@ fun AddPhotoBox(
             Text(
                 text = stringResource(textRes),
                 style = AppTypography.p12,
-                color = White,
+                color = AppTextPrimary,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),

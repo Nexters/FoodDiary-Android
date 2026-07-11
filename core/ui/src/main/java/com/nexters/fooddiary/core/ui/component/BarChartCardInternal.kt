@@ -29,7 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.Gray200
-import com.nexters.fooddiary.core.ui.theme.Sd800
+import com.nexters.fooddiary.core.ui.theme.Gray600
+import com.nexters.fooddiary.core.ui.theme.AppSurfaceVariant
+import com.nexters.fooddiary.core.ui.theme.AppSurfaceOverlay
 import com.nexters.fooddiary.core.ui.theme.White
 import com.nexters.fooddiary.core.ui.theme.horizontalGridLinesFromBottom
 import kotlinx.coroutines.delay
@@ -102,7 +104,7 @@ private fun BarChart(
                 .align(Alignment.BottomCenter)
                 .horizontalGridLinesFromBottom(
                     lineCount = ChartLineCount,
-                    lineColor = Sd800,
+                    lineColor = AppSurfaceVariant,
                     chartAreaHeight = chartAreaHeight,
                     bottomReservedHeight = labelAreaHeight,
                 ),
@@ -197,12 +199,12 @@ private fun BarGraphItem(
             text = item.label,
             modifier = Modifier.height(BarChartCardDefaults.BarLabelLineHeight.value.dp),
             style = BarChartLabelTextStyle,
-            color = Gray200,
+            color = Gray600,
         )
     }
 }
 
 private fun Modifier.barChartCardContainer(): Modifier = background(
-    color = White.copy(alpha = 0.02f),
+    color = AppSurfaceOverlay,
     shape = RoundedCornerShape(16.dp),
 )

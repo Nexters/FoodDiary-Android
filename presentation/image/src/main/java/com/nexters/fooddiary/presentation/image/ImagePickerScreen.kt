@@ -35,31 +35,32 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
-import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.compose.mavericksViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import com.airbnb.mvrx.compose.collectAsState
+import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.common.permission.PermissionUtil
+import com.nexters.fooddiary.core.ui.theme.AppBackground
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.Gray050
 import com.nexters.fooddiary.core.ui.theme.Gray400
 import com.nexters.fooddiary.core.ui.theme.PrimBase
-import com.nexters.fooddiary.core.ui.theme.SdBase
 import java.time.LocalDate
 
 private const val PREVIEW_IMAGE_URL = "https://picsum.photos/200/200?random="
@@ -174,7 +175,7 @@ fun ImagePickerContent(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(SdBase)
+            .background(AppBackground)
     ) {
         Column(
             modifier = Modifier
@@ -253,6 +254,7 @@ private fun ImagePickerHeader(
         Image(
             imageVector = ImageVector.vectorResource(R.drawable.icon_back),
             contentDescription = backDesc,
+            colorFilter = ColorFilter.tint(Color.Black),
             modifier = Modifier
                 .size(24.dp)
                 .clickable { onClose() }
@@ -265,7 +267,7 @@ private fun ImagePickerHeader(
             Text(
                 text = deselectAllText,
                 style = AppTypography.p15,
-                color = Gray050
+                color = AppTextPrimary
             )
         }
     }
@@ -327,7 +329,7 @@ private fun ImagePickerSection(
         Text(
             text = title,
             style = AppTypography.p15.copy(fontWeight = FontWeight.SemiBold),
-            color = Gray050,
+            color = AppTextPrimary,
             modifier = Modifier.padding(bottom = ImagePickerDimens.sectionTitleBottomPadding)
         )
         ImageGrid(
@@ -391,7 +393,7 @@ private fun PermissionRequestView(onRequestPermission: () -> Unit) {
             Text(
                 text = stringResource(R.string.image_picker_permission_message),
                 style = AppTypography.p15,
-                color = Gray050
+                color = AppTextPrimary
             )
             Button(
                 onClick = onRequestPermission,
@@ -412,7 +414,7 @@ private fun LoadingView() {
     ) {
         Text(
             stringResource(R.string.image_picker_loading),
-            color = Gray050
+            color = AppTextPrimary
         )
     }
 }
@@ -425,7 +427,7 @@ private fun EmptyImageView() {
     ) {
         Text(
             stringResource(R.string.image_picker_empty),
-            color = Gray050
+            color = AppTextPrimary
         )
     }
 }

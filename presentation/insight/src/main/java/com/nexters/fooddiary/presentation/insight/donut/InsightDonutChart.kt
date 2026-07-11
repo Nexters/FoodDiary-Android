@@ -33,10 +33,10 @@ import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.Blue400
 import com.nexters.fooddiary.core.ui.theme.Blue700
 import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
-import com.nexters.fooddiary.core.ui.theme.Gray050
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
 import com.nexters.fooddiary.core.ui.theme.PrimBase
 import com.nexters.fooddiary.core.ui.theme.Prim300
-import com.nexters.fooddiary.core.ui.theme.SdBase
+import com.nexters.fooddiary.core.ui.theme.AppBackground
 import com.nexters.fooddiary.presentation.insight.InsightDonutSegmentUiModel
 import com.nexters.fooddiary.presentation.insight.sampleInsightReadyState
 import kotlin.math.PI
@@ -92,7 +92,7 @@ internal fun InsightDonutChart(
     gapAngle: Float = InsightChartGapAngle,
     startAngle: Float = InsightChartStartAngle,
     innerHoleRatio: Float = InsightChartInnerHoleRatio,
-    dividerColor: Color = SdBase,
+    dividerColor: Color = AppBackground,
     animationProgress: Float = 1f,
 ) {
     val validSegments = remember(segments) {
@@ -249,7 +249,7 @@ private fun InsightDonutChartLabels(
             return@Canvas
         }
         val labelStyle = AppTypography.p12.copy(
-            color = Gray050.copy(alpha = labelAlpha),
+            color = AppTextPrimary.copy(alpha = labelAlpha),
         )
 
         val chartSizePx = chartSize.toPx()
@@ -440,7 +440,7 @@ private fun polarOffset(
 
 private fun DonutSegmentGradient.toBrush(size: Size): Brush {
     if (colors.size <= 1) {
-        return Brush.linearGradient(colors = colors.ifEmpty { listOf(Gray050) })
+        return Brush.linearGradient(colors = colors.ifEmpty { listOf(AppTextPrimary) })
     }
 
     return Brush.linearGradient(
@@ -467,13 +467,13 @@ private data class GradientPoint(
     val yFraction: Float,
 )
 
-@Preview(showBackground = true, backgroundColor = 0xFF191821)
+@Preview(showBackground = true)
 @Composable
 private fun InsightDonutChartPreview() {
     FoodDiaryTheme {
         Box(
             modifier = Modifier
-                .background(SdBase)
+                .background(AppBackground)
                 .padding(16.dp),
             contentAlignment = Alignment.Center,
         ) {
@@ -485,13 +485,13 @@ private fun InsightDonutChartPreview() {
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF191821)
+@Preview(showBackground = true)
 @Composable
 private fun InsightDonutChartWithLabelsPreview() {
     FoodDiaryTheme {
         Box(
             modifier = Modifier
-                .background(SdBase)
+                .background(AppBackground)
                 .padding(16.dp),
         ) {
             InsightDonutChartWithLabels(

@@ -18,12 +18,12 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.nexters.fooddiary.core.ui.theme.AppTypography
-import com.nexters.fooddiary.core.ui.theme.Gray050
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
 import com.nexters.fooddiary.core.ui.theme.Gray600
-import com.nexters.fooddiary.core.ui.theme.Sd900
+import com.nexters.fooddiary.core.ui.theme.AppSurface
 import com.nexters.fooddiary.core.ui.theme.White
 
-private val InputBg = Sd900
+private val InputBg = AppSurface
 private val DefaultInputShape = RoundedCornerShape(10.dp)
 
 @Composable
@@ -58,7 +58,7 @@ internal fun StyledInputField(
             )
             .clip(shape)
             .fillMaxWidth(),
-        textStyle = AppTypography.p15.copy(color = Gray050),
+        textStyle = AppTypography.p15.copy(color = AppTextPrimary),
         singleLine = singleLine,
         enabled = enabled,
         readOnly = readOnly,
@@ -85,9 +85,9 @@ internal fun StyledInputField(
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent,
                     disabledBorderColor = Color.Transparent,
-                    focusedTextColor = Gray050,
-                    unfocusedTextColor = Gray050,
-                    disabledTextColor = Gray050,
+                    focusedTextColor = AppTextPrimary,
+                    unfocusedTextColor = AppTextPrimary,
+                    disabledTextColor = AppTextPrimary,
                     disabledPlaceholderColor = Gray600,
                     cursorColor = White,
                 ),

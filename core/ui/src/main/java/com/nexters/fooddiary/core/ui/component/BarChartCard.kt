@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
-import com.nexters.fooddiary.core.ui.theme.Gray050
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
 import com.nexters.fooddiary.core.ui.theme.Gray200
 import com.nexters.fooddiary.core.ui.theme.PrimBase
 
@@ -45,7 +45,7 @@ fun BarChartCard(
                 Text(
                     text = title,
                     style = titleStyle,
-                    color = Gray050,
+                    color = AppTextPrimary,
                 )
                 Text(
                     text = buildAnnotatedString {
@@ -99,11 +99,11 @@ fun HighlightedSubjectBarChartCard(
                     Text(
                         text = title,
                         style = titleStyle,
-                        color = Gray050,
+                        color = AppTextPrimary,
                     )
                     Text(
                         text = buildAnnotatedString {
-                            withStyle(SpanStyle(color = Gray050)) {
+                            withStyle(SpanStyle(color = AppTextPrimary)) {
                                 append(highlightPrefixText)
                             }
                             withStyle(SpanStyle(color = PrimBase)) {

@@ -45,8 +45,8 @@ import com.nexters.fooddiary.core.ui.food.FoodImageCard
 import com.nexters.fooddiary.core.ui.food.FoodImageState
 import com.nexters.fooddiary.core.ui.food.FoodImageStackView
 import com.nexters.fooddiary.core.ui.theme.AppTypography
-import com.nexters.fooddiary.core.ui.theme.Gray050
-import com.nexters.fooddiary.core.ui.theme.SdBase
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
+import com.nexters.fooddiary.core.ui.theme.AppBackground
 import com.nexters.fooddiary.core.ui.R as coreR
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
@@ -61,7 +61,7 @@ internal fun HomeScreen(
     onNavigateToImagePicker: (LocalDate) -> Unit = {},
     onNavigateToDetail: (LocalDate) -> Unit = {},
     onNavigateToMyPage: () -> Unit = {},
-    isMonthlyCalendarView: Boolean = false,
+    isMonthlyCalendarView: Boolean = true,
     refreshDiaryDateString: String? = null,
     onRefreshDiaryConsumed: () -> Unit = {},
     onShowSnackBar: (SnackBarData) -> Unit = {},
@@ -156,7 +156,7 @@ private fun HomeScreen(
     state: HomeScreenState,
     modifier: Modifier = Modifier,
     onDateSelected: (LocalDate) -> Unit = {},
-    isMonthlyCalendarView: Boolean = false,
+    isMonthlyCalendarView: Boolean = true,
     onCardStackClick: () -> Unit = {},
     onNavigateToImagePicker: (LocalDate) -> Unit = {},
     onNavigateToDetail: (LocalDate) -> Unit = {},
@@ -187,7 +187,7 @@ private fun HomeScreen(
         modifier = modifier
             .fillMaxSize()
             .hazeSource(screenHazeState)
-            .background(SdBase)
+            .background(AppBackground)
     ) {
         Column(
             modifier = Modifier
@@ -197,7 +197,7 @@ private fun HomeScreen(
         ) {
                 Header(
                     modifier = Modifier.padding(vertical = 18.dp),
-                    leftIconResId = coreR.drawable.ic_app_icon,
+                    leftIconResId = coreR.drawable.ic_app_icon_light,
                     leftIconColorFilter = null,
                     onClickMyPage = onNavigateToMyPage,
                 )
@@ -206,7 +206,7 @@ private fun HomeScreen(
                     modifier = Modifier.padding(top = 12.dp, bottom = 36.dp),
                     text = stringResource(string.home_sub_description, state.userName),
                     style = AppTypography.hd24,
-                    color = Gray050,
+                    color = AppTextPrimary,
                 )
                 if (isMonthlyCalendarView) {
                     MonthlyCalendar(
@@ -277,7 +277,7 @@ private fun WeekCountDescription(
         modifier = modifier,
         text = homeDescriptionText(diaryCountByWeek),
         style = AppTypography.p12,
-        color = Gray050,
+        color = AppTextPrimary,
     )
 }
 

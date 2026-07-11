@@ -17,7 +17,7 @@ fun NavGraphBuilder.homeScreen(
     onNavigateToImagePicker: (LocalDate) -> Unit,
     onNavigateToDetail: (LocalDate) -> Unit,
     onNavigateToMyPage: () -> Unit,
-    isMonthlyCalendarView: () -> Boolean = { false },
+    isMonthlyCalendarView: () -> Boolean = { true },
     onShowSnackBar: (SnackBarData) -> Unit,
 ) {
     composable<HomeRoute> { backStackEntry ->

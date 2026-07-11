@@ -46,9 +46,9 @@ import com.nexters.fooddiary.core.ui.alert.DeleteAccountDialogData
 import com.nexters.fooddiary.core.ui.alert.DialogData
 import com.nexters.fooddiary.core.ui.R.drawable
 import com.nexters.fooddiary.core.ui.component.DetailScreenHeader
-import com.nexters.fooddiary.core.ui.theme.Color363347
-import com.nexters.fooddiary.core.ui.theme.Gray050
-import com.nexters.fooddiary.core.ui.theme.SdBase
+import com.nexters.fooddiary.core.ui.theme.AppSurfaceVariant
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
+import com.nexters.fooddiary.core.ui.theme.AppBackground
 import com.nexters.fooddiary.domain.model.DeleteAccountError
 import com.nexters.fooddiary.domain.model.DeleteAccountException
 import com.nexters.fooddiary.presentation.mypage.navigation.WebViewPage
@@ -160,7 +160,7 @@ internal fun MyPageScreen(
 
     Column(
         modifier = Modifier
-            .background(SdBase)
+            .background(AppBackground)
             .fillMaxSize()
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.End
@@ -170,7 +170,7 @@ internal fun MyPageScreen(
         ) {
             Text(
                 text = stringResource(string.my_page_title),
-                color = Gray050
+                color = AppTextPrimary
             )
         }
         ProfileCard(
@@ -252,7 +252,7 @@ internal fun MyPageScreen(
             style = TextStyle(
                 textDecoration = TextDecoration.Underline
             ),
-            color = Gray050
+            color = AppTextPrimary
         )
     }
 }
@@ -265,7 +265,7 @@ internal fun ProfileCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color363347)
+            .background(AppSurfaceVariant)
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -273,11 +273,11 @@ internal fun ProfileCard(
         // todo : 닉네임 font style p12로 변경 필요
         Text(
             text = stringResource(string.my_page_nick_name_description),
-            color = Gray050
+            color = AppTextPrimary
         )
         Text(
             text = stringResource(string.my_page_nick_name, nickName),
-            color = Gray050,
+            color = AppTextPrimary,
             fontWeight = FontWeight.SemiBold,
             fontSize = 18.sp,
             modifier = Modifier.padding(top = 7.dp)
@@ -306,7 +306,7 @@ internal fun MyPageSection(
             )
             Text(
                 text = stringResource(sectionNameId),
-                color = Gray050
+                color = AppTextPrimary
             )
         }
         Column(
@@ -326,12 +326,12 @@ internal fun MyPageSubMenu(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(color = Color363347)
+            .background(color = AppSurfaceVariant)
             .clickable { onClick() }
             .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = menuName, color = Gray050)
+        Text(text = menuName, color = AppTextPrimary)
         Image(painter = painterResource(drawable.ic_next), contentDescription = "next_button")
     }
 }

@@ -22,7 +22,7 @@ import com.nexters.fooddiary.core.ui.R
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
 import com.nexters.fooddiary.core.ui.theme.GlassmorphismStyle
-import com.nexters.fooddiary.core.ui.theme.White
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
 import com.nexters.fooddiary.core.ui.theme.glassmorphism
 import dev.chrisbanes.haze.HazeState
 
@@ -62,7 +62,7 @@ fun FoodDiarySnackBar(
         Text(
             text = message,
             style = AppTypography.p15.copy(
-                color = White,
+                color = AppTextPrimary,
                 letterSpacing = (-0.015 * 15).sp
             ),
             textAlign = TextAlign.Start
@@ -70,7 +70,7 @@ fun FoodDiarySnackBar(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF191821)
+@Preview(showBackground = true)
 @Composable
 private fun FoodDiarySnackBarPreview() {
     FoodDiaryTheme {
@@ -83,7 +83,7 @@ private fun FoodDiarySnackBarPreview() {
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF191821)
+@Preview(showBackground = true)
 @Composable
 private fun FoodDiarySnackBarNoIconPreview() {
     FoodDiaryTheme {

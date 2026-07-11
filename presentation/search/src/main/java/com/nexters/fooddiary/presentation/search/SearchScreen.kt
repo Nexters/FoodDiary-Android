@@ -47,13 +47,13 @@ import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.compose.collectAsStateWithLifecycle
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.nexters.fooddiary.core.ui.theme.AppTypography
-import com.nexters.fooddiary.core.ui.theme.Gray050
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
 import com.nexters.fooddiary.core.ui.theme.Gray400
 import com.nexters.fooddiary.core.ui.theme.Gray600
 import com.nexters.fooddiary.core.ui.theme.PrimBase
-import com.nexters.fooddiary.core.ui.theme.Sd800
-import com.nexters.fooddiary.core.ui.theme.Sd900
-import com.nexters.fooddiary.core.ui.theme.SdBase
+import com.nexters.fooddiary.core.ui.theme.AppSurfaceVariant
+import com.nexters.fooddiary.core.ui.theme.AppSurface
+import com.nexters.fooddiary.core.ui.theme.AppBackground
 import com.nexters.fooddiary.domain.model.RestaurantItem
 
 @Composable
@@ -101,7 +101,7 @@ private fun SearchScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(SdBase)
+            .background(AppBackground)
             .windowInsetsPadding(WindowInsets.statusBars)
             .windowInsetsPadding(WindowInsets.navigationBars)
             .padding(horizontal = 16.dp)
@@ -117,7 +117,7 @@ private fun SearchScreen(
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = stringResource(R.string.search_close),
-                    tint = Gray050,
+                    tint = AppTextPrimary,
                 )
             }
         }
@@ -140,7 +140,7 @@ private fun SearchScreen(
             Text(
                 text = stringResource(R.string.search_guide_title),
                 style = AppTypography.p14,
-                color = Gray050,
+                color = AppTextPrimary,
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -153,7 +153,7 @@ private fun SearchScreen(
                         .padding(top = 40.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    CircularProgressIndicator(color = Gray050)
+                    CircularProgressIndicator(color = AppTextPrimary)
                 }
             }
 
@@ -208,11 +208,11 @@ private fun SearchInputField(
                 shape = RoundedCornerShape(10.dp),
             )
             .clip(RoundedCornerShape(10.dp))
-            .background(Sd900)
+            .background(AppSurface)
             .padding(horizontal = 16.dp, vertical = 10.dp),
         singleLine = true,
-        textStyle = AppTypography.p15.copy(color = Gray050),
-        cursorBrush = SolidColor(Gray050),
+        textStyle = AppTypography.p15.copy(color = AppTextPrimary),
+        cursorBrush = SolidColor(AppTextPrimary),
         decorationBox = { innerTextField ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -231,7 +231,7 @@ private fun SearchInputField(
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = null,
-                    tint = Gray050,
+                    tint = AppTextPrimary,
                     modifier = Modifier.size(18.dp),
                 )
             }
@@ -270,7 +270,7 @@ private fun RestaurantListCard(
     LazyColumn(
         state = listState,
         modifier = modifier
-            .border(1.dp, Sd800, RoundedCornerShape(10.dp))
+            .border(1.dp, AppSurfaceVariant, RoundedCornerShape(10.dp))
             .clip(RoundedCornerShape(10.dp))
             .padding(start = 20.dp, end = 20.dp, top = 24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
@@ -289,7 +289,7 @@ private fun RestaurantListCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(1.dp)
-                        .background(Sd800),
+                        .background(AppSurfaceVariant),
                 )
             }
         }
@@ -303,7 +303,7 @@ private fun RestaurantListCard(
                     contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator(
-                        color = Gray050,
+                        color = AppTextPrimary,
                         modifier = Modifier.size(20.dp),
                         strokeWidth = 2.dp,
                     )
@@ -327,7 +327,7 @@ private fun RestaurantListCard(
                     Text(
                         text = stringResource(R.string.search_load_more_retry),
                         style = AppTypography.p12,
-                        color = Gray050,
+                        color = AppTextPrimary,
                         textDecoration = TextDecoration.Underline,
                         modifier = Modifier.clickable(onClick = onRetryLoadMore),
                     )
@@ -356,7 +356,7 @@ private fun RestaurantRow(
             Text(
                 text = restaurant.name,
                 style = AppTypography.p12,
-                color = Gray050,
+                color = AppTextPrimary,
             )
             Text(
                 text = restaurant.roadAddress,
@@ -377,7 +377,7 @@ private fun RestaurantRow(
         Text(
             text = stringResource(R.string.search_select),
             style = AppTypography.p12,
-            color = Gray050,
+            color = AppTextPrimary,
             textDecoration = TextDecoration.Underline,
             modifier = Modifier.clickable(onClick = onSelect),
         )

@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -33,16 +33,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.nexters.fooddiary.core.ui.theme.Gray050
-import com.nexters.fooddiary.core.ui.theme.Gray540
 import com.nexters.fooddiary.core.ui.theme.PrimBase
+import com.nexters.fooddiary.core.ui.theme.AppSurfaceVariant
 import com.nexters.fooddiary.presentation.onboarding.R as OnboardingR
 import kotlinx.coroutines.launch
 
-private val OnboardingColor = Color(0xFF191821)
+private val OnboardingColor = Color.White
+private val OnboardingHeaderDividerColor = Color(0xFFE0E0E0)
+private val OnboardingBodyTextColor = Color(0xFF2C2C2C)
+private val OnboardingSkipTextColor = Color(0xFF191821)
 private const val PAGE_COUNT = 5
 
 @Composable
@@ -78,21 +81,40 @@ internal fun OnboardingScreen(
             )
         }
 
-        // 우측 상단 - 건너뛰기 버튼 (마지막 페이지 제외)
-        if (pagerState.currentPage < PAGE_COUNT - 1) {
-            TextButton(
-                onClick = onComplete,
+        Column(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth(),
+        ) {
+            Box(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = 16.dp, end = 16.dp)
+                    .fillMaxWidth()
+                    .height(56.dp)
             ) {
-                Text(
-                    text = stringResource(OnboardingR.string.onboarding_button_skip),
-                    color = Gray050,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Normal
-                )
+                // 우측 상단 - 건너뛰기 버튼 (마지막 페이지 제외)
+                if (pagerState.currentPage < PAGE_COUNT - 1) {
+                    TextButton(
+                        onClick = onComplete,
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(end = 16.dp)
+                    ) {
+                        Text(
+                            text = stringResource(OnboardingR.string.onboarding_button_skip),
+                            color = OnboardingSkipTextColor,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Normal
+                        )
+                    }
+                }
             }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(OnboardingHeaderDividerColor)
+            )
         }
 
         // 하단 - Pagination Dots + Button
@@ -132,14 +154,14 @@ internal fun OnboardingScreen(
                     .height(54.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = PrimBase,
-                    contentColor = OnboardingColor
+                    contentColor = OnboardingSkipTextColor
                 ),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(27.dp)
             ) {
                 Text(
                     text = buttonText,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }
@@ -178,7 +200,7 @@ private fun OnboardingPage(
         // 설명 텍스트 (고정 위치)
         Text(
             text = stringResource(getDescriptionForPage(pageNumber)),
-            color = Color.White,
+            color = OnboardingBodyTextColor,
             fontSize = 15.sp,
             fontWeight = FontWeight.Normal,
             textAlign = TextAlign.Center,
@@ -206,7 +228,7 @@ private fun PaginationDots(
                 modifier = Modifier
                     .size(8.dp)
                     .background(
-                        color = if (index == currentPage) PrimBase else Gray540,
+                        color = if (index == currentPage) PrimBase else AppSurfaceVariant,
                         shape = CircleShape
                     )
             )
@@ -250,5 +272,27 @@ private fun OnboardingPagePreview() {
             .background(OnboardingColor)
     ) {
         OnboardingPage(pageNumber = 1)
+    }
+}
+
+@Preview(showBackground = true, fontScale = 1.3f)
+@Composable
+private fun OnboardingPageLastPreview() {
+    Box(
+        modifier = Modifier
+            .background(OnboardingColor)
+    ) {
+        OnboardingPage(pageNumber = 4)
+    }
+}
+
+@Preview(showBackground = true, device = Devices.PHONE, widthDp = 640, heightDp = 360)
+@Composable
+private fun OnboardingPageLandscapePreview() {
+    Box(
+        modifier = Modifier
+            .background(OnboardingColor)
+    ) {
+        OnboardingPage(pageNumber = 4)
     }
 }

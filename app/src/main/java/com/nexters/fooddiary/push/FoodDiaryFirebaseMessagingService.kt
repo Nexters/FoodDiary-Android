@@ -100,7 +100,7 @@ class FoodDiaryFirebaseMessagingService : FirebaseMessagingService() {
 
         val notification = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(coreR.drawable.ic_notification)
-            .setLargeIcon(BitmapFactory.decodeResource(resources, coreR.drawable.ic_app_icon))
+            .setLargeIcon(BitmapFactory.decodeResource(resources, coreR.drawable.ic_app_icon_light))
             .setContentTitle(title)
             .setContentText(body)
             .setStyle(NotificationCompat.BigTextStyle().bigText(body))

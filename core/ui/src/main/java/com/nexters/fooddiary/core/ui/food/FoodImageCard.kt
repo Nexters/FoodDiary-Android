@@ -37,13 +37,15 @@ import coil3.compose.AsyncImage
 import com.nexters.fooddiary.core.common.R.string
 import com.nexters.fooddiary.core.ui.R.drawable
 import com.nexters.fooddiary.core.ui.theme.AppTypography
+import com.nexters.fooddiary.core.ui.theme.Gray100
 import com.nexters.fooddiary.core.ui.theme.Gray900
+import com.nexters.fooddiary.core.ui.theme.AppSurfaceOverlay
 import com.nexters.fooddiary.core.ui.theme.TimeLocationBg
 import com.nexters.fooddiary.core.ui.theme.White
 
 // Dashed border modifier
 private fun Modifier.dashedBorder() = this.clip(RoundedCornerShape(16.dp))
-    .background(color = White.copy(alpha = 0.02f))
+    .background(color = AppSurfaceOverlay)
     .drawBehind {
         val path = Path().apply {
             addRoundRect(
@@ -73,6 +75,7 @@ private fun Modifier.dashedBorder() = this.clip(RoundedCornerShape(16.dp))
 fun FoodImageCard(
     imageUrl: String,
     state: FoodImageState,
+    showMetaChips: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     // State에 따라 다른 border 적용
@@ -83,7 +86,7 @@ fun FoodImageCard(
         else -> {
             Modifier.border(
                 width = 4.dp,
-                color = White,
+                color = Gray100,
                 shape = RoundedCornerShape(16.dp)
             )
         }
@@ -100,6 +103,7 @@ fun FoodImageCard(
                     imageUrl = imageUrl,
                     timeText = state.timeText,
                     locationText = state.locationText,
+                    showMetaChips = showMetaChips,
                 )
             }
             is FoodImageState.Processing -> {
@@ -149,6 +153,7 @@ private fun FoodImage(
     imageUrl: String,
     timeText: String,
     locationText: String,
+    showMetaChips: Boolean,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         // 배경 이미지
@@ -168,7 +173,7 @@ private fun FoodImage(
         }
 
         // 상단: 시간 + 위치 태그
-        if (timeText.isNotBlank() || locationText.isNotBlank()) {
+        if (showMetaChips && (timeText.isNotBlank() || locationText.isNotBlank())) {
             Row(
                 modifier = Modifier
                     .align(Alignment.TopStart)
@@ -242,7 +247,7 @@ private fun FoodImagePending(
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(color = White.copy(alpha = 0.02f)),
+            .background(color = AppSurfaceOverlay),
         contentAlignment = Alignment.Center,
     ) {
         Box(
@@ -274,8 +279,7 @@ private fun previewPlaceholder() = if (LocalInspectionMode.current) {
 
 @Preview(
     name = "Ready State",
-    showBackground = true,
-    backgroundColor = 0xFF191821
+    showBackground = true
 )
 @Composable
 private fun FoodImageReadyPreview() {
@@ -291,8 +295,7 @@ private fun FoodImageReadyPreview() {
 
 @Preview(
     name = "Processing State",
-    showBackground = true,
-    backgroundColor = 0xFF191821
+    showBackground = true
 )
 @Composable
 private fun FoodImageProcessingPreview() {
@@ -305,8 +308,7 @@ private fun FoodImageProcessingPreview() {
 
 @Preview(
     name = "Pending State",
-    showBackground = true,
-    backgroundColor = 0xFF191821
+    showBackground = true
 )
 @Composable
 private fun FoodImagePendingPreview() {

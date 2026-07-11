@@ -23,15 +23,16 @@ import androidx.compose.ui.unit.dp
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.Blue500
 import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
-import com.nexters.fooddiary.core.ui.theme.Gray050
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
 import com.nexters.fooddiary.core.ui.theme.PrimBase
-import com.nexters.fooddiary.core.ui.theme.SdBase
+import com.nexters.fooddiary.core.ui.theme.AppBackground
+import com.nexters.fooddiary.core.ui.theme.AppSurfaceOverlay
 import com.nexters.fooddiary.presentation.insight.InsightDonutCardUiModel
 import com.nexters.fooddiary.presentation.insight.R
 import com.nexters.fooddiary.presentation.insight.sampleInsightReadyState
 
 private val CardShape = RoundedCornerShape(16.dp)
-private val CardBackgroundColor = Color.White.copy(alpha = 0.02f)
+private val CardBackgroundColor = AppSurfaceOverlay
 private val DonutSecondCategoryColor = Blue500
 
 @Composable
@@ -61,7 +62,7 @@ internal fun InsightDonutCard(
                         maintainedTitle = maintainedTitle,
                     ),
                     style = AppTypography.p15.copy(fontWeight = FontWeight.SemiBold),
-                    color = Gray050,
+                    color = AppTextPrimary,
                 )
                 Text(
                     text = buildInsightHeadline(
@@ -104,7 +105,7 @@ internal fun buildInsightHeadline(
         withStyle(SpanStyle(color = card.categoryColor(currentCategory))) {
             append(currentCategory)
         }
-        withStyle(SpanStyle(color = Gray050)) {
+        withStyle(SpanStyle(color = AppTextPrimary)) {
             append(suffix)
         }
         return@buildAnnotatedString
@@ -113,13 +114,13 @@ internal fun buildInsightHeadline(
     withStyle(SpanStyle(color = card.categoryColor(previousCategory))) {
         append(previousCategory)
     }
-    withStyle(SpanStyle(color = Gray050)) {
+    withStyle(SpanStyle(color = AppTextPrimary)) {
         append(" $changedMiddle ")
     }
     withStyle(SpanStyle(color = card.categoryColor(currentCategory))) {
         append(currentCategory)
     }
-    withStyle(SpanStyle(color = Gray050)) {
+    withStyle(SpanStyle(color = AppTextPrimary)) {
         append(suffix)
     }
 }
@@ -128,16 +129,16 @@ private fun InsightDonutCardUiModel.categoryColor(category: String): Color =
     when (category) {
         currentTopCategory -> PrimBase
         previousTopCategory -> DonutSecondCategoryColor
-        else -> Gray050
+        else -> AppTextPrimary
     }
 
-@Preview(showBackground = true, backgroundColor = 0xFF191821)
+@Preview(showBackground = true)
 @Composable
 private fun InsightDonutCardPreview() {
     FoodDiaryTheme {
         Box(
             modifier = Modifier
-                .background(SdBase)
+                .background(AppBackground)
                 .padding(16.dp),
         ) {
             InsightDonutCard(

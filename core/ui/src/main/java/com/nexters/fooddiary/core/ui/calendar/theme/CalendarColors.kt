@@ -3,15 +3,12 @@ package com.nexters.fooddiary.core.ui.calendar.theme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.White
-import com.nexters.fooddiary.core.ui.theme.Gray050
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
 import com.nexters.fooddiary.core.ui.theme.Gray500
 import com.nexters.fooddiary.core.ui.theme.Gray700
-import com.nexters.fooddiary.core.ui.theme.Gray800
 import com.nexters.fooddiary.core.ui.theme.Gray900
-import com.nexters.fooddiary.core.ui.theme.GrayBase
 import com.nexters.fooddiary.core.ui.theme.PrimBase
-import com.nexters.fooddiary.core.ui.theme.Sd900
+import com.nexters.fooddiary.core.ui.theme.AppSurfaceOverlay
 
 @Immutable
 data class CalendarColors(
@@ -37,18 +34,18 @@ data class CalendarColors(
     val cellBackground: Color,  // 날짜 셀 배경
 )
 
-private val DarkCalendarColors = CalendarColors(
+private val LightCalendarColors = CalendarColors(
     // 헤더
-    headerText = Gray050,
-    iconTint = Gray050,
+    headerText = AppTextPrimary,
+    iconTint = AppTextPrimary,
 
     // 요일
     weekdayText = Gray500,
 
     // 날짜
-    dayText = Gray050,
+    dayText = AppTextPrimary,
     dayTextDisabled = Gray700,
-    dayTextSelected = Gray050,
+    dayTextSelected = Gray900,
 
     // 선택 상태
     selectedBackground = PrimBase,
@@ -58,10 +55,10 @@ private val DarkCalendarColors = CalendarColors(
 
     // 배경
     background = Color.Transparent,
-    cellBackground = Color.Transparent,
+    cellBackground = AppSurfaceOverlay,
 )
 
 @Composable
 fun calendarColors(): CalendarColors {
-    return DarkCalendarColors
+    return LightCalendarColors
 }

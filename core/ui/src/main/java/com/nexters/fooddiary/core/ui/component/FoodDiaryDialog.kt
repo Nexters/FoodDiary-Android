@@ -27,12 +27,12 @@ import androidx.compose.ui.window.DialogProperties
 import com.nexters.fooddiary.core.ui.alert.DialogData
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
-import com.nexters.fooddiary.core.ui.theme.Gray050
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
 import com.nexters.fooddiary.core.ui.theme.Gray200
 import com.nexters.fooddiary.core.ui.theme.Gray300
 import com.nexters.fooddiary.core.ui.theme.PrimBase
-import com.nexters.fooddiary.core.ui.theme.Sd800
-import com.nexters.fooddiary.core.ui.theme.Sd900
+import com.nexters.fooddiary.core.ui.theme.AppSurfaceVariant
+import com.nexters.fooddiary.core.ui.theme.AppSurface
 
 @Composable
 fun FoodDiaryDialog(
@@ -51,7 +51,7 @@ fun FoodDiaryDialog(
                 .fillMaxWidth()
                 .sizeIn(maxWidth = 560.dp),
             shape = RoundedCornerShape(24.dp),
-            color = Sd900
+            color = AppSurface
         ) {
             Column(
                 modifier = Modifier
@@ -63,7 +63,7 @@ fun FoodDiaryDialog(
                     Text(
                         text = it,
                         style = AppTypography.hd16,
-                        color = Gray050
+                        color = AppTextPrimary
                     )
                 }
 
@@ -85,7 +85,7 @@ fun FoodDiaryDialog(
                             modifier = Modifier.weight(1f),
                             textColor = Gray200,
                             backgroundColor = Color.Transparent,
-                            borderStroke = BorderStroke(1.dp, Sd800)
+                            borderStroke = BorderStroke(1.dp, AppSurfaceVariant)
                         ) {
                             dialogData.onDismiss?.invoke()
                             onDismissRequest()
@@ -95,7 +95,7 @@ fun FoodDiaryDialog(
                     DialogActionButton(
                         text = dialogData.confirmText,
                         modifier = Modifier.weight(if (dialogData.dismissText == null) 1f else 1.7f),
-                        textColor = Gray050,
+                        textColor = AppTextPrimary,
                         backgroundColor = PrimBase
                     ) {
                         dialogData.onConfirm?.invoke()

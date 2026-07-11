@@ -31,8 +31,8 @@ import com.nexters.fooddiary.core.ui.component.Header
 import com.nexters.fooddiary.core.ui.component.TasteKeywordSection
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
-import com.nexters.fooddiary.core.ui.theme.Gray050
-import com.nexters.fooddiary.core.ui.theme.SdBase
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
+import com.nexters.fooddiary.core.ui.theme.AppBackground
 import com.nexters.fooddiary.presentation.insight.component.AnimatedOnFirstVisible
 import com.nexters.fooddiary.presentation.insight.component.InsightHeaderSection
 import com.nexters.fooddiary.presentation.insight.component.InsightPhotoStatsCard
@@ -71,14 +71,14 @@ internal fun InsightScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(SdBase)
+            .background(AppBackground)
     ) {
         Header(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .zIndex(1f)
                 .padding(start = 20.dp, top = 38.dp, end = 20.dp),
-            leftIconResId = coreR.drawable.ic_app_icon,
+            leftIconResId = coreR.drawable.ic_app_icon_light,
             leftIconColorFilter = null,
             onClickMyPage = onNavigateToMyPage,
         )
@@ -178,7 +178,7 @@ internal fun InsightScreen(
                 Text(
                     text = stringResource(id = R.string.insight_ready_message),
                     style = AppTypography.p15,
-                    color = Gray050,
+                    color = AppTextPrimary,
                     textAlign = TextAlign.Center,
                 )
             }

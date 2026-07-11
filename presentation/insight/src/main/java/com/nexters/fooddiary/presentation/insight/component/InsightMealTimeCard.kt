@@ -22,14 +22,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
-import com.nexters.fooddiary.core.ui.theme.Gray050
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
 import com.nexters.fooddiary.core.ui.theme.Gray200
 import com.nexters.fooddiary.core.ui.theme.PrimBase
-import com.nexters.fooddiary.core.ui.theme.SdBase
+import com.nexters.fooddiary.core.ui.theme.AppBackground
+import com.nexters.fooddiary.core.ui.theme.AppSurfaceOverlay
 import com.nexters.fooddiary.presentation.insight.R
 
 private val MealCardShape = RoundedCornerShape(16.dp)
-private val MealCardBackgroundColor = Color(0x05FFFFFF)
+private val MealCardBackgroundColor = AppSurfaceOverlay
 private val MealTitleStyle = AppTypography.p15.copy(fontWeight = FontWeight.SemiBold)
 private val MealDescriptionStyle = AppTypography.p15.copy(
     fontSize = 10.sp,
@@ -77,7 +78,7 @@ fun InsightMealTimeCard(
                     Text(
                         text = stringResource(id = R.string.insight_highlight_summary_suffix),
                         style = MealTitleStyle,
-                        color = Gray050,
+                        color = AppTextPrimary,
                     )
                 }
             }
@@ -106,7 +107,7 @@ private fun InsightMealTimeCardPreview() {
     FoodDiaryTheme {
         Box(
             modifier = Modifier
-                .background(SdBase)
+                .background(AppBackground)
                 .padding(16.dp),
         ) {
             InsightMealTimeCard(

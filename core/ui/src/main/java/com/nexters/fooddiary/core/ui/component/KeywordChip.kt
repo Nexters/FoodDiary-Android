@@ -28,12 +28,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nexters.fooddiary.core.ui.R.drawable
+import com.nexters.fooddiary.core.ui.theme.AppBackground
+import com.nexters.fooddiary.core.ui.theme.AppSurfaceOverlay
+import com.nexters.fooddiary.core.ui.theme.AppSurfaceVariant
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.Gray050
 import com.nexters.fooddiary.core.ui.theme.Gray300
 import com.nexters.fooddiary.core.ui.theme.Gray400
-import com.nexters.fooddiary.core.ui.theme.Sd800
-import com.nexters.fooddiary.core.ui.theme.SdBase
+import com.nexters.fooddiary.core.ui.theme.Gray600
+import com.nexters.fooddiary.core.ui.theme.PrimBase
+import com.nexters.fooddiary.core.ui.theme.White
 
 private val KeywordChipShape = RoundedCornerShape(999.dp)
 
@@ -43,10 +48,10 @@ fun KeywordChip(
     modifier: Modifier = Modifier,
     selected: Boolean = false,
     onClick: (() -> Unit)? = null,
-    selectedContainerColor: Color = Gray050,
-    selectedContentColor: Color = Color.Black,
-    unselectedContainerColor: Color = Sd800,
-    unselectedContentColor: Color = Gray400,
+    selectedContainerColor: Color = AppTextPrimary,
+    selectedContentColor: Color = White,
+    unselectedContainerColor: Color = AppSurfaceVariant,
+    unselectedContentColor: Color = Gray600,
     trailingContent: @Composable (() -> Unit)? = null,
 ) {
     val containerColor = if (selected) selectedContainerColor else unselectedContainerColor
@@ -79,10 +84,10 @@ fun KeywordChipGroup(
     onKeywordClick: ((String) -> Unit)? = null,
     horizontalSpacing: Int = 8,
     verticalSpacing: Int = 8,
-    selectedContainerColor: Color = Gray050,
-    selectedContentColor: Color = Color.Black,
-    unselectedContainerColor: Color = Sd800,
-    unselectedContentColor: Color = Gray400,
+    selectedContainerColor: Color = AppTextPrimary,
+    selectedContentColor: Color = White,
+    unselectedContainerColor: Color = AppSurfaceVariant,
+    unselectedContentColor: Color = Gray600,
 ) {
     FlowRow(
         modifier = modifier,
@@ -143,14 +148,14 @@ fun EditableKeywordChipGroup(
             modifier = Modifier
                 .size(34.dp)
                 .clip(CircleShape)
-                .background(Sd800)
+                .background(PrimBase)
                 .clickable(onClick = onAddClick),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
                 contentDescription = addContentDescription,
-                tint = Gray400,
+                tint = Gray050,
             )
         }
     }
@@ -167,7 +172,7 @@ fun TasteKeywordSection(
     Row(
         modifier = modifier
             .background(
-                color = Color.White.copy(alpha = 0.02f),
+                color = AppSurfaceOverlay,
                 shape = RoundedCornerShape(16.dp),
             )
             .padding(horizontal = 16.dp, vertical = 24.dp),
@@ -178,7 +183,7 @@ fun TasteKeywordSection(
             Text(
                 text = title,
                 style = AppTypography.p15.copy(fontWeight = FontWeight.SemiBold),
-                color = Gray050,
+                color = AppTextPrimary,
             )
             KeywordChipGroup(
                 keywords = keywords,
@@ -186,19 +191,19 @@ fun TasteKeywordSection(
                 onKeywordClick = onKeywordClick,
                 horizontalSpacing = 8,
                 verticalSpacing = 8,
-                unselectedContainerColor = Sd800,
+                unselectedContainerColor = AppSurfaceVariant,
                 unselectedContentColor = Gray400,
             )
         }
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF191821)
+@Preview(showBackground = true)
 @Composable
 private fun TasteKeywordSectionPreview() {
     Row(
         modifier = Modifier
-            .background(SdBase)
+            .background(AppBackground)
             .padding(16.dp),
     ) {
         TasteKeywordSection(
@@ -208,7 +213,7 @@ private fun TasteKeywordSectionPreview() {
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF191821)
+@Preview(showBackground = true)
 @Composable
 private fun KeywordChipGroupSelectedPreview() {
     KeywordChipGroup(

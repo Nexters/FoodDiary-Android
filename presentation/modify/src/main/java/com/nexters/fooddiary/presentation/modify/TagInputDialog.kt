@@ -28,10 +28,11 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.nexters.fooddiary.core.ui.component.CommonCircleButton
 import com.nexters.fooddiary.core.ui.theme.AppTypography
-import com.nexters.fooddiary.core.ui.theme.Gray050
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
 import com.nexters.fooddiary.core.ui.theme.Gray200
-import com.nexters.fooddiary.core.ui.theme.Sd800
-import com.nexters.fooddiary.core.ui.theme.SdBase
+import com.nexters.fooddiary.core.ui.theme.AppSurfaceVariant
+import com.nexters.fooddiary.core.ui.theme.AppBackground
+import com.nexters.fooddiary.core.ui.theme.Color191821
 
 @Composable
 internal fun TagInputDialog(
@@ -60,14 +61,14 @@ internal fun TagInputDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
-                    .background(SdBase, RoundedCornerShape(16.dp))
+                    .background(AppBackground, RoundedCornerShape(16.dp))
                     .padding(horizontal = 18.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Text(
                     text = titleTag,
                     style = AppTypography.p15,
-                    color = Gray050,
+                    color = AppTextPrimary,
                 )
                 StyledInputField(
                     value = value,
@@ -87,11 +88,11 @@ internal fun TagInputDialog(
                         onClick = onDismiss,
                         buttonColors = ButtonDefaults.buttonColors(
                             contentColor = Gray200,
-                            containerColor = SdBase,
+                            containerColor = AppBackground,
                         ),
-                        border = BorderStroke(1.dp, Sd800),
+                        border = BorderStroke(1.dp, AppSurfaceVariant),
                         buttonText = cancelText,
-                        contentColor = Gray200,
+                        contentColor = Color191821,
                     )
                     CommonCircleButton(
                         modifier = Modifier.weight(2f),

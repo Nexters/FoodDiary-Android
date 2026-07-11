@@ -35,13 +35,13 @@ import com.nexters.fooddiary.core.ui.R
 import com.nexters.fooddiary.core.ui.alert.DeleteAccountDialogData
 import com.nexters.fooddiary.core.ui.theme.AppTypography
 import com.nexters.fooddiary.core.ui.theme.FoodDiaryTheme
-import com.nexters.fooddiary.core.ui.theme.Gray050
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
 import com.nexters.fooddiary.core.ui.theme.Gray200
 import com.nexters.fooddiary.core.ui.theme.Gray300
 import com.nexters.fooddiary.core.ui.theme.Gray500
 import com.nexters.fooddiary.core.ui.theme.PrimBase
-import com.nexters.fooddiary.core.ui.theme.Sd800
-import com.nexters.fooddiary.core.ui.theme.Sd900
+import com.nexters.fooddiary.core.ui.theme.AppSurfaceVariant
+import com.nexters.fooddiary.core.ui.theme.AppSurface
 
 @Composable
 fun FoodDiaryDeleteAccountDialog(
@@ -59,7 +59,7 @@ fun FoodDiaryDeleteAccountDialog(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
             shape = RoundedCornerShape(16.dp),
-            color = Sd900
+            color = AppSurface
         ) {
             Column(
                 modifier = Modifier
@@ -70,7 +70,7 @@ fun FoodDiaryDeleteAccountDialog(
                 Text(
                     text = dialogData.title,
                     style = AppTypography.hd16,
-                    color = Gray050
+                    color = AppTextPrimary
                 )
 
                 Text(
@@ -83,7 +83,7 @@ fun FoodDiaryDeleteAccountDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Sd800.copy(alpha = 0.3f))
+                        .background(AppSurfaceVariant.copy(alpha = 0.3f))
                         .padding(horizontal = 24.dp, vertical = 20.dp),
                 ) {
                     dialogData.warningItems.forEach { warningItem ->
@@ -109,7 +109,7 @@ fun FoodDiaryDeleteAccountDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(1.dp)
-                            .background(Sd800)
+                            .background(AppSurfaceVariant)
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -136,7 +136,7 @@ fun FoodDiaryDeleteAccountDialog(
                         Text(
                             text = dialogData.agreementText,
                             style = AppTypography.p12,
-                            color = Gray050
+                            color = AppTextPrimary
                         )
                     }
                 }
@@ -152,7 +152,7 @@ fun FoodDiaryDeleteAccountDialog(
                         modifier = Modifier.weight(1f),
                         textColor = Gray200,
                         backgroundColor = Color.Transparent,
-                        borderStroke = BorderStroke(1.dp, Sd800)
+                        borderStroke = BorderStroke(1.dp, AppSurfaceVariant)
                     ) {
                         dialogData.onDismiss?.invoke()
                         onDismissRequest()
@@ -161,8 +161,8 @@ fun FoodDiaryDeleteAccountDialog(
                     DeleteAccountDialogActionButton(
                         text = dialogData.confirmText,
                         modifier = Modifier.weight(1.7f),
-                        textColor = if (isAgreed) Gray050 else Gray500,
-                        backgroundColor = if (isAgreed) PrimBase else Sd800,
+                        textColor = if (isAgreed) AppTextPrimary else Gray500,
+                        backgroundColor = if (isAgreed) PrimBase else AppSurfaceVariant,
                         enabled = isAgreed
                     ) {
                         dialogData.onConfirm?.invoke()

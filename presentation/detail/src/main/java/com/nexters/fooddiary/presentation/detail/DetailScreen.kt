@@ -37,6 +37,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.DropdownMenu
@@ -80,12 +81,13 @@ import com.nexters.fooddiary.core.ui.component.DetailScreenHeader
 import com.nexters.fooddiary.core.ui.food.FoodImageCard
 import com.nexters.fooddiary.core.ui.food.FoodImageState
 import com.nexters.fooddiary.core.ui.theme.AppTypography
-import com.nexters.fooddiary.core.ui.theme.GlassmorphismStyle
-import com.nexters.fooddiary.core.ui.theme.Gray050
-import com.nexters.fooddiary.core.ui.theme.SdBase
-import com.nexters.fooddiary.core.ui.theme.Sd900
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
+import com.nexters.fooddiary.core.ui.theme.TimeLocationBg
+import com.nexters.fooddiary.core.ui.theme.Gray600
+import com.nexters.fooddiary.core.ui.theme.AppBackground
+import com.nexters.fooddiary.core.ui.theme.AppSurface
 import com.nexters.fooddiary.core.ui.theme.White
-import com.nexters.fooddiary.core.ui.theme.glassmorphism
+import com.nexters.fooddiary.core.ui.theme.PrimBase
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.flow.collectLatest
@@ -97,11 +99,8 @@ private const val DetailHeaderKey = "detail_header"
 private const val GapDetailToDailyKey = "gap_detail_to_daily"
 private const val DailyHeaderInlineKey = "daily_header_inline"
 private const val GapAfterDailyHeaderKey = "gap_after_daily_header"
-private val DetailFloatingButtonGlassStyle = GlassmorphismStyle(
-    cornerRadius = 999.dp,
-    blurRadius = 30.dp,
-)
-
+private val DetailMealCardBackground = Color(0xFFF4F6FA)
+private val DetailMealNoteIconBackground = Color(0xFFFFF2E9)
 @Composable
 internal fun DetailScreen(
     initialDateString: String = LocalDate.now().toString(),
@@ -270,7 +269,7 @@ private fun DetailContent(
     }
 
     Scaffold(
-        containerColor = SdBase,
+        containerColor = AppBackground,
     ) { padding ->
         Box(
             modifier = Modifier
@@ -282,7 +281,7 @@ private fun DetailContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .hazeSource(state = hazeState)
-                    .background(SdBase),
+                    .background(AppBackground),
                 verticalArrangement = Arrangement.Top,
                 contentPadding = PaddingValues(bottom = 20.dp)
             ) {
@@ -299,8 +298,8 @@ private fun DetailContent(
                             Text(
                                 text = stringResource(id = R.string.detail_title),
                                 style = AppTypography.hd18,
-                                color = White,
-                                modifier = Modifier.padding(start = 4.dp)
+                                color = AppTextPrimary,
+                                modifier = Modifier.padding(start = 8.dp)
                             )
                             Box(
                                 modifier = Modifier.wrapContentSize(align = Alignment.TopEnd)
@@ -309,7 +308,8 @@ private fun DetailContent(
                                     Icon(
                                         painter = painterResource(CoreUiR.drawable.ic_more),
                                         contentDescription = stringResource(id = R.string.detail_more),
-                                        tint = Color.White
+                                        tint = AppTextPrimary,
+                                        modifier = Modifier.size(22.dp)
                                     )
                                 }
                                 DropdownMenu(
@@ -318,7 +318,7 @@ private fun DetailContent(
                                     offset = DpOffset(x = 0.dp, y = 0.dp),
                                     modifier = Modifier.width(132.dp),
                                     shape = RoundedCornerShape(10.dp),
-                                    containerColor = Sd900,
+                                    containerColor = AppSurface,
                                     tonalElevation = 0.dp,
                                     shadowElevation = 10.dp,
                                 ) {
@@ -328,7 +328,7 @@ private fun DetailContent(
                                             Text(
                                                 text = stringResource(id = R.string.detail_menu_delete),
                                                 style = AppTypography.p12.copy(letterSpacing = (-0.18).sp),
-                                                color = Gray050
+                                                color = AppTextPrimary
                                             )
                                         },
                                         trailingIcon = {
@@ -336,12 +336,12 @@ private fun DetailContent(
                                                 painter = painterResource(id = R.drawable.ic_delete),
                                                 contentDescription = null,
                                                 modifier = Modifier.size(18.dp),
-                                                tint = Gray050,
+                                                tint = AppTextPrimary,
                                             )
                                         },
                                         colors = MenuDefaults.itemColors(
-                                            textColor = Gray050,
-                                            trailingIconColor = Gray050,
+                                            textColor = AppTextPrimary,
+                                            trailingIconColor = AppTextPrimary,
                                         ),
                                         contentPadding = PaddingValues(horizontal = 14.dp),
                                         onClick = {
@@ -356,7 +356,7 @@ private fun DetailContent(
                 }
 
                 item(key = GapDetailToDailyKey) {
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
                 }
 
                 item(key = DailyHeaderInlineKey) {
@@ -391,7 +391,7 @@ private fun DetailContent(
                 }
 
                 item(key = GapAfterDailyHeaderKey) {
-                    Spacer(modifier = Modifier.height(42.dp))
+                    Spacer(modifier = Modifier.height(28.dp))
                 }
 
                 itemsIndexed(mealCards, key = { _, meal -> meal.id }) { index, meal ->
@@ -434,23 +434,20 @@ private fun DetailContent(
                     .align(Alignment.BottomEnd)
                     .padding(end = 20.dp, bottom = 24.dp)
                     .size(60.dp)
-                    .glassmorphism(
-                        hazeState = hazeState,
-                        style = DetailFloatingButtonGlassStyle,
-                    ),
+                    .background(color = Color.White, shape = CircleShape),
                 onClick = onAddFloatingPhotoClick,
                 shape = CircleShape,
                 colors = IconButtonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = Gray050,
-                    disabledContainerColor = Color.Transparent,
-                    disabledContentColor = Gray050,
+                    containerColor = PrimBase,
+                    contentColor = Color.White,
+                    disabledContainerColor = PrimBase,
+                    disabledContentColor = Color.White,
                 ),
             ) {
                 Icon(
                     painter = painterResource(id = CoreUiR.drawable.ic_add),
                     contentDescription = null,
-                    tint = Gray050,
+                    tint = Color.White,
                 )
             }
         }
@@ -475,13 +472,13 @@ private fun MealSection(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = 16.dp)
         ) {
             // 식사 라벨 (아침)
             Text(
                 text = mealLabel,
                 style = AppTypography.p18,
-                color = White,
+                color = AppTextPrimary,
             )
 
             // Ready 상태일 때만 수정 버튼 표시
@@ -491,7 +488,7 @@ private fun MealSection(
                     style = AppTypography.p14.copy(
                         textDecoration = TextDecoration.Underline
                     ),
-                    color = White,
+                    color = AppTextPrimary,
                     modifier = Modifier.clickable { onEditClick() }
                 )
             }
@@ -504,7 +501,7 @@ private fun MealSection(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
+                    .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.Center
             ) {
                 AddPhotoBox(
@@ -521,7 +518,12 @@ private fun MealSection(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
+                        .padding(horizontal = 16.dp)
+                        .background(
+                            color = DetailMealCardBackground,
+                            shape = RoundedCornerShape(16.dp),
+                        )
+                        .padding(16.dp)
                 ) {
                     FoodImageCard(
                         imageUrl = firstImageUrl.orEmpty(),
@@ -536,40 +538,148 @@ private fun MealSection(
                     )
                 }
             } else {
-                // Ready 상태: HorizontalPager로 FoodImageCard 표시
-                val pagerState = rememberPagerState(pageCount = { meal.imageUrls.size })
-                val state = FoodImageState.Ready(
-                    timeText = meal.time,
-                    locationText = meal.location,
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .background(
+                            color = DetailMealCardBackground,
+                            shape = RoundedCornerShape(16.dp),
+                        )
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                ) {
+                    MealActionRow(
+                        time = meal.time,
+                        location = meal.location,
+                        onCopyClick = onCopyClick,
+                        onShareClick = onShareClick,
+                    )
 
-                HorizontalPager(
-                    state = pagerState,
-                    contentPadding = PaddingValues(horizontal = 20.dp),
-                    pageSpacing = 12.dp,
-                    modifier = Modifier.fillMaxWidth()
-                ) { page ->
-                    FoodImageCard(
-                        imageUrl = meal.imageUrls[page],
-                        state = state,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(1f)
+                    // Ready 상태: HorizontalPager로 FoodImageCard 표시
+                    val pagerState = rememberPagerState(pageCount = { meal.imageUrls.size })
+                    val state = FoodImageState.Ready(
+                        timeText = meal.time,
+                        locationText = meal.location,
+                    )
+
+                    HorizontalPager(
+                        state = pagerState,
+                        contentPadding = PaddingValues(0.dp),
+                        pageSpacing = 8.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    ) { page ->
+                        FoodImageCard(
+                            imageUrl = meal.imageUrls[page],
+                            state = state,
+                            showMetaChips = false,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(1f)
+                        )
+                    }
+
+                    MealInfoSection(
+                        place = meal.place,
+                        keywords = meal.keywords,
+                        note = meal.note,
                     )
                 }
             }
         }
+    }
+}
 
-        // Ready 상태일 때만 카드 밑에 설명란 표시
-        if (!meal.isEmpty && !meal.isPending) {
-            MealInfoSection(
-                place = meal.place,
-                keywords = meal.keywords,
-                note = meal.note,
-                onCopyClick = onCopyClick,
-                onShareClick = onShareClick,
-            )
+@Composable
+private fun MealActionRow(
+    time: String,
+    location: String,
+    onCopyClick: () -> Unit,
+    onShareClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        FlowRow(
+            modifier = Modifier.weight(1f),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            DetailMetaChip(text = time)
+            DetailMetaChip(text = location)
         }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Row(
+            modifier = Modifier.wrapContentSize(),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Row(
+                modifier = Modifier.clickable { onCopyClick() },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Icon(
+                    painter = painterResource(CoreUiR.drawable.ic_copy),
+                    contentDescription = stringResource(id = R.string.detail_copy),
+                    tint = AppTextPrimary,
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = stringResource(id = R.string.detail_copy),
+                    color = AppTextPrimary,
+                    style = AppTypography.p12,
+                    fontWeight = FontWeight.Medium,
+                )
+            }
+
+            Row(
+                modifier = Modifier.clickable { onShareClick() },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Icon(
+                    painter = painterResource(CoreUiR.drawable.ic_share),
+                    contentDescription = stringResource(id = R.string.detail_share),
+                    tint = AppTextPrimary,
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = stringResource(id = R.string.detail_share),
+                    color = AppTextPrimary,
+                    style = AppTypography.p12,
+                    fontWeight = FontWeight.Medium,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DetailMetaChip(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    if (text.isBlank()) return
+
+    Box(
+        modifier = modifier
+            .background(
+                color = TimeLocationBg,
+                shape = RoundedCornerShape(999.dp),
+            )
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            color = White,
+            style = AppTypography.p12,
+            fontWeight = FontWeight.Medium,
+        )
     }
 }
 
@@ -579,75 +689,18 @@ private fun MealInfoSection(
     place: String,
     keywords: List<String>,
     note: String,
-    onCopyClick: () -> Unit,
-    onShareClick: () -> Unit,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier.fillMaxWidth()
     ) {
-        // 장소명 + 복사/공유 버튼
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // 장소명
-            Text(
-                text = place.ifBlank { stringResource(id = R.string.detail_place_empty_guide) },
-                style = AppTypography.p12,
-                fontWeight = FontWeight.Bold,
-                color = White,
-            )
+        Text(
+            text = place.ifBlank { stringResource(id = R.string.detail_place_empty_guide) },
+            style = AppTypography.p15,
+            fontWeight = FontWeight.Bold,
+            color = AppTextPrimary,
+        )
 
-            // 복사/공유 버튼
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp), // 두 버튼 사이의 간격
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // 복사 버튼
-                Row(
-                    modifier = Modifier.clickable { onCopyClick() },
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp) // 아이콘과 텍스트 사이 간격
-                ) {
-                    Icon(
-                        painter = painterResource(CoreUiR.drawable.ic_copy),
-                        contentDescription = stringResource(id = R.string.detail_copy),
-                        tint = White,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Text(
-                        text = stringResource(id = R.string.detail_copy),
-                        color = White,
-                        style = AppTypography.p12,
-                        fontWeight = FontWeight.Medium,
-                    )
-                }
-
-                // 공유 버튼
-                Row(
-                    modifier = Modifier.clickable { onShareClick() },
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(CoreUiR.drawable.ic_share),
-                        contentDescription = stringResource(id = R.string.detail_share),
-                        tint = White,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Text(
-                        text = stringResource(id = R.string.detail_share),
-                        color = White,
-                        style = AppTypography.p12,
-                        fontWeight = FontWeight.Medium,
-                    )
-                }
-            }
-        }
-
-        // 키워드
         if (keywords.isNotEmpty()) {
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -656,7 +709,7 @@ private fun MealInfoSection(
                 keywords.forEach { keyword ->
                     Text(
                         text = keyword,
-                        color = White,
+                        color = Gray600,
                         style = AppTypography.p12,
                         fontWeight = FontWeight.Medium,
                     )
@@ -668,33 +721,29 @@ private fun MealInfoSection(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(
-                        color = Color(0xFF1D1C27),
-                        shape = RoundedCornerShape(10.dp),
-                    )
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                    .padding(top = 2.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                Box(
+                    modifier = Modifier
+                        .size(18.dp)
+                        .background(
+                            color = DetailMealNoteIconBackground,
+                            shape = RoundedCornerShape(6.dp),
+                        ),
+                    contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         painter = painterResource(CoreUiR.drawable.ic_ai_analysis),
                         contentDescription = null,
-                        tint = Color.Unspecified,
-                    )
-                    Text(
-                        text = stringResource(id = R.string.detail_ai_summary_title),
-                        color = White,
-                        style = AppTypography.p12,
-                        fontWeight = FontWeight.Medium,
+                        tint = PrimBase,
+                        modifier = Modifier.size(12.dp),
                     )
                 }
 
                 Text(
                     text = note,
-                    color = White,
+                    color = AppTextPrimary,
                     style = AppTypography.p12,
                 )
             }
@@ -730,7 +779,7 @@ private fun shareText(context: Context, text: String, chooserTitle: String) {
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF191821)
+@Preview(showBackground = true)
 @Composable
 private fun DetailScreenPreview() {
     val today = LocalDate.now()

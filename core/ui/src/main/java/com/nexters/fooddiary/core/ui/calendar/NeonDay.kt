@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.alpha
 import com.nexters.fooddiary.core.ui.theme.AppTypography.p12
-import com.nexters.fooddiary.core.ui.theme.Gray050
+import com.nexters.fooddiary.core.ui.theme.AppTextPrimary
 import com.nexters.fooddiary.core.ui.theme.neonShadow
 
 @Composable
@@ -88,14 +88,14 @@ fun NeonStyleDay(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = topText,
-                    color = Gray050,
+                    color = AppTextPrimary,
                     style = p12,
                     textAlign = TextAlign.Center
                 )
                 content?.invoke() ?: bottomText?.let {
                     Text(
                         text = it,
-                        color = Gray050,
+                        color = AppTextPrimary,
                         style = p12,
                         lineHeight = 14.sp,
                         textAlign = TextAlign.Center
@@ -106,7 +106,7 @@ fun NeonStyleDay(
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF191821)
+@Preview(showBackground = true)
 @Composable
 fun NeonStyleDayComparisonPreview() {
     Row(

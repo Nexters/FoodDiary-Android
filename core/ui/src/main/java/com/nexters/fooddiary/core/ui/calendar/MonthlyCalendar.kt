@@ -87,8 +87,8 @@ import com.nexters.fooddiary.core.ui.theme.Gray600
 import com.nexters.fooddiary.core.ui.theme.Gray700
 import com.nexters.fooddiary.core.ui.theme.Gray900
 import com.nexters.fooddiary.core.ui.theme.PrimBase
-import com.nexters.fooddiary.core.ui.theme.Sd800
-import com.nexters.fooddiary.core.ui.theme.Sd900
+import com.nexters.fooddiary.core.ui.theme.AppSurfaceVariant
+import com.nexters.fooddiary.core.ui.theme.AppSurface
 import com.nexters.fooddiary.core.ui.theme.White
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -96,6 +96,8 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import android.view.Choreographer
+import androidx.compose.ui.graphics.Color.Companion.Black
+import com.nexters.fooddiary.core.ui.theme.Gray050
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -185,7 +187,7 @@ fun MonthlyCalendar(
             modifier = Modifier
                 .shadow(4.dp, CalendarContainerShape, spotColor = Gray600.copy(alpha = 0.25f))
                 .clip(CalendarContainerShape)
-                .background(Sd900)
+                .background(AppSurface)
                 .border(1.dp, Gray600.copy(alpha = 0.6f), CalendarContainerShape)
                 .padding(16.dp),
         ) {
@@ -343,7 +345,7 @@ private fun MonthSelectBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
-        containerColor = Sd900,
+        containerColor = AppSurface,
         dragHandle = null,
         modifier = modifier,
     ) {
@@ -435,7 +437,7 @@ private fun BoxScope.SelectionBand(modifier: Modifier = Modifier) {
             .fillMaxWidth()
             .align(Alignment.Center)
             .height(ITEM_HEIGHT_DP.dp)
-            .background(Sd800, RoundedCornerShape(10.dp))
+            .background(AppSurfaceVariant, RoundedCornerShape(10.dp))
     )
 }
 
@@ -475,7 +477,7 @@ private fun RowScope.PickerColumn(
             ) {
                 Text(
                     text = label(index),
-                    color = if (isInSelectionBand) White else Gray700,
+                    color = if (isInSelectionBand) Black else Gray700,
                     fontSize = 18.sp,
                 )
             }
@@ -495,6 +497,7 @@ private fun SelectButton(
         shape = CircleShape
     ) {
         Text(
+            color = Gray050,
             text = stringResource(string.home_button_select),
             style = hd16,
         )
