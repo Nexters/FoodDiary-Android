@@ -24,21 +24,8 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Create CI local.properties
-        env:
-          LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
-        run: |
-          if [ -z "$LOCAL_PROPERTIES" ]; then
-            echo "::error::LOCAL_PROPERTIES is missing or blank"
-            exit 1
-          fi
-
-          umask 077
-          printf '%s\n' "$LOCAL_PROPERTIES" > local.properties
-
       - name: Validate configuration
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          WEB_CLIENT_ID: ${{ secrets.WEB_CLIENT_ID }}
         run: ./gradlew validateRequiredProperties
-
-      - name: Remove CI local.properties
-        if: always()
-        run: rm -f local.properties
