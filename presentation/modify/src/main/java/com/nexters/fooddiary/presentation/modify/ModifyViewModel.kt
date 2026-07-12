@@ -72,6 +72,10 @@ class ModifyViewModel @AssistedInject constructor(
         }
     }
 
+    fun updateNote(note: String) {
+        setState { copy(note = note) }
+    }
+
     fun syncDiaryId(diaryId: String) {
         var shouldFetch = true
         withState { state ->
@@ -227,7 +231,7 @@ internal fun ModifyState.toUpdateDiaryParam(): UpdateDiaryParam =
         restaurantName = restaurantName.takeIf { it.isNotBlank() },
         restaurantUrl = restaurantUrl.takeIf { it.isNotBlank() },
         tags = tags.takeIf { it.isNotEmpty() },
-        note = note.takeIf { it.isNotBlank() },
+        note = note.takeUnless { it.isBlank() }.orEmpty(),
         coverPhotoId = coverPhotoId ?: photoIds.firstOrNull(),
         photoIds = photoIds.takeIf { it.isNotEmpty() },
     )

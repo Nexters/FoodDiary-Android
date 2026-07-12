@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ButtonDefaults
@@ -25,9 +27,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.collections.immutable.persistentListOf
@@ -131,6 +133,7 @@ fun ModifyScreen(
         onSelect = viewModel::selectCategory,
         onSearchClick = onNavigateToSearch,
         onRemoveTag = viewModel::removeTag,
+        onNoteChange = viewModel::updateNote,
         onRemovePhotoAt = viewModel::removePhotoAt,
         onDelete = viewModel::onDelete,
         onSave = viewModel::onSave,
@@ -145,6 +148,7 @@ private fun ModifyScreenContent(
     onSelect: (String) -> Unit = {},
     onSearchClick: (String) -> Unit = {},
     onRemoveTag: (String) -> Unit = {},
+    onNoteChange: (String) -> Unit = {},
     onRemovePhotoAt: (Int) -> Unit = {},
     onAddChip: () -> Unit = {},
     onDelete: () -> Unit = {},
@@ -155,6 +159,8 @@ private fun ModifyScreenContent(
     val sectionCategory = stringResource(R.string.modify_section_category)
     val sectionAddress = stringResource(R.string.modify_section_address)
     val sectionTag = stringResource(R.string.modify_section_tag)
+    val sectionNote = stringResource(R.string.modify_section_note)
+    val notePlaceholder = stringResource(R.string.modify_note_placeholder)
     val deleteContentDesc = stringResource(R.string.modify_delete)
     val addTagContentDesc = stringResource(R.string.modify_tag_add)
     val selectedCategories = remember(state.selectedCategory) {
@@ -162,6 +168,16 @@ private fun ModifyScreenContent(
             .takeIf { it.isNotBlank() }
             ?.let { setOf(it) }
             ?: emptySet()
+    }
+    val noteFieldState = rememberTextFieldState(initialText = state.note)
+    LaunchedEffect(state.note) {
+        if (noteFieldState.text.toString() != state.note) {
+            noteFieldState.setTextAndPlaceCursorAtEnd(state.note)
+        }
+    }
+    LaunchedEffect(noteFieldState) {
+        snapshotFlow { noteFieldState.text.toString() }
+            .collectLatest(onNoteChange)
     }
 
     Scaffold(
@@ -244,6 +260,20 @@ private fun ModifyScreenContent(
                     )
                 }
             }
+            item {
+                Section(
+                    sectionTitle = sectionNote,
+                ) {
+                    StyledInputField(
+                        state = noteFieldState,
+                        modifier = Modifier.defaultMinSize(minHeight = 120.dp),
+                        placeholder = notePlaceholder,
+                        contentPadding = PaddingValues(16.dp),
+                        singleLine = false,
+                        minLines = 4,
+                    )
+                }
+            }
         }
     }
 }
@@ -304,6 +334,12 @@ private fun AddressSection(
     addressName: String,
 ) {
     val searchPlaceholder = stringResource(R.string.modify_address_search_placeholder)
+    val searchFieldState = rememberTextFieldState(initialText = searchQuery)
+    LaunchedEffect(searchQuery) {
+        if (searchFieldState.text.toString() != searchQuery) {
+            searchFieldState.setTextAndPlaceCursorAtEnd(searchQuery)
+        }
+    }
     val normalizedAddressLines = remember(roadAddress, addressName) {
         listOf(roadAddress, addressName)
             .map { it.trim() }
@@ -317,8 +353,7 @@ private fun AddressSection(
                 .clickable { onSearchClick(searchQuery) }
         ) {
             StyledInputField(
-                value = searchQuery,
-                onValueChange = {},
+                state = searchFieldState,
                 modifier = Modifier.defaultMinSize(minHeight = 42.dp),
                 placeholder = searchPlaceholder,
                 enabled = false,

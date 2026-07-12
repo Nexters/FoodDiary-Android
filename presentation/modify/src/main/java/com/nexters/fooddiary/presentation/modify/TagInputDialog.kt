@@ -11,13 +11,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,7 +36,7 @@ internal fun TagInputDialog(
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit,
 ) {
-    var value by remember { mutableStateOf("") }
+    val tagFieldState = rememberTextFieldState()
     val placeholder = stringResource(R.string.modify_tag_dialog_placeholder)
     val titleTag = stringResource(R.string.modify_section_tag)
     val cancelText = stringResource(R.string.modify_tag_dialog_cancel)
@@ -71,8 +68,7 @@ internal fun TagInputDialog(
                     color = AppTextPrimary,
                 )
                 StyledInputField(
-                    value = value,
-                    onValueChange = { value = it },
+                    state = tagFieldState,
                     placeholder = placeholder,
                     contentPadding = PaddingValues(
                         horizontal = 12.dp,
@@ -97,7 +93,7 @@ internal fun TagInputDialog(
                     CommonCircleButton(
                         modifier = Modifier.weight(2f),
                         onClick = {
-                            onConfirm(value.trim())
+                            onConfirm(tagFieldState.text.toString().trim())
                         },
                         buttonText = confirmText,
                     )
