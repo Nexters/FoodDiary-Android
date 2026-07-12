@@ -356,6 +356,14 @@ fun FoodDiaryNavHost(
 
                 modifyScreen(
                     onBack = { navController.popBackStack() },
+                    onSaveSuccess = { updatedDate ->
+                        updatedDate?.let { date ->
+                            navController.previousBackStackEntry
+                                ?.savedStateHandle
+                                ?.set(SyncConstants.DIARY_REFRESH_DATE, date.toString())
+                        }
+                        navController.popBackStack()
+                    },
                     onNavigateToSearch = { query ->
                         navController.navigate(
                             SearchRoute(keyword = query.takeIf { it.isNotBlank() })
