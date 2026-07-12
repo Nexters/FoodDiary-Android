@@ -130,6 +130,17 @@ web.client.id=your-web-client-id
 sentry.dsn=your-sentry-dsn
 ```
 
+### Secret 검사 설정
+
+Gitleaks를 설치하고 저장소의 pre-push hook을 활성화해주세요.
+
+```bash
+brew install gitleaks
+git config core.hooksPath .githooks
+```
+
+이후 `git push`를 실행하면 push 전에 Git 이력의 API key, token, password 등 비밀값을 검사합니다.
+
 ## 🔗 Other Repository
 
 - [FoodDiary-iOS](https://github.com/Nexters/FoodDiary-iOS)
