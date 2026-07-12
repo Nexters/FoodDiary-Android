@@ -34,7 +34,6 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
-import java.time.LocalDate
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -74,7 +73,6 @@ private val InputShape = RoundedCornerShape(10.dp)
 fun ModifyScreen(
     diaryId: String,
     onBack: () -> Unit,
-    onSaveSuccess: (LocalDate?) -> Unit = {},
     onNavigateToSearch: (String) -> Unit = {},
     searchResult: ModifySearchResult? = null,
     onSearchResultConsumed: () -> Unit = {},
@@ -100,9 +98,9 @@ fun ModifyScreen(
     LaunchedEffect(viewModel) {
         viewModel.events.collectLatest { event ->
             when (event) {
-                is ModifyEvent.Saved -> {
+                ModifyEvent.Saved -> {
                     onShowSnackBar(SnackBarData(message = successMessage))
-                    onSaveSuccess(event.diaryDate)
+                    onBack()
                 }
                 ModifyEvent.Deleted -> onBack()
             }

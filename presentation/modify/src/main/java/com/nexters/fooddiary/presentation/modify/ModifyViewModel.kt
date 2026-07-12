@@ -19,10 +19,9 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentSet
-import java.time.LocalDate
 
 sealed interface ModifyEvent {
-    data class Saved(val diaryDate: LocalDate?) : ModifyEvent
+    data object Saved : ModifyEvent
     data object Deleted : ModifyEvent
 }
 
@@ -155,11 +154,7 @@ class ModifyViewModel @AssistedInject constructor(
             }.execute { result ->
                 when (result) {
                     is Success -> {
-                        _events.tryEmit(
-                            ModifyEvent.Saved(
-                                diaryDate = result().diaryDate.toDiaryLocalDateOrNull(),
-                            ),
-                        )
+                        _events.tryEmit(ModifyEvent.Saved)
                         this
                     }
                     is Fail -> copy(error = ModifyError.Save)
@@ -197,9 +192,6 @@ class ModifyViewModel @AssistedInject constructor(
 
 internal fun normalizeTag(tag: String): String? =
     tag.trim().takeIf { it.isNotBlank() }
-
-internal fun String.toDiaryLocalDateOrNull(): LocalDate? =
-    runCatching { LocalDate.parse(substringBefore('T')) }.getOrNull()
 
 internal fun appendTagIfMissing(tags: ImmutableList<String>, newTag: String): ImmutableList<String>? =
     if (newTag in tags) null else tags.toPersistentList().add(newTag)

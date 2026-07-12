@@ -9,7 +9,6 @@ import com.nexters.fooddiary.core.ui.alert.DialogData
 import com.nexters.fooddiary.core.ui.alert.SnackBarData
 import com.nexters.fooddiary.presentation.modify.ModifyScreen
 import kotlinx.serialization.Serializable
-import java.time.LocalDate
 
 @Serializable
 data class ModifyRoute(val diaryId: String)
@@ -28,7 +27,6 @@ data class ModifySearchResult(
 
 fun NavGraphBuilder.modifyScreen(
     onBack: () -> Unit,
-    onSaveSuccess: (LocalDate?) -> Unit,
     onNavigateToSearch: (String) -> Unit = {},
     onShowDialog: (DialogData) -> Unit = {},
     onShowSnackBar: (SnackBarData) -> Unit = {},
@@ -60,7 +58,6 @@ fun NavGraphBuilder.modifyScreen(
         ModifyScreen(
             diaryId = route.diaryId,
             onBack = onBack,
-            onSaveSuccess = onSaveSuccess,
             onNavigateToSearch = onNavigateToSearch,
             searchResult = searchResult,
             onSearchResultConsumed = {
