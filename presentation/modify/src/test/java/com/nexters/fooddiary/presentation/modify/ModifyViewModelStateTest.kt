@@ -28,7 +28,15 @@ class ModifyViewModelStateTest {
         assertEquals("서울 강남구 테헤란로 123", param.roadAddress)
         assertEquals("한식", param.category)
         assertEquals("맛집", param.restaurantName)
+        assertEquals("메모", param.note)
         assertTrue(param.photoIds?.isNotEmpty() == true)
+    }
+
+    @Test
+    fun `toUpdateDiaryParam 은 노트를 비우면 빈 문자열을 전달한다`() {
+        val param = ModifyState(note = "   ").toUpdateDiaryParam()
+
+        assertEquals("", param.note)
     }
 
     @Test

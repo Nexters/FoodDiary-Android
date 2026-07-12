@@ -170,5 +170,6 @@ class DiaryApiTest : BaseMockServerTest() {
         assertEquals("/diaries/42", recordedRequest.path)
         val body = recordedRequest.body.readUtf8()
         assertTrue(body.contains("\"address_name\":\"서울시 강남구 테헤란로 123\""))
+        assertTrue(body.contains("\"note\":\"노트\""))
     }
 }
