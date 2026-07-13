@@ -696,7 +696,6 @@ private fun MealInfoSection(
     note: String,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
@@ -707,6 +706,7 @@ private fun MealInfoSection(
         )
 
         if (keywords.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(6.dp))
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -722,16 +722,17 @@ private fun MealInfoSection(
             }
         }
 
+        Spacer(modifier = Modifier.height(24.dp))
+
         if (note.isNotBlank()) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 2.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Box(
                     modifier = Modifier
-                        .size(18.dp)
                         .background(
                             color = DetailMealNoteIconBackground,
                             shape = RoundedCornerShape(6.dp),
@@ -739,7 +740,7 @@ private fun MealInfoSection(
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
-                        painter = painterResource(CoreUiR.drawable.ic_ai_analysis),
+                        painter = painterResource(CoreUiR.drawable.ic_note),
                         contentDescription = null,
                         tint = PrimBase,
                         modifier = Modifier.size(12.dp),
