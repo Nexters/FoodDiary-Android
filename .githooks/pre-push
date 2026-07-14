@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -eu
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+    echo "Gitleaks is required before pushing." >&2
+    echo "Install it with: brew install gitleaks" >&2
+    exit 1
+fi
+
+repository_root=$(git rev-parse --show-toplevel)
+
+echo "Scanning Git history for secrets..."
+gitleaks git --redact --verbose "$repository_root"
