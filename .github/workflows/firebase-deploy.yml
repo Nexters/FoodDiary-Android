@@ -30,7 +30,8 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '>=17.0.21 <18'
+          check-latest: true
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
